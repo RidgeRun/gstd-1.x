@@ -24,19 +24,8 @@ GST_DEBUG_CATEGORY (gstd_debug);
 
 #define GSTD_DEBUG_DEFAULT_LEVEL GST_LEVEL_INFO
 
-typedef struct _GstdPipeline GstdPipeline;
-
-struct _Gstdpipeline
-{
-  guint index;
-  gchar *name;
-  GstPipeline *pipeline;
-  gchar *description;
-};
-  
-
 /* List of pipeline references */
-GHashTable *gstd_pipelines = NULL;
+static GHashTable *gstd_pipelines = NULL;
 
 void
 gstd_init (gint *argc, gchar **argv[])
@@ -78,5 +67,71 @@ gstd_deinit ()
     GST_DEBUG ("Deinitialized gstd debug category");
     gst_debug_category_free (gstd_debug);
     gstd_debug = NULL;
+  }
+}
+
+GstdReturnCode
+gstd_create_pipeline (gchar *name, gchar *description, gchar **outname)
+{
+  GstdPipeline *gstd_pipeline;
+  gint newindex;
+  GError *error;
+  
+  if (!description)
+    goto no_description;
+
+  gstd_pipeline = gstd_pipeline_new();
+
+  newindex = gstd_pipeline_get_highest_index (gstd_pipelines);
+  newindex++;
+  gstd_pipeline->index = newindex;
+  
+  if (!name || name[0] == '\0') {
+    gstd_pipeline->name = g_strdup_printf("pipeline%d",newindex);
+  } else {
+    gstd_pipeline->name = g_strdup(name);
+  }
+
+  error = NULL;
+  gstd_pipeline->pipeline = GST_PIPELINE(gst_parse_launch(description, &error));
+  if (!gstd_pipeline->pipeline)
+    goto wrong_pipeline;
+
+  /* Still check if error is set because a recoverable
+   * error might have occured */
+  if (error) {
+    GST_WARNING ("Recoverable error: %s", error->message);
+    g_error_free (error);
+  }
+
+  if (g_hash_table_contains (gstd_pipelines, gstd_pipeline->name))
+    goto existing_name;
+
+  g_hash_table_insert (gstd_pipelines, gstd_pipeline->name, gstd_pipeline);
+
+  return GSTD_EOK;
+  
+ no_description:
+  {
+    GST_ERROR ("Description must not be NULL");
+    g_return_val_if_reached (GSTD_NULL_ARGUMENT);
+  }
+ wrong_pipeline:
+  {
+    if (error) {
+      GST_ERROR ("Unable to create pipeline: %s", error->message);
+      g_error_free (error);
+    }
+    else
+      GST_ERROR ("Unable to create pipeline");
+
+    gstd_pipeline_free (gstd_pipeline);
+    g_return_val_if_reached (GSTD_BAD_DESCRIPTION);
+  }
+ existing_name:
+  {
+    GST_ERROR ("The name %s already exists", gstd_pipeline->name);
+    gstd_pipeline_free (gstd_pipeline);
+    g_return_val_if_reached (GSTD_EXISTING_NAME);
   }
 }

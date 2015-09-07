@@ -27,11 +27,29 @@
  * Gstreamer Daemon return codes
  */
 
-typedef gint GstdReturnCode;
+typedef enum _GstdReturnCode GstdReturnCode;
 
-/** 
- * Everything went OK 
- */
-#define GSTD_EOK 0
+enum _GstdReturnCode {
+  /**
+   * Everything went OK 
+   */
+  GSTD_EOK = 0,
+  
+  /**
+   * A mandatory argument was passed NULL
+   */
+  GSTD_NULL_ARGUMENT = 1,
+  
+  /**
+   * A bad pipeline description was provided
+   */
+  GSTD_BAD_DESCRIPTION = 2,
+
+  /**
+   * The name trying to be used already exist
+   */
+  GSTD_EXISTING_NAME = 3
+};
+
 
 #endif //__RETURN_CODES_H__
