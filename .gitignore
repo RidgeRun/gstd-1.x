@@ -13,7 +13,7 @@ install-sh
 libtool
 ltmain.sh
 missing
-src/.deps/
-src/gstd
+gstd/.deps/
+gstd/gstd
 *.o
 stamp-h1
