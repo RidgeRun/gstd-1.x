@@ -2,7 +2,7 @@ dnl required version of autoconf
 AC_PREREQ([2.53])
 
 dnl TODO: fill in your package name and package version here
-AC_INIT([my-app],[1.0.0])
+AC_INIT([gstd],[1.0.0])
 
 dnl required version of gstreamer and gst-plugins-base
 GST_REQUIRED=1.0.0
@@ -28,27 +28,9 @@ AC_CHECK_PROG(HAVE_PKGCONFIG, pkg-config, [ ], [
   AC_MSG_ERROR([You need to have pkg-config installed or set the PATH.])
 ])
 
-dnl =======================================================================
-dnl Check for the required version of GStreamer core (and gst-plugins-base)
-dnl
-dnl This will export GST_CFLAGS and GST_LIBS variables for use in Makefile.am
-dnl
-dnl If you need libraries from gst-plugins-base here, also add:
-dnl for libgstaudio-1.0: gstreamer-audio-1.0 >= $GST_REQUIRED
-dnl for libgstvideo-1.0: gstreamer-video-1.0 >= $GST_REQUIRED
-dnl for libgsttag-1.0: gstreamer-tag-1.0 >= $GST_REQUIRED
-dnl for libgstpbutils-1.0: gstreamer-pbutils-1.0 >= $GST_REQUIRED
-dnl for libgstfft-1.0: gstreamer-fft-1.0 >= $GST_REQUIRED
-dnl for libgstinterfaces-1.0: gstreamer-interfaces-1.0 >= $GST_REQUIRED
-dnl for libgstrtp-1.0: gstreamer-rtp-1.0 >= $GST_REQUIRED
-dnl for libgstrtsp-1.0: gstreamer-rtsp-1.0 >= $GST_REQUIRED
-dnl etc.
-dnl =======================================================================
-
 PKG_CHECK_MODULES(GST, [
     gstreamer-1.0              >= $GST_REQUIRED
     gstreamer-base-1.0         >= $GST_REQUIRED
-    gstreamer-controller-1.0   >= $GST_REQUIRED
   ], [
     AC_SUBST(GST_CFLAGS)
     AC_SUBST(GST_LIBS)
@@ -58,7 +40,6 @@ PKG_CHECK_MODULES(GST, [
 
       gstreamer-1.0              >= $GST_REQUIRED
       gstreamer-base-1.0         >= $GST_REQUIRED
-      gstreamer-controller-1.0   >= $GST_REQUIRED
 
     Please make sure you have the necessary GStreamer-1.0
     development headers installed.
