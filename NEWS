@@ -1,1 +1,5 @@
-Nothing much yet.
+Gstreamer Daemon is moving to the GStreamer-1.0 framework! Completely
+rewritten in C to meet GStreamer standards and to avoid building overheads.
+Similarly, DBus has been replaced by a custom TCP based protocol for a more
+flexible controlling mechanism, without the complexities that DBus may
+involve.
