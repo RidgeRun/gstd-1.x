@@ -27,6 +27,10 @@
 
 #include "return_codes.h"
 
+/* GSTD debugging category */
+GST_DEBUG_CATEGORY_STATIC (gstd);
+#define GST_CAT_DEFAULT gstd
+
 /* GLib main loop, we need it global to access it through the SIGINT
    handler */
 GMainLoop *main_loop;
@@ -38,22 +42,31 @@ int_handler(int sig)
 
   /* User has pressed CTRL-C, stop the main loop
      so the application closes itself */
-  g_print ("Interrupt received, shutting down...\n");
+  GST_INFO ("Interrupt received, shutting down...");
   g_main_loop_quit (main_loop);
 }
 
 gint
 main (gint argc, gchar *argv[])
 {
+  guint debug_color = 0;
+  
   /* Initialize GStreamer subsystem before calling anything else */
   gst_init(&argc, &argv);
 
   /* Install a handler for the interrupt signal */
   signal (SIGINT, int_handler);
 
+  /* Initialize debug category and setting it to print by default */
+  debug_color = GST_DEBUG_FG_BLACK | GST_DEBUG_BOLD | GST_DEBUG_BG_WHITE;
+  GST_DEBUG_CATEGORY_INIT (gstd, "gstd", debug_color,
+			   "GStraemer daemon debug category");
+
+  gst_debug_set_threshold_for_name ("gstd", GST_LEVEL_INFO);
+  
   /* Starting the application's main loop, necessary for 
      messaging and signaling subsystem */
-  g_print ("Starting application...\n");
+  GST_INFO ("Starting application...");
   main_loop = g_main_loop_new (NULL, FALSE);
   g_main_loop_run (main_loop);
 
