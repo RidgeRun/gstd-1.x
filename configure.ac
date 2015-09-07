@@ -7,7 +7,7 @@ AC_INIT([gstd],[1.0.0])
 dnl required version of gstreamer and gst-plugins-base
 GST_REQUIRED=1.0.0
 
-AC_CONFIG_SRCDIR([src/main.c])
+AC_CONFIG_SRCDIR([gstd/main.c])
 AC_CONFIG_HEADERS([config.h])
 
 dnl required version of automake
@@ -69,7 +69,7 @@ dnl =======================================================================
 
 AC_CONFIG_FILES([
 Makefile
-src/Makefile
+gstd/Makefile
 ])
 AC_OUTPUT
 

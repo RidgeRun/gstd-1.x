@@ -27,6 +27,8 @@
  * Gstreamer Daemon return codes
  */
 
+typedef gint GstdReturnCode;
+
 /** 
  * Everything went OK 
  */

@@ -25,18 +25,14 @@
 #include <gst/gst.h>
 #include <signal.h>
 
-#include "return_codes.h"
-
-/* GSTD debugging category */
-GST_DEBUG_CATEGORY_STATIC (gstd);
-#define GST_CAT_DEFAULT gstd
+#include "gstd.h"
 
 /* GLib main loop, we need it global to access it through the SIGINT
    handler */
 GMainLoop *main_loop;
 
 void
-int_handler(int sig)
+int_handler(gint sig)
 {
   g_return_if_fail (main_loop);
 
@@ -48,21 +44,15 @@ int_handler(int sig)
 
 gint
 main (gint argc, gchar *argv[])
-{
-  guint debug_color = 0;
-  
+{  
   /* Initialize GStreamer subsystem before calling anything else */
   gst_init(&argc, &argv);
 
   /* Install a handler for the interrupt signal */
   signal (SIGINT, int_handler);
 
-  /* Initialize debug category and setting it to print by default */
-  debug_color = GST_DEBUG_FG_BLACK | GST_DEBUG_BOLD | GST_DEBUG_BG_WHITE;
-  GST_DEBUG_CATEGORY_INIT (gstd, "gstd", debug_color,
-			   "GStraemer daemon debug category");
-
-  gst_debug_set_threshold_for_name ("gstd", GST_LEVEL_INFO);
+  /* Initialize gstd */
+  gstd_init (&argc, &argv);
   
   /* Starting the application's main loop, necessary for 
      messaging and signaling subsystem */
@@ -74,5 +64,8 @@ main (gint argc, gchar *argv[])
   g_main_loop_unref (main_loop);
   main_loop = NULL;
 
+  gstd_deinit();
+  gst_deinit();
+  
   return GSTD_EOK;
 }
