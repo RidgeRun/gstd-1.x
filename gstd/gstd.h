@@ -26,7 +26,7 @@
 
 #include <gst/gst.h>
 
-#include "return_codes.h"
+#include "gstd_return_codes.h"
 #include "gstd_debug.h"
 #include "gstd_pipeline.h"
 

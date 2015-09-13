@@ -22,7 +22,7 @@
 #define __GSTD_PIPELINE_H__
 
 #include <gst/gst.h>
-#include "return_codes.h"
+#include "gstd_return_codes.h"
 #include "gstd_debug.h"
 
 typedef struct _GstdPipeline GstdPipeline;

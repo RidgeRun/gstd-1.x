@@ -18,8 +18,8 @@
  * along with Gstd.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __RETURN_CODES_H__
-#define __RETURN_CODES_H__
+#ifndef __GSTD_RETURN_CODES_H__
+#define __GSTD_RETURN_CODES_H__
 
 /**
  * \file return_codes.h
@@ -62,4 +62,4 @@ enum _GstdReturnCode {
 };
 
 
-#endif //__RETURN_CODES_H__
+#endif //__GSTD_RETURN_CODES_H__

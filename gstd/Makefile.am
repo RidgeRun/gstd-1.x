@@ -7,7 +7,7 @@ gstd_SOURCES = 	main.c \
 		gstd_pipeline.c
 
 # list of headers we're not going to install
-noinst_HEADERS = return_codes.h \
+noinst_HEADERS = gstd_return_codes.h \
 		 gstd.h \
 		 gstd_pipeline.h
 
