@@ -29,7 +29,7 @@ struct _GstdPipeline
 {
   guint index;
   gchar *name;
-  GstPipeline *pipeline;
+  GstElement *pipeline;
   gchar *description;
 };
 

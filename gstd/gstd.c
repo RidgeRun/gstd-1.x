@@ -93,7 +93,7 @@ gstd_create_pipeline (gchar *name, gchar *description, gchar **outname)
   }
 
   error = NULL;
-  gstd_pipeline->pipeline = GST_PIPELINE(gst_parse_launch(description, &error));
+  gstd_pipeline->pipeline = gst_parse_launch(description, &error);
   if (!gstd_pipeline->pipeline)
     goto wrong_pipeline;
 
