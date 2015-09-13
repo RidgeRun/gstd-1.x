@@ -17,49 +17,13 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Gstd.  If not, see <http://www.gnu.org/licenses/>.
  */
+#ifndef __GSTD_DEBUG_H__
+#define __GSTD_DEBUG_H__
 
-#ifndef __RETURN_CODES_H__
-#define __RETURN_CODES_H__
+GST_DEBUG_CATEGORY_EXTERN (gstd_debug);
+#define GST_CAT_DEFAULT gstd_debug
 
-/**
- * \file return_codes.h
- *
- * Gstreamer Daemon return codes
- */
+#define GSTD_DEBUG_DEFAULT_LEVEL GST_LEVEL_INFO
 
-typedef enum _GstdReturnCode GstdReturnCode;
+#endif // __GSTD_DEBUG_H__
 
-enum _GstdReturnCode {
-  /**
-   * Everything went OK 
-   */
-  GSTD_EOK = 0,
-  
-  /**
-   * A mandatory argument was passed NULL
-   */
-  GSTD_NULL_ARGUMENT = 1,
-  
-  /**
-   * A bad pipeline description was provided
-   */
-  GSTD_BAD_DESCRIPTION = 2,
-
-  /**
-   * The name trying to be used already exist
-   */
-  GSTD_EXISTING_NAME = 3,
-
-  /**
-   * Missing initialization
-   */
-  GSTD_MISSING_INITIALIZATION = 4,
-
-  /**
-   * The argument must be NULL but was found to point somewhere
-   */
-  GSTD_NOT_NULL_ARGUMENT = 5
-};
-
-
-#endif //__RETURN_CODES_H__

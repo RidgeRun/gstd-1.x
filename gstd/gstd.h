@@ -27,10 +27,8 @@
 #include <gst/gst.h>
 
 #include "return_codes.h"
+#include "gstd_debug.h"
 #include "gstd_pipeline.h"
-
-GST_DEBUG_CATEGORY_EXTERN(gstd_debug);
-#define GST_CAT_DEFAULT gstd_debug
 
 /**
  * \brief Initializes Gstreamer Daemon 
@@ -56,26 +54,6 @@ gstd_init (gint *argc, gchar **argv[]);
  */
 void
 gstd_deinit ();
-
-/**
- * \brief Creates a new pipeline based on a gst-launch description
- * 
- * Creates a new named pipeline based on the provided gst-launch
- * description. If no name is provided then a generic name will be 
- * assigned.
- *
- * \param name A unique name to assign to the pipeline. If empty or
- * NULL, a unique name will be generated.  
- * \param description A
- * gst-launch like description of the pipeline.  
- * \param outname A pointer to char array to hold the name assigned 
- * to the pipeline. This pointer will be NULL in case of failure. Do 
- * not free this name.
- *
- * \return A GstdReturnCode with the return status.
- *
- * \post A new pipeline will be allocated with the given name.
- */
 
 GstdReturnCode
 gstd_create_pipeline (gchar *name, gchar *description, gchar **outname);

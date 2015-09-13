@@ -22,6 +22,8 @@
 #define __GSTD_PIPELINE_H__
 
 #include <gst/gst.h>
+#include "return_codes.h"
+#include "gstd_debug.h"
 
 typedef struct _GstdPipeline GstdPipeline;
 
@@ -32,6 +34,20 @@ struct _GstdPipeline
   GstElement *pipeline;
   gchar *description;
 };
+
+/**
+ * Initializes the pipeline list. This has to be called prior
+ * any operation on the pipeline list.
+ */
+void
+gstd_pipeline_init ();
+
+/**
+ * Deinitializes the pipeline list. No pipeline operation may be
+ * performed after this.
+ */
+void
+gstd_pipeline_deinit ();
 
 /**
  * Allocates a new GstdPipeline.
@@ -55,16 +71,33 @@ gstd_pipeline_new ();
 void
 gstd_pipeline_free (GstdPipeline *pipeline);
 
+/**
+ * Returns the list of current pipelines. Note that this list 
+ * may be NULL if gstd_pipeline_init hasnt been called
+ *
+ * \return A GHashTable of the list of pipelines.
+ */
+GHashTable*
+gstd_pipeline_get_list ();
 
 /**
- * Iterates over the existing pipelines and returns the highest index
- * found in the array.
+ * Creates a new named pipeline based on the provided gst-launch
+ * description. If no name is provided then a generic name will be 
+ * assigned.
  *
- * \param pipelines A hash table of the existing pipelines.
+ * \param name A unique name to assign to the pipeline. If empty or
+ * NULL, a unique name will be generated.  
+ * \param description A gst-launch like description of the pipeline.  
+ * \param outname A pointer to char array to hold the name assigned 
+ * to the pipeline. Must be NULL. This pointer will be NULL in case
+ * of failure. Do not free this name!
  *
- * \return The highest index found or -1 if no pipelines where found.
+ * \return A GstdReturnCode with the return status.
+ *
+ * \post A new pipeline will be allocated with the given name.
  */
-gint
-gstd_pipeline_get_highest_index (GHashTable *pipelines);
+GstdReturnCode
+gstd_pipeline_create (gchar *name, gchar *description, gchar **outname);
+
 
 #endif // __GSTD_PIPELINE_H__
