@@ -29,7 +29,7 @@ typedef struct _GstdPipeline GstdPipeline;
 
 struct _GstdPipeline
 {
-  guint index;
+  gint index;
   gchar *name;
   GstElement *pipeline;
   gchar *description;

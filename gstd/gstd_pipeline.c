@@ -109,6 +109,7 @@ gstd_pipeline_iter_max (gpointer _key, gpointer _value, gpointer _user_data)
   
   GST_LOG ("Analyzing %s's index: %d vs current max %d", key,
 	   value->index, *outmax);
+
   if (value->index > *outmax)
     *outmax = value->index;
 }
@@ -168,7 +169,8 @@ gstd_pipeline_create (gchar *name, gchar *description, gchar **outname)
   
   *outname = gstd_pipeline->name;
   GST_INFO ("Created pipeline \"%s\": \"%s\"", *outname, description);
-  g_hash_table_insert (gstd_pipeline_list, gstd_pipeline->name, gstd_pipeline);
+  g_hash_table_insert (gstd_pipeline_list, g_strdup(gstd_pipeline->name),
+		       gstd_pipeline);
   
   return GSTD_EOK;
 

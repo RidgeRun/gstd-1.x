@@ -48,7 +48,7 @@ gstd_init (gint *argc, gchar **argv[])
 void
 gstd_deinit ()
 {
-  gstd_pipeline_init();
+  gstd_pipeline_deinit();
 
   if (gstd_debug) {
     GST_DEBUG ("Deinitialized gstd debug category");

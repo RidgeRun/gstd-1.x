@@ -9,9 +9,10 @@ GST_REQUIRED=1.0.0
 
 AC_CONFIG_SRCDIR([gstd/main.c])
 AC_CONFIG_HEADERS([config.h])
+AC_CONFIG_MACRO_DIRS([m4])
 
 dnl required version of automake
-AM_INIT_AUTOMAKE([1.10])
+AM_INIT_AUTOMAKE([1.10 subdir-objects])
 
 dnl enable mainainer mode by default
 AM_MAINTAINER_MODE([enable])
@@ -70,6 +71,8 @@ dnl =======================================================================
 AC_CONFIG_FILES([
 Makefile
 gstd/Makefile
+tests/Makefile
+tests/gstd/Makefile
 ])
 AC_OUTPUT
 
