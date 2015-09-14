@@ -137,7 +137,7 @@ gstd_pipeline_create (gchar *name, gchar *description, gchar **outname)
 
   g_return_val_if_fail (gstd_pipeline_list, GSTD_MISSING_INITIALIZATION);
   g_return_val_if_fail (description, GSTD_NULL_ARGUMENT);
-  g_return_val_if_fail (outname, GSTD_NOT_NULL_ARGUMENT);
+  g_warn_if_fail (!*outname);
   
   gstd_pipeline = gstd_pipeline_new();
 
@@ -184,12 +184,12 @@ gstd_pipeline_create (gchar *name, gchar *description, gchar **outname)
       GST_ERROR ("Unable to create pipeline");
 
     gstd_pipeline_free (gstd_pipeline);
-    g_return_val_if_reached (GSTD_BAD_DESCRIPTION);
+    return GSTD_BAD_DESCRIPTION;
   }
  existing_name:
   {
     GST_ERROR ("The name %s already exists", gstd_pipeline->name);
     gstd_pipeline_free (gstd_pipeline);
-    g_return_val_if_reached (GSTD_EXISTING_NAME);
+    return GSTD_EXISTING_NAME;
   }
 }
