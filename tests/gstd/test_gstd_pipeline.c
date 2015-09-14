@@ -104,6 +104,38 @@ test_create_pipeline_bad_pipeline (gpointer fixture, gconstpointer data)
   g_assert_cmpuint(0, ==, size);
 }
 
+static void
+test_destroy_pipeline_no_pipe (gpointer fixture, gconstpointer data)
+{
+  GstdReturnCode ret;
+
+  ret = gstd_pipeline_destroy("some_name");
+  
+  g_assert_cmpint(GSTD_NO_PIPELINE, ==, ret);
+}
+
+static void
+test_destroy_pipeline_existing (gpointer fixture, gconstpointer data)
+{
+  GstdReturnCode ret;
+  gchar *outname = NULL;
+  guint size;
+
+  ret = gstd_pipeline_create("pipe", TEST_PIPE, &outname);
+  g_assert_cmpint(GSTD_EOK, ==, ret);
+
+  size = g_hash_table_size(gstd_pipeline_get_list());
+  g_assert_cmpuint(1, ==, size);
+  
+  ret = gstd_pipeline_destroy("pipe");
+  g_assert_cmpint(GSTD_EOK, ==, ret);
+
+  size = g_hash_table_size(gstd_pipeline_get_list());
+  g_assert_cmpuint(0, ==, size);
+}
+
+
+
 gint
 main (gint argc, gchar *argv[])
 {
@@ -130,6 +162,10 @@ main (gint argc, gchar *argv[])
   g_test_add ("/gstd/gstd_pipeline/create_pipeline/bad_pipeline",
 	      gpointer, NULL, test_set_up,
 	      test_create_pipeline_bad_pipeline, test_tear_down);
+
+  g_test_add ("/gstd/gstd_pipeline/destroy_pipeline/existing",
+	      gpointer, NULL, test_set_up,
+	      test_destroy_pipeline_existing, test_tear_down);
   
   return g_test_run ();
 }

@@ -193,3 +193,21 @@ gstd_pipeline_create (gchar *name, gchar *description, gchar **outname)
     return GSTD_EXISTING_NAME;
   }
 }
+
+GstdReturnCode
+gstd_pipeline_destroy (gchar *name)
+{
+  g_return_val_if_fail(gstd_pipeline_list, GSTD_MISSING_INITIALIZATION);
+  g_return_val_if_fail(name, GSTD_NULL_ARGUMENT);
+  
+  if (!g_hash_table_remove (gstd_pipeline_list, name))
+    goto not_found;
+
+  GST_INFO ("Removed pipeline \"%s\"", name);
+  return GSTD_EOK;
+  
+ not_found:
+  GST_ERROR("Pipeline with name \"%s\": was not found in the pipeline list",
+	    name);
+  return GSTD_NO_PIPELINE;
+}

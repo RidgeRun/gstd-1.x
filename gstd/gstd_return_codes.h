@@ -56,9 +56,9 @@ enum _GstdReturnCode {
   GSTD_MISSING_INITIALIZATION = 4,
 
   /**
-   * The argument must be NULL but was found to point somewhere
+   * The requested pipeline was not found
    */
-  GSTD_NOT_NULL_ARGUMENT = 5
+  GSTD_NO_PIPELINE = 5
 };
 
 

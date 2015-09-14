@@ -100,6 +100,18 @@ GstdReturnCode
 gstd_pipeline_create (gchar *name, gchar *description, gchar **outname);
 
 /**
+ * Destroys an existing pipeline.
+ *
+ * \param name The unique name assigned to the pipeline.
+ *
+ * \return A GstdReturnCode with the return status.
+ *
+ * \post The given pipeline resources will be freed.
+ */
+GstdReturnCode
+gstd_pipeline_destroy (gchar *name);
+
+/**
  * Returns the hash table that currently holds the pipelines
  *
  * \return A hash table containing the pipelines with its names
