@@ -99,5 +99,13 @@ gstd_pipeline_get_list ();
 GstdReturnCode
 gstd_pipeline_create (gchar *name, gchar *description, gchar **outname);
 
+/**
+ * Returns the hash table that currently holds the pipelines
+ *
+ * \return A hash table containing the pipelines with its names
+ * as keys and GstdPipeline as values
+ */
+GHashTable *
+gstd_pipeline_get_list ();
 
 #endif // __GSTD_PIPELINE_H__

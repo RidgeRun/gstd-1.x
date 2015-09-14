@@ -60,8 +60,7 @@ main (gint argc, gchar *argv[])
   main_loop = g_main_loop_new (NULL, FALSE);
 
   gchar *outname = NULL;
-  gstd_create_pipeline ("uno", "fakesrc ! fakesink", &outname);
-  gstd_create_pipeline (NULL, "fakesrc ! fakesink", &outname);
+  gstd_create_pipeline (NULL, "failing no", &outname);
   
   g_main_loop_run (main_loop);
 
