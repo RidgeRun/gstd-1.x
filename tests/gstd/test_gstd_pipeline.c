@@ -39,7 +39,7 @@ test_create_pipeline_null_name (gpointer fixture, gconstpointer data)
   GstdPipeline *outpipe = NULL;
   GstdReturnCode ret;
 
-  ret = gstd_create_pipeline (NULL, TEST_PIPE, &outpipe);
+  ret = gstd_pipeline_create (NULL, TEST_PIPE, &outpipe);
 
   g_assert_cmpint(GSTD_EOK, ==, ret); 
   g_assert_cmpstr("pipeline0", ==, GSTD_PIPELINE_NAME(outpipe));
@@ -51,7 +51,7 @@ test_create_pipeline_empty_name (gpointer fixture, gconstpointer data)
   GstdPipeline *outpipe = NULL;
   GstdReturnCode ret;
 
-  ret = gstd_create_pipeline ("", TEST_PIPE, &outpipe);
+  ret = gstd_pipeline_create ("", TEST_PIPE, &outpipe);
 
   g_assert_cmpint(GSTD_EOK, ==, ret);
   g_assert_cmpstr("pipeline0", ==, GSTD_PIPELINE_NAME(outpipe));
@@ -63,7 +63,7 @@ test_create_pipeline_custom_name (gpointer fixture, gconstpointer data)
   GstdPipeline *outpipe = NULL;
   GstdReturnCode ret;
 
-  ret = gstd_create_pipeline ("custom", TEST_PIPE, &outpipe);
+  ret = gstd_pipeline_create ("custom", TEST_PIPE, &outpipe);
 
   g_assert_cmpint(GSTD_EOK, ==, ret); 
   g_assert_cmpstr("custom", ==, GSTD_PIPELINE_NAME(outpipe));
@@ -75,16 +75,16 @@ test_create_pipeline_multiple (gpointer fixture, gconstpointer data)
   GstdPipeline *outpipe = NULL;
   GstdReturnCode ret;
 
-  ret = gstd_create_pipeline ("first", TEST_PIPE, NULL);
+  ret = gstd_pipeline_create ("first", TEST_PIPE, NULL);
   g_assert_cmpint(GSTD_EOK, ==, ret);
 
   outpipe = NULL;
-  ret = gstd_create_pipeline ("second", TEST_PIPE, &outpipe);
+  ret = gstd_pipeline_create ("second", TEST_PIPE, &outpipe);
   g_assert_cmpint(GSTD_EOK, ==, ret);
   g_assert_cmpstr("second", ==, GSTD_PIPELINE_NAME(outpipe));
 
   outpipe = NULL;
-  ret = gstd_create_pipeline (NULL, TEST_PIPE, &outpipe);
+  ret = gstd_pipeline_create (NULL, TEST_PIPE, &outpipe);
   g_assert_cmpint(GSTD_EOK, ==, ret);
   g_assert_cmpstr("pipeline2", ==, GSTD_PIPELINE_NAME(outpipe));
 }
@@ -97,7 +97,7 @@ test_create_pipeline_bad_pipeline (gpointer fixture, gconstpointer data)
   GstdReturnCode ret;
   guint size;
 
-  ret = gstd_create_pipeline (NULL, "this_is_a_bad_pipeline", &outpipe);
+  ret = gstd_pipeline_create (NULL, "this_is_a_bad_pipeline", &outpipe);
   gstd_pipeline_get_list(&pipes);
   size = g_hash_table_size (pipes);
 
