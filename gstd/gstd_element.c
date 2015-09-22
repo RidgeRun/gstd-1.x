@@ -19,9 +19,39 @@
  */
 #include "gstd_element.h"
 
+typedef struct _ForEachData ForEachData;
+
+struct _ForEachData {
+  GstdPipeline *pipeline;
+  GList *elements;
+};
+
+/* VTable */
+static void
+_for_each (gpointer, gpointer);
+
+static void
+_for_each (gpointer data, gpointer user)
+{
+  GstElement *gstelement;
+  GstdElement *gstdelement;
+  ForEachData *fedata;
+
+  gstelement = GST_ELEMENT(data);
+  fedata = (ForEachData *)user;
+
+  gstdelement = (GstdElement*)g_malloc(sizeof(GstdElement));
+  gstdelement->element = gstelement;
+  gstdelement->pipeline = fedata->pipeline;
+  
+  fedata->elements = g_list_append (fedata->elements, gstdelement);
+}
+
 GstdReturnCode
 gstd_element_get_list (GstdPipeline *pipeline, GList **elements)
 {
+  ForEachData data;
+  
   g_return_val_if_fail(pipeline, GSTD_MISSING_INITIALIZATION);
 
   /* If this is not null, we want to advice the user a potential memory leak */
@@ -29,8 +59,14 @@ gstd_element_get_list (GstdPipeline *pipeline, GList **elements)
 
   GST_INFO("Returning elements in pipeline \"%s\"",
 	   GSTD_PIPELINE_NAME(pipeline));
+
+  data.pipeline = pipeline;
+  data.elements = NULL;
   
-  *elements = GST_BIN_CHILDREN(GSTD_PIPELINE_PIPELINE(pipeline));
+  g_list_foreach (GST_BIN_CHILDREN(GSTD_PIPELINE_PIPELINE(pipeline)),
+		  _for_each, &data);
+
+  *elements = data.elements;
 
   return GSTD_EOK;
 }
