@@ -159,7 +159,7 @@ gstd_pipeline_get_highest_index (GHashTable *pipelines)
 
 GstdReturnCode
 gstd_pipeline_create (const gchar *name, const gchar *description,
-		      gchar **outname)
+		      GstdPipeline **newpipe)
 {
   GstdPipeline *gstd_pipeline;
   gint newindex;
@@ -167,7 +167,6 @@ gstd_pipeline_create (const gchar *name, const gchar *description,
 
   g_return_val_if_fail (gstd_pipeline_list, GSTD_MISSING_INITIALIZATION);
   g_return_val_if_fail (description, GSTD_NULL_ARGUMENT);
-  g_warn_if_fail (!*outname);
   
   gstd_pipeline = gstd_pipeline_new();
 
@@ -201,10 +200,17 @@ gstd_pipeline_create (const gchar *name, const gchar *description,
   gst_object_set_name (GST_OBJECT(gstd_pipeline->pipeline),
 		       gstd_pipeline->name);
   
-  *outname = gstd_pipeline->name;
-  GST_INFO ("Created pipeline \"%s\": \"%s\"", *outname, description);
+  GST_INFO ("Created pipeline \"%s\": \"%s\"", gstd_pipeline->name,
+	    description);
   g_hash_table_insert (gstd_pipeline_list, g_strdup(gstd_pipeline->name),
 		       gstd_pipeline);
+
+  /* If the user passed NULL, it means he is not interested in 
+     having the struct back */
+  if (newpipe) {
+    g_warn_if_fail (!*newpipe);
+    *newpipe = gstd_pipeline;
+  }
   
   return GSTD_EOK;
 
@@ -218,12 +224,14 @@ gstd_pipeline_create (const gchar *name, const gchar *description,
       GST_ERROR ("Unable to create pipeline");
 
     gstd_pipeline_free (gstd_pipeline);
+    *newpipe = NULL;
     return GSTD_BAD_DESCRIPTION;
   }
  existing_name:
   {
     GST_ERROR ("The name %s already exists", gstd_pipeline->name);
     gstd_pipeline_free (gstd_pipeline);
+    *newpipe = NULL;
     return GSTD_EXISTING_NAME;
   }
 }
@@ -301,7 +309,7 @@ static gboolean _get_by_index (gpointer key, gpointer value, gpointer data)
 GstdReturnCode
 gstd_pipeline_get_by_name (const gchar *name, GstdPipeline **outpipe)
 {
-  GST_INFO("Looking for pipeline \"name\"", name);
+  GST_INFO("Looking for pipeline \"%s\"", name);
   return gstd_pipeline_get(_get_by_name, (gpointer)name, outpipe);
 }
 

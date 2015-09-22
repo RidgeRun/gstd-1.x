@@ -36,70 +36,70 @@ test_tear_down (gpointer fixture, gconstpointer data)
 static void
 test_create_pipeline_null_name (gpointer fixture, gconstpointer data)
 {
-  gchar *outname = NULL;
+  GstdPipeline *outpipe = NULL;
   GstdReturnCode ret;
 
-  ret = gstd_create_pipeline (NULL, TEST_PIPE, &outname);
+  ret = gstd_create_pipeline (NULL, TEST_PIPE, &outpipe);
 
   g_assert_cmpint(GSTD_EOK, ==, ret); 
-  g_assert_cmpstr("pipeline0", ==, outname);
+  g_assert_cmpstr("pipeline0", ==, GSTD_PIPELINE_NAME(outpipe));
 }
 
 static void
 test_create_pipeline_empty_name (gpointer fixture, gconstpointer data)
 {
-  gchar *outname = NULL;
+  GstdPipeline *outpipe = NULL;
   GstdReturnCode ret;
 
-  ret = gstd_create_pipeline ("", TEST_PIPE, &outname);
+  ret = gstd_create_pipeline ("", TEST_PIPE, &outpipe);
 
   g_assert_cmpint(GSTD_EOK, ==, ret);
-  g_assert_cmpstr("pipeline0", ==, outname);
+  g_assert_cmpstr("pipeline0", ==, GSTD_PIPELINE_NAME(outpipe));
 }
 
 static void
 test_create_pipeline_custom_name (gpointer fixture, gconstpointer data)
 {
-  gchar *outname = NULL;
+  GstdPipeline *outpipe = NULL;
   GstdReturnCode ret;
 
-  ret = gstd_create_pipeline ("custom", TEST_PIPE, &outname);
+  ret = gstd_create_pipeline ("custom", TEST_PIPE, &outpipe);
 
   g_assert_cmpint(GSTD_EOK, ==, ret); 
-  g_assert_cmpstr("custom", ==, outname);
+  g_assert_cmpstr("custom", ==, GSTD_PIPELINE_NAME(outpipe));
 }
 
 static void
 test_create_pipeline_multiple (gpointer fixture, gconstpointer data)
 {
-  gchar *outname = NULL;
+  GstdPipeline *outpipe = NULL;
   GstdReturnCode ret;
 
-  ret = gstd_create_pipeline ("first", TEST_PIPE, &outname);
+  ret = gstd_create_pipeline ("first", TEST_PIPE, NULL);
   g_assert_cmpint(GSTD_EOK, ==, ret);
-  g_assert_cmpstr("first", ==, outname);
 
-  outname = NULL;
-  ret = gstd_create_pipeline ("second", TEST_PIPE, &outname);
+  outpipe = NULL;
+  ret = gstd_create_pipeline ("second", TEST_PIPE, &outpipe);
   g_assert_cmpint(GSTD_EOK, ==, ret);
-  g_assert_cmpstr("second", ==, outname);
+  g_assert_cmpstr("second", ==, GSTD_PIPELINE_NAME(outpipe));
 
-  outname = NULL;
-  ret = gstd_create_pipeline (NULL, TEST_PIPE, &outname);
+  outpipe = NULL;
+  ret = gstd_create_pipeline (NULL, TEST_PIPE, &outpipe);
   g_assert_cmpint(GSTD_EOK, ==, ret);
-  g_assert_cmpstr("pipeline2", ==, outname);
+  g_assert_cmpstr("pipeline2", ==, GSTD_PIPELINE_NAME(outpipe));
 }
 
 static void
 test_create_pipeline_bad_pipeline (gpointer fixture, gconstpointer data)
 {
-  gchar *outname = NULL;
+  GstdPipeline *outpipe = NULL;
   GstdReturnCode ret;
   guint size;
 
-  ret = gstd_create_pipeline (NULL, "this_is_a_bad_pipeline", &outname);
+  ret = gstd_create_pipeline (NULL, "this_is_a_bad_pipeline", &outpipe);
   size = g_hash_table_size (gstd_pipeline_get_list());
 
+  g_assert(!outpipe);
   g_assert_cmpint(GSTD_BAD_DESCRIPTION, ==, ret);
   g_assert_cmpuint(0, ==, size);
 }

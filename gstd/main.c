@@ -59,8 +59,7 @@ main (gint argc, gchar *argv[])
   GST_INFO ("Starting application...");
   main_loop = g_main_loop_new (NULL, FALSE);
 
-  gchar *outname = NULL;
-  gstd_create_pipeline (NULL, "failing no", &outname);
+  gstd_create_pipeline (NULL, "failing no", NULL);
   
   g_main_loop_run (main_loop);
 

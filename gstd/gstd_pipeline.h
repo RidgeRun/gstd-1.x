@@ -109,9 +109,9 @@ gstd_pipeline_deinit ();
  * \param name A unique name to assign to the pipeline. If empty or
  * NULL, a unique name will be generated.  
  * \param description A gst-launch like description of the pipeline.  
- * \param outname A pointer to char array to hold the name assigned 
- * to the pipeline. Must be NULL. This pointer will be NULL in case
- * of failure. Do not free this name!
+ * \param newpipe A double pointer to hold the newly created GstdPipeline. 
+ * It may be passed NULL to ignore output values. This pointer will be 
+ * NULL in case of failure. Do not free this pointer!
  *
  * \return A GstdReturnCode with the return status.
  *
@@ -119,7 +119,7 @@ gstd_pipeline_deinit ();
  */
 GstdReturnCode
 gstd_pipeline_create (const gchar *name, const gchar *description,
-		      gchar **outname);
+		      GstdPipeline **newpipe);
 
 /**
  * Destroys an existing pipeline.
