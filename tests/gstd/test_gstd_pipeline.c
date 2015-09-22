@@ -134,6 +134,17 @@ test_destroy_pipeline_existing (gpointer fixture, gconstpointer data)
   g_assert_cmpuint(0, ==, size);
 }
 
+static void
+test_destroy_pipeline_non_existent (gpointer fixture, gconstpointer data)
+{
+  GstdReturnCode ret;
+  gchar *outname = NULL;
+  guint size;
+  
+  ret = gstd_pipeline_destroy("pipe");
+  g_assert_cmpint(GSTD_NO_PIPELINE, ==, ret);
+}
+
 
 
 gint
@@ -166,6 +177,10 @@ main (gint argc, gchar *argv[])
   g_test_add ("/gstd/gstd_pipeline/destroy_pipeline/existing",
 	      gpointer, NULL, test_set_up,
 	      test_destroy_pipeline_existing, test_tear_down);
+
+    g_test_add ("/gstd/gstd_pipeline/destroy_pipeline/non_existent",
+	      gpointer, NULL, test_set_up,
+	      test_destroy_pipeline_non_existent, test_tear_down);
   
   return g_test_run ();
 }
