@@ -128,7 +128,7 @@ gstd_pipeline_create (const gchar *name, const gchar *description,
  *
  * \return A GstdReturnCode with the return status.
  *
- * \post The given pipeline resources will be freed.
+ * \post All the associated lists will become invalid (elements, properties)
  */
 GstdReturnCode
 gstd_pipeline_destroy (const gchar *name);
@@ -136,11 +136,12 @@ gstd_pipeline_destroy (const gchar *name);
 /**
  * Returns the hash table that currently holds the pipelines
  *
- * \return A hash table containing the pipelines with its names
- * as keys and GstdPipeline as values
+ * \param pipelines A hash table double pointer to hold the pipelines with
+ * its names as keys and GstdPipeline as values. Do not free this hash table.
+ * \return The respective return code
  */
-GHashTable *
-gstd_pipeline_get_list ();
+GstdReturnCode
+gstd_pipeline_get_list (GHashTable **pipelines);
 
 /**
  * Returns a read-only GstdPipeline by its name. This pipeline 

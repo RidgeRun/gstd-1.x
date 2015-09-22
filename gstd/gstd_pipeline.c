@@ -117,12 +117,16 @@ gstd_pipeline_free_hash (gpointer pipe)
   gstd_pipeline_free ((GstdPipeline *)pipe);
 }
 
-GHashTable *
-gstd_pipeline_get_list ()
+GstdReturnCode
+gstd_pipeline_get_list (GHashTable **pipelines)
 {
-  g_return_val_if_fail (gstd_pipeline_list, NULL);
-  
-  return gstd_pipeline_list;
+  g_return_val_if_fail (gstd_pipeline_list, GSTD_MISSING_INITIALIZATION);
+
+  /* Warn potential memory leaks */
+  g_warn_if_fail (!*pipelines);
+  *pipelines = gstd_pipeline_list;
+
+  return GSTD_EOK;;
 }
 
 static void

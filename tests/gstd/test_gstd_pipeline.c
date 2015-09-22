@@ -93,11 +93,13 @@ static void
 test_create_pipeline_bad_pipeline (gpointer fixture, gconstpointer data)
 {
   GstdPipeline *outpipe = NULL;
+  GHashTable *pipes = NULL;
   GstdReturnCode ret;
   guint size;
 
   ret = gstd_create_pipeline (NULL, "this_is_a_bad_pipeline", &outpipe);
-  size = g_hash_table_size (gstd_pipeline_get_list());
+  gstd_pipeline_get_list(&pipes);
+  size = g_hash_table_size (pipes);
 
   g_assert(!outpipe);
   g_assert_cmpint(GSTD_BAD_DESCRIPTION, ==, ret);
@@ -119,18 +121,22 @@ test_destroy_pipeline_existing (gpointer fixture, gconstpointer data)
 {
   GstdReturnCode ret;
   gchar *outname = NULL;
+  GHashTable *pipes = NULL;
   guint size;
 
   ret = gstd_pipeline_create("pipe", TEST_PIPE, &outname);
   g_assert_cmpint(GSTD_EOK, ==, ret);
 
-  size = g_hash_table_size(gstd_pipeline_get_list());
+  gstd_pipeline_get_list(&pipes);
+  size = g_hash_table_size(pipes);
   g_assert_cmpuint(1, ==, size);
-  
+
   ret = gstd_pipeline_destroy("pipe");
   g_assert_cmpint(GSTD_EOK, ==, ret);
 
-  size = g_hash_table_size(gstd_pipeline_get_list());
+  pipes = NULL;
+  gstd_pipeline_get_list(&pipes);
+  size = g_hash_table_size(pipes);
   g_assert_cmpuint(0, ==, size);
 }
 

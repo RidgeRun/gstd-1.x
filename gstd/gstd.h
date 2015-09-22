@@ -56,6 +56,6 @@ void
 gstd_deinit ();
 
 GstdReturnCode
-gstd_create_pipeline (gchar *name, gchar *description, gchar **outname);
+gstd_create_pipeline (gchar *name, gchar *description, GstdPipeline **outpipe);
 
 #endif //__GSTD_H__

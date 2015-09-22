@@ -58,7 +58,7 @@ gstd_deinit ()
 }
 
 GstdReturnCode
-gstd_create_pipeline (gchar *name, gchar *description, gchar **outname)
+gstd_create_pipeline (gchar *name, gchar *description, GstdPipeline **outpipe)
 {
-  return gstd_pipeline_create (name, description, outname);
+  return gstd_pipeline_create (name, description, outpipe);
 }
