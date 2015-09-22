@@ -135,7 +135,7 @@ test_destroy_pipeline_existing (gpointer fixture, gconstpointer data)
 }
 
 static void
-test_destroy_pipeline_non_existent (gpointer fixture, gconstpointer data)
+test_destroy_pipeline_unexistent (gpointer fixture, gconstpointer data)
 {
   GstdReturnCode ret;
   gchar *outname = NULL;
@@ -145,7 +145,72 @@ test_destroy_pipeline_non_existent (gpointer fixture, gconstpointer data)
   g_assert_cmpint(GSTD_NO_PIPELINE, ==, ret);
 }
 
+static void
+test_get_by_name_existing (gpointer fixture, gconstpointer data)
+{
+  GstdReturnCode ret;
+  gchar *outname = NULL;
+  GstdPipeline *outpipe = NULL;
+  guint size;
+  const gchar *name = "pipe";
 
+  ret = gstd_pipeline_create(name, TEST_PIPE, &outname);
+  g_assert_cmpint(GSTD_EOK, ==, ret);
+
+  ret = gstd_pipeline_get_by_name("pipe", &outpipe);
+  g_assert_cmpint(GSTD_EOK, ==, ret);
+  g_assert_cmpstr(name, ==, GSTD_PIPELINE_NAME(outpipe));
+}
+
+static void
+test_get_by_name_unexistent (gpointer fixture, gconstpointer data)
+{
+  GstdReturnCode ret;
+  gchar *outname = NULL;
+  GstdPipeline *outpipe = NULL;
+  guint size;
+  const gchar *name = "pipe";
+
+  ret = gstd_pipeline_get_by_name("pipe", &outpipe);
+  g_assert_cmpint(GSTD_NO_PIPELINE, ==, ret);
+  g_assert(!outpipe);
+}
+
+static void
+test_get_by_index_existing (gpointer fixture, gconstpointer data)
+{
+  GstdReturnCode ret;
+  gchar *outname = NULL;
+  GstdPipeline *outpipe = NULL;
+
+  ret = gstd_pipeline_create("first", TEST_PIPE, &outname);
+  g_assert_cmpint(GSTD_EOK, ==, ret);
+
+  ret = gstd_pipeline_create("second", TEST_PIPE, &outname);
+  g_assert_cmpint(GSTD_EOK, ==, ret);
+
+  ret = gstd_pipeline_get_by_index(0, &outpipe);
+  g_assert_cmpint(GSTD_EOK, ==, ret);
+  g_assert_cmpstr("first", ==, GSTD_PIPELINE_NAME(outpipe));
+
+  ret = gstd_pipeline_get_by_index(1, &outpipe);
+  g_assert_cmpint(GSTD_EOK, ==, ret);
+  g_assert_cmpstr("second", ==, GSTD_PIPELINE_NAME(outpipe));
+}
+
+static void
+test_get_by_index_unexistent (gpointer fixture, gconstpointer data)
+{
+  GstdReturnCode ret;
+  gchar *outname = NULL;
+  GstdPipeline *outpipe = NULL;
+  guint size;
+  const gchar *name = "pipe";
+
+  ret = gstd_pipeline_get_by_index(0, &outpipe);
+  g_assert_cmpint(GSTD_NO_PIPELINE, ==, ret);
+  g_assert(!outpipe);
+}
 
 gint
 main (gint argc, gchar *argv[])
@@ -153,7 +218,7 @@ main (gint argc, gchar *argv[])
   g_test_init (&argc, &argv, NULL);
   gst_init (&argc, &argv);
   
-  // Define the tests.
+  // Install the tests.
   g_test_add ("/gstd/gstd_pipeline/create_pipeline/null_name",
 	      gpointer, NULL, test_set_up,
 	      test_create_pipeline_null_name, test_tear_down);
@@ -178,9 +243,17 @@ main (gint argc, gchar *argv[])
 	      gpointer, NULL, test_set_up,
 	      test_destroy_pipeline_existing, test_tear_down);
 
-    g_test_add ("/gstd/gstd_pipeline/destroy_pipeline/non_existent",
+  g_test_add ("/gstd/gstd_pipeline/destroy_pipeline/unexistent",
 	      gpointer, NULL, test_set_up,
-	      test_destroy_pipeline_non_existent, test_tear_down);
+	      test_destroy_pipeline_unexistent, test_tear_down);
+
+  g_test_add ("/gstd/gstd_pipeline/get_by_name/existing",
+	      gpointer, NULL, test_set_up,
+	      test_get_by_name_existing, test_tear_down);
+
+  g_test_add ("/gstd/gstd_pipeline/get_by_name/unexistent",
+	      gpointer, NULL, test_set_up,
+	      test_get_by_name_unexistent, test_tear_down);
   
   return g_test_run ();
 }

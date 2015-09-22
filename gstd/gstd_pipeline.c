@@ -18,6 +18,7 @@
  * along with Gstd.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "gstd_pipeline.h"
+#include <string.h>
 
 /* Global list of pipelines */
 static GHashTable *gstd_pipeline_list = NULL;
@@ -29,6 +30,17 @@ static gint
 gstd_pipeline_get_highest_index (GHashTable *);
 static void
 gstd_pipeline_free_hash (gpointer);
+static GstdPipeline *
+gstd_pipeline_new (void);
+static void
+gstd_pipeline_free (GstdPipeline *pipeline);
+static GstdReturnCode
+gstd_pipeline_get (GHRFunc, const gpointer, GstdPipeline **);
+static gboolean
+_get_by_name (gpointer, gpointer, gpointer);
+static gboolean
+_get_by_index (gpointer, gpointer, gpointer);
+
 
 void
 gstd_pipeline_init ()
@@ -51,7 +63,16 @@ gstd_pipeline_deinit ()
   GST_DEBUG ("Deinitialized pipeline hash table");
 }
 
-GstdPipeline *
+/*
+ * Allocates a new GstdPipeline.
+ *
+ * Allocates and returns a new pointer to GstdPipeline. The pointer
+ * must then be freed using gstd_pipeline_free.
+ *
+ * \return A newly allocated GstdPipeline
+ */
+
+static GstdPipeline *
 gstd_pipeline_new ()
 {
   GstdPipeline *pipe;
@@ -62,7 +83,15 @@ gstd_pipeline_new ()
   return pipe;
 }
 
-void
+/*
+ * Frees a previously allocated GstdPipeline.
+ * 
+ * \param The pipeline to free
+ *
+ * \pre The pipeline must have been allocated using gstd_pipeline_new
+ * \post The pipeline will no longer be usable
+ */
+static void
 gstd_pipeline_free (GstdPipeline *pipe)
 {
   g_return_if_fail (pipe);
@@ -129,7 +158,8 @@ gstd_pipeline_get_highest_index (GHashTable *pipelines)
 }
 
 GstdReturnCode
-gstd_pipeline_create (gchar *name, gchar *description, gchar **outname)
+gstd_pipeline_create (const gchar *name, const gchar *description,
+		      gchar **outname)
 {
   GstdPipeline *gstd_pipeline;
   gint newindex;
@@ -199,7 +229,7 @@ gstd_pipeline_create (gchar *name, gchar *description, gchar **outname)
 }
 
 GstdReturnCode
-gstd_pipeline_destroy (gchar *name)
+gstd_pipeline_destroy (const gchar *name)
 {
   g_return_val_if_fail(gstd_pipeline_list, GSTD_MISSING_INITIALIZATION);
   g_return_val_if_fail(name, GSTD_NULL_ARGUMENT);
@@ -214,4 +244,70 @@ gstd_pipeline_destroy (gchar *name)
   GST_ERROR("Pipeline with name \"%s\": was not found in the pipeline list",
 	    name);
   return GSTD_NO_PIPELINE;
+}
+
+
+GstdReturnCode
+gstd_pipeline_get (GHRFunc getter, const gpointer data,
+		   GstdPipeline **outpipe)
+{
+  /* Pointer Guards */
+  g_return_val_if_fail(gstd_pipeline_list, GSTD_MISSING_INITIALIZATION);
+  g_return_val_if_fail(data, GSTD_NULL_ARGUMENT);
+  g_warn_if_fail (!*outpipe);
+
+  g_hash_table_ref(gstd_pipeline_list);
+  *outpipe = (GstdPipeline *)g_hash_table_find(gstd_pipeline_list, getter,
+					      data);
+  g_hash_table_unref(gstd_pipeline_list);
+
+  if (!*outpipe)
+    goto nopipe;
+
+  return GSTD_EOK;
+
+ nopipe:
+  {
+    GST_WARNING("No pipeline found for the given criteria");
+    return GSTD_NO_PIPELINE;
+  }
+}
+
+static gboolean _get_by_name (gpointer key, gpointer value, gpointer data)
+{
+  GstdPipeline *pipe;
+  gchar *name;
+
+  pipe = (GstdPipeline *)value;
+  name = (gchar *)data;
+
+  GST_LOG("Comparing \"%s\" vs \"%s\"",  name, pipe->name);
+  
+  return !strcmp(name, pipe->name);
+}
+static gboolean _get_by_index (gpointer key, gpointer value, gpointer data)
+{
+  GstdPipeline *pipe;
+  gint index;
+
+  pipe = (GstdPipeline *)value;
+  index = *(gint*)data;
+
+  GST_LOG("Comparing %d vs %d",  index, pipe->index);
+
+  return index == pipe->index;
+}
+
+GstdReturnCode
+gstd_pipeline_get_by_name (const gchar *name, GstdPipeline **outpipe)
+{
+  GST_INFO("Looking for pipeline \"name\"", name);
+  return gstd_pipeline_get(_get_by_name, (gpointer)name, outpipe);
+}
+
+GstdReturnCode
+gstd_pipeline_get_by_index (const gint index, GstdPipeline **outpipe)
+{
+  GST_INFO("Looking for pipeline number %d", index);
+  return gstd_pipeline_get(_get_by_index, (gpointer)&index, outpipe);
 }

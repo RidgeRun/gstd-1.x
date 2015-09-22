@@ -25,15 +25,67 @@
 #include "gstd_return_codes.h"
 #include "gstd_debug.h"
 
+
 typedef struct _GstdPipeline GstdPipeline;
 
+/**
+ * GstdPipeline:
+ * A wrapper for the conventional pipeline
+ */
 struct _GstdPipeline
 {
+  /**
+   * The unique, numerical id for the current pipeline
+   */
   gint index;
+
+  /**
+   * A unique name for the pipeline
+   */
   gchar *name;
+
+  /**
+   * A Gstreamer element holding the pipeline
+   */
   GstElement *pipeline;
+
+  /**
+   * The GstLaunch syntax used to create the pipeline
+   */
   gchar *description;
 };
+
+/**
+ * Returns numerical index of the pipeline
+ *
+ * \param pipe a GstdPipeline
+ * \return The numerical index of the pipeline
+ */
+#define GSTD_PIPELINE_INDEX(pipe) ((pipe)->index)
+
+/**
+ * Returns the name of the pipeline
+ *
+ * \param pipe a GstdPipeline
+ * \return The name of the pipeline
+ */
+#define GSTD_PIPELINE_NAME(pipe) ((pipe)->name)
+
+/**
+ * Returns the Gstreamer pipeline
+ *
+ * \param pipe a GstdPipeline
+ * \return The Gstreamer pipeline
+ */
+#define GSTD_PIPELINE_PIPELINE(pipe) ((pipe)->pipeline)
+
+/**
+ * Returns the Gstreamer pipeline
+ *
+ * \param pipe a GstdPipeline
+ * \return The GstLaunch description used to create the pipeline
+ */
+#define GSTD_PIPELINE_DESCRIPTION(pipe) ((pipe)->description)
 
 /**
  * Initializes the pipeline list. This has to be called prior
@@ -48,37 +100,6 @@ gstd_pipeline_init ();
  */
 void
 gstd_pipeline_deinit ();
-
-/**
- * Allocates a new GstdPipeline.
- *
- * Allocates and returns a new pointer to GstdPipeline. The pointer
- * must then be freed using gstd_pipeline_free.
- *
- * \return A newly allocated GstdPipeline
- */
-GstdPipeline *
-gstd_pipeline_new ();
-
-/**
- * Frees a previously allocated GstdPipeline.
- * 
- * \param The pipeline to free
- *
- * \pre The pipeline must have been allocated using gstd_pipeline_new
- * \post The pipeline will no longer be usable
- */
-void
-gstd_pipeline_free (GstdPipeline *pipeline);
-
-/**
- * Returns the list of current pipelines. Note that this list 
- * may be NULL if gstd_pipeline_init hasnt been called
- *
- * \return A GHashTable of the list of pipelines.
- */
-GHashTable*
-gstd_pipeline_get_list ();
 
 /**
  * Creates a new named pipeline based on the provided gst-launch
@@ -97,7 +118,8 @@ gstd_pipeline_get_list ();
  * \post A new pipeline will be allocated with the given name.
  */
 GstdReturnCode
-gstd_pipeline_create (gchar *name, gchar *description, gchar **outname);
+gstd_pipeline_create (const gchar *name, const gchar *description,
+		      gchar **outname);
 
 /**
  * Destroys an existing pipeline.
@@ -109,7 +131,7 @@ gstd_pipeline_create (gchar *name, gchar *description, gchar **outname);
  * \post The given pipeline resources will be freed.
  */
 GstdReturnCode
-gstd_pipeline_destroy (gchar *name);
+gstd_pipeline_destroy (const gchar *name);
 
 /**
  * Returns the hash table that currently holds the pipelines
@@ -119,5 +141,29 @@ gstd_pipeline_destroy (gchar *name);
  */
 GHashTable *
 gstd_pipeline_get_list ();
+
+/**
+ * Returns a read-only GstdPipeline by its name. This pipeline 
+ * must not be modified. If the pipeline is not found, the 
+ * return value will be NULL
+ *
+ * \param name The name of the pipeline to query
+ * \param outpipe A read-only pointer to a GstdPipeline or NULL
+ * if it wasn't found.
+ */
+GstdReturnCode
+gstd_pipeline_get_by_name (const gchar *name, GstdPipeline **outpipe);
+
+/**
+ * Returns a read-only GstdPipeline by its index. This pipeline 
+ * must not be modified. If the pipeline is not found, the 
+ * return value will be NULL
+ *
+ * \param index The index of the pipeline to query
+ * \param outpipe A read-only pointer to a GstdPipeline or NULL
+ * if it wasn't found.
+ */
+GstdReturnCode
+gstd_pipeline_get_by_index (const gint index, GstdPipeline **outpipe);
 
 #endif // __GSTD_PIPELINE_H__
