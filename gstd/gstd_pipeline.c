@@ -166,6 +166,10 @@ gstd_pipeline_create (gchar *name, gchar *description, gchar **outname)
     g_error_free (error);
   }
   gstd_pipeline->description = g_strdup(description);
+
+  /* Pipelines do not have parents, so this function cant fail */
+  gst_object_set_name (GST_OBJECT(gstd_pipeline->pipeline),
+		       gstd_pipeline->name);
   
   *outname = gstd_pipeline->name;
   GST_INFO ("Created pipeline \"%s\": \"%s\"", *outname, description);
