@@ -17,25 +17,52 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Gstd.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef __GSTD_H__
-#define __GSTD_H__
+#ifndef __GSTD_OBJECT_H__
+#define __GSTD_OBJECT_H__
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 
 #include <gst/gst.h>
-#include "gstd_object.h"
 #include "gstd_return_codes.h"
 
 G_BEGIN_DECLS
 
-/*
- * Type declaration.
- */
-#define GSTD_TYPE_CORE gstd_core_get_type ()
-G_DECLARE_FINAL_TYPE (GstdCore, gstd_core, GSTD, CORE, GstdObject)
+#define GSTD_TYPE_OBJECT \
+  (gstd_object_get_type())
+#define GSTD_OBJECT(obj) \
+  (G_TYPE_CHECK_INSTANCE_CAST((obj),GSTD_TYPE_OBJECT,GstdObject))
+#define GSTD_OBJECT_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_CAST((klass),GSTD_TYPE_OBJECT,GstdObjectClass))
+#define GSTD_IS_OBJECT(obj) \
+  (G_TYPE_CHECK_INSTANCE_TYPE((obj),GSTD_TYPE_OBJECT))
+#define GSTD_IS_OBJECT_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_TYPE((klass),GSTD_TYPE_OBJECT))
+
+typedef struct _GstdObject GstdObject;
+typedef struct _GstdObjectClass GstdObjectClass;
+     
+struct _GstdObject
+{
+  GObject parent;
+
+  /**
+   * The name of the core session
+   */
+  gchar *name;
+};
+
+struct _GstdObjectClass
+{
+  GObjectClass parent_class;
+};
+
+GType gstd_object_get_type(void);
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(GstdObject, g_object_unref)
+
+#define GSTD_OBJECT_DEFAULT_NAME "GstdCore0"
 
 G_END_DECLS
 
-#endif //__GSTD_H__
+#endif //__GSTD_OBJECT_H__

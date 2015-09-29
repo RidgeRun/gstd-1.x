@@ -29,7 +29,7 @@
 
 /* GLib main loop, we need it global to access it through the SIGINT
    handler */
-GMainLoop *main_loop;
+static GMainLoop *main_loop;
 
 void
 int_handler(gint sig)
@@ -44,22 +44,21 @@ int_handler(gint sig)
 
 gint
 main (gint argc, gchar *argv[])
-{  
+{
+  GstdCore *gstd;
+  
   /* Initialize GStreamer subsystem before calling anything else */
   gst_init(&argc, &argv);
 
   /* Install a handler for the interrupt signal */
   signal (SIGINT, int_handler);
 
-  /* Initialize gstd */
-  gstd_init (&argc, &argv);
-  
   /* Starting the application's main loop, necessary for 
      messaging and signaling subsystem */
   GST_INFO ("Starting application...");
   main_loop = g_main_loop_new (NULL, FALSE);
 
-  gstd_create_pipeline (NULL, "failing no", NULL);
+  gstd = g_object_new (GSTD_TYPE_CORE, "name", "GstdCore0", NULL);
   
   g_main_loop_run (main_loop);
 
@@ -67,7 +66,7 @@ main (gint argc, gchar *argv[])
   g_main_loop_unref (main_loop);
   main_loop = NULL;
 
-  gstd_deinit();
+  g_object_unref (gstd);
   gst_deinit();
   
   return GSTD_EOK;

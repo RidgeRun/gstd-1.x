@@ -19,46 +19,128 @@
  */
 #include "gstd.h"
 
-/* GSTD debugging category */
-GST_DEBUG_CATEGORY (gstd_debug);
+/* Gstd Core debugging category */
+GST_DEBUG_CATEGORY_STATIC(gstd_core_debug);
+#define GST_CAT_DEFAULT gstd_core_debug
 
-void
-gstd_init (gint *argc, gchar **argv[])
+#define GSTD_DEBUG_DEFAULT_LEVEL GST_LEVEL_INFO
+
+enum {
+  PROP_PIPELINES = 1,
+  N_PROPERTIES // NOT A PROPERTY
+};
+
+#define GSTD_CORE_DEFAULT_PIPELINES NULL
+
+struct _GstdCore
 {
-  guint debug_color;
-  GstDebugLevel debug_level;
+  GstdObject parent;
   
-  /* Initialize debug category and setting it to print by default */
+  /**
+   * The list of GstdPipelines created by the user
+   */
+  GList *pipelines;
+};
+
+G_DEFINE_TYPE (GstdCore, gstd_core, GSTD_TYPE_OBJECT)
+
+/* VTable */
+static void
+gstd_core_set_property (GObject *, guint, const GValue *, GParamSpec *);
+static void
+gstd_core_get_property (GObject *, guint, GValue *, GParamSpec *);
+static void
+gstd_core_dispose (GObject *);
+
+static void
+gstd_core_class_init (GstdCoreClass *klass)
+{
+  GObjectClass *object_class = G_OBJECT_CLASS (klass);
+  GParamSpec *properties[N_PROPERTIES] = { NULL, };
+  guint debug_color;
+
+  object_class->set_property = gstd_core_set_property;
+  object_class->get_property = gstd_core_get_property;
+  object_class->dispose = gstd_core_dispose;
+
+  properties[PROP_PIPELINES] =
+    g_param_spec_pointer ("pipelines",
+			  "Pipelines",
+			  "The pipelines created by the user",
+                         G_PARAM_READABLE |
+                         G_PARAM_STATIC_STRINGS);
+
+  g_object_class_install_properties (object_class,
+                                     N_PROPERTIES,
+                                     properties);
+
+
+  /* Initialize debug category with nice colors */
   debug_color = GST_DEBUG_FG_BLACK | GST_DEBUG_BOLD | GST_DEBUG_BG_WHITE;
-  if (!gstd_debug) {
-    GST_DEBUG_CATEGORY_INIT (gstd_debug, "gstd", debug_color,
-			     "GStraemer daemon debug category");
+  GST_DEBUG_CATEGORY_INIT (gstd_core_debug, "gstdcore", debug_color,
+			   "Gstd Core category");
+}
 
-    debug_level = gst_debug_category_get_threshold (gstd_debug);
-    if (debug_level < GSTD_DEBUG_DEFAULT_LEVEL)
-      debug_level = GSTD_DEBUG_DEFAULT_LEVEL;
+static void
+gstd_core_init (GstdCore *self)
+{
+  GST_INFO_OBJECT(self, "Initializing gstd core");
+
+  self->pipelines = GSTD_CORE_DEFAULT_PIPELINES;
+}
+
+static void
+gstd_core_get_property (GObject        *object,
+			guint           property_id,
+			GValue         *value,
+			GParamSpec     *pspec)
+{
+  GstdCore *self = GSTD_CORE(object);
+
+  switch (property_id) {
+  case PROP_PIPELINES:
+    GST_DEBUG_OBJECT(self, "Returning pipeline list %p", self->pipelines);
+    g_value_set_pointer (value, self->pipelines);
+    break;
+  default:
+    /* We don't have any other property... */
+    G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
+    break;
+  }
+}
+
+static void
+gstd_core_set_property (GObject      *object,
+		   guint         property_id,
+		   const GValue *value,
+		   GParamSpec   *pspec)
+{
+  GstdCore *self = GSTD_CORE(object);
+  
+  switch (property_id) {
+  case PROP_PIPELINES:
+    self->pipelines = g_value_get_pointer (value);
+    GST_INFO_OBJECT(self, "Changed pipeline list to %p", self->pipelines);
+    break;
     
-    gst_debug_set_threshold_for_name ("gstd", debug_level);
-    GST_DEBUG ("Initialized gstd debug category");
-  }
-
-  gstd_pipeline_init();
-}
-
-void
-gstd_deinit ()
-{
-  gstd_pipeline_deinit();
-
-  if (gstd_debug) {
-    GST_DEBUG ("Deinitialized gstd debug category");
-    gst_debug_category_free (gstd_debug);
-    gstd_debug = NULL;
+  default:
+    /* We don't have any other property... */
+    G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
+    break;
   }
 }
 
-GstdReturnCode
-gstd_create_pipeline (gchar *name, gchar *description, GstdPipeline **outpipe)
+static void
+gstd_core_dispose (GObject *object)
 {
-  return gstd_pipeline_create (name, description, outpipe);
+  GstdCore *self = GSTD_CORE(object);
+  
+  GST_INFO_OBJECT(object, "Deinitializing gstd core");
+
+  if (self->pipelines) {
+    g_list_free (self->pipelines);
+    self->pipelines = NULL;
+  }
+  
+  G_OBJECT_CLASS(gstd_core_parent_class)->dispose(object);
 }
