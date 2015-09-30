@@ -26,6 +26,7 @@
 #include <signal.h>
 
 #include "gstd.h"
+#include "gstd_pipeline.h"
 
 /* GLib main loop, we need it global to access it through the SIGINT
    handler */
@@ -46,6 +47,7 @@ gint
 main (gint argc, gchar *argv[])
 {
   GstdCore *gstd;
+  GstdPipeline *pipe;
   
   /* Initialize GStreamer subsystem before calling anything else */
   gst_init(&argc, &argv);
@@ -59,6 +61,11 @@ main (gint argc, gchar *argv[])
   main_loop = g_main_loop_new (NULL, FALSE);
 
   gstd = g_object_new (GSTD_TYPE_CORE, "name", "GstdCore0", NULL);
+  gstd_object_create (GSTD_OBJECT(gstd), "pipelines", "index", 0, "description", "fakesrc ! fakesink", NULL);
+    gstd_object_create (GSTD_OBJECT(gstd), "pipelines", "index", 0, "description", "fakesrc ! fakesink", NULL);
+  //  pipe = g_object_new (GSTD_TYPE_PIPELINE, "description", "fakesrc ! fakesink",
+  //		       "name", "GstdPipeline0","index", 0, NULL);
+  
   
   g_main_loop_run (main_loop);
 

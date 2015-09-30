@@ -25,6 +25,7 @@
 #endif
 
 #include <gst/gst.h>
+#include <string.h>
 #include "gstd_return_codes.h"
 
 G_BEGIN_DECLS
@@ -64,6 +65,27 @@ GType gstd_object_get_type(void);
 G_DEFINE_AUTOPTR_CLEANUP_FUNC(GstdObject, g_object_unref)
 
 #define GSTD_OBJECT_DEFAULT_NAME NULL
+
+#define GSTD_PARAM_CREATE (1 << (G_PARAM_USER_SHIFT+0))
+#define GSTD_PARAM_READ   (G_PARAM_READABLE)
+#define GSTD_PARAM_UPDATE (1 << (G_PARAM_USER_SHIFT+1))
+#define GSTD_PARAM_DELETE (1 << (G_PARAM_USER_SHIFT+2))
+
+#define GSTD_PARAM_IS_CREATE(p) (p & GSTD_PARAM_CREATE)
+#define GSTD_PARAM_IS_READ(p)   (p & GSTD_PARAM_READ)
+#define GSTD_PARAM_IS_UPDATE(p) (p & GSTD_PARAM_UPDATE)
+#define GSTD_PARAM_IS_DELETE(p) (p & GSTD_PARAM_DELETE)
+GstdReturnCode
+gstd_object_create (GstdObject *object, const gchar *property, ...);
+
+GstdReturnCode
+gstd_object_read (GstdObject *object, const gchar *property, ...);
+
+GstdReturnCode
+gstd_object_update (GstdObject *object, const gchar *property, ...);
+
+GstdReturnCode
+gstd_object_delete (GstdObject *object, const gchar *property, ...);
 
 G_END_DECLS
 

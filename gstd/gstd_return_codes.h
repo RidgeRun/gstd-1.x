@@ -58,7 +58,22 @@ enum _GstdReturnCode {
   /**
    * The requested pipeline was not found
    */
-  GSTD_NO_PIPELINE = 5
+  GSTD_NO_PIPELINE = 5,
+
+  /**
+   * The requested resource was not found
+   */
+  GSTD_NO_RESOURCE = 6,
+
+  /**
+   * Cannot create a resource in the given property
+   */
+  GSTD_NO_CREATE = 7,
+
+  /**
+   * The resource to create already exists
+   */
+  GSTD_EXISTING_RESOURCE = 8,
 };
 
 

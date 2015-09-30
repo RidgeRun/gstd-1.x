@@ -17,6 +17,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Gstd.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include <stdarg.h>
 #include "gstd_object.h"
 
 enum {
@@ -39,6 +40,8 @@ static void
 gstd_object_get_property (GObject *, guint, GValue *, GParamSpec *);
 static void
 gstd_object_dispose (GObject *);
+static gint
+gstd_object_find_resource (gconstpointer, gconstpointer);
 
 static void
 gstd_object_class_init (GstdObjectClass *klass)
@@ -57,8 +60,10 @@ gstd_object_class_init (GstdObjectClass *klass)
 			 "The name of the current Gstd session",
 			 GSTD_OBJECT_DEFAULT_NAME,
 			 G_PARAM_CONSTRUCT_ONLY |
+			 G_PARAM_STATIC_STRINGS |
 			 G_PARAM_READWRITE |
-			 G_PARAM_STATIC_STRINGS);
+			 GSTD_PARAM_READ
+			 );
   
   g_object_class_install_properties (object_class,
                                      N_PROPERTIES,
@@ -135,3 +140,93 @@ gstd_object_dispose (GObject *object)
   
   G_OBJECT_CLASS(gstd_object_parent_class)->dispose(object);
 }
+
+static gint
+gstd_object_find_resource (gconstpointer _obj, gconstpointer _name)
+{
+  GstdObject *obj = GSTD_OBJECT(_obj);
+  gchar *name = (gchar*)_name;
+
+  GST_LOG("Comparing %s vs %s", GSTD_OBJECT_NAME(obj),name);
+  
+  return strcmp(GSTD_OBJECT_NAME(obj), name);
+}
+
+GstdReturnCode
+gstd_object_create (GstdObject *object, const gchar *property, ...)
+{
+  va_list ap;
+  GParamSpec *spec;
+  GList *list, *found;
+  GstdObject *nnew;
+  GType resourcetype;
+  const gchar *first;
+
+  g_return_val_if_fail (G_IS_OBJECT (object), GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (property, GSTD_NULL_ARGUMENT);
+
+  /* Does the property exist? */
+  spec = g_object_class_find_property (G_OBJECT_GET_CLASS(object), property);
+  if (!spec)
+    goto noproperty;
+
+  /* Can we create resources on it */
+  if (!GSTD_PARAM_IS_CREATE(spec->flags))
+    goto nocreate;
+
+  /* Assert since this is a programming error */
+  g_return_val_if_fail(G_IS_PARAM_SPEC_POINTER(spec),
+		       GSTD_NO_CREATE);
+
+  /* Hack to get the type of the resource in the list */
+  resourcetype = g_param_spec_get_qdata (spec,
+      g_quark_from_static_string("ResourceType"));
+  
+  /* All validated to create the new resource */
+  va_start(ap, property);
+  first = va_arg(ap, gchar*);
+
+  nnew = g_object_new_valist (resourcetype, first, ap);
+  va_end(ap);
+
+  list = NULL;
+  g_object_get (object, property, &list, NULL);
+  found = g_list_find_custom (list, GSTD_OBJECT_NAME(nnew),
+			      gstd_object_find_resource);
+  if (found)
+    goto exists;
+
+  /* Append it to the list of resources */
+  list = g_list_append (list, nnew);
+  g_object_set (object, property, list, NULL);
+  
+  return GSTD_EOK;
+
+ noproperty:
+  {
+    GST_ERROR_OBJECT(object, "The property \"%s\" doesn't exist", property);
+    return GSTD_NO_RESOURCE;
+  }
+ nocreate:
+  {
+    GST_ERROR_OBJECT(object, "Cannot create resources in \"%s\"", property);
+    return GSTD_NO_CREATE;
+  }
+ exists:
+  {
+    GST_ERROR_OBJECT(object, "The resource \"%s\" already exists in \"%s\"",
+		     GSTD_OBJECT_NAME(nnew), property);
+    g_object_unref(nnew);
+    return GSTD_EXISTING_RESOURCE;
+  }
+}
+
+GstdReturnCode
+gstd_object_read (GstdObject *object, const gchar *property, ...);
+
+GstdReturnCode
+gstd_object_update (GstdObject *object, const gchar *property, ...);
+
+GstdReturnCode
+gstd_object_delete (GstdObject *object, const gchar *property, ...);
+

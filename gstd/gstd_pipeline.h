@@ -32,8 +32,8 @@ G_BEGIN_DECLS
  * Type declaration.
  */
 #define GSTD_TYPE_PIPELINE gstd_pipeline_get_type ()
-G_DECLARE_FINAL_TYPE (GstdPipeline, gstd_pipeline, GSTD, PIPELINE, GstdObject)
-
+G_DECLARE_FINAL_TYPE (GstdPipeline, gstd_pipeline, GSTD, PIPELINE, GstdObject);
+     
 G_END_DECLS
 
 #endif // __GSTD_PIPELINE_H__

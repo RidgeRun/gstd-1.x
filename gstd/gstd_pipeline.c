@@ -101,7 +101,8 @@ gstd_pipeline_class_init (GstdPipelineClass *klass)
 		      GSTD_PIPELINE_DEFAULT_INDEX,
 		      G_PARAM_CONSTRUCT_ONLY |
 		      G_PARAM_READWRITE |
-		      G_PARAM_STATIC_STRINGS);
+		      G_PARAM_STATIC_STRINGS |
+		      GSTD_PARAM_READ);
 
   properties[PROP_DESCRIPTION] =
     g_param_spec_string ("description",
@@ -110,14 +111,18 @@ gstd_pipeline_class_init (GstdPipelineClass *klass)
 			 GSTD_PIPELINE_DEFAULT_DESCRIPTION,
 			 G_PARAM_CONSTRUCT_ONLY |
                          G_PARAM_READWRITE |
-                         G_PARAM_STATIC_STRINGS);
+                         G_PARAM_STATIC_STRINGS |
+			 GSTD_PARAM_READ);
 
   properties[PROP_ELEMENTS] =
     g_param_spec_pointer ("elements",
-                         "Elements",
-                         "The elements in the pipeline",
-                         G_PARAM_READABLE |
-                         G_PARAM_STATIC_STRINGS);
+			  "Elements",
+			  "The elements in the pipeline",
+			  G_PARAM_READABLE |
+			  G_PARAM_STATIC_STRINGS |
+			  GSTD_PARAM_CREATE |
+			  GSTD_PARAM_READ |
+			  GSTD_PARAM_DELETE);
 
   g_object_class_install_properties (object_class,
                                      N_PROPERTIES,

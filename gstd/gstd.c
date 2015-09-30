@@ -58,6 +58,7 @@ gstd_core_class_init (GstdCoreClass *klass)
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
   GParamSpec *properties[N_PROPERTIES] = { NULL, };
   guint debug_color;
+  GType type;
 
   object_class->set_property = gstd_core_set_property;
   object_class->get_property = gstd_core_get_property;
@@ -67,8 +68,14 @@ gstd_core_class_init (GstdCoreClass *klass)
     g_param_spec_pointer ("pipelines",
 			  "Pipelines",
 			  "The pipelines created by the user",
-                         G_PARAM_READABLE |
-                         G_PARAM_STATIC_STRINGS);
+			  G_PARAM_READWRITE |
+			  G_PARAM_STATIC_STRINGS |
+			  GSTD_PARAM_CREATE |
+			  GSTD_PARAM_READ |
+			  GSTD_PARAM_DELETE);
+  type = GSTD_TYPE_PIPELINE;
+  g_param_spec_set_qdata(properties[PROP_PIPELINES],
+			 g_quark_from_static_string("ResourceType"), (gpointer)type);
 
   g_object_class_install_properties (object_class,
                                      N_PROPERTIES,
@@ -138,7 +145,7 @@ gstd_core_dispose (GObject *object)
   GST_INFO_OBJECT(object, "Deinitializing gstd core");
 
   if (self->pipelines) {
-    g_list_free (self->pipelines);
+    g_list_free_full (self->pipelines, g_object_unref);
     self->pipelines = NULL;
   }
   

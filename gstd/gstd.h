@@ -26,6 +26,7 @@
 
 #include <gst/gst.h>
 #include "gstd_object.h"
+#include "gstd_pipeline.h"
 #include "gstd_return_codes.h"
 
 G_BEGIN_DECLS
