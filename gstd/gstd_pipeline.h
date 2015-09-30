@@ -22,149 +22,18 @@
 #define __GSTD_PIPELINE_H__
 
 #include <gst/gst.h>
+
+#include "gstd_object.h"
 #include "gstd_return_codes.h"
-#include "gstd_debug.h"
 
+G_BEGIN_DECLS
 
-typedef struct _GstdPipeline GstdPipeline;
-
-/**
- * GstdPipeline:
- * A wrapper for the conventional pipeline
+/*
+ * Type declaration.
  */
-struct _GstdPipeline
-{
-  /**
-   * The unique, numerical id for the current pipeline
-   */
-  gint index;
+#define GSTD_TYPE_PIPELINE gstd_pipeline_get_type ()
+G_DECLARE_FINAL_TYPE (GstdPipeline, gstd_pipeline, GSTD, PIPELINE, GstdObject)
 
-  /**
-   * A unique name for the pipeline
-   */
-  gchar *name;
-
-  /**
-   * A Gstreamer element holding the pipeline
-   */
-  GstElement *pipeline;
-
-  /**
-   * The GstLaunch syntax used to create the pipeline
-   */
-  gchar *description;
-};
-
-/**
- * Returns numerical index of the pipeline
- *
- * \param pipe a GstdPipeline
- * \return The numerical index of the pipeline
- */
-#define GSTD_PIPELINE_INDEX(pipe) ((pipe)->index)
-
-/**
- * Returns the name of the pipeline
- *
- * \param pipe a GstdPipeline
- * \return The name of the pipeline
- */
-#define GSTD_PIPELINE_NAME(pipe) ((pipe)->name)
-
-/**
- * Returns the Gstreamer pipeline
- *
- * \param pipe a GstdPipeline
- * \return The Gstreamer pipeline
- */
-#define GSTD_PIPELINE_PIPELINE(pipe) ((pipe)->pipeline)
-
-/**
- * Returns the Gstreamer pipeline
- *
- * \param pipe a GstdPipeline
- * \return The GstLaunch description used to create the pipeline
- */
-#define GSTD_PIPELINE_DESCRIPTION(pipe) ((pipe)->description)
-
-/**
- * Initializes the pipeline list. This has to be called prior
- * any operation on the pipeline list.
- */
-void
-gstd_pipeline_init ();
-
-/**
- * Deinitializes the pipeline list. No pipeline operation may be
- * performed after this.
- */
-void
-gstd_pipeline_deinit ();
-
-/**
- * Creates a new named pipeline based on the provided gst-launch
- * description. If no name is provided then a generic name will be 
- * assigned.
- *
- * \param name A unique name to assign to the pipeline. If empty or
- * NULL, a unique name will be generated.  
- * \param description A gst-launch like description of the pipeline.  
- * \param newpipe A double pointer to hold the newly created GstdPipeline. 
- * It may be passed NULL to ignore output values. This pointer will be 
- * NULL in case of failure. Do not free this pointer!
- *
- * \return A GstdReturnCode with the return status.
- *
- * \post A new pipeline will be allocated with the given name.
- */
-GstdReturnCode
-gstd_pipeline_create (const gchar *name, const gchar *description,
-		      GstdPipeline **newpipe);
-
-/**
- * Destroys an existing pipeline.
- *
- * \param name The unique name assigned to the pipeline.
- *
- * \return A GstdReturnCode with the return status.
- *
- * \post All the associated lists will become invalid (elements, properties)
- */
-GstdReturnCode
-gstd_pipeline_destroy (const gchar *name);
-
-/**
- * Returns the hash table that currently holds the pipelines
- *
- * \param pipelines A hash table double pointer to hold the pipelines with
- * its names as keys and GstdPipeline as values. Do not free this hash table.
- * \return The respective return code
- */
-GstdReturnCode
-gstd_pipeline_get_list (GHashTable **pipelines);
-
-/**
- * Returns a read-only GstdPipeline by its name. This pipeline 
- * must not be modified. If the pipeline is not found, the 
- * return value will be NULL
- *
- * \param name The name of the pipeline to query
- * \param outpipe A read-only pointer to a GstdPipeline or NULL
- * if it wasn't found.
- */
-GstdReturnCode
-gstd_pipeline_get_by_name (const gchar *name, GstdPipeline **outpipe);
-
-/**
- * Returns a read-only GstdPipeline by its index. This pipeline 
- * must not be modified. If the pipeline is not found, the 
- * return value will be NULL
- *
- * \param index The index of the pipeline to query
- * \param outpipe A read-only pointer to a GstdPipeline or NULL
- * if it wasn't found.
- */
-GstdReturnCode
-gstd_pipeline_get_by_index (const gint index, GstdPipeline **outpipe);
+G_END_DECLS
 
 #endif // __GSTD_PIPELINE_H__

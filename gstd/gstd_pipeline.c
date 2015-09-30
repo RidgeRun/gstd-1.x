@@ -20,306 +20,298 @@
 #include "gstd_pipeline.h"
 #include <string.h>
 
-/* Global list of pipelines */
-static GHashTable *gstd_pipeline_list = NULL;
+enum {
+  PROP_INDEX = 1,
+  PROP_DESCRIPTION,
+  PROP_ELEMENTS,
+  N_PROPERTIES // NOT A PROPERTY
+};
+
+#define GSTD_PIPELINE_DEFAULT_INDEX -1
+#define GSTD_PIPELINE_DEFAULT_DESCRIPTION NULL
+#define GSTD_PIPELINE_DEFAULT_ELEMENTS NULL
+
+/* Gstd Core debugging category */
+GST_DEBUG_CATEGORY_STATIC(gstd_pipeline_debug);
+#define GST_CAT_DEFAULT gstd_pipeline_debug
+
+#define GSTD_DEBUG_DEFAULT_LEVEL GST_LEVEL_INFO
+
+/**
+ * GstdPipeline:
+ * A wrapper for the conventional pipeline
+ */
+struct _GstdPipeline
+{
+  GstdObject parent;
+  
+  /**
+   * The unique, numerical id for the current pipeline
+   */
+  gint index;
+
+  /**
+   * The GstLaunch syntax used to create the pipeline
+   */
+  gchar *description;
+  
+  /**
+   * A Gstreamer element holding the pipeline
+   */
+  GstElement *pipeline;
+
+  /**
+   * The list of GstdElement held by the pipeline
+   */
+  GList *elements;
+};
+
+G_DEFINE_TYPE (GstdPipeline, gstd_pipeline, GSTD_TYPE_OBJECT)
 
 /* VTable */
 static void
-gstd_pipeline_iter_max (gpointer, gpointer, gpointer);
-static gint
-gstd_pipeline_get_highest_index (GHashTable *);
+gstd_pipeline_get_property (GObject *, guint, GValue *, GParamSpec *);
 static void
-gstd_pipeline_free_hash (gpointer);
-static GstdPipeline *
-gstd_pipeline_new (void);
+gstd_pipeline_set_property (GObject *, guint, const GValue *, GParamSpec *);
 static void
-gstd_pipeline_free (GstdPipeline *pipeline);
+gstd_pipeline_dispose (GObject *);
+static GObject *
+gstd_pipeline_constructor (GType , guint, GObjectConstructParam *);
 static GstdReturnCode
-gstd_pipeline_get (GHRFunc, const gpointer, GstdPipeline **);
-static gboolean
-_get_by_name (gpointer, gpointer, gpointer);
-static gboolean
-_get_by_index (gpointer, gpointer, gpointer);
-
-
-void
-gstd_pipeline_init ()
-{
-  /* Initialize the global pipeline list */
-  if (!gstd_pipeline_list) {
-    gstd_pipeline_list = g_hash_table_new_full (g_str_hash, g_str_equal,
-        g_free, gstd_pipeline_free_hash);
-    GST_DEBUG ("Initialized pipelines hash table");
-  }
-}
-
-void
-gstd_pipeline_deinit ()
-{
-  g_return_if_fail (gstd_pipeline_list);
-
-  g_hash_table_unref (gstd_pipeline_list);
-  gstd_pipeline_list = NULL;
-  GST_DEBUG ("Deinitialized pipeline hash table");
-}
-
-/*
- * Allocates a new GstdPipeline.
- *
- * Allocates and returns a new pointer to GstdPipeline. The pointer
- * must then be freed using gstd_pipeline_free.
- *
- * \return A newly allocated GstdPipeline
- */
-
-static GstdPipeline *
-gstd_pipeline_new ()
-{
-  GstdPipeline *pipe;
-
-  pipe = g_malloc0(sizeof(GstdPipeline));
-  pipe->index = -1;
-
-  return pipe;
-}
-
-/*
- * Frees a previously allocated GstdPipeline.
- * 
- * \param The pipeline to free
- *
- * \pre The pipeline must have been allocated using gstd_pipeline_new
- * \post The pipeline will no longer be usable
- */
-static void
-gstd_pipeline_free (GstdPipeline *pipe)
-{
-  g_return_if_fail (pipe);
-
-  if (pipe->name) {
-    GST_DEBUG ("Freeing pipeline %s", pipe->name);
-    g_free(pipe->name);
-  }
-
-  if (pipe->description)
-    g_free(pipe->description);
-
-  if (pipe->pipeline)
-    g_object_unref(pipe->pipeline);
-
-  g_free(pipe);
-}
-
-void
-gstd_pipeline_free_hash (gpointer pipe)
-{
-  /* Shush the compiler about different expected argument type */
-  gstd_pipeline_free ((GstdPipeline *)pipe);
-}
-
-GstdReturnCode
-gstd_pipeline_get_list (GHashTable **pipelines)
-{
-  g_return_val_if_fail (gstd_pipeline_list, GSTD_MISSING_INITIALIZATION);
-
-  /* Warn potential memory leaks */
-  g_warn_if_fail (!*pipelines);
-  *pipelines = gstd_pipeline_list;
-
-  return GSTD_EOK;;
-}
+gstd_pipeline_create (GstdPipeline *, const gchar *, const gint, const gchar *);
 
 static void
-gstd_pipeline_iter_max (gpointer _key, gpointer _value, gpointer _user_data)
+gstd_pipeline_class_init (GstdPipelineClass *klass)
 {
-  gchar *key = (gchar *)_key;
-  GstdPipeline *value = (GstdPipeline *)_value;
-  gint *outmax = (gint *)_user_data;
+  GObjectClass *object_class = G_OBJECT_CLASS (klass);
+  GParamSpec *properties[N_PROPERTIES] = { NULL, };
+  guint debug_color;
 
-  g_return_if_fail(key);
-  g_return_if_fail(value);
-  g_return_if_fail(outmax);
+  object_class->set_property = gstd_pipeline_set_property;
+  object_class->get_property = gstd_pipeline_get_property;
+  object_class->constructor = gstd_pipeline_constructor;
+  object_class->dispose = gstd_pipeline_dispose;
   
-  GST_LOG ("Analyzing %s's index: %d vs current max %d", key,
-	   value->index, *outmax);
+  properties[PROP_INDEX] =
+    g_param_spec_int ("index",
+		      "Index",
+		      "The numerical index of the pipeline",
+		      G_MININT,
+		      G_MAXINT,
+		      GSTD_PIPELINE_DEFAULT_INDEX,
+		      G_PARAM_CONSTRUCT_ONLY |
+		      G_PARAM_READWRITE |
+		      G_PARAM_STATIC_STRINGS);
 
-  if (value->index > *outmax)
-    *outmax = value->index;
+  properties[PROP_DESCRIPTION] =
+    g_param_spec_string ("description",
+                         "Description",
+                         "The gst-launch like pipeline description",
+			 GSTD_PIPELINE_DEFAULT_DESCRIPTION,
+			 G_PARAM_CONSTRUCT_ONLY |
+                         G_PARAM_READWRITE |
+                         G_PARAM_STATIC_STRINGS);
+
+  properties[PROP_ELEMENTS] =
+    g_param_spec_pointer ("elements",
+                         "Elements",
+                         "The elements in the pipeline",
+                         G_PARAM_READABLE |
+                         G_PARAM_STATIC_STRINGS);
+
+  g_object_class_install_properties (object_class,
+                                     N_PROPERTIES,
+                                     properties);
+
+  /* Initialize debug category with nice colors */
+  debug_color = GST_DEBUG_FG_BLACK | GST_DEBUG_BOLD | GST_DEBUG_BG_WHITE;
+  GST_DEBUG_CATEGORY_INIT (gstd_pipeline_debug, "gstdpipeline", debug_color,
+			   "Gstd Pipeline category");
 }
 
-static gint
-gstd_pipeline_get_highest_index (GHashTable *pipelines)
+static void
+gstd_pipeline_init (GstdPipeline *self)
 {
-  gint outmax;
-
-  outmax = -1;
-  g_return_val_if_fail (pipelines, outmax);
-
-  g_hash_table_foreach (pipelines, gstd_pipeline_iter_max, &outmax);
-  GST_DEBUG ("Found current max index to be %d", outmax);
-
-  return outmax;
+  GST_INFO_OBJECT(self, "Initializing pipeline");
+  self->index = GSTD_PIPELINE_DEFAULT_INDEX;
+  self->description = g_strdup(GSTD_PIPELINE_DEFAULT_DESCRIPTION);
+  self->pipeline = NULL;
+  self->elements = GSTD_PIPELINE_DEFAULT_ELEMENTS;
 }
 
-GstdReturnCode
-gstd_pipeline_create (const gchar *name, const gchar *description,
-		      GstdPipeline **newpipe)
+static void
+gstd_pipeline_dispose (GObject *object)
 {
-  GstdPipeline *gstd_pipeline;
-  gint newindex;
+  GstdPipeline *self = GSTD_PIPELINE(object);
+
+  GST_INFO_OBJECT(self, "Disposing %s pipeline", GSTD_OBJECT_NAME(self));
+  
+  if (self->description) {
+    g_free(self->description);
+    self->description = NULL;
+  }
+
+  if (self->pipeline) {
+    g_object_unref(self->pipeline);
+    self->pipeline = NULL;
+  }
+
+  if (self->elements) {
+    g_list_free_full(self->elements, (GDestroyNotify)g_object_unref);
+    self->elements = NULL;
+  }
+
+  G_OBJECT_CLASS(gstd_pipeline_parent_class)->dispose(object);
+}
+
+static GObject *
+gstd_pipeline_constructor (GType type, guint count,
+			   GObjectConstructParam *properties)
+{
+  GstdPipeline *self;
+  gint index;
+  const gchar *description;
+
+  self = GSTD_PIPELINE(G_OBJECT_CLASS(gstd_pipeline_parent_class)->
+		       constructor(type, count, properties));
+
+  /* After chaining parent constructor the CONSTRUCT_ONLY properties
+     have been already set */
+  index = self->index;
+  description = self->description;
+  
+  GST_DEBUG_OBJECT(self, "Called pipeline constructor with index: "
+		   "\"%d\" and description : \"%s\"", self->index,
+		   self->description);
+
+  gstd_pipeline_create (self, GSTD_OBJECT_NAME(self),
+			self->index, self->description);
+  
+  return G_OBJECT(self);
+}
+
+static void
+gstd_pipeline_get_property (GObject        *object,
+			    guint           property_id,
+			    GValue         *value,
+			    GParamSpec     *pspec)
+{
+  GstdPipeline *self = GSTD_PIPELINE(object);
+
+  switch (property_id) {
+  case PROP_INDEX:
+    GST_DEBUG_OBJECT(self, "Returning index of %d", self->index);
+    g_value_set_int (value, self->index);
+    break;
+  case PROP_DESCRIPTION:
+    GST_DEBUG_OBJECT(self, "Returning description of \"%s\"",
+		     self->description);
+    g_value_set_string (value, self->description);
+    break;
+  case PROP_ELEMENTS:
+    GST_DEBUG_OBJECT(self, "Returning element list %p", self->elements);
+    g_value_set_pointer (value, self->elements);
+    break;
+  default:
+    /* We don't have any other property... */
+    G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
+    break;
+  }
+}
+
+static void
+gstd_pipeline_set_property (GObject      *object,
+			    guint         property_id,
+			    const GValue *value,
+			    GParamSpec   *pspec)
+{
+  GstdPipeline *self = GSTD_PIPELINE (object);
+  
+  switch (property_id) {
+  case PROP_INDEX:
+    self->index = g_value_get_int(value);
+    GST_INFO_OBJECT(self, "Changed index to \"%d\"", self->index);
+    break;
+  case PROP_DESCRIPTION:
+    if (self->description)
+      g_free (self->description);
+    self->description = g_value_dup_string (value);
+    GST_INFO_OBJECT(self, "Changed description to \"%s\"", self->description);
+    break;
+  default:
+    /* We don't have any other property... */
+    G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
+    break;
+  }
+}
+
+/**
+ * Creates a new named pipeline based on the provided gst-launch
+ * description. If no name is provided then a generic name will be 
+ * assigned.
+ *
+ * \param name A unique name to assign to the pipeline. If empty or
+ * NULL, a unique name will be generated.  
+ * \param description A gst-launch like description of the pipeline.  
+ * \param newpipe A double pointer to hold the newly created GstdPipeline. 
+ * It may be passed NULL to ignore output values. This pointer will be 
+ * NULL in case of failure. Do not free this pointer!
+ *
+ * \return A GstdReturnCode with the return status.
+ *
+ * \post A new pipeline will be allocated with the given name.
+ */
+static GstdReturnCode
+gstd_pipeline_create (GstdPipeline *self, const gchar *name,
+		      const gint index, const gchar *description)
+{
   GError *error;
+  const gchar *fbname = "pipeline%d";
+  gchar *pipename;
 
-  g_return_val_if_fail (gstd_pipeline_list, GSTD_MISSING_INITIALIZATION);
+  g_return_val_if_fail (self, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (index != -1, GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (description, GSTD_NULL_ARGUMENT);
   
-  gstd_pipeline = gstd_pipeline_new();
-
-  newindex = gstd_pipeline_get_highest_index (gstd_pipeline_list);
-  newindex++;
-  gstd_pipeline->index = newindex;
-  
-  if (!name || name[0] == '\0') {
-    gstd_pipeline->name = g_strdup_printf("pipeline%d",newindex);
-  } else {
-    gstd_pipeline->name = g_strdup(name);
-  }
-
-  if (g_hash_table_contains (gstd_pipeline_list, gstd_pipeline->name))
-    goto existing_name;
-  
   error = NULL;
-  gstd_pipeline->pipeline = gst_parse_launch(description, &error);
-  if (!gstd_pipeline->pipeline)
+  self->pipeline = gst_parse_launch(description, &error);
+  if (!self->pipeline)
     goto wrong_pipeline;
 
   /* Still check if error is set because a recoverable
    * error might have occured */
   if (error) {
-    GST_WARNING ("Recoverable error: %s", error->message);
+    GST_WARNING_OBJECT (self, "Recoverable error: %s", error->message);
     g_error_free (error);
   }
-  gstd_pipeline->description = g_strdup(description);
 
-  /* Pipelines do not have parents, so this function cant fail */
-  gst_object_set_name (GST_OBJECT(gstd_pipeline->pipeline),
-		       gstd_pipeline->name);
-  
-  GST_INFO ("Created pipeline \"%s\": \"%s\"", gstd_pipeline->name,
-	    description);
-  g_hash_table_insert (gstd_pipeline_list, g_strdup(gstd_pipeline->name),
-		       gstd_pipeline);
-
-  /* If the user passed NULL, it means he is not interested in 
-     having the struct back */
-  if (newpipe) {
-    g_warn_if_fail (!*newpipe);
-    *newpipe = gstd_pipeline;
+  /* If the user didn't provide a name or provided an empty name
+   * assign the fallback using the idex */
+  if (!name || name[0] == '\0') {
+    pipename = g_strdup_printf(fbname, index);
+  } else {
+    pipename = g_strdup (name);
   }
-  
+
+  /* Set the updated name */
+  gst_object_set_name (GST_OBJECT(self->pipeline), pipename);
+  g_object_set (self, "name", pipename, NULL);
+  g_free (pipename);
+
+  GST_INFO_OBJECT (self, "Created pipeline \"%s\": \"%s\"",
+		   GSTD_OBJECT_NAME(self), description);
+
   return GSTD_EOK;
 
  wrong_pipeline:
   {
     if (error) {
-      GST_ERROR ("Unable to create pipeline: %s", error->message);
+      GST_ERROR_OBJECT (self, "Unable to create pipeline: %s", error->message);
       g_error_free (error);
     }
     else
-      GST_ERROR ("Unable to create pipeline");
+      GST_ERROR_OBJECT (self, "Unable to create pipeline");
 
-    gstd_pipeline_free (gstd_pipeline);
-    *newpipe = NULL;
     return GSTD_BAD_DESCRIPTION;
   }
- existing_name:
-  {
-    GST_ERROR ("The name %s already exists", gstd_pipeline->name);
-    gstd_pipeline_free (gstd_pipeline);
-    *newpipe = NULL;
-    return GSTD_EXISTING_NAME;
-  }
-}
-
-GstdReturnCode
-gstd_pipeline_destroy (const gchar *name)
-{
-  g_return_val_if_fail(gstd_pipeline_list, GSTD_MISSING_INITIALIZATION);
-  g_return_val_if_fail(name, GSTD_NULL_ARGUMENT);
-  
-  if (!g_hash_table_remove (gstd_pipeline_list, name))
-    goto not_found;
-
-  GST_INFO ("Removed pipeline \"%s\"", name);
-  return GSTD_EOK;
-  
- not_found:
-  GST_ERROR("Pipeline with name \"%s\": was not found in the pipeline list",
-	    name);
-  return GSTD_NO_PIPELINE;
-}
-
-
-GstdReturnCode
-gstd_pipeline_get (GHRFunc getter, const gpointer data,
-		   GstdPipeline **outpipe)
-{
-  /* Pointer Guards */
-  g_return_val_if_fail(gstd_pipeline_list, GSTD_MISSING_INITIALIZATION);
-  g_return_val_if_fail(data, GSTD_NULL_ARGUMENT);
-  g_warn_if_fail (!*outpipe);
-
-  g_hash_table_ref(gstd_pipeline_list);
-  *outpipe = (GstdPipeline *)g_hash_table_find(gstd_pipeline_list, getter,
-					      data);
-  g_hash_table_unref(gstd_pipeline_list);
-
-  if (!*outpipe)
-    goto nopipe;
-
-  return GSTD_EOK;
-
- nopipe:
-  {
-    GST_WARNING("No pipeline found for the given criteria");
-    return GSTD_NO_PIPELINE;
-  }
-}
-
-static gboolean _get_by_name (gpointer key, gpointer value, gpointer data)
-{
-  GstdPipeline *pipe;
-  gchar *name;
-
-  pipe = (GstdPipeline *)value;
-  name = (gchar *)data;
-
-  GST_LOG("Comparing \"%s\" vs \"%s\"",  name, pipe->name);
-  
-  return !strcmp(name, pipe->name);
-}
-static gboolean _get_by_index (gpointer key, gpointer value, gpointer data)
-{
-  GstdPipeline *pipe;
-  gint index;
-
-  pipe = (GstdPipeline *)value;
-  index = *(gint*)data;
-
-  GST_LOG("Comparing %d vs %d",  index, pipe->index);
-
-  return index == pipe->index;
-}
-
-GstdReturnCode
-gstd_pipeline_get_by_name (const gchar *name, GstdPipeline **outpipe)
-{
-  GST_INFO("Looking for pipeline \"%s\"", name);
-  return gstd_pipeline_get(_get_by_name, (gpointer)name, outpipe);
-}
-
-GstdReturnCode
-gstd_pipeline_get_by_index (const gint index, GstdPipeline **outpipe)
-{
-  GST_INFO("Looking for pipeline number %d", index);
-  return gstd_pipeline_get(_get_by_index, (gpointer)&index, outpipe);
-}
+ }
