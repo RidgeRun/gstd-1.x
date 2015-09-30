@@ -53,6 +53,8 @@ struct _GstdObject
   gchar *name;
 };
 
+#define GSTD_OBJECT_NAME(obj) (GSTD_OBJECT(obj)->name)
+
 struct _GstdObjectClass
 {
   GObjectClass parent_class;
@@ -61,7 +63,7 @@ struct _GstdObjectClass
 GType gstd_object_get_type(void);
 G_DEFINE_AUTOPTR_CLEANUP_FUNC(GstdObject, g_object_unref)
 
-#define GSTD_OBJECT_DEFAULT_NAME "GstdCore0"
+#define GSTD_OBJECT_DEFAULT_NAME NULL
 
 G_END_DECLS
 

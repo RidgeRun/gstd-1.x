@@ -56,6 +56,7 @@ gstd_object_class_init (GstdObjectClass *klass)
 			 "Name",
 			 "The name of the current Gstd session",
 			 GSTD_OBJECT_DEFAULT_NAME,
+			 G_PARAM_CONSTRUCT_ONLY |
 			 G_PARAM_READWRITE |
 			 G_PARAM_STATIC_STRINGS);
   

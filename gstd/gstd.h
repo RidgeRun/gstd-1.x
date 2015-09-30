@@ -34,7 +34,7 @@ G_BEGIN_DECLS
  * Type declaration.
  */
 #define GSTD_TYPE_CORE gstd_core_get_type ()
-G_DECLARE_FINAL_TYPE (GstdCore, gstd_core, GSTD, CORE, GstdObject)
+G_DECLARE_FINAL_TYPE (GstdCore, gstd_core, GSTD, CORE, GstdObject);
 
 G_END_DECLS
 
