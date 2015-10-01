@@ -159,7 +159,7 @@ gstd_object_create (GstdObject *object, const gchar *property, ...)
   GParamSpec *spec;
   GList *list, *found;
   GstdObject *nnew;
-  GType resourcetype;
+  GType *resourcetype;
   const gchar *first;
 
   g_return_val_if_fail (G_IS_OBJECT (object), GSTD_NULL_ARGUMENT);
@@ -186,7 +186,7 @@ gstd_object_create (GstdObject *object, const gchar *property, ...)
   va_start(ap, property);
   first = va_arg(ap, gchar*);
 
-  nnew = g_object_new_valist (resourcetype, first, ap);
+  nnew = GSTD_OBJECT(g_object_new_valist (*resourcetype, first, ap));
   va_end(ap);
 
   list = NULL;
@@ -225,7 +225,52 @@ GstdReturnCode
 gstd_object_read (GstdObject *object, const gchar *property, ...);
 
 GstdReturnCode
-gstd_object_update (GstdObject *object, const gchar *property, ...);
+gstd_object_update (GstdObject *object, const gchar *property, ...)
+{
+  va_list ap;
+  GParamSpec *spec;
+  GObject *propobject;
+  const gchar *first;
+  
+  g_return_val_if_fail (G_IS_OBJECT (object), GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (property, GSTD_NULL_ARGUMENT);
+
+  /* Does the property exist? */
+  spec = g_object_class_find_property (G_OBJECT_GET_CLASS(object), property);
+  if (!spec)
+    goto noproperty;
+
+  /* Can we create resources on it */
+  if (!GSTD_PARAM_IS_UPDATE(spec->flags))
+    goto noupdate;
+
+  /* Assert since this is a programming error */
+  g_return_val_if_fail(G_IS_PARAM_SPEC_OBJECT(spec),
+		       GSTD_NO_UPDATE);
+
+  g_object_get(object, property, &propobject, NULL);
+
+  va_start(ap, property);
+  first = va_arg(ap, gchar*);
+  
+  g_object_set_valist (propobject, first, ap);
+  va_end(ap);
+		       
+  g_object_unref(propobject);
+    
+  return GSTD_EOK;
+  
+ noproperty:
+  {
+    GST_ERROR_OBJECT(object, "The property \"%s\" doesn't exist", property);
+    return GSTD_NO_RESOURCE;
+  }
+ noupdate:
+  {
+    GST_ERROR_OBJECT(object, "Cannot update resources in \"%s\"", property);
+    return GSTD_NO_CREATE;
+  }
+}
 
 GstdReturnCode
 gstd_object_delete (GstdObject *object, const gchar *property, ...);

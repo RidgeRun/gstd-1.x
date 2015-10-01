@@ -76,7 +76,8 @@ gstd_element_class_init (GstdElementClass *klass)
 			 G_PARAM_READWRITE |
 			 G_PARAM_CONSTRUCT_ONLY |
 			 G_PARAM_STATIC_STRINGS |
-			 GSTD_PARAM_READ);
+			 GSTD_PARAM_READ |
+			 GSTD_PARAM_UPDATE);
 
   g_object_class_install_properties (object_class,
                                      N_PROPERTIES,
@@ -120,8 +121,8 @@ gstd_element_get_property (GObject        *object,
 
   switch (property_id) {
   case PROP_PROPERTIES:
-    GST_DEBUG_OBJECT(self, "Returning element %p (%s)", self->element,
-		     GSTD_OBJECT_NAME(self->element));
+    GST_DEBUG_OBJECT(self, "Returning properties %p (%s)", self->element,
+		     GST_OBJECT_NAME(self->element));
     g_value_set_object (value, self->element);
     break;
   default:

@@ -74,6 +74,11 @@ enum _GstdReturnCode {
    * The resource to create already exists
    */
   GSTD_EXISTING_RESOURCE = 8,
+
+  /**
+   * Cannot update the given property
+   */
+  GSTD_NO_UPDATE = 9,
 };
 
 

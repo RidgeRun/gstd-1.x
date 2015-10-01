@@ -58,7 +58,7 @@ gstd_core_class_init (GstdCoreClass *klass)
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
   GParamSpec *properties[N_PROPERTIES] = { NULL, };
   guint debug_color;
-  GType type;
+  GType *type;
 
   object_class->set_property = gstd_core_set_property;
   object_class->get_property = gstd_core_get_property;
@@ -73,9 +73,12 @@ gstd_core_class_init (GstdCoreClass *klass)
 			  GSTD_PARAM_CREATE |
 			  GSTD_PARAM_READ |
 			  GSTD_PARAM_DELETE);
-  type = GSTD_TYPE_PIPELINE;
+
+  type = g_new0(GType, 1);
+  *type = GSTD_TYPE_PIPELINE;
+  
   g_param_spec_set_qdata(properties[PROP_PIPELINES],
-			 g_quark_from_static_string("ResourceType"), (gpointer)type);
+  g_quark_from_static_string("ResourceType"), type);
 
   g_object_class_install_properties (object_class,
                                      N_PROPERTIES,
