@@ -3,8 +3,8 @@ lib_LTLIBRARIES = libgstd-core.la
 
 libgstd_core_la_SOURCES = gstd.c 		\
 			  gstd_object.c		\
-	                  gstd_pipeline.c 	
-#			  gstd_element.c
+	                  gstd_pipeline.c 	\
+			  gstd_element.c
 
 libgstd_core_la_CFLAGS = $(GST_CFLAGS)
 libgstd_core_la_LDFLAGS = $(GST_LIBS)

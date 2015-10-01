@@ -73,7 +73,8 @@ gstd_element_class_init (GstdElementClass *klass)
 			 "Properties",
 			 "The properties of the element",
 			 GST_TYPE_ELEMENT,
-			 G_PARAM_READABLE |
+			 G_PARAM_READWRITE |
+			 G_PARAM_CONSTRUCT_ONLY |
 			 G_PARAM_STATIC_STRINGS |
 			 GSTD_PARAM_READ);
 
@@ -118,7 +119,7 @@ gstd_element_get_property (GObject        *object,
   GstdElement *self = GSTD_ELEMENT(object);
 
   switch (property_id) {
-  case PROP_ELEMENTS:
+  case PROP_PROPERTIES:
     GST_DEBUG_OBJECT(self, "Returning element %p (%s)", self->element,
 		     GSTD_OBJECT_NAME(self->element));
     g_value_set_object (value, self->element);
@@ -139,7 +140,11 @@ gstd_element_set_property (GObject      *object,
   GstdElement *self = GSTD_ELEMENT (object);
   
   switch (property_id) {
-    // No writable properties yet
+  case PROP_PROPERTIES:
+    self->element = g_object_ref(g_value_get_object (value));
+    GST_DEBUG_OBJECT(self, "Setting element %p (%s)",self->element,
+		     GST_OBJECT_NAME(self->element));
+    break;
   default:
     /* We don't have any other property... */
     G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);

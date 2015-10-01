@@ -18,6 +18,7 @@
  * along with Gstd.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "gstd_pipeline.h"
+#include "gstd_element.h"
 #include <string.h>
 
 enum {
@@ -79,6 +80,8 @@ static GObject *
 gstd_pipeline_constructor (GType , guint, GObjectConstructParam *);
 static GstdReturnCode
 gstd_pipeline_create (GstdPipeline *, const gchar *, const gint, const gchar *);
+static GstdReturnCode
+gstd_pipeline_fill_elements (GstdPipeline *, GstElement *);
 
 static void
 gstd_pipeline_class_init (GstdPipelineClass *klass)
@@ -120,9 +123,7 @@ gstd_pipeline_class_init (GstdPipelineClass *klass)
 			  "The elements in the pipeline",
 			  G_PARAM_READABLE |
 			  G_PARAM_STATIC_STRINGS |
-			  GSTD_PARAM_CREATE |
-			  GSTD_PARAM_READ |
-			  GSTD_PARAM_DELETE);
+			  GSTD_PARAM_READ);
 
   g_object_class_install_properties (object_class,
                                      N_PROPERTIES,
@@ -306,7 +307,7 @@ gstd_pipeline_create (GstdPipeline *self, const gchar *name,
   GST_INFO_OBJECT (self, "Created pipeline \"%s\": \"%s\"",
 		   GSTD_OBJECT_NAME(self), description);
 
-  return GSTD_EOK;
+  return gstd_pipeline_fill_elements (self, self->pipeline);
 
  wrong_pipeline:
   {
@@ -320,3 +321,81 @@ gstd_pipeline_create (GstdPipeline *self, const gchar *name,
     return GSTD_BAD_DESCRIPTION;
   }
  }
+
+static GstdReturnCode
+gstd_pipeline_fill_elements (GstdPipeline *self, GstElement *element)
+{
+  GstPipeline *pipe;
+  GList *elementlist;
+  GstIterator *it;
+  GValue item = G_VALUE_INIT;
+  GstElement *gste;
+  GstdElement *gstde;
+  gboolean done;
+
+  g_return_val_if_fail (GSTD_IS_PIPELINE(self), GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (GST_IS_ELEMENT(element), GSTD_NULL_ARGUMENT);
+
+  GST_DEBUG_OBJECT(self, "Gathering \"%s\" elements", GSTD_OBJECT_NAME(self));
+  
+  if (!GST_IS_PIPELINE(element))
+    goto singleelement;
+      
+  pipe = GST_PIPELINE(element);
+  elementlist = self->elements;
+
+  it = gst_bin_iterate_elements (GST_BIN(pipe));
+  if (!it)
+    goto noiter;
+
+  done = FALSE;
+
+  while (!done) {
+    switch (gst_iterator_next (it, &item)) {
+    case GST_ITERATOR_OK:
+      gste = g_value_get_object (&item);
+      GST_LOG_OBJECT(self,
+          "Saving element \"%s\"", GST_OBJECT_NAME(gste));
+      gstde = GSTD_ELEMENT(g_object_new(GSTD_TYPE_ELEMENT,
+					"name", GST_OBJECT_NAME(gste),
+					"properties", gste, NULL));
+      elementlist = g_list_append (elementlist, gstde);
+      g_value_reset (&item);
+      break;
+    case GST_ITERATOR_RESYNC:
+	gst_iterator_resync (it);
+      break;
+    case GST_ITERATOR_ERROR:
+      GST_ERROR_OBJECT(self, "Unknown element iterator error");
+      done = TRUE;
+      break;
+    case GST_ITERATOR_DONE:
+      done = TRUE;
+      break;
+    }
+  }
+  g_value_unset (&item);
+  gst_iterator_free (it);
+
+  GST_DEBUG_OBJECT(self, "A total of %u elements where saved",
+		   g_list_length(elementlist));
+
+  if (self->elements)
+    g_list_free_full(self->elements, g_object_unref);
+
+  self->elements = elementlist;
+  
+  return GSTD_EOK;
+  
+ singleelement:
+  {
+    GST_INFO_OBJECT(self, "The pipeline \"%s\" doesn't contain elements!",
+		    GSTD_OBJECT_NAME(self));
+    return GSTD_EOK;
+  }
+ noiter:
+  {
+    GST_ERROR_OBJECT(self, "Malformed pipeline \"%s\"", GSTD_OBJECT_NAME(self));
+    return GSTD_NO_PIPELINE;
+  }
+}
