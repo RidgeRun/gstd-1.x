@@ -61,24 +61,11 @@ main (gint argc, gchar *argv[])
   main_loop = g_main_loop_new (NULL, FALSE);
 
   gstd = g_object_new (GSTD_TYPE_CORE, "name", "GstdCore0", NULL);
-  gstd_object_create (GSTD_OBJECT(gstd), "pipelines", "index", 0, "description", "fakesrc ! fakesink", NULL);
+  gstd_object_create (GSTD_OBJECT(gstd), "pipelines", "name", "mypipe", "description", "fakesrc ! fakesink", NULL);
+  
 
-  GstdElement *gstde;
-  GList *lpipes;
-  GList *lgstde;
-  GstdPipeline *gstdp;
-  
-  g_object_get(gstd, "pipelines", &lpipes, NULL);
-  gstdp = GSTD_PIPELINE(lpipes->data);
-  g_object_get(gstdp, "elements", &lgstde, NULL);
-  gstde = GSTD_ELEMENT(lgstde->data);
-  
-  gstd_object_update (GSTD_OBJECT(gstde), "properties", "silent", FALSE, NULL);
-
-  //  pipe = g_object_new (GSTD_TYPE_PIPELINE, "description", "fakesrc ! fakesink",
-  //		       "name", "GstdPipeline0","index", 0, NULL);
-  
-  
+  gstd_uri (gstd, "create pipelines index 0 description fakesink");
+    
   g_main_loop_run (main_loop);
 
   /* Application shut down*/

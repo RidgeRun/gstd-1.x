@@ -43,7 +43,7 @@ struct _GstdCore
   /**
    * The list of GstdPipelines created by the user
    */
-  GList *pipelines;
+  GstdList *pipelines;
 };
 
 G_DEFINE_TYPE (GstdCore, gstd_core, GSTD_TYPE_OBJECT)
@@ -94,7 +94,8 @@ gstd_core_init (GstdCore *self)
 {
   GST_INFO_OBJECT(self, "Initializing gstd core");
 
-  self->pipelines = GSTD_CORE_DEFAULT_PIPELINES;
+  self->pipelines = GSTD_LIST(g_object_new(GSTD_TYPE_LIST,
+					   "element-type", GSTD_TYPE_PIPELINE, NULL));
 }
 
 static void
@@ -110,7 +111,7 @@ gstd_core_get_property (GObject        *object,
   switch (property_id) {
   case PROP_PIPELINES:
     GST_DEBUG_OBJECT(self, "Returning pipeline list %p", self->pipelines);
-    g_value_set_pointer (value, self->pipelines);
+    g_value_set_object (value, self->pipelines);
     break;
     
   default:
@@ -133,7 +134,7 @@ gstd_core_set_property (GObject      *object,
   
   switch (property_id) {
   case PROP_PIPELINES:
-    self->pipelines = g_value_get_pointer (value);
+    self->pipelines = g_value_get_object (value);
     GST_INFO_OBJECT(self, "Changed pipeline list to %p", self->pipelines);
     break;
     
@@ -153,7 +154,7 @@ gstd_core_dispose (GObject *object)
   GST_INFO_OBJECT(object, "Deinitializing gstd core");
 
   if (self->pipelines) {
-    g_list_free_full (self->pipelines, g_object_unref);
+    g_object_unref (self->pipelines);
     self->pipelines = NULL;
   }
   
