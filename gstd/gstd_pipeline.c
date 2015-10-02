@@ -163,7 +163,7 @@ gstd_pipeline_dispose (GObject *object)
   }
 
   if (self->elements) {
-    g_list_free_full(self->elements, (GDestroyNotify)g_object_unref);
+    g_list_free_full(self->elements, g_object_unref);
     self->elements = NULL;
   }
 
@@ -177,6 +177,7 @@ gstd_pipeline_constructor (GType type, guint count,
   GstdPipeline *self;
   gint index;
   const gchar *description;
+  GstdReturnCode code;
 
   self = GSTD_PIPELINE(G_OBJECT_CLASS(gstd_pipeline_parent_class)->
 		       constructor(type, count, properties));
@@ -190,8 +191,9 @@ gstd_pipeline_constructor (GType type, guint count,
 		   "\"%d\" and description : \"%s\"", self->index,
 		   self->description);
 
-  gstd_pipeline_create (self, GSTD_OBJECT_NAME(self),
-			self->index, self->description);
+  code = gstd_pipeline_create (self, GSTD_OBJECT_NAME(self),
+			       self->index, self->description);
+  gstd_object_set_code (GSTD_OBJECT(self), code);
   
   return G_OBJECT(self);
 }
@@ -221,8 +223,11 @@ gstd_pipeline_get_property (GObject        *object,
   default:
     /* We don't have any other property... */
     G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
-    break;
+    gstd_object_set_code (GSTD_OBJECT(self), GSTD_NO_RESOURCE);
+    return;
   }
+
+  gstd_object_set_code (GSTD_OBJECT(self), GSTD_EOK);
 }
 
 static void
@@ -247,8 +252,11 @@ gstd_pipeline_set_property (GObject      *object,
   default:
     /* We don't have any other property... */
     G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
-    break;
+    gstd_object_set_code (GSTD_OBJECT(self), GSTD_NO_RESOURCE);
+    return;
   }
+
+  gstd_object_set_code (GSTD_OBJECT(self), GSTD_EOK);
 }
 
 /**

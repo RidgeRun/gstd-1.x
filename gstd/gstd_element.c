@@ -128,8 +128,11 @@ gstd_element_get_property (GObject        *object,
   default:
     /* We don't have any other property... */
     G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
-    break;
+    gstd_object_set_code (GSTD_OBJECT(self), GSTD_NO_RESOURCE);
+    return;
   }
+
+  gstd_object_set_code (GSTD_OBJECT(self), GSTD_EOK);
 }
 
 static void
@@ -149,6 +152,9 @@ gstd_element_set_property (GObject      *object,
   default:
     /* We don't have any other property... */
     G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
-    break;
+    gstd_object_set_code (GSTD_OBJECT(self), GSTD_NO_RESOURCE);
+    return
   }
+
+  gstd_object_set_code (GSTD_OBJECT(self), GSTD_EOK);
 }

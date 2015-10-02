@@ -31,11 +31,11 @@
 
 G_BEGIN_DECLS
 
-/*
- * Type declaration.
- */
 #define GSTD_TYPE_CORE gstd_core_get_type ()
 G_DECLARE_FINAL_TYPE (GstdCore, gstd_core, GSTD, CORE, GstdObject);
+
+GstdReturnCode
+gstd_uri (GstdCore *gstd, const gchar *uri);
 
 G_END_DECLS
 

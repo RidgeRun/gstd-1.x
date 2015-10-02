@@ -18,6 +18,8 @@
  * along with Gstd.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "gstd.h"
+#include <string.h>
+#include <stdio.h>
 
 /* Gstd Core debugging category */
 GST_DEBUG_CATEGORY_STATIC(gstd_core_debug);
@@ -117,6 +119,8 @@ gstd_core_get_property (GObject        *object,
     G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
     break;
   }
+
+  gstd_object_set_code (GSTD_OBJECT(self), GSTD_EOK);
 }
 
 static void
@@ -138,6 +142,8 @@ gstd_core_set_property (GObject      *object,
     G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
     break;
   }
+
+  gstd_object_set_code (GSTD_OBJECT(self), GSTD_EOK);
 }
 
 static void
@@ -154,3 +160,47 @@ gstd_core_dispose (GObject *object)
   
   G_OBJECT_CLASS(gstd_core_parent_class)->dispose(object);
 }
+
+GstdReturnCode
+gstd_uri (GstdCore *gstd, const gchar *cmd)
+{
+  gchar **action;
+  const gchar *daction = " ";
+  gchar **path;
+  const gchar *dpath = "/";
+  GObject *parent;
+  const gchar *uri;
+
+  g_return_val_if_fail(GSTD_IS_CORE(gstd), GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail(cmd, GSTD_NULL_ARGUMENT);
+
+  action = g_strsplit (cmd, daction, -1);
+
+  if (!action[0] || !action[1])
+    goto badcommand;
+
+  uri = action[1];
+
+  path = g_strsplit (uri, dpath, -1);
+
+  
+  parent = g_object_ref(gstd);
+  
+  if (!g_ascii_strcasecmp(action[0], "CREATE")) {
+  } else if (!g_ascii_strcasecmp(action[0], "READ")) {
+  } else if (!g_ascii_strcasecmp(action[0], "UPDATE")) {
+  } else if (!g_ascii_strcasecmp(action[0], "DELETE")) {
+  } else {
+  }
+
+  g_object_unref(parent);
+  return GSTD_EOK;
+  
+ badcommand:
+  {
+    GST_ERROR_OBJECT(gstd, "Invalid command");
+    return GSTD_BAD_COMMAND;
+  }
+}
+
+

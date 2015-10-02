@@ -79,6 +79,8 @@ enum _GstdReturnCode {
    * Cannot update the given property
    */
   GSTD_NO_UPDATE = 9,
+
+  GSTD_BAD_COMMAND = 10,
 };
 
 

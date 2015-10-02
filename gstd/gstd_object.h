@@ -49,12 +49,30 @@ struct _GstdObject
   GObject parent;
 
   /**
-   * The name of the core session
+   * The name of the object
    */
   gchar *name;
+
+  /**
+   * A protection for the object's lock
+   */
+  GMutex codelock;
+
+  /**
+   * The return code set by the last function
+   */
+  GstdReturnCode code;
 };
 
 #define GSTD_OBJECT_NAME(obj) (GSTD_OBJECT(obj)->name)
+#define GSTD_OBJECT_CODE(obj) (GSTD_OBJECT(obj)->code)
+
+void
+gstd_object_set_code (GstdObject *self, GstdReturnCode code);
+
+GstdReturnCode
+gstd_object_get_code (GstdObject *self);
+
 
 struct _GstdObjectClass
 {
@@ -78,8 +96,8 @@ G_DEFINE_AUTOPTR_CLEANUP_FUNC(GstdObject, g_object_unref)
 GstdReturnCode
 gstd_object_create (GstdObject *object, const gchar *property, ...);
 
-GstdReturnCode
-gstd_object_read (GstdObject *object, const gchar *property, ...);
+//GstdReturnCode
+//gstd_object_read (GstdObject *object, const gchar *property, ...);
 
 GstdReturnCode
 gstd_object_update (GstdObject *object, const gchar *property, ...);

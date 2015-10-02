@@ -81,6 +81,10 @@ gstd_object_init (GstdObject *self)
   GST_DEBUG_OBJECT(self, "Initializing gstd object");
 
   self->name = g_strdup(GSTD_OBJECT_DEFAULT_NAME);
+  self->code = GSTD_EOK;
+  
+  g_mutex_init (&self->codelock);
+  
 }
 
 static void
@@ -99,8 +103,11 @@ gstd_object_get_property (GObject        *object,
   default:
     /* We don't have any other property... */
     G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
-    break;
+    gstd_object_set_code (GSTD_OBJECT(self), GSTD_NO_RESOURCE);
+    return;
   }
+
+  gstd_object_set_code (GSTD_OBJECT(self), GSTD_EOK);
 }
 
 static void
@@ -122,8 +129,11 @@ gstd_object_set_property (GObject      *object,
   default:
     /* We don't have any other property... */
     G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
-    break;
+    gstd_object_set_code (GSTD_OBJECT(self), GSTD_NO_RESOURCE);
+    return;
   }
+
+  gstd_object_set_code (GSTD_OBJECT(self), GSTD_EOK);
 }
 
 static void
@@ -158,7 +168,7 @@ gstd_object_create (GstdObject *object, const gchar *property, ...)
   va_list ap;
   GParamSpec *spec;
   GList *list, *found;
-  GstdObject *nnew;
+  GstdObject *newo;
   GType *resourcetype;
   const gchar *first;
 
@@ -174,30 +184,33 @@ gstd_object_create (GstdObject *object, const gchar *property, ...)
   if (!GSTD_PARAM_IS_CREATE(spec->flags))
     goto nocreate;
 
+  /* The only resources we can create into are pointers */
   /* Assert since this is a programming error */
   g_return_val_if_fail(G_IS_PARAM_SPEC_POINTER(spec),
 		       GSTD_NO_CREATE);
 
-  /* Hack to get the type of the resource in the list */
+  /* Hack to get the type of the resource in the list, FIXME! */
   resourcetype = g_param_spec_get_qdata (spec,
       g_quark_from_static_string("ResourceType"));
   
-  /* All validated to create the new resource */
+  /* Everything setup, create the new resource */
   va_start(ap, property);
   first = va_arg(ap, gchar*);
 
-  nnew = GSTD_OBJECT(g_object_new_valist (*resourcetype, first, ap));
+  newo = GSTD_OBJECT(g_object_new_valist (*resourcetype, first, ap));
   va_end(ap);
 
   list = NULL;
   g_object_get (object, property, &list, NULL);
-  found = g_list_find_custom (list, GSTD_OBJECT_NAME(nnew),
+
+  /* Test if the resource to create already exists */
+  found = g_list_find_custom (list, GSTD_OBJECT_NAME(newo),
 			      gstd_object_find_resource);
   if (found)
     goto exists;
 
   /* Append it to the list of resources */
-  list = g_list_append (list, nnew);
+  list = g_list_append (list, newo);
   g_object_set (object, property, list, NULL);
   
   return GSTD_EOK;
@@ -215,14 +228,17 @@ gstd_object_create (GstdObject *object, const gchar *property, ...)
  exists:
   {
     GST_ERROR_OBJECT(object, "The resource \"%s\" already exists in \"%s\"",
-		     GSTD_OBJECT_NAME(nnew), property);
-    g_object_unref(nnew);
+		     GSTD_OBJECT_NAME(newo), property);
+    g_object_unref(newo);
     return GSTD_EXISTING_RESOURCE;
   }
 }
 
 GstdReturnCode
-gstd_object_read (GstdObject *object, const gchar *property, ...);
+gstd_object_read (GstdObject *object, const gchar *property, gchar **out, ...)
+{
+  return GSTD_EOK;
+}
 
 GstdReturnCode
 gstd_object_update (GstdObject *object, const gchar *property, ...)
@@ -240,7 +256,7 @@ gstd_object_update (GstdObject *object, const gchar *property, ...)
   if (!spec)
     goto noproperty;
 
-  /* Can we create resources on it */
+  /* Can we update its resources? */
   if (!GSTD_PARAM_IS_UPDATE(spec->flags))
     goto noupdate;
 
@@ -275,3 +291,25 @@ gstd_object_update (GstdObject *object, const gchar *property, ...)
 GstdReturnCode
 gstd_object_delete (GstdObject *object, const gchar *property, ...);
 
+void
+gstd_object_set_code (GstdObject *self, GstdReturnCode code)
+{
+  GST_LOG_OBJECT (self, "Setting return code to %d", code);
+  
+  g_mutex_lock (&self->codelock);
+  self->code = code;
+  g_mutex_unlock (&self->codelock);
+}
+
+GstdReturnCode
+gstd_object_get_code (GstdObject *self)
+{
+  GstdReturnCode code;
+
+  g_mutex_lock (&self->codelock);
+  code = self->code;
+  g_mutex_unlock (&self->codelock);
+  
+  GST_LOG_OBJECT (self, "Returning code %d", code);
+  return code;
+}
