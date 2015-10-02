@@ -19,6 +19,7 @@
  */
 #include <stdarg.h>
 #include "gstd_object.h"
+#include "gstd_list.h"
 
 enum {
   PROP_NAME = 1,
@@ -40,8 +41,6 @@ static void
 gstd_object_get_property (GObject *, guint, GValue *, GParamSpec *);
 static void
 gstd_object_dispose (GObject *);
-static gint
-gstd_object_find_resource (gconstpointer, gconstpointer);
 
 static void
 gstd_object_class_init (GstdObjectClass *klass)
@@ -151,26 +150,16 @@ gstd_object_dispose (GObject *object)
   G_OBJECT_CLASS(gstd_object_parent_class)->dispose(object);
 }
 
-static gint
-gstd_object_find_resource (gconstpointer _obj, gconstpointer _name)
-{
-  GstdObject *obj = GSTD_OBJECT(_obj);
-  gchar *name = (gchar*)_name;
-
-  GST_LOG("Comparing %s vs %s", GSTD_OBJECT_NAME(obj),name);
-  
-  return strcmp(GSTD_OBJECT_NAME(obj), name);
-}
-
 GstdReturnCode
 gstd_object_create (GstdObject *object, const gchar *property, ...)
 {
   va_list ap;
   GParamSpec *spec;
-  GList *list, *found;
-  GstdObject *newo;
-  GType *resourcetype;
+  GstdList *glist;
+  GType etype;
+  GObject *newelement;
   const gchar *first;
+  GstdReturnCode code;
 
   g_return_val_if_fail (G_IS_OBJECT (object), GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (property, GSTD_NULL_ARGUMENT);
@@ -186,32 +175,24 @@ gstd_object_create (GstdObject *object, const gchar *property, ...)
 
   /* The only resources we can create into are pointers */
   /* Assert since this is a programming error */
-  g_return_val_if_fail(G_IS_PARAM_SPEC_POINTER(spec),
+  g_return_val_if_fail(G_IS_PARAM_SPEC_OBJECT(spec),
 		       GSTD_NO_CREATE);
 
-  /* Hack to get the type of the resource in the list, FIXME! */
-  resourcetype = g_param_spec_get_qdata (spec,
-      g_quark_from_static_string("ResourceType"));
+  g_object_get (object, property, &glist, NULL);
+  g_object_get (glist, "element-type", &etype, NULL);
   
   /* Everything setup, create the new resource */
   va_start(ap, property);
   first = va_arg(ap, gchar*);
 
-  newo = GSTD_OBJECT(g_object_new_valist (*resourcetype, first, ap));
+  newelement = g_object_new_valist (etype, first, ap);
   va_end(ap);
 
-  list = NULL;
-  g_object_get (object, property, &list, NULL);
-
-  /* Test if the resource to create already exists */
-  found = g_list_find_custom (list, GSTD_OBJECT_NAME(newo),
-			      gstd_object_find_resource);
-  if (found)
+  code = gstd_list_append (glist, GSTD_OBJECT(newelement));
+  g_object_unref (glist);
+  
+  if (GSTD_EOK != code)
     goto exists;
-
-  /* Append it to the list of resources */
-  list = g_list_append (list, newo);
-  g_object_set (object, property, list, NULL);
   
   return GSTD_EOK;
 
@@ -228,8 +209,8 @@ gstd_object_create (GstdObject *object, const gchar *property, ...)
  exists:
   {
     GST_ERROR_OBJECT(object, "The resource \"%s\" already exists in \"%s\"",
-		     GSTD_OBJECT_NAME(newo), property);
-    g_object_unref(newo);
+		     GSTD_OBJECT_NAME(newelement), property);
+    g_object_unref(newelement);
     return GSTD_EXISTING_RESOURCE;
   }
 }
@@ -240,56 +221,91 @@ gstd_object_read (GstdObject *object, const gchar *property, gchar **out, ...)
   return GSTD_EOK;
 }
 
-GstdReturnCode
-gstd_object_update (GstdObject *object, const gchar *property, ...)
-{
-  va_list ap;
-  GParamSpec *spec;
-  GObject *propobject;
-  const gchar *first;
+
+/* GstdReturnCode */
+/* gstd_object_delete (GstdObject *object, const gchar *property, */
+/* 		    const gchar *what) */
+/* { */
+/*   GParamSpec *spec; */
+/*   GList *list, *found; */
+/*   GstdObject *newo; */
+/*   GType *resourcetype; */
+/*   const gchar *first; */
+/*   GstdReturnCode code; */
+
+/*   g_return_val_if_fail (G_IS_OBJECT (object), GSTD_NULL_ARGUMENT); */
+/*   g_return_val_if_fail (property, GSTD_NULL_ARGUMENT); */
+/*   g_return_val_if_fail (what, GSTD_NULL_ARGUMENT); */
+
+/*   /\* Does the property exist? *\/ */
+/*   spec = g_object_class_find_property (G_OBJECT_GET_CLASS(object), property); */
+/*   if (!spec) */
+/*     goto noproperty; */
+
+/*   /\* Can we create resources on it *\/ */
+/*   if (!GSTD_PARAM_IS_DELETE(spec->flags)) */
+/*     goto nocreate; */
+
+/*   /\* The only resources we can create into are pointers *\/ */
+/*   /\* Assert since this is a programming error *\/ */
+/*   g_return_val_if_fail(G_IS_PARAM_SPEC_POINTER(spec), */
+/* 		       GSTD_NO_CREATE); */
+
+/*   /\* Hack to get the type of the resource in the list, FIXME! *\/ */
+/*   resourcetype = g_param_spec_get_qdata (spec, */
+/*       g_quark_from_static_string("ResourceType")); */
   
-  g_return_val_if_fail (G_IS_OBJECT (object), GSTD_NULL_ARGUMENT);
-  g_return_val_if_fail (property, GSTD_NULL_ARGUMENT);
+/*   /\* Everything setup, create the new resource *\/ */
+/*   va_start(ap, property); */
+/*   first = va_arg(ap, gchar*); */
 
-  /* Does the property exist? */
-  spec = g_object_class_find_property (G_OBJECT_GET_CLASS(object), property);
-  if (!spec)
-    goto noproperty;
+/*   newo = GSTD_OBJECT(g_object_new_valist (*resourcetype, first, ap)); */
+/*   va_end(ap); */
 
-  /* Can we update its resources? */
-  if (!GSTD_PARAM_IS_UPDATE(spec->flags))
-    goto noupdate;
+/*   /\* Check if the resource was created properly *\/ */
+/*   code = gstd_object_get_code (GSTD_OBJECT(self)); */
+/*   if (code) */
+/*     goto failed; */
 
-  /* Assert since this is a programming error */
-  g_return_val_if_fail(G_IS_PARAM_SPEC_OBJECT(spec),
-		       GSTD_NO_UPDATE);
+/*   list = NULL; */
+/*   g_object_get (object, property, &list, NULL); */
 
-  g_object_get(object, property, &propobject, NULL);
+/*   /\* Test if the resource to create already exists *\/ */
+/*   found = g_list_find_custom (list, GSTD_OBJECT_NAME(newo), */
+/* 			      gstd_object_find_resource); */
+/*   if (found) */
+/*     goto exists; */
 
-  va_start(ap, property);
-  first = va_arg(ap, gchar*);
+/*   /\* Append it to the list of resources *\/ */
+/*   list = g_list_append (list, newo); */
+/*   g_object_set (object, property, list, NULL); */
   
-  g_object_set_valist (propobject, first, ap);
-  va_end(ap);
-		       
-  g_object_unref(propobject);
-    
-  return GSTD_EOK;
-  
- noproperty:
-  {
-    GST_ERROR_OBJECT(object, "The property \"%s\" doesn't exist", property);
-    return GSTD_NO_RESOURCE;
-  }
- noupdate:
-  {
-    GST_ERROR_OBJECT(object, "Cannot update resources in \"%s\"", property);
-    return GSTD_NO_CREATE;
-  }
-}
+/*   return GSTD_EOK; */
 
-GstdReturnCode
-gstd_object_delete (GstdObject *object, const gchar *property, ...);
+/*  noproperty: */
+/*   { */
+/*     GST_ERROR_OBJECT(object, "The property \"%s\" doesn't exist", property); */
+/*     return GSTD_NO_RESOURCE; */
+/*   } */
+/*  nocreate: */
+/*   { */
+/*     GST_ERROR_OBJECT(object, "Cannot create resources in \"%s\"", property); */
+/*     return GSTD_NO_CREATE; */
+/*   } */
+/*  exists: */
+/*   { */
+/*     GST_ERROR_OBJECT(object, "The resource \"%s\" already exists in \"%s\"", */
+/* 		     GSTD_OBJECT_NAME(newo), property); */
+/*     g_object_unref(newo); */
+/*     return GSTD_EXISTING_RESOURCE; */
+/*   } */
+/*  failed: */
+/*   { */
+/*     GST_ERROR_OBJECT(object, "Unable to create \"%s\"", GSTD_OBJECT_NAME(newo)); */
+/*     g_object_unref(newo); */
+/*     return code; */
+/*   } */
+/* } */
 
 void
 gstd_object_set_code (GstdObject *self, GstdReturnCode code)

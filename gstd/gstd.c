@@ -18,8 +18,10 @@
  * along with Gstd.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "gstd.h"
+#include "gstd_list.h"
 #include <string.h>
 #include <stdio.h>
+
 
 /* Gstd Core debugging category */
 GST_DEBUG_CATEGORY_STATIC(gstd_core_debug);
@@ -60,27 +62,21 @@ gstd_core_class_init (GstdCoreClass *klass)
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
   GParamSpec *properties[N_PROPERTIES] = { NULL, };
   guint debug_color;
-  GType *type;
 
   object_class->set_property = gstd_core_set_property;
   object_class->get_property = gstd_core_get_property;
   object_class->dispose = gstd_core_dispose;
 
   properties[PROP_PIPELINES] =
-    g_param_spec_pointer ("pipelines",
-			  "Pipelines",
-			  "The pipelines created by the user",
-			  G_PARAM_READWRITE |
-			  G_PARAM_STATIC_STRINGS |
-			  GSTD_PARAM_CREATE |
-			  GSTD_PARAM_READ |
-			  GSTD_PARAM_DELETE);
-
-  type = g_new0(GType, 1);
-  *type = GSTD_TYPE_PIPELINE;
-  
-  g_param_spec_set_qdata(properties[PROP_PIPELINES],
-  g_quark_from_static_string("ResourceType"), type);
+    g_param_spec_object ("pipelines",
+			 "Pipelines",
+			 "The pipelines created by the user",
+			 GSTD_TYPE_LIST,
+			 G_PARAM_READWRITE |
+			 G_PARAM_STATIC_STRINGS |
+			 GSTD_PARAM_CREATE |
+			 GSTD_PARAM_READ |
+			 GSTD_PARAM_DELETE);
 
   g_object_class_install_properties (object_class,
                                      N_PROPERTIES,
@@ -109,18 +105,20 @@ gstd_core_get_property (GObject        *object,
 {
   GstdCore *self = GSTD_CORE(object);
 
+  gstd_object_set_code (GSTD_OBJECT(self), GSTD_EOK);
+  
   switch (property_id) {
   case PROP_PIPELINES:
     GST_DEBUG_OBJECT(self, "Returning pipeline list %p", self->pipelines);
     g_value_set_pointer (value, self->pipelines);
     break;
+    
   default:
     /* We don't have any other property... */
     G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
+    gstd_object_set_code (GSTD_OBJECT(self), GSTD_NO_RESOURCE);
     break;
   }
-
-  gstd_object_set_code (GSTD_OBJECT(self), GSTD_EOK);
 }
 
 static void
@@ -130,6 +128,8 @@ gstd_core_set_property (GObject      *object,
 		   GParamSpec   *pspec)
 {
   GstdCore *self = GSTD_CORE(object);
+
+  gstd_object_set_code (GSTD_OBJECT(self), GSTD_EOK);
   
   switch (property_id) {
   case PROP_PIPELINES:
@@ -140,10 +140,9 @@ gstd_core_set_property (GObject      *object,
   default:
     /* We don't have any other property... */
     G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
+    gstd_object_set_code (GSTD_OBJECT(self), GSTD_NO_RESOURCE);
     break;
   }
-
-  gstd_object_set_code (GSTD_OBJECT(self), GSTD_EOK);
 }
 
 static void

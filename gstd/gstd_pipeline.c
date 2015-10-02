@@ -19,16 +19,15 @@
  */
 #include "gstd_pipeline.h"
 #include "gstd_element.h"
+#include "gstd_list.h"
 #include <string.h>
 
 enum {
-  PROP_INDEX = 1,
-  PROP_DESCRIPTION,
+  PROP_DESCRIPTION = 1,
   PROP_ELEMENTS,
   N_PROPERTIES // NOT A PROPERTY
 };
 
-#define GSTD_PIPELINE_DEFAULT_INDEX -1
 #define GSTD_PIPELINE_DEFAULT_DESCRIPTION NULL
 #define GSTD_PIPELINE_DEFAULT_ELEMENTS NULL
 
@@ -45,11 +44,6 @@ GST_DEBUG_CATEGORY_STATIC(gstd_pipeline_debug);
 struct _GstdPipeline
 {
   GstdObject parent;
-  
-  /**
-   * The unique, numerical id for the current pipeline
-   */
-  gint index;
 
   /**
    * The GstLaunch syntax used to create the pipeline
@@ -76,8 +70,6 @@ static void
 gstd_pipeline_set_property (GObject *, guint, const GValue *, GParamSpec *);
 static void
 gstd_pipeline_dispose (GObject *);
-static GObject *
-gstd_pipeline_constructor (GType , guint, GObjectConstructParam *);
 static GstdReturnCode
 gstd_pipeline_create (GstdPipeline *, const gchar *, const gint, const gchar *);
 static GstdReturnCode
@@ -92,20 +84,7 @@ gstd_pipeline_class_init (GstdPipelineClass *klass)
 
   object_class->set_property = gstd_pipeline_set_property;
   object_class->get_property = gstd_pipeline_get_property;
-  object_class->constructor = gstd_pipeline_constructor;
   object_class->dispose = gstd_pipeline_dispose;
-  
-  properties[PROP_INDEX] =
-    g_param_spec_int ("index",
-		      "Index",
-		      "The numerical index of the pipeline",
-		      G_MININT,
-		      G_MAXINT,
-		      GSTD_PIPELINE_DEFAULT_INDEX,
-		      G_PARAM_CONSTRUCT_ONLY |
-		      G_PARAM_READWRITE |
-		      G_PARAM_STATIC_STRINGS |
-		      GSTD_PARAM_READ);
 
   properties[PROP_DESCRIPTION] =
     g_param_spec_string ("description",
@@ -118,12 +97,13 @@ gstd_pipeline_class_init (GstdPipelineClass *klass)
 			 GSTD_PARAM_READ);
 
   properties[PROP_ELEMENTS] =
-    g_param_spec_pointer ("elements",
-			  "Elements",
-			  "The elements in the pipeline",
-			  G_PARAM_READABLE |
-			  G_PARAM_STATIC_STRINGS |
-			  GSTD_PARAM_READ);
+    g_param_spec_object ("elements",
+			 "Elements",
+			 "The elements in the pipeline",
+			 GSTD_TYPE_LIST,
+			 G_PARAM_READABLE |
+			 G_PARAM_STATIC_STRINGS |
+			 GSTD_PARAM_READ);
 
   g_object_class_install_properties (object_class,
                                      N_PROPERTIES,
@@ -139,7 +119,6 @@ static void
 gstd_pipeline_init (GstdPipeline *self)
 {
   GST_INFO_OBJECT(self, "Initializing pipeline");
-  self->index = GSTD_PIPELINE_DEFAULT_INDEX;
   self->description = g_strdup(GSTD_PIPELINE_DEFAULT_DESCRIPTION);
   self->pipeline = NULL;
   self->elements = GSTD_PIPELINE_DEFAULT_ELEMENTS;
@@ -170,34 +149,6 @@ gstd_pipeline_dispose (GObject *object)
   G_OBJECT_CLASS(gstd_pipeline_parent_class)->dispose(object);
 }
 
-static GObject *
-gstd_pipeline_constructor (GType type, guint count,
-			   GObjectConstructParam *properties)
-{
-  GstdPipeline *self;
-  gint index;
-  const gchar *description;
-  GstdReturnCode code;
-
-  self = GSTD_PIPELINE(G_OBJECT_CLASS(gstd_pipeline_parent_class)->
-		       constructor(type, count, properties));
-
-  /* After chaining parent constructor the CONSTRUCT_ONLY properties
-     have been already set */
-  index = self->index;
-  description = self->description;
-  
-  GST_DEBUG_OBJECT(self, "Called pipeline constructor with index: "
-		   "\"%d\" and description : \"%s\"", self->index,
-		   self->description);
-
-  code = gstd_pipeline_create (self, GSTD_OBJECT_NAME(self),
-			       self->index, self->description);
-  gstd_object_set_code (GSTD_OBJECT(self), code);
-  
-  return G_OBJECT(self);
-}
-
 static void
 gstd_pipeline_get_property (GObject        *object,
 			    guint           property_id,
@@ -206,17 +157,16 @@ gstd_pipeline_get_property (GObject        *object,
 {
   GstdPipeline *self = GSTD_PIPELINE(object);
 
+  gstd_object_set_code (GSTD_OBJECT(self), GSTD_EOK);
+  
   switch (property_id) {
-  case PROP_INDEX:
-    GST_DEBUG_OBJECT(self, "Returning index of %d", self->index);
-    g_value_set_int (value, self->index);
-    break;
   case PROP_DESCRIPTION:
     GST_DEBUG_OBJECT(self, "Returning description of \"%s\"",
 		     self->description);
     g_value_set_string (value, self->description);
     break;
   case PROP_ELEMENTS:
+    gstd_pipeline_create (self, "hola",0, "fakesrc ! fakesink");
     GST_DEBUG_OBJECT(self, "Returning element list %p", self->elements);
     g_value_set_pointer (value, self->elements);
     break;
@@ -224,10 +174,8 @@ gstd_pipeline_get_property (GObject        *object,
     /* We don't have any other property... */
     G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
     gstd_object_set_code (GSTD_OBJECT(self), GSTD_NO_RESOURCE);
-    return;
+    break;
   }
-
-  gstd_object_set_code (GSTD_OBJECT(self), GSTD_EOK);
 }
 
 static void
@@ -237,12 +185,10 @@ gstd_pipeline_set_property (GObject      *object,
 			    GParamSpec   *pspec)
 {
   GstdPipeline *self = GSTD_PIPELINE (object);
+
+  gstd_object_set_code (GSTD_OBJECT(self), GSTD_EOK);
   
   switch (property_id) {
-  case PROP_INDEX:
-    self->index = g_value_get_int(value);
-    GST_INFO_OBJECT(self, "Changed index to \"%d\"", self->index);
-    break;
   case PROP_DESCRIPTION:
     if (self->description)
       g_free (self->description);
@@ -253,10 +199,8 @@ gstd_pipeline_set_property (GObject      *object,
     /* We don't have any other property... */
     G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
     gstd_object_set_code (GSTD_OBJECT(self), GSTD_NO_RESOURCE);
-    return;
+    break;
   }
-
-  gstd_object_set_code (GSTD_OBJECT(self), GSTD_EOK);
 }
 
 /**

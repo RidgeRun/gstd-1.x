@@ -119,6 +119,8 @@ gstd_element_get_property (GObject        *object,
 {
   GstdElement *self = GSTD_ELEMENT(object);
 
+  gstd_object_set_code (GSTD_OBJECT(self), GSTD_EOK);
+  
   switch (property_id) {
   case PROP_PROPERTIES:
     GST_DEBUG_OBJECT(self, "Returning properties %p (%s)", self->element,
@@ -131,8 +133,6 @@ gstd_element_get_property (GObject        *object,
     gstd_object_set_code (GSTD_OBJECT(self), GSTD_NO_RESOURCE);
     return;
   }
-
-  gstd_object_set_code (GSTD_OBJECT(self), GSTD_EOK);
 }
 
 static void
@@ -142,6 +142,8 @@ gstd_element_set_property (GObject      *object,
 			    GParamSpec   *pspec)
 {
   GstdElement *self = GSTD_ELEMENT (object);
+
+  gstd_object_set_code (GSTD_OBJECT(self), GSTD_EOK);
   
   switch (property_id) {
   case PROP_PROPERTIES:
@@ -153,8 +155,6 @@ gstd_element_set_property (GObject      *object,
     /* We don't have any other property... */
     G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
     gstd_object_set_code (GSTD_OBJECT(self), GSTD_NO_RESOURCE);
-    return
+    break;
   }
-
-  gstd_object_set_code (GSTD_OBJECT(self), GSTD_EOK);
 }
