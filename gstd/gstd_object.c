@@ -44,6 +44,8 @@ gstd_object_dispose (GObject *);
 GstdReturnCode
 gstd_object_create_default (GstdObject *, const gchar *, va_list);
 GstdReturnCode
+gstd_object_read_default (GstdObject *, const gchar *, va_list);
+GstdReturnCode
 gstd_object_delete_default (GstdObject *, const gchar *);
 
 static void
@@ -73,6 +75,7 @@ gstd_object_class_init (GstdObjectClass *klass)
                                      properties);
 
   klass->create = gstd_object_create_default;
+  klass->read = gstd_object_read_default;
   klass->delete = gstd_object_delete_default;
   
   /* Initialize debug category with nice colors */
@@ -193,7 +196,7 @@ gstd_object_create_default (GstdObject *object, const gchar *property,
 
   newelement = g_object_new_valist (etype, first, va);
 
-  code = gstd_list_append (glist, GSTD_OBJECT(newelement));
+  code = GSTD_EOK;
   g_object_unref (glist);
   
   if (GSTD_EOK != code)
@@ -221,7 +224,7 @@ gstd_object_create_default (GstdObject *object, const gchar *property,
 }
 
 GstdReturnCode
-gstd_object_read (GstdObject *object, const gchar *property, gchar **out, ...)
+gstd_object_read_default (GstdObject *object, const gchar *property, va_list va)
 {
   return GSTD_EOK;
 }
@@ -268,6 +271,22 @@ gstd_object_create (GstdObject *object, const gchar *property, ...)
 
   va_start(va, property);
   ret = GSTD_OBJECT_GET_CLASS(object)->create (object, property, va);
+  va_end(va);
+
+  return ret;
+}
+
+GstdReturnCode
+gstd_object_read (GstdObject *object, const gchar *property, ...)
+{
+  va_list va;
+  GstdReturnCode ret;
+  
+  g_return_val_if_fail (GSTD_IS_OBJECT(object), GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (property, GSTD_NULL_ARGUMENT);
+
+  va_start(va, property);
+  ret = GSTD_OBJECT_GET_CLASS(object)->read (object, property, va);
   va_end(va);
 
   return ret;

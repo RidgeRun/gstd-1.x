@@ -85,7 +85,7 @@ struct _GstdObjectClass
   GstdReturnCode (*create)    (GstdObject *object, const gchar *property,
 			       va_list va);
   GstdReturnCode (*read)      (GstdObject *object, const gchar *property,
-			       gpointer value);
+			       va_list va);
   GstdReturnCode (*update)    (GstdObject *object, const gchar *property,
 			       va_list va);
   GstdReturnCode (*delete)    (GstdObject *object, const gchar *property);
@@ -111,8 +111,8 @@ G_DEFINE_AUTOPTR_CLEANUP_FUNC(GstdObject, g_object_unref)
 GstdReturnCode
 gstd_object_create (GstdObject *object, const gchar *property, ...);
 
-//GstdReturnCode
-//gstd_object_read (GstdObject *object, const gchar *property, ...);
+GstdReturnCode
+gstd_object_read (GstdObject *object, const gchar *property, ...);
 
 //GstdReturnCode
 //gstd_object_update (GstdObject *object, const gchar *property,

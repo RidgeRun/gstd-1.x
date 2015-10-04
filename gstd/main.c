@@ -49,6 +49,7 @@ gint
 main (gint argc, gchar *argv[])
 {
   GstdObject *gstd;
+  GstdObject *read;
   
   /* Initialize GStreamer subsystem before calling anything else */
   gst_init(&argc, &argv);
@@ -63,10 +64,13 @@ main (gint argc, gchar *argv[])
 
   gstd = g_object_new (GSTD_TYPE_LIST, "name", "GstdCore0", "node-type", GSTD_TYPE_OBJECT, "flags", GSTD_PARAM_READ | GSTD_PARAM_CREATE | GSTD_PARAM_DELETE, NULL);
   gstd_object_create (GSTD_OBJECT(gstd), "name", "hola", NULL);
-  gstd_object_create (GSTD_OBJECT(gstd), "name", "adios", NULL);
-  gstd_object_create (GSTD_OBJECT(gstd), "name", "adios", NULL);
-  gstd_object_delete (GSTD_OBJECT(gstd), "hola");
-  gstd_object_delete (GSTD_OBJECT(gstd), "hola");
+  read = NULL;
+  //  gstd_object_create (GSTD_OBJECT(gstd), "name", "adios", NULL);
+  //  gstd_object_create (GSTD_OBJECT(gstd), "name", "adios", NULL);
+  gstd_object_read (GSTD_OBJECT(gstd), "hola", &read, NULL);
+  //  gstd_object_delete (GSTD_OBJECT(gstd), "hola");
+
+  g_object_unref(read);
   
   //  gstd_uri (gstd, "create pipelines index 0 description fakesink");
     

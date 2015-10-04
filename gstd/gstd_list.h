@@ -32,9 +32,6 @@ G_BEGIN_DECLS
 #define GSTD_TYPE_LIST gstd_list_get_type ()
 G_DECLARE_FINAL_TYPE (GstdList, gstd_list, GSTD, LIST, GstdObject);
 
-GstdReturnCode
-gstd_list_append (GstdList *list, GstdObject *object);
-
 G_END_DECLS
 
 #endif // __GSTD_LIST_H__
