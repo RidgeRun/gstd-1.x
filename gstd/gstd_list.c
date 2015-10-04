@@ -42,6 +42,8 @@ static gint
 gstd_list_find_node (gconstpointer, gconstpointer);
 static
 GstdReturnCode gstd_list_create (GstdObject *, const gchar *, va_list va);
+static
+GstdReturnCode gstd_list_delete (GstdObject *, const gchar *);
 
 /**
  * GstdList:
@@ -117,6 +119,7 @@ gstd_list_class_init (GstdListClass *klass)
                                      properties);
 
   gstd_object_class->create = gstd_list_create;
+  gstd_object_class->delete = gstd_list_delete;
   
   /* Initialize debug category with nice colors */
   debug_color = GST_DEBUG_FG_BLACK | GST_DEBUG_BOLD | GST_DEBUG_BG_WHITE;
@@ -281,6 +284,46 @@ gstd_list_create (GstdObject * object, const gchar *property, va_list va)
     GST_ERROR_OBJECT(object, "The resource \"%s\" already exists in \"%s\"",
 		     GSTD_OBJECT_NAME(newnode), GSTD_OBJECT_NAME(self));
     g_object_unref(newnode);
+    return GSTD_EXISTING_RESOURCE;
+  }
+}
+
+static GstdReturnCode
+gstd_list_delete (GstdObject * object, const gchar *node)
+{
+  GstdList *self = GSTD_LIST(object);
+  GList *found;
+  GstdObject *todelete;
+  
+  g_return_val_if_fail (GSTD_IS_LIST (object), GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (node, GSTD_NULL_ARGUMENT);
+
+  /* Can we create resources on it */
+  if (!GSTD_PARAM_IS_DELETE(self->flags))
+    goto nodelete;
+
+  found = g_list_find_custom (self->list, node, gstd_list_find_node);
+  if (!found)
+    goto unexisting;
+  todelete = GSTD_OBJECT(found->data);
+
+  GST_INFO_OBJECT(self, "Deleting %s from %s list", GSTD_OBJECT_NAME(self),
+		   GSTD_OBJECT_NAME(self));
+  self->list = g_list_delete_link (self->list, found);
+  g_object_unref(todelete);
+  
+  return GSTD_EOK;
+
+ nodelete:
+  {
+    GST_ERROR_OBJECT(object, "Cannot delete resources from \"%s\"",
+		     GSTD_OBJECT_NAME(self));
+    return GSTD_NO_CREATE;
+  }
+ unexisting:
+  {
+    GST_ERROR_OBJECT(object, "The resource \"%s\" doesn't exists in \"%s\"",
+		     node, GSTD_OBJECT_NAME(self));
     return GSTD_EXISTING_RESOURCE;
   }
 }

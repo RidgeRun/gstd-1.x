@@ -65,6 +65,7 @@ main (gint argc, gchar *argv[])
   gstd_object_create (GSTD_OBJECT(gstd), "name", "hola", NULL);
   gstd_object_create (GSTD_OBJECT(gstd), "name", "adios", NULL);
   gstd_object_create (GSTD_OBJECT(gstd), "name", "adios", NULL);
+  gstd_object_delete (GSTD_OBJECT(gstd), "adios");
   
   //  gstd_uri (gstd, "create pipelines index 0 description fakesink");
     

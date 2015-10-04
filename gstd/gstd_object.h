@@ -118,8 +118,7 @@ gstd_object_create (GstdObject *object, const gchar *property, ...);
 //gstd_object_update (GstdObject *object, const gchar *property,
 //		    const gchar *vaule);
 GstdReturnCode
-gstd_object_delete (GstdObject *object, const gchar *property,
-		    const gchar *what);
+gstd_object_delete (GstdObject *object, const gchar *name);
 
 G_END_DECLS
 
