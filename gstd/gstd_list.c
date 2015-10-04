@@ -222,40 +222,12 @@ gstd_list_find_node (gconstpointer _obj, gconstpointer _name)
   return strcmp(GSTD_OBJECT_NAME(obj), name);
 }
 
-GstdReturnCode
-gstd_list_append (GstdList *self, GstdObject *object)
-{
-  GList *found;
-  
-  g_return_val_if_fail (GSTD_IS_LIST(self), GSTD_NULL_ARGUMENT);
-  g_return_val_if_fail (G_TYPE_CHECK_INSTANCE_TYPE (object, self->node_type),
-			GSTD_NULL_ARGUMENT);
-
-  /* Test if the resource to create already exists */
-  found = g_list_find_custom (self->list, GSTD_OBJECT_NAME(object),
-			      gstd_list_find_node);
-  if (found)
-    goto exists;
-  
-  self->list = g_list_append (self->list, object);
-
-  GST_INFO_OBJECT(self, "Appended %s to %s list", GSTD_OBJECT_NAME(object),
-		  GSTD_OBJECT_NAME(self));
-  
-  return GSTD_EOK;
-  
- exists:
-  {
-    return GSTD_EXISTING_RESOURCE;
-  }
-}
-
 static GstdReturnCode
 gstd_list_create (GstdObject * object, const gchar *property, va_list va)
 {
   GstdList *self = GSTD_LIST(object);
   GObject *newnode;
-  GstdReturnCode code;
+  GList *found;
   
   g_return_val_if_fail (GSTD_IS_LIST (object), GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (property, GSTD_NULL_ARGUMENT);
@@ -267,9 +239,15 @@ gstd_list_create (GstdObject * object, const gchar *property, va_list va)
   /* Everything setup, create the new resource */
   newnode = g_object_new_valist (self->node_type, property, va);
 
-  code = gstd_list_append (self, GSTD_OBJECT(newnode));
-  if (GSTD_EOK != code)
+  /* Test if the resource to create already exists */
+  found = g_list_find_custom (self->list, GSTD_OBJECT_NAME(newnode),
+			      gstd_list_find_node);
+  if (found)
     goto exists;
+  
+  self->list = g_list_append (self->list, newnode);
+  GST_INFO_OBJECT(self, "Appended %s to %s list", GSTD_OBJECT_NAME(newnode),
+		  GSTD_OBJECT_NAME(self));
   
   return GSTD_EOK;
 
