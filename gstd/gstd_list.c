@@ -22,12 +22,14 @@
 
 enum {
   PROP_COUNT = 1,
-  PROP_ELEMENT_TYPE,
+  PROP_NODE_TYPE,
+  PROP_FLAGS,
   N_PROPERTIES // NOT A PROPERTY
 };
 
 #define GSTD_LIST_DEFAULT_COUNT 0
-#define GSTD_LIST_DEFAULT_ELEMENT_TYPE G_TYPE_NONE
+#define GSTD_LIST_DEFAULT_NODE_TYPE G_TYPE_NONE
+#define GSTD_LIST_DEFAULT_FLAGS GSTD_PARAM_READ
 
 /* Gstd Core debugging category */
 GST_DEBUG_CATEGORY_STATIC(gstd_list_debug);
@@ -37,7 +39,9 @@ GST_DEBUG_CATEGORY_STATIC(gstd_list_debug);
 
 /* VTable */
 static gint
-gstd_list_find_element (gconstpointer, gconstpointer);
+gstd_list_find_node (gconstpointer, gconstpointer);
+static
+GstdReturnCode gstd_list_create (GstdObject *, const gchar *, va_list va);
 
 /**
  * GstdList:
@@ -49,7 +53,9 @@ struct _GstdList
   
   guint count;
 
-  GType element_type;
+  GType node_type;
+
+  GParamFlags flags;
   
   GList *list;
 };
@@ -68,6 +74,7 @@ static void
 gstd_list_class_init (GstdListClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
+  GstdObjectClass *gstd_object_class = GSTD_OBJECT_CLASS (klass);
   GParamSpec *properties[N_PROPERTIES] = { NULL, };
   guint debug_color;
 
@@ -78,18 +85,29 @@ gstd_list_class_init (GstdListClass *klass)
   properties[PROP_COUNT] =
     g_param_spec_uint ("count",
 		       "Count",
-		       "The amount of elements in the list",
+		       "The amount of nodes in the list",
 		       0,
 		       G_MAXINT,
 		       GSTD_LIST_DEFAULT_COUNT,
 		       G_PARAM_READABLE |
 		       GSTD_PARAM_READ);
 
-    properties[PROP_ELEMENT_TYPE] =
-    g_param_spec_gtype ("element-type",
-		       "Element type",
-		       "The type of the element that the list holds",
-		       GSTD_LIST_DEFAULT_ELEMENT_TYPE,
+    properties[PROP_NODE_TYPE] =
+    g_param_spec_gtype ("node-type",
+		       "Node type",
+		       "The type of the node that the list holds",
+		       GSTD_LIST_DEFAULT_NODE_TYPE,
+		       G_PARAM_CONSTRUCT_ONLY |
+		       G_PARAM_READWRITE |
+		       GSTD_PARAM_READ);
+
+    properties[PROP_FLAGS] =
+    g_param_spec_uint ("flags",
+		       "Flags",
+		       "The resource access flags",
+		       0,
+		       G_MAXUINT,
+		       GSTD_LIST_DEFAULT_FLAGS,
 		       G_PARAM_CONSTRUCT_ONLY |
 		       G_PARAM_READWRITE |
 		       GSTD_PARAM_READ);
@@ -98,6 +116,8 @@ gstd_list_class_init (GstdListClass *klass)
                                      N_PROPERTIES,
                                      properties);
 
+  gstd_object_class->create = gstd_list_create;
+  
   /* Initialize debug category with nice colors */
   debug_color = GST_DEBUG_FG_BLACK | GST_DEBUG_BOLD | GST_DEBUG_BG_WHITE;
   GST_DEBUG_CATEGORY_INIT (gstd_list_debug, "gstdlist", debug_color,
@@ -110,7 +130,7 @@ gstd_list_init (GstdList *self)
   GST_INFO_OBJECT(self, "Initializing list");
   self->list = NULL;
   self->count = GSTD_LIST_DEFAULT_COUNT;
-  self->element_type = GSTD_LIST_DEFAULT_ELEMENT_TYPE;
+  self->node_type = GSTD_LIST_DEFAULT_NODE_TYPE;
 }
 
 static void
@@ -143,10 +163,14 @@ gstd_list_get_property (GObject        *object,
     GST_DEBUG_OBJECT(self, "Returning count of %u", self->count);
     g_value_set_uint (value, self->count);
     break;
-  case PROP_ELEMENT_TYPE:
+  case PROP_NODE_TYPE:
     GST_DEBUG_OBJECT(self, "Returning type %s",
-		     g_type_name(self->element_type));
-    g_value_set_gtype (value, self->element_type);
+		     g_type_name(self->node_type));
+    g_value_set_gtype (value, self->node_type);
+    break;
+  case PROP_FLAGS:
+    GST_DEBUG_OBJECT(self, "Returning flags %u", self->flags);
+    g_value_set_uint (value, self->flags);
     break;
   default:
     /* We don't have any other property... */
@@ -167,10 +191,14 @@ gstd_list_set_property (GObject      *object,
   gstd_object_set_code (GSTD_OBJECT(self), GSTD_EOK);
   
   switch (property_id) {
-  case PROP_ELEMENT_TYPE:
-    GST_DEBUG_OBJECT(self, "Setting element type to %s",
-		     g_type_name(self->element_type));
-    self->element_type = g_value_get_gtype (value);
+  case PROP_NODE_TYPE:
+    GST_DEBUG_OBJECT(self, "Setting node type to %s",
+		     g_type_name(self->node_type));
+    self->node_type = g_value_get_gtype (value);
+    break;
+  case PROP_FLAGS:
+    GST_DEBUG_OBJECT(self, "Setting node type to %u", self->flags);
+    self->flags = g_value_get_uint (value);
     break;
   default:
     /* We don't have any other property... */
@@ -181,7 +209,7 @@ gstd_list_set_property (GObject      *object,
 }
 
 static gint
-gstd_list_find_element (gconstpointer _obj, gconstpointer _name)
+gstd_list_find_node (gconstpointer _obj, gconstpointer _name)
 {
   GstdObject *obj = GSTD_OBJECT(_obj);
   gchar *name = (gchar*)_name;
@@ -197,22 +225,62 @@ gstd_list_append (GstdList *self, GstdObject *object)
   GList *found;
   
   g_return_val_if_fail (GSTD_IS_LIST(self), GSTD_NULL_ARGUMENT);
-  g_return_val_if_fail (GSTD_IS_OBJECT(self), GSTD_NULL_ARGUMENT);
-  g_return_val_if_fail (G_OBJECT_TYPE(object) == self->element_type,
+  g_return_val_if_fail (G_TYPE_CHECK_INSTANCE_TYPE (object, self->node_type),
 			GSTD_NULL_ARGUMENT);
 
   /* Test if the resource to create already exists */
   found = g_list_find_custom (self->list, GSTD_OBJECT_NAME(object),
-			      gstd_list_find_element);
+			      gstd_list_find_node);
   if (found)
     goto exists;
   
   self->list = g_list_append (self->list, object);
 
+  GST_INFO_OBJECT(self, "Appended %s to %s list", GSTD_OBJECT_NAME(object),
+		  GSTD_OBJECT_NAME(self));
+  
   return GSTD_EOK;
   
  exists:
   {
+    return GSTD_EXISTING_RESOURCE;
+  }
+}
+
+static GstdReturnCode
+gstd_list_create (GstdObject * object, const gchar *property, va_list va)
+{
+  GstdList *self = GSTD_LIST(object);
+  GObject *newnode;
+  GstdReturnCode code;
+  
+  g_return_val_if_fail (GSTD_IS_LIST (object), GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (property, GSTD_NULL_ARGUMENT);
+
+  /* Can we create resources on it */
+  if (!GSTD_PARAM_IS_CREATE(self->flags))
+    goto nocreate;
+  
+  /* Everything setup, create the new resource */
+  newnode = g_object_new_valist (self->node_type, property, va);
+
+  code = gstd_list_append (self, GSTD_OBJECT(newnode));
+  if (GSTD_EOK != code)
+    goto exists;
+  
+  return GSTD_EOK;
+
+ nocreate:
+  {
+    GST_ERROR_OBJECT(object, "Cannot create resources in \"%s\"",
+		     GSTD_OBJECT_NAME(self));
+    return GSTD_NO_CREATE;
+  }
+ exists:
+  {
+    GST_ERROR_OBJECT(object, "The resource \"%s\" already exists in \"%s\"",
+		     GSTD_OBJECT_NAME(newnode), GSTD_OBJECT_NAME(self));
+    g_object_unref(newnode);
     return GSTD_EXISTING_RESOURCE;
   }
 }

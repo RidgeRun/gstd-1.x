@@ -26,6 +26,8 @@
 
 #include <gst/gst.h>
 #include <string.h>
+#include <stdarg.h>
+
 #include "gstd_return_codes.h"
 
 G_BEGIN_DECLS
@@ -40,6 +42,8 @@ G_BEGIN_DECLS
   (G_TYPE_CHECK_INSTANCE_TYPE((obj),GSTD_TYPE_OBJECT))
 #define GSTD_IS_OBJECT_CLASS(klass) \
   (G_TYPE_CHECK_CLASS_TYPE((klass),GSTD_TYPE_OBJECT))
+#define GSTD_OBJECT_GET_CLASS(obj) \
+  (G_TYPE_INSTANCE_GET_CLASS ((obj), GSTD_TYPE_OBJECT, GstdObjectClass))
 
 typedef struct _GstdObject GstdObject;
 typedef struct _GstdObjectClass GstdObjectClass;
@@ -77,6 +81,17 @@ gstd_object_get_code (GstdObject *self);
 struct _GstdObjectClass
 {
   GObjectClass parent_class;
+
+  GstdReturnCode (*create)    (GstdObject *object, const gchar *property,
+			       va_list va);
+  GstdReturnCode (*read)      (GstdObject *object, const gchar *property,
+			       gpointer value);
+  GstdReturnCode (*update)    (GstdObject *object, const gchar *property,
+			       va_list va);
+  GstdReturnCode (*delete)    (GstdObject *object, const gchar *property);
+  GstdReturnCode (*get_child) (GstdObject *object, const gchar *name,
+			       GstdObject **child);
+  
 };
 
 GType gstd_object_get_type(void);

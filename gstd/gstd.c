@@ -95,7 +95,7 @@ gstd_core_init (GstdCore *self)
   GST_INFO_OBJECT(self, "Initializing gstd core");
 
   self->pipelines = GSTD_LIST(g_object_new(GSTD_TYPE_LIST,
-					   "element-type", GSTD_TYPE_PIPELINE, NULL));
+					   "node-type", GSTD_TYPE_PIPELINE, NULL));
 }
 
 static void

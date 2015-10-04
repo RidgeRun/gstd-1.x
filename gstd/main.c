@@ -28,6 +28,7 @@
 #include "gstd.h"
 #include "gstd_pipeline.h"
 #include "gstd_element.h"
+#include "gstd_list.h"
 
 /* GLib main loop, we need it global to access it through the SIGINT
    handler */
@@ -47,7 +48,7 @@ int_handler(gint sig)
 gint
 main (gint argc, gchar *argv[])
 {
-  GstdCore *gstd;
+  GstdObject *gstd;
   
   /* Initialize GStreamer subsystem before calling anything else */
   gst_init(&argc, &argv);
@@ -60,11 +61,12 @@ main (gint argc, gchar *argv[])
   GST_INFO ("Starting application...");
   main_loop = g_main_loop_new (NULL, FALSE);
 
-  gstd = g_object_new (GSTD_TYPE_CORE, "name", "GstdCore0", NULL);
-  gstd_object_create (GSTD_OBJECT(gstd), "pipelines", "name", "mypipe", "description", "fakesrc ! fakesink", NULL);
+  gstd = g_object_new (GSTD_TYPE_LIST, "name", "GstdCore0", "node-type", GSTD_TYPE_OBJECT, "flags", GSTD_PARAM_READ | GSTD_PARAM_CREATE | GSTD_PARAM_DELETE, NULL);
+  gstd_object_create (GSTD_OBJECT(gstd), "name", "hola", NULL);
+  gstd_object_create (GSTD_OBJECT(gstd), "name", "adios", NULL);
+  gstd_object_create (GSTD_OBJECT(gstd), "name", "adios", NULL);
   
-
-  gstd_uri (gstd, "create pipelines index 0 description fakesink");
+  //  gstd_uri (gstd, "create pipelines index 0 description fakesink");
     
   g_main_loop_run (main_loop);
 

@@ -41,6 +41,8 @@ static void
 gstd_object_get_property (GObject *, guint, GValue *, GParamSpec *);
 static void
 gstd_object_dispose (GObject *);
+GstdReturnCode
+gstd_object_create_default (GstdObject *, const gchar *, va_list);
 
 static void
 gstd_object_class_init (GstdObjectClass *klass)
@@ -67,6 +69,8 @@ gstd_object_class_init (GstdObjectClass *klass)
   g_object_class_install_properties (object_class,
                                      N_PROPERTIES,
                                      properties);
+
+  klass->create = gstd_object_create_default;
   
   /* Initialize debug category with nice colors */
   debug_color = GST_DEBUG_FG_BLACK | GST_DEBUG_BOLD | GST_DEBUG_BG_WHITE;
@@ -140,7 +144,7 @@ gstd_object_dispose (GObject *object)
 {
   GstdObject *self = GSTD_OBJECT(object);
   
-  GST_DEBUG_OBJECT(object, "Deinitializing gstd object");
+  GST_DEBUG_OBJECT(object, "Deinitializing %s object", GSTD_OBJECT_NAME(self));
 
   if (self->name) {
     g_free (self->name);
@@ -151,9 +155,9 @@ gstd_object_dispose (GObject *object)
 }
 
 GstdReturnCode
-gstd_object_create (GstdObject *object, const gchar *property, ...)
+gstd_object_create_default (GstdObject *object, const gchar *property,
+			    va_list va)
 {
-  va_list ap;
   GParamSpec *spec;
   GstdList *glist;
   GType etype;
@@ -182,11 +186,9 @@ gstd_object_create (GstdObject *object, const gchar *property, ...)
   g_object_get (glist, "element-type", &etype, NULL);
   
   /* Everything setup, create the new resource */
-  va_start(ap, property);
-  first = va_arg(ap, gchar*);
+  first = va_arg(va, gchar*);
 
-  newelement = g_object_new_valist (etype, first, ap);
-  va_end(ap);
+  newelement = g_object_new_valist (etype, first, va);
 
   code = gstd_list_append (glist, GSTD_OBJECT(newelement));
   g_object_unref (glist);
@@ -328,4 +330,21 @@ gstd_object_get_code (GstdObject *self)
   
   GST_LOG_OBJECT (self, "Returning code %d", code);
   return code;
+}
+
+
+GstdReturnCode
+gstd_object_create (GstdObject *object, const gchar *property, ...)
+{
+  GstdReturnCode ret;
+  va_list va;
+  
+  g_return_val_if_fail (GSTD_IS_OBJECT(object), GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (property, GSTD_NULL_ARGUMENT);
+
+  va_start(va, property);
+  ret = GSTD_OBJECT_GET_CLASS(object)->create (object, property, va);
+  va_end(va);
+
+  return ret;
 }
