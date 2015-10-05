@@ -73,7 +73,7 @@ main (gint argc, gchar *argv[])
   g_print ("Block size=%d\n", bs);
 
   gstd_element_set (core, "pipe0", "fakesink0", "blocksize", (gpointer)1234);
-  gstd_get_by_uri (core, "/pipelines/pipe0/elements/fakesink0", &fakesrc);
+  gstd_get_by_uri (core, "/pipelines/pipe0/elements/fakesink0//", &fakesrc);
   gstd_object_read (fakesrc, "blocksize", &bs, NULL);
   g_print ("Block size=%d\n", bs);
     

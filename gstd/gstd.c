@@ -205,10 +205,8 @@ GstdReturnCode
 gstd_element_generic (GstdCore *gstd, const gchar *pipe, const gchar *name,
 		      const gchar *property, gpointer value, eaccess func)
 {
-  GstdObject *pipelines;
-  GstdObject *pipeline;
-  GstdObject *elements;
   GstdObject *element;
+  gchar *uri;
   GstdReturnCode ret;
 
   g_return_val_if_fail (GSTD_IS_CORE(gstd), GSTD_NULL_ARGUMENT);
@@ -217,33 +215,22 @@ gstd_element_generic (GstdCore *gstd, const gchar *pipe, const gchar *name,
   g_return_val_if_fail (property, GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (value, GSTD_NULL_ARGUMENT);
 
-  gstd_object_read (GSTD_OBJECT(gstd), "pipelines", &pipelines, NULL);
-  ret = gstd_object_read (pipelines, pipe, &pipeline, NULL);
-  if (GSTD_EOK != ret)
-    goto nopipeline;
-  gstd_object_read (pipeline, "elements", &elements, NULL);
-  ret = gstd_object_read (elements, name, &element, NULL);
-  if (GSTD_EOK != ret)
-    goto noelement;
+  element = NULL;
+  uri =  g_strdup_printf ("/pipelines/%s/elements/%s/", pipe, name);
+  ret = gstd_get_by_uri (gstd, uri, &element);
+  g_free (uri);
+  if (ret)
+    goto baduri;
+
   ret = func (element, property, value, NULL);
-  
   g_object_unref(element);
-  g_object_unref(elements);
-  g_object_unref(pipeline);
-  g_object_unref(pipelines);
 
   return ret;
 
- nopipeline:
+ baduri:
   {
-    g_object_unref (pipelines);
-    return ret;
-  }
- noelement:
-  {
-    g_object_unref (pipelines);
-    g_object_unref (pipeline);
-    g_object_unref (elements);
+    if (element)
+      g_object_unref (element);
     return ret;
   }
 }
@@ -285,8 +272,10 @@ gstd_get_by_uri (GstdCore *gstd, const gchar *uri, GstdObject **node)
   
   while (*it) {
     // Empty slash, try no normalize
-    if ('\0' == *it[0])
+    if ('\0' == *it[0]) {
       ++it;
+      continue;
+    }
     
     ret = gstd_object_read (parent, *it, &child, NULL);
     g_object_unref (parent);
