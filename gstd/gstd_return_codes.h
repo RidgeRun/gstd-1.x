@@ -83,6 +83,8 @@ enum _GstdReturnCode {
   GSTD_BAD_COMMAND = 10,
 
   GSTD_NO_READ = 11,
+
+  GSTD_NO_CONNECTION = 12
 };
 
 

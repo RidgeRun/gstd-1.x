@@ -19,9 +19,9 @@
  */
 #include "gstd.h"
 #include "gstd_list.h"
+#include "gstd_tcp.h"
 #include <string.h>
 #include <stdio.h>
-
 
 /* Gstd Core debugging category */
 GST_DEBUG_CATEGORY_STATIC(gstd_core_debug);
@@ -31,6 +31,7 @@ GST_DEBUG_CATEGORY_STATIC(gstd_core_debug);
 
 enum {
   PROP_PIPELINES = 1,
+  PROP_PORT,
   N_PROPERTIES // NOT A PROPERTY
 };
 
@@ -44,6 +45,9 @@ struct _GstdCore
    * The list of GstdPipelines created by the user
    */
   GstdList *pipelines;
+
+  guint16 port;
+  GSocketService *service;
 };
 
 G_DEFINE_TYPE (GstdCore, gstd_core, GSTD_TYPE_OBJECT)
@@ -55,6 +59,8 @@ static void
 gstd_core_get_property (GObject *, guint, GValue *, GParamSpec *);
 static void
 gstd_core_dispose (GObject *);
+static void
+gstd_core_constructed (GObject *);
 
 static void
 gstd_core_class_init (GstdCoreClass *klass)
@@ -66,6 +72,7 @@ gstd_core_class_init (GstdCoreClass *klass)
   object_class->set_property = gstd_core_set_property;
   object_class->get_property = gstd_core_get_property;
   object_class->dispose = gstd_core_dispose;
+  object_class->constructed = gstd_core_constructed;
 
   properties[PROP_PIPELINES] =
     g_param_spec_object ("pipelines",
@@ -77,6 +84,18 @@ gstd_core_class_init (GstdCoreClass *klass)
 			 GSTD_PARAM_CREATE |
 			 GSTD_PARAM_READ |
 			 GSTD_PARAM_DELETE);
+
+  properties[PROP_PORT] =
+    g_param_spec_uint ("port",
+		       "Port",
+		       "The port to start listening to",
+		       0,
+		       G_MAXINT,
+		       GSTD_TCP_DEFAULT_PORT,
+		       G_PARAM_READWRITE |
+		       G_PARAM_CONSTRUCT_ONLY |
+		       G_PARAM_STATIC_STRINGS |
+		       GSTD_PARAM_READ);
 
   g_object_class_install_properties (object_class,
                                      N_PROPERTIES,
@@ -95,6 +114,8 @@ gstd_core_init (GstdCore *self)
 
   self->pipelines = GSTD_LIST(g_object_new(GSTD_TYPE_LIST, "name", "pipelines",
 					   "node-type", GSTD_TYPE_PIPELINE, NULL));
+  self->port = GSTD_TCP_DEFAULT_PORT;
+  self->service = NULL;
 }
 
 static void
@@ -111,6 +132,10 @@ gstd_core_get_property (GObject        *object,
   case PROP_PIPELINES:
     GST_DEBUG_OBJECT(self, "Returning pipeline list %p", self->pipelines);
     g_value_set_object (value, self->pipelines);
+    break;
+  case PROP_PORT:
+    GST_DEBUG_OBJECT(self, "Returning post %u", self->port);
+    g_value_set_uint (value, self->port);
     break;
     
   default:
@@ -136,6 +161,10 @@ gstd_core_set_property (GObject      *object,
     self->pipelines = g_value_get_object (value);
     GST_INFO_OBJECT(self, "Changed pipeline list to %p", self->pipelines);
     break;
+  case PROP_PORT:
+    GST_DEBUG_OBJECT(self, "Changing port to %u", self->port);
+    self->port = g_value_get_uint (value);
+    break;
     
   default:
     /* We don't have any other property... */
@@ -156,14 +185,28 @@ gstd_core_dispose (GObject *object)
     g_object_unref (self->pipelines);
     self->pipelines = NULL;
   }
+
+  if (self->service) {
+    g_object_unref (self->service);
+    self->service = NULL;
+  }
   
   G_OBJECT_CLASS(gstd_core_parent_class)->dispose(object);
 }
 
-GstdCore *
-gstd_new (const gchar *name)
+static void
+gstd_core_constructed (GObject *object)
 {
-  return GSTD_CORE(g_object_new (GSTD_TYPE_CORE, "name", name, NULL));
+  GstdCore *self = GSTD_CORE(object);
+  
+  gstd_tcp_start (self, &self->service, self->port);
+}
+
+
+GstdCore *
+gstd_new (const gchar *name, const guint16 port)
+{
+  return GSTD_CORE(g_object_new (GSTD_TYPE_CORE, "name", name, "port", port, NULL));
 }
 
 GstdReturnCode

@@ -35,7 +35,7 @@ G_BEGIN_DECLS
 G_DECLARE_FINAL_TYPE (GstdCore, gstd_core, GSTD, CORE, GstdObject);
 
 GstdCore *
-gstd_new (const gchar *name);
+gstd_new (const gchar *name, const guint16 port);
 
 GstdReturnCode
 gstd_pipeline_create (GstdCore *gstd, const gchar *name, const gchar *description);

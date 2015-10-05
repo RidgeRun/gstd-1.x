@@ -7,6 +7,9 @@ AC_INIT([gstd],[1.0.0])
 dnl required version of gstreamer and gst-plugins-base
 GST_REQUIRED=1.0.0
 
+dnl required version of gio
+GIO_REQUIRED=2.0.0
+
 AC_CONFIG_SRCDIR([gstd/main.c])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIRS([m4])
@@ -50,6 +53,22 @@ PKG_CHECK_MODULES(GST, [
 
     On RPM-based systems you will probably need to install the
     'gstreamer-devel-1.0' package.
+  ])
+])
+
+PKG_CHECK_MODULES(GIO, [
+    gio-2.0              >= $GST_REQUIRED
+  ], [
+    AC_SUBST(GIO_CFLAGS)
+    AC_SUBST(GIO_LIBS)
+  ], [
+  AC_MSG_ERROR([
+    Can't find the following GIO development packages:
+
+      gio-2.0              >= $GIO_REQUIRED
+
+    Please make sure you have the necessary GIO-2.0
+    development headers installed.
   ])
 ])
 

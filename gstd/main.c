@@ -50,7 +50,7 @@ gint
 main (gint argc, gchar *argv[])
 {
   GstdCore *core;
-  
+
   /* Initialize GStreamer subsystem before calling anything else */
   gst_init(&argc, &argv);
 
@@ -62,10 +62,12 @@ main (gint argc, gchar *argv[])
   GST_INFO ("Starting application...");
   main_loop = g_main_loop_new (NULL, FALSE);
 
-  core = gstd_new ("Core0");
+  core = gstd_new ("Core0", 5000);
   gstd_pipeline_create (core, "pipe0", "videotestsrc ! osxvideosink");
 
   gstd_pipeline_play(core, "pipe0");
+  sleep(3);
+  gstd_element_set (core, "pipe0", "videotestsrc0", "pattern", (gpointer)3);
   sleep(3);
   gstd_pipeline_null(core, "pipe0");
     
