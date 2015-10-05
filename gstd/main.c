@@ -48,6 +48,7 @@ int_handler(gint sig)
 gint
 main (gint argc, gchar *argv[])
 {
+  GstdCore *core;
   GstdList *pipelines;
   GstdPipeline *pipe;
   GstdList *elements;
@@ -65,7 +66,8 @@ main (gint argc, gchar *argv[])
   GST_INFO ("Starting application...");
   main_loop = g_main_loop_new (NULL, FALSE);
 
-  pipelines = g_object_new (GSTD_TYPE_LIST, "name", "pipelines", "node-type", GSTD_TYPE_PIPELINE, NULL);
+  core = g_object_new (GSTD_TYPE_CORE, "name", "Core0", NULL);
+  gstd_object_read (GSTD_OBJECT(core), "pipelines", &pipelines, NULL);
   gstd_object_create (GSTD_OBJECT(pipelines), "name", "pipe0", "description", "fakesrc ! fakesink", NULL);
 
   gstd_object_read (GSTD_OBJECT(pipelines), "pipe0", &pipe, NULL);
@@ -88,7 +90,6 @@ main (gint argc, gchar *argv[])
   g_object_unref(pipe);
   g_object_unref(pipelines);
   
-  //  g_object_unref (gstd);
   gst_deinit();
   
   return GSTD_EOK;

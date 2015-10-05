@@ -81,8 +81,7 @@ gstd_core_class_init (GstdCoreClass *klass)
   g_object_class_install_properties (object_class,
                                      N_PROPERTIES,
                                      properties);
-
-
+  
   /* Initialize debug category with nice colors */
   debug_color = GST_DEBUG_FG_BLACK | GST_DEBUG_BOLD | GST_DEBUG_BG_WHITE;
   GST_DEBUG_CATEGORY_INIT (gstd_core_debug, "gstdcore", debug_color,
@@ -94,7 +93,7 @@ gstd_core_init (GstdCore *self)
 {
   GST_INFO_OBJECT(self, "Initializing gstd core");
 
-  self->pipelines = GSTD_LIST(g_object_new(GSTD_TYPE_LIST,
+  self->pipelines = GSTD_LIST(g_object_new(GSTD_TYPE_LIST, "name", "pipelines",
 					   "node-type", GSTD_TYPE_PIPELINE, NULL));
 }
 
