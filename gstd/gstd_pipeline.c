@@ -292,7 +292,6 @@ gstd_pipeline_fill_elements (GstdPipeline *self, GstElement *element)
     goto singleelement;
       
   pipe = GST_PIPELINE(element);
-  count = 0;
 
   it = gst_bin_iterate_elements (GST_BIN(pipe));
   if (!it)
@@ -308,7 +307,6 @@ gstd_pipeline_fill_elements (GstdPipeline *self, GstElement *element)
           "Saving element \"%s\"", GST_OBJECT_NAME(gste));
       gstd_object_create (GSTD_OBJECT(self->elements), "name", GST_OBJECT_NAME(gste),
 			  "properties", gste, NULL);
-      count++;
       g_value_reset (&item);
       break;
     case GST_ITERATOR_RESYNC:
@@ -326,6 +324,8 @@ gstd_pipeline_fill_elements (GstdPipeline *self, GstElement *element)
   g_value_unset (&item);
   gst_iterator_free (it);
 
+  count = 0;
+  //  gstd_object_read(GSTD_OBJECT(self->elements), "count", &count, NULL);
   GST_DEBUG_OBJECT(self, "A total of %u elements where saved",
 		   count);
 

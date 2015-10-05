@@ -160,44 +160,155 @@ gstd_core_dispose (GObject *object)
   G_OBJECT_CLASS(gstd_core_parent_class)->dispose(object);
 }
 
-GstdReturnCode
-gstd_uri (GstdCore *gstd, const gchar *cmd)
+GstdCore *
+gstd_new (const gchar *name)
 {
-  gchar **action;
-  const gchar *daction = " ";
-  gchar **path;
-  const gchar *dpath = "/";
-  GObject *parent;
-  const gchar *uri;
+  return GSTD_CORE(g_object_new (GSTD_TYPE_CORE, "name", name, NULL));
+}
 
+GstdReturnCode
+gstd_pipeline_create (GstdCore *gstd, const gchar *name, const gchar *description)
+{
+  GstdObject *list;
+  GstdReturnCode ret;
+
+  g_return_val_if_fail (GSTD_IS_CORE(gstd), GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (name, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (description, GSTD_NULL_ARGUMENT);
+
+  gstd_object_read (GSTD_OBJECT(gstd), "pipelines", &list, NULL);
+  ret =  gstd_object_create (list, "name", name,
+			     "description", description, NULL);
+  g_object_unref (list);
+  
+  return ret;
+}
+
+GstdReturnCode
+gstd_pipeline_destroy (GstdCore *gstd, const gchar *name)
+{
+  GstdObject *list;
+  GstdReturnCode ret;
+
+  g_return_val_if_fail (GSTD_IS_CORE(gstd), GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (name, GSTD_NULL_ARGUMENT);
+
+  gstd_object_read (GSTD_OBJECT(gstd), "pipelines", &list, NULL);
+  ret = gstd_object_delete (list, name);
+  g_object_unref(list);
+
+  return ret;
+}
+
+typedef GstdReturnCode eaccess (GstdObject *, const gchar *, ...);
+GstdReturnCode
+gstd_element_generic (GstdCore *gstd, const gchar *pipe, const gchar *name,
+		      const gchar *property, gpointer value, eaccess func)
+{
+  GstdObject *pipelines;
+  GstdObject *pipeline;
+  GstdObject *elements;
+  GstdObject *element;
+  GstdReturnCode ret;
+
+  g_return_val_if_fail (GSTD_IS_CORE(gstd), GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (pipe, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (name, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (property, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (value, GSTD_NULL_ARGUMENT);
+
+  gstd_object_read (GSTD_OBJECT(gstd), "pipelines", &pipelines, NULL);
+  ret = gstd_object_read (pipelines, pipe, &pipeline, NULL);
+  if (GSTD_EOK != ret)
+    goto nopipeline;
+  gstd_object_read (pipeline, "elements", &elements, NULL);
+  ret = gstd_object_read (elements, name, &element, NULL);
+  if (GSTD_EOK != ret)
+    goto noelement;
+  ret = func (element, property, value, NULL);
+  
+  g_object_unref(element);
+  g_object_unref(elements);
+  g_object_unref(pipeline);
+  g_object_unref(pipelines);
+
+  return ret;
+
+ nopipeline:
+  {
+    g_object_unref (pipelines);
+    return ret;
+  }
+ noelement:
+  {
+    g_object_unref (pipelines);
+    g_object_unref (pipeline);
+    g_object_unref (elements);
+    return ret;
+  }
+}
+
+GstdReturnCode
+gstd_element_set (GstdCore *gstd, const gchar *pipe, const gchar *name,
+		  const gchar *property, gpointer value)
+{
+  return gstd_element_generic (gstd, pipe, name, property,
+			       value, gstd_object_update);
+}
+
+GstdReturnCode
+gstd_element_get (GstdCore *gstd, const gchar *pipe, const gchar *name,
+		  const gchar *property, gpointer value)
+{
+  return gstd_element_generic (gstd, pipe, name, property,
+			       value, gstd_object_read);
+}
+
+GstdReturnCode
+gstd_get_by_uri (GstdCore *gstd, const gchar *uri, GstdObject **node)
+{
+  GstdObject *parent, *child;
+  gchar **nodes;
+  gchar **it;
+  GstdReturnCode ret;
+  
   g_return_val_if_fail(GSTD_IS_CORE(gstd), GSTD_NULL_ARGUMENT);
-  g_return_val_if_fail(cmd, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail(uri, GSTD_NULL_ARGUMENT);
 
-  action = g_strsplit (cmd, daction, -1);
+  nodes = g_strsplit_set (uri, "/", -1);
 
-  if (!action[0] || !action[1])
+  if (!nodes)
     goto badcommand;
 
-  uri = action[1];
-
-  path = g_strsplit (uri, dpath, -1);
-
+  it = nodes;
+  parent = g_object_ref(GSTD_OBJECT(gstd));
   
-  parent = g_object_ref(gstd);
-  
-  if (!g_ascii_strcasecmp(action[0], "CREATE")) {
-  } else if (!g_ascii_strcasecmp(action[0], "READ")) {
-  } else if (!g_ascii_strcasecmp(action[0], "UPDATE")) {
-  } else if (!g_ascii_strcasecmp(action[0], "DELETE")) {
-  } else {
+  while (*it) {
+    // Empty slash, try no normalize
+    if ('\0' == *it[0])
+      ++it;
+    
+    ret = gstd_object_read (parent, *it, &child, NULL);
+    g_object_unref (parent);
+
+    if (ret)
+      goto nonode;
+
+    parent = child;
+    ++it;
   }
 
-  g_object_unref(parent);
+  *node = parent;
   return GSTD_EOK;
   
  badcommand:
   {
     GST_ERROR_OBJECT(gstd, "Invalid command");
+    return GSTD_BAD_COMMAND;
+  }
+ nonode:
+  {
+    GST_ERROR_OBJECT(gstd, "Invalid node %s", *it);
     return GSTD_BAD_COMMAND;
   }
 }

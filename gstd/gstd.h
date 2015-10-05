@@ -34,8 +34,26 @@ G_BEGIN_DECLS
 #define GSTD_TYPE_CORE gstd_core_get_type ()
 G_DECLARE_FINAL_TYPE (GstdCore, gstd_core, GSTD, CORE, GstdObject);
 
+GstdCore *
+gstd_new (const gchar *name);
+
 GstdReturnCode
-gstd_uri (GstdCore *gstd, const gchar *uri);
+gstd_pipeline_create (GstdCore *gstd, const gchar *name, const gchar *description);
+
+GstdReturnCode
+gstd_pipeline_destroy (GstdCore *gstd, const gchar *name);
+
+GstdReturnCode
+gstd_element_get (GstdCore *gstd, const gchar *pipe, const gchar *name,
+		  const gchar *property, gpointer value);
+GstdReturnCode
+gstd_element_set (GstdCore *gstd, const gchar *pipe, const gchar *name,
+		  const gchar *property, gpointer value);
+
+GstdReturnCode
+gstd_get_by_uri (GstdCore *gstd, const gchar *uri, GstdObject **node);
+
+
 
 G_END_DECLS
 

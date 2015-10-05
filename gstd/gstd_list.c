@@ -250,6 +250,7 @@ gstd_list_create (GstdObject * object, const gchar *property, va_list va)
     goto exists;
 
   self->list = g_list_append (self->list, newnode);
+  self->count = g_list_length (self->list);
   GST_INFO_OBJECT(self, "Appended %s to %s list", GSTD_OBJECT_NAME(newnode),
 		  GSTD_OBJECT_NAME(self));
   
@@ -281,7 +282,6 @@ gstd_list_read (GstdObject * object, const gchar *property, va_list va)
   gchar *error = NULL;
 
   g_return_val_if_fail (GSTD_IS_LIST (object), GSTD_NULL_ARGUMENT);
-  g_return_val_if_fail (property, GSTD_NULL_ARGUMENT);
 
   /* Can we create resources on it */
   if (!GSTD_PARAM_IS_READ(self->flags))

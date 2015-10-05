@@ -49,11 +49,8 @@ gint
 main (gint argc, gchar *argv[])
 {
   GstdCore *core;
-  GstdList *pipelines;
-  GstdPipeline *pipe;
-  GstdList *elements;
-  GstElement *element;
-  guint nb = 0;
+  GstdObject *fakesrc;
+  guint bs = 0;
   
   /* Initialize GStreamer subsystem before calling anything else */
   gst_init(&argc, &argv);
@@ -66,18 +63,19 @@ main (gint argc, gchar *argv[])
   GST_INFO ("Starting application...");
   main_loop = g_main_loop_new (NULL, FALSE);
 
-  core = g_object_new (GSTD_TYPE_CORE, "name", "Core0", NULL);
-  gstd_object_read (GSTD_OBJECT(core), "pipelines", &pipelines, NULL);
-  gstd_object_create (GSTD_OBJECT(pipelines), "name", "pipe0", "description", "fakesrc ! fakesink", NULL);
+  core = gstd_new ("Core0");
+  gstd_pipeline_create (core, "pipe0", "fakesrc ! fakesink");
 
-  gstd_object_read (GSTD_OBJECT(pipelines), "pipe0", &pipe, NULL);
-  gstd_object_read (GSTD_OBJECT(pipe), "elements", &elements, NULL);
-  gstd_object_read(GSTD_OBJECT(elements), "fakesink0", &element, NULL);
-  gstd_object_read(GSTD_OBJECT(element), "num-buffers", &nb, NULL);
+  gstd_element_get (core, "pipe0", "fakesink0", "blocksize", &bs);
+  g_print ("Block size=%d\n", bs);
+  gstd_element_set (core, "pipe0", "fakesink0", "blocksize", (gpointer)1000);
+  gstd_element_get (core, "pipe0", "fakesink0", "blocksize", &bs);
+  g_print ("Block size=%d\n", bs);
 
-  g_print ("NUM BUFFERS = %d\n", nb);
-
-    //  gstd_uri (gstd, "create pipelines index 0 description fakesink");
+  gstd_element_set (core, "pipe0", "fakesink0", "blocksize", (gpointer)1234);
+  gstd_get_by_uri (core, "/pipelines/pipe0/elements/fakesink0", &fakesrc);
+  gstd_object_read (fakesrc, "blocksize", &bs, NULL);
+  g_print ("Block size=%d\n", bs);
     
   g_main_loop_run (main_loop);
 
@@ -85,11 +83,7 @@ main (gint argc, gchar *argv[])
   g_main_loop_unref (main_loop);
   main_loop = NULL;
 
-  g_object_unref(element);
-  g_object_unref(elements);
-  g_object_unref(pipe);
-  g_object_unref(pipelines);
-  
+  g_object_unref (core);
   gst_deinit();
   
   return GSTD_EOK;
