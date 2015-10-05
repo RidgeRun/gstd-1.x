@@ -69,7 +69,7 @@ main (gint argc, gchar *argv[])
   gstd_element_get (core, "pipe0", "fakesink0", "blocksize", &bs);
 
   gstd_pipeline_play(core, "pipe0");
-  sleep(5);
+  sleep(3);
   gstd_pipeline_null(core, "pipe0");
     
   g_main_loop_run (main_loop);
