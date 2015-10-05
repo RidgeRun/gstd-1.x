@@ -88,6 +88,8 @@ gstd_pipeline_get_property (GObject *, guint, GValue *, GParamSpec *);
 static void
 gstd_pipeline_set_property (GObject *, guint, const GValue *, GParamSpec *);
 static void
+gstd_pipeline_constructed (GObject *);
+static void
 gstd_pipeline_dispose (GObject *);
 static GstdReturnCode
 gstd_pipeline_create (GstdPipeline *, const gchar *, gint, const gchar*);
@@ -108,6 +110,7 @@ gstd_pipeline_class_init (GstdPipelineClass *klass)
   object_class->set_property = gstd_pipeline_set_property;
   object_class->get_property = gstd_pipeline_get_property;
   object_class->dispose = gstd_pipeline_dispose;
+  object_class->constructed = gstd_pipeline_constructed;
 
   properties[PROP_DESCRIPTION] =
     g_param_spec_string ("description",
@@ -156,6 +159,14 @@ gstd_pipeline_init (GstdPipeline *self)
   self->pipeline = NULL;
   self->elements = g_object_new (GSTD_TYPE_LIST, "name", "elements",
 				 "node-type", GSTD_TYPE_ELEMENT, NULL);
+
+}
+
+static void
+gstd_pipeline_constructed (GObject *object)
+{
+  GstdPipeline *self = GSTD_PIPELINE(object);
+  gstd_pipeline_create (self, GSTD_OBJECT_NAME(self),0, self->description);
 }
 
 static void
@@ -231,7 +242,6 @@ gstd_pipeline_get_property (GObject        *object,
     g_value_set_string (value, self->description);
     break;
   case PROP_ELEMENTS:
-    gstd_pipeline_create (self, GSTD_OBJECT_NAME(self),0, self->description);
     GST_DEBUG_OBJECT(self, "Returning element list %p", self->elements);
     g_value_set_object (value, self->elements);
     break;
