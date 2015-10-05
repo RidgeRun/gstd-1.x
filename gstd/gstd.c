@@ -187,7 +187,7 @@ gstd_core_dispose (GObject *object)
   }
 
   if (self->service) {
-    g_object_unref (self->service);
+    gstd_tcp_stop (self, &self->service);
     self->service = NULL;
   }
   
