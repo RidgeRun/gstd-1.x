@@ -200,6 +200,46 @@ gstd_pipeline_destroy (GstdCore *gstd, const gchar *name)
   return ret;
 }
 
+GstdReturnCode
+gstd_pipeline_state (GstdCore *gstd, const gchar *pipe, const GstdPipelineState state)
+{
+  GstdObject *pipeline;
+  gchar *uri;
+  GstdReturnCode ret;
+
+  g_return_val_if_fail (GSTD_IS_CORE(gstd), GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (pipe, GSTD_NULL_ARGUMENT);
+
+  uri = g_strdup_printf ("/pipelines/%s/", pipe);
+  ret = gstd_get_by_uri (gstd, uri, &pipeline);
+  if (ret)
+    goto noelement;
+  
+  ret = gstd_object_update (pipeline, "state", state, NULL);
+  
+  g_object_unref(pipeline);
+  g_free (uri);
+
+  return ret;
+  
+ noelement:
+  {
+    return ret;
+  }
+}
+
+GstdReturnCode
+gstd_pipeline_play (GstdCore *gstd, const gchar *pipe)
+{
+  return gstd_pipeline_state (gstd, pipe, GSTD_PIPELINE_PLAYING);
+}
+
+GstdReturnCode
+gstd_pipeline_null (GstdCore *gstd, const gchar *pipe)
+{
+  return gstd_pipeline_state (gstd, pipe, GSTD_PIPELINE_NULL);
+}
+
 typedef GstdReturnCode eaccess (GstdObject *, const gchar *, ...);
 GstdReturnCode
 gstd_element_generic (GstdCore *gstd, const gchar *pipe, const gchar *name,

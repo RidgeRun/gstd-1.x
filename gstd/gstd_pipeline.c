@@ -25,16 +25,36 @@
 enum {
   PROP_DESCRIPTION = 1,
   PROP_ELEMENTS,
+  PROP_STATE,
   N_PROPERTIES // NOT A PROPERTY
 };
 
 #define GSTD_PIPELINE_DEFAULT_DESCRIPTION NULL
+#define GSTD_PIPELINE_DEFAULT_STATE GSTD_PIPELINE_NULL
 
 /* Gstd Core debugging category */
 GST_DEBUG_CATEGORY_STATIC(gstd_pipeline_debug);
 #define GST_CAT_DEFAULT gstd_pipeline_debug
 
 #define GSTD_DEBUG_DEFAULT_LEVEL GST_LEVEL_INFO
+
+#define GSTD_TYPE_PIPELINE_STATE (gstd_pipeline_state_get_type ())
+static GType
+gstd_pipeline_state_get_type (void)
+{
+  static GType pipeline_state_type = 0;
+  static const GEnumValue state_types[] = {
+    {GSTD_PIPELINE_NULL, "NULL", "null"},
+    {GSTD_PIPELINE_PAUSED, "PAUSED", "paused"},
+    {GSTD_PIPELINE_PLAYING, "PLAY", "play"},
+    {0, NULL, NULL}
+  };
+  if (!pipeline_state_type) {
+    pipeline_state_type =
+        g_enum_register_static ("GstdPipelineState", state_types);
+  }
+  return pipeline_state_type;
+}
 
 /**
  * GstdPipeline:
@@ -73,6 +93,10 @@ static GstdReturnCode
 gstd_pipeline_create (GstdPipeline *, const gchar *, gint, const gchar*);
 static GstdReturnCode
 gstd_pipeline_fill_elements (GstdPipeline *, GstElement *);
+static GstState
+gstd_to_gst (GstdPipelineState);
+static GstdPipelineState
+gst_to_gstd (GstState);
 
 static void
 gstd_pipeline_class_init (GstdPipelineClass *klass)
@@ -103,6 +127,16 @@ gstd_pipeline_class_init (GstdPipelineClass *klass)
 			 G_PARAM_READABLE |
 			 G_PARAM_STATIC_STRINGS |
 			 GSTD_PARAM_READ);
+
+  properties[PROP_STATE] =
+    g_param_spec_enum ("state", "State",
+		       "The state of the pipeline",
+		       GSTD_TYPE_PIPELINE_STATE,
+		       GSTD_PIPELINE_DEFAULT_STATE,
+		       G_PARAM_READWRITE |
+		       G_PARAM_STATIC_STRINGS |
+		       GSTD_PARAM_READ |
+		       GSTD_PARAM_UPDATE);
 
   g_object_class_install_properties (object_class,
                                      N_PROPERTIES,
@@ -149,6 +183,34 @@ gstd_pipeline_dispose (GObject *object)
   G_OBJECT_CLASS(gstd_pipeline_parent_class)->dispose(object);
 }
 
+static GstdPipelineState
+gst_to_gstd (GstState gst)
+{
+  switch (gst) {
+  case GST_STATE_PAUSED:
+    return GSTD_PIPELINE_PAUSED;
+  case GST_STATE_PLAYING:
+    return GSTD_PIPELINE_PLAYING;
+  case GST_STATE_NULL:
+  case GST_STATE_READY:
+  default:
+    return GSTD_PIPELINE_NULL;
+  }
+}
+
+static GstState
+gstd_to_gst (GstdPipelineState gstd)
+{
+  switch (gstd) {
+  case GSTD_PIPELINE_PAUSED:
+    return GST_STATE_PAUSED;
+  case GSTD_PIPELINE_PLAYING:
+    return GST_STATE_PLAYING;
+  case GSTD_PIPELINE_NULL:
+    return GST_STATE_NULL;
+  }
+}
+
 static void
 gstd_pipeline_get_property (GObject        *object,
 			    guint           property_id,
@@ -156,6 +218,9 @@ gstd_pipeline_get_property (GObject        *object,
 			    GParamSpec     *pspec)
 {
   GstdPipeline *self = GSTD_PIPELINE(object);
+  GstdPipelineState state;
+  GEnumValue *evalue;
+  GEnumClass *eclass;
 
   gstd_object_set_code (GSTD_OBJECT(self), GSTD_EOK);
   
@@ -169,6 +234,15 @@ gstd_pipeline_get_property (GObject        *object,
     gstd_pipeline_create (self, GSTD_OBJECT_NAME(self),0, self->description);
     GST_DEBUG_OBJECT(self, "Returning element list %p", self->elements);
     g_value_set_object (value, self->elements);
+    break;
+  case PROP_STATE:
+    state = gst_to_gstd(GST_STATE(self->pipeline));
+    eclass = g_type_class_ref (GSTD_TYPE_PIPELINE_STATE);
+    evalue = g_enum_get_value (eclass, state);
+    g_value_set_enum (value, state);
+    GST_DEBUG_OBJECT(self, "Returning pipeline state %d (%s)", state,
+		     evalue->value_name);
+    g_type_class_unref (eclass);
     break;
   default:
     /* We don't have any other property... */
@@ -185,6 +259,9 @@ gstd_pipeline_set_property (GObject      *object,
 			    GParamSpec   *pspec)
 {
   GstdPipeline *self = GSTD_PIPELINE (object);
+  GstdPipelineState state;
+  GEnumValue *evalue;
+  GEnumClass *eclass;
 
   gstd_object_set_code (GSTD_OBJECT(self), GSTD_EOK);
   
@@ -194,6 +271,17 @@ gstd_pipeline_set_property (GObject      *object,
       g_free (self->description);
     self->description = g_value_dup_string (value);
     GST_INFO_OBJECT(self, "Changed description to \"%s\"", self->description);
+    break;
+  case PROP_STATE:
+    state = g_value_get_enum (value);
+    eclass = g_type_class_ref (GSTD_TYPE_PIPELINE_STATE);
+    evalue = g_enum_get_value (eclass, state);
+
+    gst_element_set_state (self->pipeline, gstd_to_gst(state));
+
+    GST_INFO_OBJECT(self, "Changed state to %d (%s)", state,
+		    evalue->value_name);
+    g_type_class_unref (eclass);
     break;
   default:
     /* We don't have any other property... */

@@ -33,7 +33,13 @@ G_BEGIN_DECLS
  */
 #define GSTD_TYPE_PIPELINE gstd_pipeline_get_type ()
 G_DECLARE_FINAL_TYPE (GstdPipeline, gstd_pipeline, GSTD, PIPELINE, GstdObject);
-     
+
+typedef enum {
+  GSTD_PIPELINE_NULL,
+  GSTD_PIPELINE_PAUSED,
+  GSTD_PIPELINE_PLAYING,
+} GstdPipelineState;
+
 G_END_DECLS
 
 #endif // __GSTD_PIPELINE_H__

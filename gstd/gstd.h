@@ -51,6 +51,12 @@ gstd_element_set (GstdCore *gstd, const gchar *pipe, const gchar *name,
 		  const gchar *property, gpointer value);
 
 GstdReturnCode
+gstd_pipeline_play (GstdCore *gstd, const gchar *pipe);
+
+GstdReturnCode
+gstd_pipeline_null (GstdCore *gstd, const gchar *pipe);
+
+GstdReturnCode
 gstd_get_by_uri (GstdCore *gstd, const gchar *uri, GstdObject **node);
 
 

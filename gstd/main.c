@@ -24,6 +24,7 @@
 
 #include <gst/gst.h>
 #include <signal.h>
+#include <unistd.h>
 
 #include "gstd.h"
 #include "gstd_pipeline.h"
@@ -49,7 +50,6 @@ gint
 main (gint argc, gchar *argv[])
 {
   GstdCore *core;
-  GstdObject *fakesrc;
   guint bs = 0;
   
   /* Initialize GStreamer subsystem before calling anything else */
@@ -64,18 +64,13 @@ main (gint argc, gchar *argv[])
   main_loop = g_main_loop_new (NULL, FALSE);
 
   core = gstd_new ("Core0");
-  gstd_pipeline_create (core, "pipe0", "fakesrc ! fakesink");
+  gstd_pipeline_create (core, "pipe0", "videotestsrc ! osxvideosink");
 
   gstd_element_get (core, "pipe0", "fakesink0", "blocksize", &bs);
-  g_print ("Block size=%d\n", bs);
-  gstd_element_set (core, "pipe0", "fakesink0", "blocksize", (gpointer)1000);
-  gstd_element_get (core, "pipe0", "fakesink0", "blocksize", &bs);
-  g_print ("Block size=%d\n", bs);
 
-  gstd_element_set (core, "pipe0", "fakesink0", "blocksize", (gpointer)1234);
-  gstd_get_by_uri (core, "/pipelines/pipe0/elements/fakesink0//", &fakesrc);
-  gstd_object_read (fakesrc, "blocksize", &bs, NULL);
-  g_print ("Block size=%d\n", bs);
+  gstd_pipeline_play(core, "pipe0");
+  sleep(5);
+  gstd_pipeline_null(core, "pipe0");
     
   g_main_loop_run (main_loop);
 
