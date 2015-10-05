@@ -29,7 +29,6 @@ enum {
 };
 
 #define GSTD_PIPELINE_DEFAULT_DESCRIPTION NULL
-#define GSTD_PIPELINE_DEFAULT_ELEMENTS NULL
 
 /* Gstd Core debugging category */
 GST_DEBUG_CATEGORY_STATIC(gstd_pipeline_debug);
@@ -58,7 +57,7 @@ struct _GstdPipeline
   /**
    * The list of GstdElement held by the pipeline
    */
-  GList *elements;
+  GstdList *elements;
 };
 
 G_DEFINE_TYPE (GstdPipeline, gstd_pipeline, GSTD_TYPE_OBJECT)
@@ -71,7 +70,7 @@ gstd_pipeline_set_property (GObject *, guint, const GValue *, GParamSpec *);
 static void
 gstd_pipeline_dispose (GObject *);
 static GstdReturnCode
-gstd_pipeline_create (GstdPipeline *, const gchar *, const gint, const gchar *);
+gstd_pipeline_create (GstdPipeline *, const gchar *, gint, const gchar*);
 static GstdReturnCode
 gstd_pipeline_fill_elements (GstdPipeline *, GstElement *);
 
@@ -121,7 +120,8 @@ gstd_pipeline_init (GstdPipeline *self)
   GST_INFO_OBJECT(self, "Initializing pipeline");
   self->description = g_strdup(GSTD_PIPELINE_DEFAULT_DESCRIPTION);
   self->pipeline = NULL;
-  self->elements = GSTD_PIPELINE_DEFAULT_ELEMENTS;
+  self->elements = g_object_new (GSTD_TYPE_LIST, "name", "elements",
+				 "node-type", GSTD_TYPE_ELEMENT, NULL);
 }
 
 static void
@@ -142,7 +142,7 @@ gstd_pipeline_dispose (GObject *object)
   }
 
   if (self->elements) {
-    g_list_free_full(self->elements, g_object_unref);
+    g_object_unref(self->elements);
     self->elements = NULL;
   }
 
@@ -166,9 +166,9 @@ gstd_pipeline_get_property (GObject        *object,
     g_value_set_string (value, self->description);
     break;
   case PROP_ELEMENTS:
-    gstd_pipeline_create (self, "hola",0, "fakesrc ! fakesink");
+    gstd_pipeline_create (self, GSTD_OBJECT_NAME(self),0, self->description);
     GST_DEBUG_OBJECT(self, "Returning element list %p", self->elements);
-    g_value_set_pointer (value, self->elements);
+    g_value_set_object (value, self->elements);
     break;
   default:
     /* We don't have any other property... */
@@ -235,7 +235,7 @@ gstd_pipeline_create (GstdPipeline *self, const gchar *name,
   self->pipeline = gst_parse_launch(description, &error);
   if (!self->pipeline)
     goto wrong_pipeline;
-
+  
   /* Still check if error is set because a recoverable
    * error might have occured */
   if (error) {
@@ -253,7 +253,6 @@ gstd_pipeline_create (GstdPipeline *self, const gchar *name,
 
   /* Set the updated name */
   gst_object_set_name (GST_OBJECT(self->pipeline), pipename);
-  g_object_set (self, "name", pipename, NULL);
   g_free (pipename);
 
   GST_INFO_OBJECT (self, "Created pipeline \"%s\": \"%s\"",
@@ -278,12 +277,11 @@ static GstdReturnCode
 gstd_pipeline_fill_elements (GstdPipeline *self, GstElement *element)
 {
   GstPipeline *pipe;
-  GList *elementlist;
   GstIterator *it;
   GValue item = G_VALUE_INIT;
   GstElement *gste;
-  GstdElement *gstde;
   gboolean done;
+  guint count;
 
   g_return_val_if_fail (GSTD_IS_PIPELINE(self), GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (GST_IS_ELEMENT(element), GSTD_NULL_ARGUMENT);
@@ -294,7 +292,7 @@ gstd_pipeline_fill_elements (GstdPipeline *self, GstElement *element)
     goto singleelement;
       
   pipe = GST_PIPELINE(element);
-  elementlist = self->elements;
+  count = 0;
 
   it = gst_bin_iterate_elements (GST_BIN(pipe));
   if (!it)
@@ -308,10 +306,9 @@ gstd_pipeline_fill_elements (GstdPipeline *self, GstElement *element)
       gste = g_value_get_object (&item);
       GST_LOG_OBJECT(self,
           "Saving element \"%s\"", GST_OBJECT_NAME(gste));
-      gstde = GSTD_ELEMENT(g_object_new(GSTD_TYPE_ELEMENT,
-					"name", GST_OBJECT_NAME(gste),
-					"properties", gste, NULL));
-      elementlist = g_list_append (elementlist, gstde);
+      gstd_object_create (GSTD_OBJECT(self->elements), "name", GST_OBJECT_NAME(gste),
+			  "properties", gste, NULL);
+      count++;
       g_value_reset (&item);
       break;
     case GST_ITERATOR_RESYNC:
@@ -330,13 +327,8 @@ gstd_pipeline_fill_elements (GstdPipeline *self, GstElement *element)
   gst_iterator_free (it);
 
   GST_DEBUG_OBJECT(self, "A total of %u elements where saved",
-		   g_list_length(elementlist));
+		   count);
 
-  if (self->elements)
-    g_list_free_full(self->elements, g_object_unref);
-
-  self->elements = elementlist;
-  
   return GSTD_EOK;
   
  singleelement:

@@ -89,9 +89,6 @@ struct _GstdObjectClass
   GstdReturnCode (*update)    (GstdObject *object, const gchar *property,
 			       va_list va);
   GstdReturnCode (*delete)    (GstdObject *object, const gchar *property);
-  GstdReturnCode (*get_child) (GstdObject *object, const gchar *name,
-			       GstdObject **child);
-  
 };
 
 GType gstd_object_get_type(void);
@@ -114,9 +111,8 @@ gstd_object_create (GstdObject *object, const gchar *property, ...);
 GstdReturnCode
 gstd_object_read (GstdObject *object, const gchar *property, ...);
 
-//GstdReturnCode
-//gstd_object_update (GstdObject *object, const gchar *property,
-//		    const gchar *vaule);
+GstdReturnCode
+gstd_object_update (GstdObject *object, const gchar *property, ...);
 GstdReturnCode
 gstd_object_delete (GstdObject *object, const gchar *name);
 

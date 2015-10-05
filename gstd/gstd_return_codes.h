@@ -81,6 +81,8 @@ enum _GstdReturnCode {
   GSTD_NO_UPDATE = 9,
 
   GSTD_BAD_COMMAND = 10,
+
+  GSTD_NO_READ = 11,
 };
 
 

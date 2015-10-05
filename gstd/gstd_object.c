@@ -18,6 +18,7 @@
  * along with Gstd.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <stdarg.h>
+#include <gobject/gvaluecollector.h>
 #include "gstd_object.h"
 #include "gstd_list.h"
 
@@ -41,11 +42,13 @@ static void
 gstd_object_get_property (GObject *, guint, GValue *, GParamSpec *);
 static void
 gstd_object_dispose (GObject *);
-GstdReturnCode
+static GstdReturnCode
 gstd_object_create_default (GstdObject *, const gchar *, va_list);
-GstdReturnCode
+static GstdReturnCode
 gstd_object_read_default (GstdObject *, const gchar *, va_list);
-GstdReturnCode
+static GstdReturnCode
+gstd_object_update_default (GstdObject *, const gchar *, va_list);
+static GstdReturnCode
 gstd_object_delete_default (GstdObject *, const gchar *);
 
 static void
@@ -76,6 +79,7 @@ gstd_object_class_init (GstdObjectClass *klass)
 
   klass->create = gstd_object_create_default;
   klass->read = gstd_object_read_default;
+  klass->update = gstd_object_update_default;
   klass->delete = gstd_object_delete_default;
   
   /* Initialize debug category with nice colors */
@@ -93,7 +97,6 @@ gstd_object_init (GstdObject *self)
   self->code = GSTD_EOK;
   
   g_mutex_init (&self->codelock);
-  
 }
 
 static void
@@ -160,77 +163,122 @@ gstd_object_dispose (GObject *object)
   G_OBJECT_CLASS(gstd_object_parent_class)->dispose(object);
 }
 
-GstdReturnCode
+static GstdReturnCode
 gstd_object_create_default (GstdObject *object, const gchar *property,
 			    va_list va)
 {
-  GParamSpec *spec;
-  GstdList *glist;
-  GType etype;
-  GObject *newelement;
-  const gchar *first;
-  GstdReturnCode code;
-
-  g_return_val_if_fail (G_IS_OBJECT (object), GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (GSTD_IS_OBJECT(object), GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (property, GSTD_NULL_ARGUMENT);
 
-  /* Does the property exist? */
-  spec = g_object_class_find_property (G_OBJECT_GET_CLASS(object), property);
-  if (!spec)
-    goto noproperty;
-
-  /* Can we create resources on it */
-  if (!GSTD_PARAM_IS_CREATE(spec->flags))
-    goto nocreate;
-
-  /* The only resources we can create into are pointers */
-  /* Assert since this is a programming error */
-  g_return_val_if_fail(G_IS_PARAM_SPEC_OBJECT(spec),
-		       GSTD_NO_CREATE);
-
-  g_object_get (object, property, &glist, NULL);
-  g_object_get (glist, "element-type", &etype, NULL);
-  
-  /* Everything setup, create the new resource */
-  first = va_arg(va, gchar*);
-
-  newelement = g_object_new_valist (etype, first, va);
-
-  code = GSTD_EOK;
-  g_object_unref (glist);
-  
-  if (GSTD_EOK != code)
-    goto exists;
-  
-  return GSTD_EOK;
-
- noproperty:
-  {
-    GST_ERROR_OBJECT(object, "The property \"%s\" doesn't exist", property);
-    return GSTD_NO_RESOURCE;
-  }
- nocreate:
-  {
-    GST_ERROR_OBJECT(object, "Cannot create resources in \"%s\"", property);
-    return GSTD_NO_CREATE;
-  }
- exists:
-  {
-    GST_ERROR_OBJECT(object, "The resource \"%s\" already exists in \"%s\"",
-		     GSTD_OBJECT_NAME(newelement), property);
-    g_object_unref(newelement);
-    return GSTD_EXISTING_RESOURCE;
-  }
+  GST_ERROR_OBJECT(object, "Cannot create resources in %s", GSTD_OBJECT_NAME(object));
+  g_return_val_if_reached (GSTD_NO_CREATE);
 }
 
-GstdReturnCode
-gstd_object_read_default (GstdObject *object, const gchar *property, va_list va)
+static GstdReturnCode
+gstd_object_read_default (GstdObject *self, const gchar *property,
+			   va_list va)
 {
-  return GSTD_EOK;
+  GParamSpec *pspec;
+  const gchar *name;
+  GstdReturnCode ret;
+  GValue value = G_VALUE_INIT;
+  gchar *error = NULL;
+  
+  g_return_val_if_fail (GSTD_IS_OBJECT (self), GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (property, GSTD_NULL_ARGUMENT);
+
+  name = property;
+  ret = GSTD_EOK;
+
+  while (name) {
+    pspec = g_object_class_find_property (G_OBJECT_GET_CLASS(self),
+					  name);
+    if (!pspec) {
+      GST_ERROR_OBJECT (self, "The property %s is not a property in %s",
+			name, GSTD_OBJECT_NAME(self));
+      ret |= GSTD_NO_CREATE;
+      break;
+    } 
+
+    if (!GSTD_PARAM_IS_READ(pspec->flags)) {
+      GST_ERROR_OBJECT (self, "The property %s is not readable", name);
+      ret |= GSTD_NO_READ;
+      break;
+    }
+    
+    g_value_init (&value, G_PARAM_SPEC_VALUE_TYPE(pspec));
+    g_object_get_property (G_OBJECT(self), name, &value);
+    
+    G_VALUE_LCOPY(&value, va, 0, &error);
+    
+    if (error) {
+      GST_ERROR_OBJECT(self, "%s", error);
+      g_free (error);
+      ret |= GSTD_NO_CREATE;
+    } else {
+      GST_INFO_OBJECT(self, "Read object %s from %s", property,
+		      GSTD_OBJECT_NAME(self));
+    }
+
+    g_value_unset (&value);
+    name = va_arg (va, const gchar *);  
+  }
+  
+  return ret;
+}
+
+static GstdReturnCode
+gstd_object_update_default (GstdObject *self, const gchar *property,
+			    va_list va)
+{
+  GParamSpec *pspec;
+  const gchar *name;
+  GstdReturnCode ret;
+  GValue value = G_VALUE_INIT;
+  gchar *error = NULL;
+  
+  g_return_val_if_fail (GSTD_IS_OBJECT (self), GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (property, GSTD_NULL_ARGUMENT);
+
+  name = property;
+  ret = GSTD_EOK;
+
+  while (name) {
+    pspec = g_object_class_find_property (G_OBJECT_GET_CLASS(self), name);
+    if (!pspec) {
+      GST_ERROR_OBJECT (self, "The property %s is not a property in %s",
+			name, GSTD_OBJECT_NAME(self));
+      ret |= GSTD_NO_UPDATE;
+      break;
+    } 
+
+    if (pspec->flags & G_PARAM_WRITABLE & !G_PARAM_CONSTRUCT_ONLY) {
+      GST_ERROR_OBJECT (self, "The property %s is not writable", name);
+      ret |= GSTD_NO_UPDATE;
+      break;
+    }
+    
+    g_value_init (&value, G_PARAM_SPEC_VALUE_TYPE(pspec));
+    G_VALUE_COLLECT(&value, va, 0, &error);
+    if (error) {
+      GST_ERROR_OBJECT(self, "%s", error);
+      g_free (error);
+      ret |= GSTD_NO_CREATE;
+    } else {
+      g_object_set_property (G_OBJECT(self), name, &value);
+      GST_INFO_OBJECT(self, "Wrote object %s from %s", property,
+		      GSTD_OBJECT_NAME(self));
+    }
+
+    g_value_unset (&value);
+    name = va_arg (va, const gchar *);  
+  }
+  
+  return ret;
 }
 
 
-GstdReturnCode
+static GstdReturnCode
 gstd_object_delete_default (GstdObject *object, const gchar *name)
 {
   return GSTD_EOK;
@@ -263,8 +311,8 @@ gstd_object_get_code (GstdObject *self)
 GstdReturnCode
 gstd_object_create (GstdObject *object, const gchar *property, ...)
 {
-  GstdReturnCode ret;
   va_list va;
+  GstdReturnCode ret;
   
   g_return_val_if_fail (GSTD_IS_OBJECT(object), GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (property, GSTD_NULL_ARGUMENT);
@@ -287,6 +335,22 @@ gstd_object_read (GstdObject *object, const gchar *property, ...)
 
   va_start(va, property);
   ret = GSTD_OBJECT_GET_CLASS(object)->read (object, property, va);
+  va_end(va);
+
+  return ret;
+}
+
+GstdReturnCode
+gstd_object_update (GstdObject *object, const gchar *property, ...)
+{
+  va_list va;
+  GstdReturnCode ret;
+  
+  g_return_val_if_fail (GSTD_IS_OBJECT(object), GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (property, GSTD_NULL_ARGUMENT);
+
+  va_start(va, property);
+  ret = GSTD_OBJECT_GET_CLASS(object)->update (object, property, va);
   va_end(va);
 
   return ret;

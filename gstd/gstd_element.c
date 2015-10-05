@@ -19,6 +19,7 @@
  */
 #include "gstd_element.h"
 #include <string.h>
+#include <gobject/gvaluecollector.h>
 
 enum {
   PROP_PROPERTIES = 1,
@@ -56,11 +57,16 @@ static void
 gstd_element_set_property (GObject *, guint, const GValue *, GParamSpec *);
 static void
 gstd_element_dispose (GObject *);
+static GstdReturnCode
+gstd_element_read (GstdObject *, const gchar*, va_list);
+static GstdReturnCode
+gstd_element_update (GstdObject *, const gchar*, va_list);
 
 static void
 gstd_element_class_init (GstdElementClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
+  GstdObjectClass *gstd_object_class = GSTD_OBJECT_CLASS (klass);
   GParamSpec *properties[N_PROPERTIES] = { NULL, };
   guint debug_color;
 
@@ -82,6 +88,9 @@ gstd_element_class_init (GstdElementClass *klass)
   g_object_class_install_properties (object_class,
                                      N_PROPERTIES,
                                      properties);
+
+  gstd_object_class->read = gstd_element_read;
+  gstd_object_class->update = gstd_element_update;
 
   /* Initialize debug category with nice colors */
   debug_color = GST_DEBUG_FG_BLACK | GST_DEBUG_BOLD | GST_DEBUG_BG_WHITE;
@@ -157,4 +166,112 @@ gstd_element_set_property (GObject      *object,
     gstd_object_set_code (GSTD_OBJECT(self), GSTD_NO_RESOURCE);
     break;
   }
+}
+
+static GstdReturnCode
+gstd_element_read (GstdObject *object, const gchar *property,
+		   va_list va)
+{
+  GstdElement *self = GSTD_ELEMENT(object);
+  GParamSpec *pspec;
+  const gchar *name;
+  GstdReturnCode ret;
+  GValue value = G_VALUE_INIT;
+  gchar *error = NULL;
+  
+  g_return_val_if_fail (GSTD_IS_ELEMENT (object), GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (property, GSTD_NULL_ARGUMENT);
+
+  name = property;
+  ret = GSTD_EOK;
+
+  while (name) {
+    pspec = g_object_class_find_property (G_OBJECT_GET_CLASS(self->element),
+					  name);
+    if (!pspec) {
+      GST_ERROR_OBJECT (self, "The property %s is not a property in %s",
+			name, GSTD_OBJECT_NAME(self));
+      ret |= GSTD_NO_CREATE;
+      break;
+    } 
+
+    if (!GSTD_PARAM_IS_READ(pspec->flags)) {
+      GST_ERROR_OBJECT (self, "The property %s is not readable", name);
+      ret |= GSTD_NO_READ;
+      break;
+    }
+    
+    g_value_init (&value, G_PARAM_SPEC_VALUE_TYPE(pspec));
+    g_object_get_property (G_OBJECT(self->element), name, &value);
+    
+    G_VALUE_LCOPY(&value, va, 0, &error);
+    
+    if (error) {
+      GST_ERROR_OBJECT(self, "%s", error);
+      g_free (error);
+      g_value_unset (&value);
+      ret |= GSTD_NO_CREATE;
+    } else {
+      GST_INFO_OBJECT(self, "Read object %s from %s", property,
+		      GSTD_OBJECT_NAME(self));
+    }
+
+    g_value_unset (&value);
+    name = va_arg (va, const gchar *);  
+  }
+  
+  return ret;
+}
+
+static GstdReturnCode
+gstd_element_update (GstdObject *object, const gchar *property,
+		     va_list va)
+{
+  GstdElement *self = GSTD_ELEMENT(object);
+  GParamSpec *pspec;
+  const gchar *name;
+  GstdReturnCode ret;
+  GValue value = G_VALUE_INIT;
+  gchar *error = NULL;
+  
+  g_return_val_if_fail (GSTD_IS_ELEMENT (object), GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (property, GSTD_NULL_ARGUMENT);
+
+  name = property;
+  ret = GSTD_EOK;
+
+  while (name) {
+    pspec = g_object_class_find_property (G_OBJECT_GET_CLASS(self->element),
+					  name);
+    if (!pspec) {
+      GST_ERROR_OBJECT (self, "The property %s is not a property in %s",
+			name, GSTD_OBJECT_NAME(self));
+      ret |= GSTD_NO_UPDATE;
+      break;
+    } 
+
+    if (pspec->flags & G_PARAM_WRITABLE & !G_PARAM_CONSTRUCT_ONLY) {
+      GST_ERROR_OBJECT (self, "The property %s is not writable", name);
+      ret |= GSTD_NO_UPDATE;
+      break;
+    }
+    
+    g_value_init (&value, G_PARAM_SPEC_VALUE_TYPE(pspec));
+    G_VALUE_COLLECT(&value, va, 0, &error);
+    if (error) {
+      GST_ERROR_OBJECT(self, "%s", error);
+      g_free (error);
+      g_value_unset (&value);
+      ret |= GSTD_NO_CREATE;
+    } else {
+      g_object_set_property (G_OBJECT(self->element), name, &value);
+      GST_INFO_OBJECT(self, "Wrote object %s from %s", property,
+		      GSTD_OBJECT_NAME(self));
+    }
+
+    g_value_unset (&value);
+    name = va_arg (va, const gchar *);  
+  }
+  
+  return ret;
 }

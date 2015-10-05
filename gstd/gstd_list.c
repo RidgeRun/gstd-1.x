@@ -30,7 +30,7 @@ enum {
 
 #define GSTD_LIST_DEFAULT_COUNT 0
 #define GSTD_LIST_DEFAULT_NODE_TYPE G_TYPE_NONE
-#define GSTD_LIST_DEFAULT_FLAGS GSTD_PARAM_READ
+#define GSTD_LIST_DEFAULT_FLAGS GSTD_PARAM_READ | GSTD_PARAM_CREATE | GSTD_PARAM_DELETE
 
 /* Gstd Core debugging category */
 GST_DEBUG_CATEGORY_STATIC(gstd_list_debug);
@@ -248,7 +248,7 @@ gstd_list_create (GstdObject * object, const gchar *property, va_list va)
 			      gstd_list_find_node);
   if (found)
     goto exists;
-  
+
   self->list = g_list_append (self->list, newnode);
   GST_INFO_OBJECT(self, "Appended %s to %s list", GSTD_OBJECT_NAME(newnode),
 		  GSTD_OBJECT_NAME(self));
@@ -292,6 +292,8 @@ gstd_list_read (GstdObject * object, const gchar *property, va_list va)
   
   while (name) {
     found = g_list_find_custom (self->list, name, gstd_list_find_node);
+    if (!found)
+      goto noexist;
 
     g_value_init (&value, self->node_type);
     g_value_set_object(&value, G_OBJECT(found->data));
@@ -314,6 +316,11 @@ gstd_list_read (GstdObject * object, const gchar *property, va_list va)
   
   return ret;
 
+ noexist:
+  {
+    GST_ERROR_OBJECT(self, "The node %s does not exist in %s", property, GSTD_OBJECT_NAME(self));
+    return GSTD_NO_CREATE;
+  }
  noread:
   {
     GST_ERROR_OBJECT(self, "Cannot read from %s", GSTD_OBJECT_NAME(self));

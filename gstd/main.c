@@ -48,8 +48,11 @@ int_handler(gint sig)
 gint
 main (gint argc, gchar *argv[])
 {
-  GstdObject *gstd;
-  GstdObject *read;
+  GstdList *pipelines;
+  GstdPipeline *pipe;
+  GstdList *elements;
+  GstElement *element;
+  guint nb = 0;
   
   /* Initialize GStreamer subsystem before calling anything else */
   gst_init(&argc, &argv);
@@ -62,17 +65,17 @@ main (gint argc, gchar *argv[])
   GST_INFO ("Starting application...");
   main_loop = g_main_loop_new (NULL, FALSE);
 
-  gstd = g_object_new (GSTD_TYPE_LIST, "name", "GstdCore0", "node-type", GSTD_TYPE_OBJECT, "flags", GSTD_PARAM_READ | GSTD_PARAM_CREATE | GSTD_PARAM_DELETE, NULL);
-  gstd_object_create (GSTD_OBJECT(gstd), "name", "hola", NULL);
-  read = NULL;
-  //  gstd_object_create (GSTD_OBJECT(gstd), "name", "adios", NULL);
-  //  gstd_object_create (GSTD_OBJECT(gstd), "name", "adios", NULL);
-  gstd_object_read (GSTD_OBJECT(gstd), "hola", &read, NULL);
-  //  gstd_object_delete (GSTD_OBJECT(gstd), "hola");
+  pipelines = g_object_new (GSTD_TYPE_LIST, "name", "pipelines", "node-type", GSTD_TYPE_PIPELINE, NULL);
+  gstd_object_create (GSTD_OBJECT(pipelines), "name", "pipe0", "description", "fakesrc ! fakesink", NULL);
 
-  g_object_unref(read);
-  
-  //  gstd_uri (gstd, "create pipelines index 0 description fakesink");
+  gstd_object_read (GSTD_OBJECT(pipelines), "pipe0", &pipe, NULL);
+  gstd_object_read (GSTD_OBJECT(pipe), "elements", &elements, NULL);
+  gstd_object_read(GSTD_OBJECT(elements), "fakesink0", &element, NULL);
+  gstd_object_read(GSTD_OBJECT(element), "num-buffers", &nb, NULL);
+
+  g_print ("NUM BUFFERS = %d\n", nb);
+
+    //  gstd_uri (gstd, "create pipelines index 0 description fakesink");
     
   g_main_loop_run (main_loop);
 
@@ -80,7 +83,12 @@ main (gint argc, gchar *argv[])
   g_main_loop_unref (main_loop);
   main_loop = NULL;
 
-  g_object_unref (gstd);
+  g_object_unref(element);
+  g_object_unref(elements);
+  g_object_unref(pipe);
+  g_object_unref(pipelines);
+  
+  //  g_object_unref (gstd);
   gst_deinit();
   
   return GSTD_EOK;
