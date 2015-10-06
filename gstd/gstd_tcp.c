@@ -18,6 +18,7 @@
  * along with Gstd.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "gstd_tcp.h"
+#include <stdio.h>
 
 /* Gstd Core debugging category */
 GST_DEBUG_CATEGORY_STATIC(gstd_tcp_debug);
@@ -129,6 +130,84 @@ gstd_tcp_stop (GstdCore *core, GSocketService **service)
   return GSTD_EOK;
 }
 
+static GstdReturnCode
+gstd_tcp_update_by_type (GstdCore *core, GstdObject *obj, gchar *args)
+{
+  gchar **tokens;
+  gchar **property;
+  gchar *prop;
+  gchar *svalue;
+  GParamSpec *pspec;
+
+  g_return_val_if_fail (GSTD_IS_CORE(core), GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (GSTD_IS_OBJECT(obj), GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (args, GSTD_NULL_ARGUMENT);
+
+  tokens = g_strsplit (args, " ", -1);
+  property = tokens;
+  while (*property) {
+    prop = *property++;
+    svalue = *property++;
+    
+    if (!*svalue)
+      goto novalue;
+    
+    pspec = g_object_class_find_property(G_OBJECT_GET_CLASS(obj), prop);
+    if (!pspec)
+      goto noprop;
+    
+    if (G_TYPE_CHAR == pspec->value_type ||
+	G_TYPE_UCHAR == pspec->value_type ||
+	G_TYPE_STRING == pspec->value_type)
+      {
+	return gstd_object_update (obj, prop, svalue, NULL);
+      }
+    if (G_TYPE_INT == pspec->value_type)
+      {
+	gint d;
+	sscanf (svalue, "%d", &d);
+	return gstd_object_update (obj, prop, d, NULL);
+      }
+    if (G_TYPE_UINT == pspec->value_type)
+      {
+	guint u;
+	sscanf (svalue, "%u", &u);
+	return gstd_object_update (obj, prop, u, NULL);
+      }
+    if (G_TYPE_FLOAT == pspec->value_type)
+      {
+	gfloat f;
+	sscanf (svalue, "%f", &f);
+	return gstd_object_update (obj, prop, f, NULL);
+      }
+    if (G_TYPE_DOUBLE == pspec->value_type)
+      {
+	gdouble lf;
+	sscanf (svalue, "%lf", &lf);
+	return gstd_object_update (obj, prop, lf, NULL);
+      }
+
+    GST_ERROR_OBJECT(core, "Unable to handle \"%s\" types",
+		     g_type_name(pspec->value_type));
+    g_strfreev(tokens);
+    return GSTD_BAD_COMMAND;
+  }
+
+ novalue:
+  {
+    GST_ERROR_OBJECT(core, "Missing value for property");
+    g_strfreev(tokens);
+    return GSTD_BAD_COMMAND;
+  }
+ noprop:
+  {
+    GST_ERROR_OBJECT(core, "Unexisting property \"%s\" in %s",
+		     prop, GSTD_OBJECT_NAME(obj));
+    g_strfreev(tokens);
+    return GSTD_BAD_COMMAND;
+  }
+}
+
 static gchar*
 gstd_tcp_parse_cmd (GstdCore *core, const gchar *cmd)
 {
@@ -136,8 +215,7 @@ gstd_tcp_parse_cmd (GstdCore *core, const gchar *cmd)
   gchar **tokens;
   gchar *action, *uri, *args;
   GstdObject *node;
-  
-  
+
   g_return_val_if_fail (GSTD_IS_CORE(core), NULL);
   g_return_val_if_fail (cmd, NULL);
 
@@ -152,11 +230,16 @@ gstd_tcp_parse_cmd (GstdCore *core, const gchar *cmd)
   if (!g_ascii_strcasecmp("CREATE", action)) {
     g_print ("CREATE - %s - %s\n", GSTD_OBJECT_NAME(node), args); 
   } else if (!g_ascii_strcasecmp("READ", action)) {
-    g_print ("READ - %s - %s\n", GSTD_OBJECT_NAME(node), args); 
+    gchar *str = NULL;
+    gstd_object_to_string(node, &str);
+    g_print ("%s\n", str);
+    g_free (str);
   } else if (!g_ascii_strcasecmp("UPDATE", action)) {
-    g_print ("UPDATE - %s - %s\n", GSTD_OBJECT_NAME(node), args); 
+    gstd_tcp_update_by_type (core, node, args);
   } else if (!g_ascii_strcasecmp("DELETE", action)) {
-    g_print ("DELETE - %s - %s\n", GSTD_OBJECT_NAME(node), args); 
+    if (!args)
+      goto noargtodelete;
+    gstd_object_delete (node, args);
   } else
     goto badcommand;
   
@@ -171,6 +254,13 @@ gstd_tcp_parse_cmd (GstdCore *core, const gchar *cmd)
  badcommand:
   {
     GST_ERROR_OBJECT(core, "Unknown command \"%s\"", action);
+    g_strfreev (tokens);
+    g_object_unref (node);
+    return NULL;
+  }
+ noargtodelete:
+  {
+    GST_ERROR_OBJECT(core, "Missing name of resource to delete");
     g_strfreev (tokens);
     g_object_unref (node);
     return NULL;
