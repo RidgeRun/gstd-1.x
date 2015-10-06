@@ -299,8 +299,9 @@ gstd_object_to_string_default (GstdObject *self, gchar **outstring)
   const gchar *prolog = "{\n  [{\n";
   const gchar *epilog = "}]\n}";
   const gchar *new = "},{\n";
-  const gchar *fmt = "%s    %s : %s,\n"
-    "    param_spec: {\n"
+  const gchar *fmt = "%s    name       : %s,\n"
+    "    value      : %s,\n"
+    "    param_spec : {\n"
     "      blurb     : %s,\n"
     "      type      : %s,\n"
     "      construct : %s,\n"

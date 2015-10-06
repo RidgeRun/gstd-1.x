@@ -38,6 +38,25 @@ GST_DEBUG_CATEGORY_STATIC(gstd_list_debug);
 
 #define GSTD_DEBUG_DEFAULT_LEVEL GST_LEVEL_INFO
 
+#define GSTD_TYPE_LIST_FLAGS (gstd_list_flags_get_type ())
+static GType
+gstd_list_flags_get_type (void)
+{
+  static GType list_flags_type = 0;
+  static const GFlagsValue flags_types[] = {
+    {GSTD_PARAM_CREATE, "CREATE", "create"},
+    {GSTD_PARAM_READ, "READ", "read"},
+    {GSTD_PARAM_UPDATE, "UPDATE", "update"},
+    {GSTD_PARAM_DELETE, "DELETE", "delete"},
+    {0, NULL, NULL}
+  };
+  if (!list_flags_type) {
+    list_flags_type =
+        g_flags_register_static ("GstdListFlags", flags_types);
+  }
+  return list_flags_type;
+}
+
 /* VTable */
 static gint
 gstd_list_find_node (gconstpointer, gconstpointer);
@@ -107,15 +126,14 @@ gstd_list_class_init (GstdListClass *klass)
 		       GSTD_PARAM_READ);
 
     properties[PROP_FLAGS] =
-    g_param_spec_uint ("flags",
-		       "Flags",
-		       "The resource access flags",
-		       0,
-		       G_MAXUINT,
-		       GSTD_LIST_DEFAULT_FLAGS,
-		       G_PARAM_CONSTRUCT_ONLY |
-		       G_PARAM_READWRITE |
-		       GSTD_PARAM_READ);
+    g_param_spec_flags ("flags",
+			"Flags",
+			"The resource access flags",
+			GSTD_TYPE_LIST_FLAGS,
+			GSTD_LIST_DEFAULT_FLAGS,
+			G_PARAM_CONSTRUCT_ONLY |
+			G_PARAM_READWRITE |
+			GSTD_PARAM_READ);
 
   g_object_class_install_properties (object_class,
                                      N_PROPERTIES,
@@ -177,7 +195,7 @@ gstd_list_get_property (GObject        *object,
     break;
   case PROP_FLAGS:
     GST_DEBUG_OBJECT(self, "Returning flags %u", self->flags);
-    g_value_set_uint (value, self->flags);
+    g_value_set_flags (value, self->flags);
     break;
   default:
     /* We don't have any other property... */
@@ -205,7 +223,7 @@ gstd_list_set_property (GObject      *object,
     break;
   case PROP_FLAGS:
     GST_DEBUG_OBJECT(self, "Setting node type to %u", self->flags);
-    self->flags = g_value_get_uint (value);
+    self->flags = g_value_get_flags (value);
     break;
   default:
     /* We don't have any other property... */
