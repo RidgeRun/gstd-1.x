@@ -31,6 +31,8 @@ gstd_tcp_callback  (GSocketService *service,
                     GSocketConnection *connection,
                     GObject *source_object,
                     gpointer user_data);
+static gchar*
+gstd_tcp_parse_cmd (GstdCore *core, const gchar *cmd);
 
 static gboolean
 gstd_tcp_callback  (GSocketService *service,
@@ -38,13 +40,28 @@ gstd_tcp_callback  (GSocketService *service,
                     GObject *source_object,
                     gpointer user_data) {
 
-  GInputStream *istream = g_io_stream_get_input_stream (G_IO_STREAM (connection));
+  GstdCore *core = GSTD_CORE(user_data);
+  GInputStream *istream;
+  GOutputStream *ostream;
+
+  g_return_val_if_fail (core, TRUE);
+
+  istream = g_io_stream_get_input_stream (G_IO_STREAM (connection));
+  ostream = g_io_stream_get_output_stream (G_IO_STREAM (connection));
+  
   gchar message[1024];
   g_input_stream_read (istream,
 		       message,
-		       1,
+		       1024,
 		       NULL,
 		       NULL);
+
+  gstd_tcp_parse_cmd (core, message);
+  g_output_stream_write (ostream,
+			 message,
+			 1024,
+			 NULL,
+			 NULL);
   
   g_print("Message was: \"%s\"\n", message);
   return FALSE;
@@ -77,7 +94,7 @@ gstd_tcp_start (GstdCore *core, GSocketService **service, guint16 port)
   g_signal_connect (*service,
 		    "incoming",
 		    G_CALLBACK (gstd_tcp_callback),
-		    NULL);
+		    core);
   
   /* start the socket service */
   g_socket_service_start (*service);
@@ -110,4 +127,52 @@ gstd_tcp_stop (GstdCore *core, GSocketService **service)
   }
   
   return GSTD_EOK;
+}
+
+static gchar*
+gstd_tcp_parse_cmd (GstdCore *core, const gchar *cmd)
+{
+  gchar *out = NULL;
+  gchar **tokens;
+  gchar *action, *uri, *args;
+  GstdObject *node;
+  
+  
+  g_return_val_if_fail (GSTD_IS_CORE(core), NULL);
+  g_return_val_if_fail (cmd, NULL);
+
+  tokens = g_strsplit (cmd, " ", 3);
+  action = tokens[0];
+  uri = tokens[1];
+  args = tokens[2];
+
+  if (gstd_get_by_uri (core, uri, &node))
+    goto nonode;
+  
+  if (!g_ascii_strcasecmp("CREATE", action)) {
+    g_print ("CREATE - %s - %s\n", GSTD_OBJECT_NAME(node), args); 
+  } else if (!g_ascii_strcasecmp("READ", action)) {
+    g_print ("READ - %s - %s\n", GSTD_OBJECT_NAME(node), args); 
+  } else if (!g_ascii_strcasecmp("UPDATE", action)) {
+    g_print ("UPDATE - %s - %s\n", GSTD_OBJECT_NAME(node), args); 
+  } else if (!g_ascii_strcasecmp("DELETE", action)) {
+    g_print ("DELETE - %s - %s\n", GSTD_OBJECT_NAME(node), args); 
+  } else
+    goto badcommand;
+  
+  return out;
+
+ nonode:
+  {
+    GST_ERROR_OBJECT(core, "Malformed URI \"%s\"", uri);
+    g_strfreev (tokens);
+    return NULL;
+  }
+ badcommand:
+  {
+    GST_ERROR_OBJECT(core, "Unknown command \"%s\"", action);
+    g_strfreev (tokens);
+    g_object_unref (node);
+    return NULL;
+  }
 }

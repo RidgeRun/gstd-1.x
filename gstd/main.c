@@ -63,14 +63,22 @@ main (gint argc, gchar *argv[])
   main_loop = g_main_loop_new (NULL, FALSE);
 
   core = gstd_new ("Core0", 5000);
+  
+  /* Install a handler for the interrupt signal */
+  signal (SIGINT, int_handler);
   gstd_pipeline_create (core, "pipe0", "videotestsrc ! osxvideosink");
 
-  gstd_pipeline_play(core, "pipe0");
-  sleep(3);
-  gstd_element_set (core, "pipe0", "videotestsrc0", "pattern", (gpointer)3);
-  sleep(3);
-  gstd_pipeline_null(core, "pipe0");
-    
+  //  gstd_pipeline_play(core, "pipe0");
+  //  sleep(1);
+  //  gstd_element_set (core, "pipe0", "videotestsrc0", "pattern", (gpointer)3);
+  //  sleep(1);
+  //  gstd_pipeline_null(core, "pipe0");
+  gchar *tostring;
+  gstd_object_to_string(GSTD_OBJECT(core), &tostring);
+
+  g_print ("%s\n", tostring);
+  g_free (tostring);
+  
   g_main_loop_run (main_loop);
 
   /* Application shut down*/

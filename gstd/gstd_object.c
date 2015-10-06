@@ -50,6 +50,8 @@ static GstdReturnCode
 gstd_object_update_default (GstdObject *, const gchar *, va_list);
 static GstdReturnCode
 gstd_object_delete_default (GstdObject *, const gchar *);
+static GstdReturnCode
+gstd_object_to_string_default (GstdObject *object, gchar **outstring);
 
 static void
 gstd_object_class_init (GstdObjectClass *klass)
@@ -81,6 +83,7 @@ gstd_object_class_init (GstdObjectClass *klass)
   klass->read = gstd_object_read_default;
   klass->update = gstd_object_update_default;
   klass->delete = gstd_object_delete_default;
+  klass->to_string = gstd_object_to_string_default;
   
   /* Initialize debug category with nice colors */
   debug_color = GST_DEBUG_FG_BLACK | GST_DEBUG_BOLD | GST_DEBUG_BG_WHITE;
@@ -284,6 +287,66 @@ gstd_object_delete_default (GstdObject *object, const gchar *name)
   return GSTD_EOK;
 }
 
+
+static GstdReturnCode
+gstd_object_to_string_default (GstdObject *self, gchar **outstring)
+{
+  GParamSpec **properties;
+  GValue value = G_VALUE_INIT;
+  gchar *svalue;
+  guint n, i;
+  const gchar *typename;
+  const gchar *prolog = "{\n  [{\n";
+  const gchar *epilog = "}]\n}";
+  const gchar *new = "},{\n";
+  const gchar *fmt = "%s    %s : %s,\n"
+    "    param_spec: {\n"
+    "      blurb     : %s,\n"
+    "      type      : %s,\n"
+    "      construct : %s,\n"
+    "      create    : %s,\n"
+    "      read      : %s,\n"
+    "      update    : %s,\n"
+    "      delete    : %s\n"
+    "    }\n  %s";
+  
+  gchar *buffer;
+  gchar *oldbuffer;
+  
+  g_return_val_if_fail (GSTD_IS_OBJECT(self), GSTD_NULL_ARGUMENT);
+  g_warn_if_fail (!*outstring);
+
+  buffer = g_strdup(prolog);
+  
+  properties = g_object_class_list_properties(G_OBJECT_GET_CLASS(self), &n);
+  for (i=0;i<n;i++) {
+    typename = g_type_name(properties[i]->value_type);
+
+    g_value_init (&value, properties[i]->value_type);
+    g_object_get_property(G_OBJECT(self), properties[i]->name, &value);
+    svalue = g_strdup_value_contents(&value);
+    g_value_unset(&value);
+      
+    oldbuffer = buffer;
+    buffer = g_strdup_printf(fmt, oldbuffer,
+        properties[i]->name, svalue,
+        properties[i]->_blurb,
+        typename,
+	G_PARAM_CONSTRUCT_ONLY & properties[i]->flags ? "TRUE" : "FALSE",
+	GSTD_PARAM_IS_CREATE(properties[i]->flags) ? "TRUE" : "FALSE",
+	GSTD_PARAM_IS_READ(properties[i]->flags) ? "TRUE" : "FALSE",
+	GSTD_PARAM_IS_UPDATE(properties[i]->flags) ? "TRUE" : "FALSE",
+        GSTD_PARAM_IS_DELETE(properties[i]->flags) ? "TRUE" : "FALSE",
+        i+1 != n ? new : epilog);
+
+    g_free (svalue);
+    g_free (oldbuffer);
+  }
+  g_free (properties);
+  *outstring = buffer;
+  return GSTD_EOK;
+}
+
 void
 gstd_object_set_code (GstdObject *self, GstdReturnCode code)
 {
@@ -363,4 +426,13 @@ gstd_object_delete (GstdObject *object, const gchar *name)
   g_return_val_if_fail (name, GSTD_NULL_ARGUMENT);
 
   return GSTD_OBJECT_GET_CLASS(object)->delete (object, name);
+}
+
+GstdReturnCode
+gstd_object_to_string (GstdObject *object, gchar **outstring)
+{
+  g_return_val_if_fail (GSTD_IS_OBJECT(object), GSTD_NULL_ARGUMENT);
+  g_warn_if_fail (!*outstring);
+
+  return GSTD_OBJECT_GET_CLASS(object)->to_string (object, outstring);
 }

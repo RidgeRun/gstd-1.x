@@ -89,6 +89,8 @@ struct _GstdObjectClass
   GstdReturnCode (*update)    (GstdObject *object, const gchar *property,
 			       va_list va);
   GstdReturnCode (*delete)    (GstdObject *object, const gchar *property);
+
+  GstdReturnCode (*to_string) (GstdObject *object, gchar **outstring);
 };
 
 GType gstd_object_get_type(void);
@@ -107,14 +109,14 @@ G_DEFINE_AUTOPTR_CLEANUP_FUNC(GstdObject, g_object_unref)
 #define GSTD_PARAM_IS_DELETE(p) (p & GSTD_PARAM_DELETE)
 GstdReturnCode
 gstd_object_create (GstdObject *object, const gchar *property, ...);
-
 GstdReturnCode
 gstd_object_read (GstdObject *object, const gchar *property, ...);
-
 GstdReturnCode
 gstd_object_update (GstdObject *object, const gchar *property, ...);
 GstdReturnCode
 gstd_object_delete (GstdObject *object, const gchar *name);
+GstdReturnCode
+gstd_object_to_string (GstdObject *object, gchar **outstring);
 
 G_END_DECLS
 
