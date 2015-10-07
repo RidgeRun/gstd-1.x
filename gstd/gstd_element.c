@@ -61,6 +61,10 @@ static GstdReturnCode
 gstd_element_read (GstdObject *, const gchar*, va_list);
 static GstdReturnCode
 gstd_element_update (GstdObject *, const gchar*, va_list);
+static GstdReturnCode
+gstd_element_to_string (GstdObject *, gchar **);
+void
+gstd_element_internal_to_string (GstdElement *, gchar **);
 
 static void
 gstd_element_class_init (GstdElementClass *klass)
@@ -90,6 +94,7 @@ gstd_element_class_init (GstdElementClass *klass)
 
   gstd_object_class->read = gstd_element_read;
   gstd_object_class->update = gstd_element_update;
+  gstd_object_class->to_string = gstd_element_to_string;
 
   /* Initialize debug category with nice colors */
   debug_color = GST_DEBUG_FG_BLACK | GST_DEBUG_BOLD | GST_DEBUG_BG_WHITE;
@@ -282,4 +287,102 @@ gstd_element_update (GstdObject *object, const gchar *property,
   }
   
   return ret;
+}
+
+static GstdReturnCode
+gstd_element_to_string (GstdObject *object, gchar **outstring)
+{
+  GstdElement *self = GSTD_ELEMENT(object);
+  gchar *props;
+  gchar *internal;
+
+  g_return_val_if_fail (GSTD_IS_OBJECT(object), GSTD_NULL_ARGUMENT);
+  g_warn_if_fail (!*outstring);
+
+  /* Lets leverage the parent's class implementation */
+  GSTD_OBJECT_CLASS(gstd_element_parent_class)->to_string(GSTD_OBJECT(object), &props);
+  // A little hack to remove the last bracket
+  props[strlen(props)-2] = '\0';
+  
+  // Now parse the properties of the internal GST element
+  gstd_element_internal_to_string (self, &internal);
+
+  *outstring = g_strdup_printf ("%s,%s", props, internal);
+  g_free (props);
+  g_free (internal);
+  
+  return GSTD_EOK;
+}
+
+void
+gstd_element_internal_to_string (GstdElement *self, gchar **outstring)
+{
+  GParamSpec **properties;
+  GValue value = G_VALUE_INIT;
+  gchar *svalue;
+  GValue flags = G_VALUE_INIT;
+  gchar *sflags;
+  guint n, i;
+  const gchar *typename;
+  const gchar *prolog = "{\n";
+  const gchar *epilog = "}]\n}";
+  const gchar *new = "},{\n";
+  const gchar *fmt = "%s    name       : %s,\n"
+    "    value      : %s,\n"
+    "    param_spec : {\n"
+    "      blurb     : %s,\n"
+    "      type      : %s,\n"
+    "      access    : %s,\n"
+    "      construct : %s,\n"
+#if 0
+    "      create    : %s,\n"
+    "      read      : %s,\n"
+    "      update    : %s,\n"
+    "      delete    : %s\n"
+#endif
+    "    }\n  %s";
+  
+  gchar *buffer;
+  gchar *oldbuffer;
+  
+  g_return_if_fail (GSTD_IS_ELEMENT(self));
+  g_warn_if_fail (!*outstring);
+
+  buffer = g_strdup(prolog);
+  
+  properties = g_object_class_list_properties(G_OBJECT_GET_CLASS(self->element), &n);
+  for (i=0;i<n;i++) {
+    typename = g_type_name(properties[i]->value_type);
+    /* Automagical type value serialization */
+    g_value_init (&value, properties[i]->value_type);
+    g_object_get_property(G_OBJECT(self), properties[i]->name, &value);
+    svalue = g_strdup_value_contents(&value);
+    g_value_unset(&value);
+    /* Automagical flags serialization */
+    g_value_init (&flags, GSTD_TYPE_PARAM_FLAGS);
+    g_value_set_flags (&flags, properties[i]->flags);
+    sflags = g_strdup_value_contents(&flags);
+    g_value_unset(&flags);
+      
+    oldbuffer = buffer;
+    buffer = g_strdup_printf(fmt, oldbuffer,
+        properties[i]->name, svalue,
+        properties[i]->_blurb,
+        typename,
+        sflags,
+	G_PARAM_CONSTRUCT_ONLY & properties[i]->flags ? "TRUE" : "FALSE",
+#if 0
+	GSTD_PARAM_IS_CREATE(properties[i]->flags) ? "TRUE" : "FALSE",
+	GSTD_PARAM_IS_READ(properties[i]->flags) ? "TRUE" : "FALSE",
+	GSTD_PARAM_IS_UPDATE(properties[i]->flags) ? "TRUE" : "FALSE",
+        GSTD_PARAM_IS_DELETE(properties[i]->flags) ? "TRUE" : "FALSE",
+#endif
+        i+1 != n ? new : epilog);
+
+    g_free (sflags);
+    g_free (svalue);
+    g_free (oldbuffer);
+  }
+  g_free (properties);
+  *outstring = buffer;
 }
