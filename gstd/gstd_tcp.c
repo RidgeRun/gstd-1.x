@@ -162,6 +162,7 @@ gstd_tcp_read (GstdCore *core, GstdObject *obj, gchar *args, gchar **response)
   GParamSpec *pspec;
   GObject *properties;
   GValue value = G_VALUE_INIT;
+  gchar *svalue;
   
   g_return_val_if_fail (GSTD_IS_CORE(core), GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (GSTD_IS_OBJECT(obj), GSTD_NULL_ARGUMENT);
@@ -190,16 +191,18 @@ gstd_tcp_read (GstdCore *core, GstdObject *obj, gchar *args, gchar **response)
   /* Automagical type value serialization */
   g_value_init (&value, pspec->value_type);
   g_object_get_property(G_OBJECT(properties), tokens[0], &value);
-  *response = g_strdup_value_contents(&value);
+  svalue = g_strdup_value_contents(&value);
   g_value_unset(&value);
 
+  *response = g_strdup_printf ("{\n    %s : %s\n  }", tokens[0], svalue);
+  g_free (svalue);
+  
   return GSTD_EOK;
 
  noprop:
   {
     GST_ERROR_OBJECT(core, "Unexisting property \"%s\" in %s",
 		     tokens[0], GSTD_OBJECT_NAME(obj));
-    g_strfreev(tokens);
     return GSTD_BAD_COMMAND;
   }
 }
@@ -394,9 +397,8 @@ gstd_tcp_parse_cmd (GstdCore *core, const gchar *cmd, gchar **response)
     ret = gstd_tcp_read(core, node, args, response);
   } else if (!g_ascii_strcasecmp("UPDATE", action)) {
     ret = gstd_tcp_update_by_type (core, node, args);
+    gstd_tcp_read(core, node, args, response);
   } else if (!g_ascii_strcasecmp("DELETE", action)) {
-    if (!args)
-      goto noargtodelete;
     ret = gstd_object_delete (node, args);
   } else
     goto badcommand;
@@ -415,12 +417,5 @@ gstd_tcp_parse_cmd (GstdCore *core, const gchar *cmd, gchar **response)
     g_strfreev (tokens);
     g_object_unref (node);
     return GSTD_BAD_COMMAND;
-  }
- noargtodelete:
-  {
-    GST_ERROR_OBJECT(core, "Missing name of resource to delete");
-    g_strfreev (tokens);
-    g_object_unref (node);
-    return GSTD_NO_RESOURCE;
   }
 }
