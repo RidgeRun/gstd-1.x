@@ -66,7 +66,6 @@ main (gint argc, gchar *argv[])
   
   /* Install a handler for the interrupt signal */
   signal (SIGINT, int_handler);
-  gstd_pipeline_create (core, "pipe0", "videotestsrc ! osxvideosink");
   
   g_main_loop_run (main_loop);
 
