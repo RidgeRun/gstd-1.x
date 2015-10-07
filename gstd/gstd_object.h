@@ -103,6 +103,9 @@ G_DEFINE_AUTOPTR_CLEANUP_FUNC(GstdObject, g_object_unref)
 #define GSTD_PARAM_UPDATE (1 << (G_PARAM_USER_SHIFT+1))
 #define GSTD_PARAM_DELETE (1 << (G_PARAM_USER_SHIFT+2))
 
+#define GSTD_TYPE_PARAM_FLAGS (gstd_object_flags_get_type ())
+GType gstd_object_flags_get_type (void);
+
 #define GSTD_PARAM_IS_CREATE(p) (p & GSTD_PARAM_CREATE)
 #define GSTD_PARAM_IS_READ(p)   (p & GSTD_PARAM_READ)
 #define GSTD_PARAM_IS_UPDATE(p) (p & GSTD_PARAM_UPDATE)

@@ -38,25 +38,6 @@ GST_DEBUG_CATEGORY_STATIC(gstd_list_debug);
 
 #define GSTD_DEBUG_DEFAULT_LEVEL GST_LEVEL_INFO
 
-#define GSTD_TYPE_LIST_FLAGS (gstd_list_flags_get_type ())
-static GType
-gstd_list_flags_get_type (void)
-{
-  static GType list_flags_type = 0;
-  static const GFlagsValue flags_types[] = {
-    {GSTD_PARAM_CREATE, "CREATE", "create"},
-    {GSTD_PARAM_READ, "READ", "read"},
-    {GSTD_PARAM_UPDATE, "UPDATE", "update"},
-    {GSTD_PARAM_DELETE, "DELETE", "delete"},
-    {0, NULL, NULL}
-  };
-  if (!list_flags_type) {
-    list_flags_type =
-        g_flags_register_static ("GstdListFlags", flags_types);
-  }
-  return list_flags_type;
-}
-
 /* VTable */
 static gint
 gstd_list_find_node (gconstpointer, gconstpointer);
@@ -129,7 +110,7 @@ gstd_list_class_init (GstdListClass *klass)
     g_param_spec_flags ("flags",
 			"Flags",
 			"The resource access flags",
-			GSTD_TYPE_LIST_FLAGS,
+			GSTD_TYPE_PARAM_FLAGS,
 			GSTD_LIST_DEFAULT_FLAGS,
 			G_PARAM_CONSTRUCT_ONLY |
 			G_PARAM_READWRITE |

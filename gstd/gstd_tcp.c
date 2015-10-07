@@ -168,7 +168,7 @@ gstd_tcp_update_by_type (GstdCore *core, GstdObject *obj, gchar *args)
     if (!*svalue)
       goto novalue;
 
-    /* If its a GSteramer element we need to parse the property from
+    /* If its a GstdElement element we need to parse the pspec from
        the internal element */
     if (GSTD_IS_ELEMENT(obj))
       gstd_object_read(obj, "gstelement", &properties, NULL);
@@ -181,34 +181,55 @@ gstd_tcp_update_by_type (GstdCore *core, GstdObject *obj, gchar *args)
     
     if (G_TYPE_CHAR == pspec->value_type ||
 	G_TYPE_UCHAR == pspec->value_type ||
-	G_TYPE_STRING == pspec->value_type)
-      {
-	return gstd_object_update (obj, prop, svalue, NULL);
-      }
-    if (G_TYPE_INT == pspec->value_type)
-      {
-	gint d;
-	sscanf (svalue, "%d", &d);
-	return gstd_object_update (obj, prop, d, NULL);
-      }
-    if (G_TYPE_UINT == pspec->value_type)
-      {
-	guint u;
-	sscanf (svalue, "%u", &u);
-	return gstd_object_update (obj, prop, u, NULL);
-      }
-    if (G_TYPE_FLOAT == pspec->value_type)
-      {
-	gfloat f;
-	sscanf (svalue, "%f", &f);
-	return gstd_object_update (obj, prop, f, NULL);
-      }
-    if (G_TYPE_DOUBLE == pspec->value_type)
-      {
-	gdouble lf;
-	sscanf (svalue, "%lf", &lf);
-	return gstd_object_update (obj, prop, lf, NULL);
-      }
+	G_TYPE_STRING == pspec->value_type) {
+      return gstd_object_update (obj, prop, svalue, NULL);
+    }
+    
+    if (G_TYPE_INT == pspec->value_type) {
+      gint d;
+      sscanf (svalue, "%d", &d);
+      return gstd_object_update (obj, prop, d, NULL);
+    }
+    
+    if (G_TYPE_UINT == pspec->value_type) {
+      guint u;
+      sscanf (svalue, "%u", &u);
+      return gstd_object_update (obj, prop, u, NULL);
+    }
+    
+    if (G_TYPE_FLOAT == pspec->value_type) {
+      gfloat f;
+      sscanf (svalue, "%f", &f);
+      return gstd_object_update (obj, prop, f, NULL);
+    }
+    
+    if (G_TYPE_DOUBLE == pspec->value_type) {
+      gdouble lf;
+      sscanf (svalue, "%lf", &lf);
+      return gstd_object_update (obj, prop, lf, NULL);
+    }
+    
+    if (G_TYPE_IS_ENUM(pspec->value_type)) {
+      GEnumClass *c = g_type_class_ref (pspec->value_type);
+      /* Try by name and by nick */
+      GEnumValue *e = g_enum_get_value_by_name (c, svalue);
+      if (!e)
+	e = g_enum_get_value_by_nick (c, svalue);
+      else
+	goto noenum;
+      return gstd_object_update (obj, prop, e->value, NULL);
+    }
+    
+    if (G_TYPE_IS_FLAGS(pspec->value_type)) {
+      GFlagsClass *c = g_type_class_ref (pspec->value_type);
+      /* Try by name and by nick */
+      GFlagsValue *e = g_flags_get_value_by_name (c, svalue);
+      if (!e)
+	e = g_flags_get_value_by_nick (c, svalue);
+      else
+	goto noenum;
+      return gstd_object_update (obj, prop, e->value, NULL);
+    }
     
     GST_ERROR_OBJECT(core, "Unable to handle \"%s\" types",
 		     g_type_name(pspec->value_type));
@@ -228,6 +249,12 @@ gstd_tcp_update_by_type (GstdCore *core, GstdObject *obj, gchar *args)
 		     prop, GSTD_OBJECT_NAME(obj));
     g_strfreev(tokens);
     return GSTD_BAD_COMMAND;
+  }
+ noenum:
+  {
+    GST_ERROR_OBJECT(core, "Invalid enum value \"%s\"", svalue);
+    g_strfreev(tokens);
+    return GSTD_BAD_ENUM;
   }
 }
 
