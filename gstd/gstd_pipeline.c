@@ -379,7 +379,6 @@ gstd_pipeline_fill_elements (GstdPipeline *self, GstElement *element)
   GValue item = G_VALUE_INIT;
   GstElement *gste;
   gboolean done;
-  guint count;
 
   g_return_val_if_fail (GSTD_IS_PIPELINE(self), GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (GST_IS_ELEMENT(element), GSTD_NULL_ARGUMENT);
@@ -422,10 +421,14 @@ gstd_pipeline_fill_elements (GstdPipeline *self, GstElement *element)
   g_value_unset (&item);
   gst_iterator_free (it);
 
-  count = 0;
-  //  gstd_object_read(GSTD_OBJECT(self->elements), "count", &count, NULL);
-  GST_DEBUG_OBJECT(self, "A total of %u elements where saved",
-		   count);
+  // Lock the elements from now on
+  gint flags;
+  gstd_object_read(GSTD_OBJECT(self->elements), "flags", &flags, NULL);
+  GST_ERROR("Flags before %x", flags);
+  gstd_object_update(GSTD_OBJECT(self->elements), "flags", GSTD_PARAM_READ, NULL);
+  gstd_object_read(GSTD_OBJECT(self->elements), "flags", &flags, NULL);
+  GST_ERROR("Flags after %x", flags);
+  GST_DEBUG_OBJECT(self, "Elements where saved");
 
   return GSTD_EOK;
   

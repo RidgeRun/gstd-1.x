@@ -37,6 +37,8 @@ gstd_tcp_callback  (GSocketService *service,
 static GstdReturnCode
 gstd_tcp_parse_cmd (GstdCore *core, const gchar *cmd, gchar **response);
 static GstdReturnCode
+gstd_tcp_create (GstdCore *core, GstdObject *obj, gchar *args, gchar **response);
+static GstdReturnCode
 gstd_tcp_read (GstdCore *core, GstdObject *obj, gchar *args, gchar **reponse);
 static GstdReturnCode
 gstd_tcp_update_by_type (GstdCore *core, GstdObject *obj, gchar *args);
@@ -153,6 +155,65 @@ gstd_tcp_is_num (const gchar *str)
       return FALSE;
   }
   return TRUE;
+}
+
+static GstdReturnCode
+gstd_tcp_create (GstdCore *core, GstdObject *obj, gchar *args, gchar **response)
+{
+  gchar **tokens;
+  gchar *name;
+  gchar *description;
+  GstdObject *new;
+  GstdReturnCode ret;
+  
+  g_return_val_if_fail (GSTD_IS_CORE(core), GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (GSTD_IS_OBJECT(obj), GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (args, GSTD_NULL_ARGUMENT);
+
+  // This may mean a potential leak
+  g_warn_if_fail (!*response);
+
+  GST_FIXME_OBJECT(core, "Currently hardcoded to create pipelines, we must be "
+		    "generic enough to create any type of object");
+
+  // Tokens has the form {'name', <name>, 'description', <description>}
+  tokens = g_strsplit(args, " ", 4);
+  name = tokens[1];
+  description = tokens[3];
+
+  if (!name || name[0] == '\0')
+    goto noname;
+
+  if (!description || description[0] == '\0')
+    goto nodescription;
+
+  ret = gstd_object_create (obj, "name", name, "description", description, NULL);
+  if (ret)
+    goto noobject;
+
+  gstd_object_read (obj, name, &new, NULL);
+  gstd_object_to_string(new, response);
+  g_object_unref(new);
+
+  return ret;
+  
+ noname:
+  {
+    GST_ERROR_OBJECT(core, "Missing name for the new pipeline");
+    g_strfreev(tokens);
+    return GSTD_NULL_ARGUMENT;
+  }
+ nodescription:
+  {
+    GST_ERROR_OBJECT(core, "Missing description for pipeline \"%s\"", name);
+    g_strfreev(tokens);
+    return GSTD_NULL_ARGUMENT;
+  }
+ noobject:
+  {
+    g_strfreev(tokens);
+    return ret;
+  }
 }
 
 static GstdReturnCode
@@ -391,8 +452,7 @@ gstd_tcp_parse_cmd (GstdCore *core, const gchar *cmd, gchar **response)
     goto nonode;
   
   if (!g_ascii_strcasecmp("CREATE", action)) {
-    ret = GSTD_EOK;
-    g_print ("CREATE - %s - %s\n", GSTD_OBJECT_NAME(node), args); 
+    ret = gstd_tcp_create(core, node, args, response);
   } else if (!g_ascii_strcasecmp("READ", action)) {
     ret = gstd_tcp_read(core, node, args, response);
   } else if (!g_ascii_strcasecmp("UPDATE", action)) {

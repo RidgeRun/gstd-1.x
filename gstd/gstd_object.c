@@ -192,7 +192,7 @@ gstd_object_create_default (GstdObject *object, const gchar *property,
   g_return_val_if_fail (property, GSTD_NULL_ARGUMENT);
 
   GST_ERROR_OBJECT(object, "Cannot create resources in %s", GSTD_OBJECT_NAME(object));
-  g_return_val_if_reached (GSTD_NO_CREATE);
+  return GSTD_NO_CREATE;
 }
 
 static GstdReturnCode

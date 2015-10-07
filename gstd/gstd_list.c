@@ -114,7 +114,7 @@ gstd_list_class_init (GstdListClass *klass)
 			"The resource access flags",
 			GSTD_TYPE_PARAM_FLAGS,
 			GSTD_LIST_DEFAULT_FLAGS,
-			G_PARAM_CONSTRUCT_ONLY |
+			//			G_PARAM_CONSTRUCT_ONLY |
 			G_PARAM_READWRITE |
 			GSTD_PARAM_READ);
 
