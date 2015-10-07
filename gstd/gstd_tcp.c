@@ -145,6 +145,8 @@ gstd_tcp_stop (GstdCore *core, GSocketService **service)
   return GSTD_EOK;
 }
 
+
+
 static GstdReturnCode
 gstd_tcp_update_by_type (GstdCore *core, GstdObject *obj, gchar *args)
 {

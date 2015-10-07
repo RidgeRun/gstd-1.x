@@ -41,12 +41,14 @@ GST_DEBUG_CATEGORY_STATIC(gstd_list_debug);
 /* VTable */
 static gint
 gstd_list_find_node (gconstpointer, gconstpointer);
-static
-GstdReturnCode gstd_list_create (GstdObject *, const gchar *, va_list);
-static
-GstdReturnCode gstd_list_read (GstdObject *, const gchar *, va_list);
-static
-GstdReturnCode gstd_list_delete (GstdObject *, const gchar *);
+static GstdReturnCode
+gstd_list_create (GstdObject *, const gchar *, va_list);
+static GstdReturnCode
+gstd_list_read (GstdObject *, const gchar *, va_list);
+static GstdReturnCode
+gstd_list_delete (GstdObject *, const gchar *);
+static GstdReturnCode
+gstd_list_to_string (GstdObject *, gchar **);
 
 /**
  * GstdList:
@@ -123,6 +125,7 @@ gstd_list_class_init (GstdListClass *klass)
   gstd_object_class->create = gstd_list_create;
   gstd_object_class->read = gstd_list_read;
   gstd_object_class->delete = gstd_list_delete;
+  gstd_object_class->to_string = gstd_list_to_string;
   
   /* Initialize debug category with nice colors */
   debug_color = GST_DEBUG_FG_BLACK | GST_DEBUG_BOLD | GST_DEBUG_BG_WHITE;
@@ -365,4 +368,40 @@ gstd_list_delete (GstdObject * object, const gchar *node)
 		     node, GSTD_OBJECT_NAME(self));
     return GSTD_EXISTING_RESOURCE;
   }
+}
+
+static GstdReturnCode
+gstd_list_to_string (GstdObject *object, gchar **outstring)
+{
+  GstdList *self = GSTD_LIST(object);
+  gchar *props;
+  gchar *acc;
+  gchar *node;
+  GList *list;
+  gchar *separator;
+
+  g_return_val_if_fail (GSTD_IS_OBJECT(object), GSTD_NULL_ARGUMENT);
+  g_warn_if_fail (!*outstring);
+
+  /* Lets leverage the parent's class implementation */
+  GSTD_OBJECT_CLASS(gstd_list_parent_class)->to_string(GSTD_OBJECT(object), &props);
+  // A little hack to remove the last bracket
+  props[strlen(props)-2] = '\0';
+  
+  list = self->list;
+  acc = g_strdup("");
+  while (list) {
+    separator = list->next ? "," : "";
+    node = g_strdup_printf("%s{\n    name : %s\n  }%s", acc, GSTD_OBJECT_NAME(list->data),
+			   separator);
+    g_free (acc);
+    acc = node;
+    list = list->next;
+  }
+
+  *outstring = g_strdup_printf ("%s,\n  nodes: [%s]\n}", props, acc);
+  g_free (props);
+  g_free (acc);
+  
+  return GSTD_EOK;
 }
