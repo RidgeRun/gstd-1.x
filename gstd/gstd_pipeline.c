@@ -46,7 +46,7 @@ gstd_pipeline_state_get_type (void)
   static const GEnumValue state_types[] = {
     {GSTD_PIPELINE_NULL, "NULL", "null"},
     {GSTD_PIPELINE_PAUSED, "PAUSED", "paused"},
-    {GSTD_PIPELINE_PLAYING, "PLAY", "play"},
+    {GSTD_PIPELINE_PLAYING, "PLAYING", "playing"},
     {0, NULL, NULL}
   };
   if (!pipeline_state_type) {

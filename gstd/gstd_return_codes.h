@@ -86,7 +86,7 @@ enum _GstdReturnCode {
 
   GSTD_NO_CONNECTION = 12,
 
-  GSTD_BAD_ENUM = 13
+  GSTD_BAD_VALUE = 13
 };
 
 

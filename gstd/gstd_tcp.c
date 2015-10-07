@@ -20,6 +20,7 @@
 #include "gstd_tcp.h"
 #include "gstd_element.h"
 #include <stdio.h>
+#include <ctype.h>
 
 /* Gstd Core debugging category */
 GST_DEBUG_CATEGORY_STATIC(gstd_tcp_debug);
@@ -56,7 +57,6 @@ gstd_tcp_callback  (GSocketService *service,
 
   istream = g_io_stream_get_input_stream (G_IO_STREAM (connection));
   ostream = g_io_stream_get_output_stream (G_IO_STREAM (connection));
-  
 
   read = g_input_stream_read (istream,
 			      message,
@@ -76,10 +76,7 @@ gstd_tcp_callback  (GSocketService *service,
   			 size,
   			 NULL,
   			 NULL);
-  g_print("%s\n", response);
   g_free(response);
-  
-  g_print("Message was: \"%s\"\n", message);
   return FALSE;
 }
 
@@ -145,7 +142,15 @@ gstd_tcp_stop (GstdCore *core, GSocketService **service)
   return GSTD_EOK;
 }
 
-
+static gboolean
+gstd_tcp_is_num (const gchar *str)
+{
+  for (;*str != '\0'; str++){
+    if (!g_ascii_isdigit(*str))
+      return FALSE;
+  }
+  return TRUE;
+}
 
 static GstdReturnCode
 gstd_tcp_update_by_type (GstdCore *core, GstdObject *obj, gchar *args)
@@ -210,27 +215,71 @@ gstd_tcp_update_by_type (GstdCore *core, GstdObject *obj, gchar *args)
       sscanf (svalue, "%lf", &lf);
       return gstd_object_update (obj, prop, lf, NULL);
     }
-    
+
+    if (G_TYPE_BOOLEAN == pspec->value_type) {
+      gboolean b;
+      if (!g_ascii_strcasecmp(svalue, "true"))
+	b = TRUE;
+      else if (!g_ascii_strcasecmp(svalue, "false"))
+	b = FALSE;
+      else
+	goto badboolean;
+      
+      return gstd_object_update (obj, prop, b, NULL);
+    }
+
+    /* Complex types so  we can refer to the enum value as
+       their names rather than ugly numbers */
     if (G_TYPE_IS_ENUM(pspec->value_type)) {
       GEnumClass *c = g_type_class_ref (pspec->value_type);
-      /* Try by name and by nick */
-      GEnumValue *e = g_enum_get_value_by_name (c, svalue);
-      if (!e)
-	e = g_enum_get_value_by_nick (c, svalue);
-      else
-	goto noenum;
-      return gstd_object_update (obj, prop, e->value, NULL);
+      GEnumValue *e;
+      gint d;
+
+      /* Try by name */
+      e = g_enum_get_value_by_name (c, svalue);
+      if (e)
+	return gstd_object_update (obj, prop, e->value, NULL);
+
+      /* Try by nick */
+      e = g_enum_get_value_by_nick (c, svalue);
+      if (e)
+	return gstd_object_update (obj, prop, e->value, NULL);
+
+      /* Try by integer */
+      if(gstd_tcp_is_num(svalue)) {
+	sscanf (svalue, "%d", &d);
+	return gstd_object_update (obj, prop, d, NULL);
+      }
+
+      /* Unknown! */
+      goto unknown;
     }
-    
+
+    /* Complex types so  we can refer to the flag value as
+       their names rather than ugly numbers */
     if (G_TYPE_IS_FLAGS(pspec->value_type)) {
       GFlagsClass *c = g_type_class_ref (pspec->value_type);
-      /* Try by name and by nick */
-      GFlagsValue *e = g_flags_get_value_by_name (c, svalue);
-      if (!e)
-	e = g_flags_get_value_by_nick (c, svalue);
-      else
-	goto noenum;
-      return gstd_object_update (obj, prop, e->value, NULL);
+      GFlagsValue *e;
+      gint d;
+
+      /* Try by name */
+      e = g_flags_get_value_by_name (c, svalue);
+      if (e)
+	return gstd_object_update (obj, prop, e->value, NULL);
+
+      /* Try by nick */
+      e = g_flags_get_value_by_nick (c, svalue);
+      if (e)
+	return gstd_object_update (obj, prop, e->value, NULL);
+
+      /* Try by integer */
+      if(gstd_tcp_is_num(svalue)) {
+	sscanf (svalue, "%d", &d);
+	return gstd_object_update (obj, prop, d, NULL);
+      }
+
+      /* Unknown! */
+      goto unknown;
     }
     
     GST_ERROR_OBJECT(core, "Unable to handle \"%s\" types",
@@ -252,11 +301,17 @@ gstd_tcp_update_by_type (GstdCore *core, GstdObject *obj, gchar *args)
     g_strfreev(tokens);
     return GSTD_BAD_COMMAND;
   }
- noenum:
+ unknown:
   {
-    GST_ERROR_OBJECT(core, "Invalid enum value \"%s\"", svalue);
+    GST_ERROR_OBJECT(core, "Invalid enum/flags value \"%s\"", svalue);
     g_strfreev(tokens);
-    return GSTD_BAD_ENUM;
+    return GSTD_BAD_VALUE;
+  }
+ badboolean:
+  {
+    GST_ERROR_OBJECT(core, "Invalid boolean value \"%s\"", svalue);
+    g_strfreev(tokens);
+    return GSTD_BAD_VALUE;
   }
 }
 
@@ -266,6 +321,7 @@ gstd_tcp_parse_cmd (GstdCore *core, const gchar *cmd, gchar **response)
   gchar **tokens;
   gchar *action, *uri, *args;
   GstdObject *node;
+  GstdReturnCode ret;
 
   g_return_val_if_fail (GSTD_IS_CORE(core), GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (cmd, GSTD_NULL_ARGUMENT);
@@ -280,19 +336,20 @@ gstd_tcp_parse_cmd (GstdCore *core, const gchar *cmd, gchar **response)
     goto nonode;
   
   if (!g_ascii_strcasecmp("CREATE", action)) {
+    ret = GSTD_EOK;
     g_print ("CREATE - %s - %s\n", GSTD_OBJECT_NAME(node), args); 
   } else if (!g_ascii_strcasecmp("READ", action)) {
-    gstd_object_to_string(node, response);
+    ret = gstd_object_to_string(node, response);
   } else if (!g_ascii_strcasecmp("UPDATE", action)) {
-    gstd_tcp_update_by_type (core, node, args);
+    ret = gstd_tcp_update_by_type (core, node, args);
   } else if (!g_ascii_strcasecmp("DELETE", action)) {
     if (!args)
       goto noargtodelete;
-    gstd_object_delete (node, args);
+    ret = gstd_object_delete (node, args);
   } else
     goto badcommand;
   
-  return GSTD_EOK;
+  return ret;
 
  nonode:
   {

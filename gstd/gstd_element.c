@@ -355,9 +355,10 @@ gstd_element_internal_to_string (GstdElement *self, gchar **outstring)
     typename = g_type_name(properties[i]->value_type);
     /* Automagical type value serialization */
     g_value_init (&value, properties[i]->value_type);
-    g_object_get_property(G_OBJECT(self), properties[i]->name, &value);
+    g_object_get_property(G_OBJECT(self->element), properties[i]->name, &value);
     svalue = g_strdup_value_contents(&value);
     g_value_unset(&value);
+    
     /* Automagical flags serialization */
     g_value_init (&flags, GSTD_TYPE_PARAM_FLAGS);
     g_value_set_flags (&flags, properties[i]->flags);
