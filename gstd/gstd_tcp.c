@@ -32,8 +32,8 @@ gstd_tcp_callback  (GSocketService *service,
                     GSocketConnection *connection,
                     GObject *source_object,
                     gpointer user_data);
-static gchar*
-gstd_tcp_parse_cmd (GstdCore *core, const gchar *cmd);
+static GstdReturnCode
+gstd_tcp_parse_cmd (GstdCore *core, const gchar *cmd, gchar **response);
 
 static gboolean
 gstd_tcp_callback  (GSocketService *service,
@@ -44,25 +44,32 @@ gstd_tcp_callback  (GSocketService *service,
   GstdCore *core = GSTD_CORE(user_data);
   GInputStream *istream;
   GOutputStream *ostream;
+  gint read;
+  const guint size = 1024;
+  gchar *response = NULL;
+  gchar message[size];
 
   g_return_val_if_fail (core, TRUE);
 
   istream = g_io_stream_get_input_stream (G_IO_STREAM (connection));
   ostream = g_io_stream_get_output_stream (G_IO_STREAM (connection));
   
-  gchar message[1024];
-  g_input_stream_read (istream,
-		       message,
-		       1024,
-		       NULL,
-		       NULL);
 
-  gstd_tcp_parse_cmd (core, message);
+  read = g_input_stream_read (istream,
+			      message,
+			      size,
+			      NULL,
+			      NULL);
+  message[read] = '\0';
+
+  gstd_tcp_parse_cmd (core, message, &response);
   g_output_stream_write (ostream,
-			 message,
-			 1024,
-			 NULL,
-			 NULL);
+  			 response,
+  			 size,
+  			 NULL,
+  			 NULL);
+  g_print("%s\n", response);
+  g_free(response);
   
   g_print("Message was: \"%s\"\n", message);
   return FALSE;
@@ -186,7 +193,7 @@ gstd_tcp_update_by_type (GstdCore *core, GstdObject *obj, gchar *args)
 	sscanf (svalue, "%lf", &lf);
 	return gstd_object_update (obj, prop, lf, NULL);
       }
-
+    
     GST_ERROR_OBJECT(core, "Unable to handle \"%s\" types",
 		     g_type_name(pspec->value_type));
     g_strfreev(tokens);
@@ -208,16 +215,16 @@ gstd_tcp_update_by_type (GstdCore *core, GstdObject *obj, gchar *args)
   }
 }
 
-static gchar*
-gstd_tcp_parse_cmd (GstdCore *core, const gchar *cmd)
+static GstdReturnCode
+gstd_tcp_parse_cmd (GstdCore *core, const gchar *cmd, gchar **response)
 {
-  gchar *out = NULL;
   gchar **tokens;
   gchar *action, *uri, *args;
   GstdObject *node;
 
-  g_return_val_if_fail (GSTD_IS_CORE(core), NULL);
-  g_return_val_if_fail (cmd, NULL);
+  g_return_val_if_fail (GSTD_IS_CORE(core), GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (cmd, GSTD_NULL_ARGUMENT);
+  g_warn_if_fail (!*response);
 
   tokens = g_strsplit (cmd, " ", 3);
   action = tokens[0];
@@ -230,10 +237,7 @@ gstd_tcp_parse_cmd (GstdCore *core, const gchar *cmd)
   if (!g_ascii_strcasecmp("CREATE", action)) {
     g_print ("CREATE - %s - %s\n", GSTD_OBJECT_NAME(node), args); 
   } else if (!g_ascii_strcasecmp("READ", action)) {
-    gchar *str = NULL;
-    gstd_object_to_string(node, &str);
-    g_print ("%s\n", str);
-    g_free (str);
+    gstd_object_to_string(node, response);
   } else if (!g_ascii_strcasecmp("UPDATE", action)) {
     gstd_tcp_update_by_type (core, node, args);
   } else if (!g_ascii_strcasecmp("DELETE", action)) {
@@ -243,26 +247,26 @@ gstd_tcp_parse_cmd (GstdCore *core, const gchar *cmd)
   } else
     goto badcommand;
   
-  return out;
+  return GSTD_EOK;
 
  nonode:
   {
     GST_ERROR_OBJECT(core, "Malformed URI \"%s\"", uri);
     g_strfreev (tokens);
-    return NULL;
+    return GSTD_NO_RESOURCE;
   }
  badcommand:
   {
     GST_ERROR_OBJECT(core, "Unknown command \"%s\"", action);
     g_strfreev (tokens);
     g_object_unref (node);
-    return NULL;
+    return GSTD_BAD_COMMAND;
   }
  noargtodelete:
   {
     GST_ERROR_OBJECT(core, "Missing name of resource to delete");
     g_strfreev (tokens);
     g_object_unref (node);
-    return NULL;
+    return GSTD_NO_RESOURCE;
   }
 }
