@@ -46,7 +46,7 @@ gstd_tcp_callback  (GSocketService *service,
   GInputStream *istream;
   GOutputStream *ostream;
   gint read;
-  const guint size = 1024;
+  const guint size = 1024*1024;
   gchar *output = NULL;
   gchar *response;
   gchar message[size];

@@ -412,7 +412,7 @@ gstd_client_cmd_tcp(gchar *name, gchar *arg, GstdClientData *data)
   GError *err = NULL;
   GInputStream *istream;
   GOutputStream *ostream;
-  gchar buffer[1024];
+  gchar buffer[1024*1024];
   gint read;
   
   g_return_val_if_fail (name, -1);
@@ -427,8 +427,8 @@ gstd_client_cmd_tcp(gchar *name, gchar *arg, GstdClientData *data)
 						 data->port,
 						 NULL,
 						 &err);
-  if (err) {
-    goto exrror;
+  if (err)
+    goto error;
   
   istream = g_io_stream_get_input_stream (G_IO_STREAM(data->con));
   ostream = g_io_stream_get_output_stream (G_IO_STREAM(data->con));
