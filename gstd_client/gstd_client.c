@@ -427,8 +427,8 @@ gstd_client_cmd_tcp(gchar *name, gchar *arg, GstdClientData *data)
 						 data->port,
 						 NULL,
 						 &err);
-    if (err)
-      goto error;
+  if (err) {
+    goto exrror;
   
   istream = g_io_stream_get_input_stream (G_IO_STREAM(data->con));
   ostream = g_io_stream_get_output_stream (G_IO_STREAM(data->con));

@@ -18,6 +18,7 @@
  * along with Gstd.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "gstd_tcp.h"
+#include "gstd_element.h"
 #include <stdio.h>
 
 /* Gstd Core debugging category */
@@ -46,8 +47,10 @@ gstd_tcp_callback  (GSocketService *service,
   GOutputStream *ostream;
   gint read;
   const guint size = 1024;
-  gchar *response = NULL;
+  gchar *output = NULL;
+  gchar *response;
   gchar message[size];
+  GstdReturnCode ret;
 
   g_return_val_if_fail (core, TRUE);
 
@@ -62,7 +65,12 @@ gstd_tcp_callback  (GSocketService *service,
 			      NULL);
   message[read] = '\0';
 
-  gstd_tcp_parse_cmd (core, message, &response);
+  ret = gstd_tcp_parse_cmd (core, message, &output);
+  
+  /* Prepend the code to the output */
+  response = g_strdup_printf("{\n  code : %d\n  resource : %s\n}", ret, output);
+  g_free(output);
+  
   g_output_stream_write (ostream,
   			 response,
   			 size,
@@ -145,6 +153,7 @@ gstd_tcp_update_by_type (GstdCore *core, GstdObject *obj, gchar *args)
   gchar *prop;
   gchar *svalue;
   GParamSpec *pspec;
+  GObject *properties;
 
   g_return_val_if_fail (GSTD_IS_CORE(core), GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (GSTD_IS_OBJECT(obj), GSTD_NULL_ARGUMENT);
@@ -155,11 +164,18 @@ gstd_tcp_update_by_type (GstdCore *core, GstdObject *obj, gchar *args)
   while (*property) {
     prop = *property++;
     svalue = *property++;
-    
+
     if (!*svalue)
       goto novalue;
+
+    /* If its a GSteramer element we need to parse the property from
+       the internal element */
+    if (GSTD_IS_ELEMENT(obj))
+      gstd_object_read(obj, "gstelement", &properties, NULL);
+    else
+      properties = G_OBJECT(obj);
     
-    pspec = g_object_class_find_property(G_OBJECT_GET_CLASS(obj), prop);
+    pspec = g_object_class_find_property(G_OBJECT_GET_CLASS(properties), prop);
     if (!pspec)
       goto noprop;
     

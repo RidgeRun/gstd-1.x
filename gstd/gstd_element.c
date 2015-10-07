@@ -22,11 +22,11 @@
 #include <gobject/gvaluecollector.h>
 
 enum {
-  PROP_PROPERTIES = 1,
+  PROP_GSTELEMENT = 1,
   N_PROPERTIES // NOT A PROPERTY
 };
 
-#define GSTD_ELEMENT_DEFAULT_PROPERTIES NULL
+#define GSTD_ELEMENT_DEFAULT_GSTELEMENT NULL
 
 /* Gstd Core debugging category */
 GST_DEBUG_CATEGORY_STATIC(gstd_element_debug);
@@ -74,16 +74,15 @@ gstd_element_class_init (GstdElementClass *klass)
   object_class->get_property = gstd_element_get_property;
   object_class->dispose = gstd_element_dispose;
 
-  properties[PROP_PROPERTIES] =
-    g_param_spec_object ("properties",
-			 "Properties",
-			 "The properties of the element",
+  properties[PROP_GSTELEMENT] =
+    g_param_spec_object ("gstelement",
+			 "GstElement",
+			 "The internal Gstreamer element",
 			 GST_TYPE_ELEMENT,
 			 G_PARAM_READWRITE |
 			 G_PARAM_CONSTRUCT_ONLY |
 			 G_PARAM_STATIC_STRINGS |
-			 GSTD_PARAM_READ |
-			 GSTD_PARAM_UPDATE);
+			 GSTD_PARAM_READ);
 
   g_object_class_install_properties (object_class,
                                      N_PROPERTIES,
@@ -102,7 +101,7 @@ static void
 gstd_element_init (GstdElement *self)
 {
   GST_INFO_OBJECT(self, "Initializing element");
-  self->element = GSTD_ELEMENT_DEFAULT_PROPERTIES;
+  self->element = GSTD_ELEMENT_DEFAULT_GSTELEMENT;
 }
 
 static void
@@ -131,8 +130,8 @@ gstd_element_get_property (GObject        *object,
   gstd_object_set_code (GSTD_OBJECT(self), GSTD_EOK);
   
   switch (property_id) {
-  case PROP_PROPERTIES:
-    GST_DEBUG_OBJECT(self, "Returning properties %p (%s)", self->element,
+  case PROP_GSTELEMENT:
+    GST_DEBUG_OBJECT(self, "Returning gstelement %p (%s)", self->element,
 		     GST_OBJECT_NAME(self->element));
     g_value_set_object (value, self->element);
     break;
@@ -155,7 +154,7 @@ gstd_element_set_property (GObject      *object,
   gstd_object_set_code (GSTD_OBJECT(self), GSTD_EOK);
   
   switch (property_id) {
-  case PROP_PROPERTIES:
+  case PROP_GSTELEMENT:
     self->element = g_object_ref(g_value_get_object (value));
     GST_DEBUG_OBJECT(self, "Setting element %p (%s)",self->element,
 		     GST_OBJECT_NAME(self->element));
@@ -178,6 +177,7 @@ gstd_element_read (GstdObject *object, const gchar *property,
   GstdReturnCode ret;
   GValue value = G_VALUE_INIT;
   gchar *error = NULL;
+  GObject *toset;
   
   g_return_val_if_fail (GSTD_IS_ELEMENT (object), GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (property, GSTD_NULL_ARGUMENT);
@@ -186,8 +186,16 @@ gstd_element_read (GstdObject *object, const gchar *property,
   ret = GSTD_EOK;
 
   while (name) {
-    pspec = g_object_class_find_property (G_OBJECT_GET_CLASS(self->element),
+    // First look for the property in the container
+    toset = G_OBJECT(self);
+    pspec = g_object_class_find_property (G_OBJECT_GET_CLASS(self),
 					  name);
+    if (!pspec) {
+      pspec = g_object_class_find_property (G_OBJECT_GET_CLASS(self->element),
+					    name);
+      toset = G_OBJECT(self->element);
+    }
+    
     if (!pspec) {
       GST_ERROR_OBJECT (self, "The property %s is not a property in %s",
 			name, GSTD_OBJECT_NAME(self));
@@ -202,7 +210,7 @@ gstd_element_read (GstdObject *object, const gchar *property,
     }
     
     g_value_init (&value, G_PARAM_SPEC_VALUE_TYPE(pspec));
-    g_object_get_property (G_OBJECT(self->element), name, &value);
+    g_object_get_property (toset, name, &value);
     
     G_VALUE_LCOPY(&value, va, 0, &error);
     
