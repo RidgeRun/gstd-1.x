@@ -36,7 +36,11 @@ gstd_tcp_callback  (GSocketService *service,
                     gpointer user_data);
 static GstdReturnCode
 gstd_tcp_parse_cmd (GstdCore *core, const gchar *cmd, gchar **response);
-
+static GstdReturnCode
+gstd_tcp_read (GstdCore *core, GstdObject *obj, gchar *args, gchar **reponse);
+static GstdReturnCode
+gstd_tcp_update_by_type (GstdCore *core, GstdObject *obj, gchar *args);
+  
 static gboolean
 gstd_tcp_callback  (GSocketService *service,
                     GSocketConnection *connection,
@@ -68,7 +72,7 @@ gstd_tcp_callback  (GSocketService *service,
   ret = gstd_tcp_parse_cmd (core, message, &output);
   
   /* Prepend the code to the output */
-  response = g_strdup_printf("{\n  code : %d\n  resource : %s\n}", ret, output);
+  response = g_strdup_printf("{\n  code : %d\n  response : %s\n}", ret, output);
   g_free(output);
   
   g_output_stream_write (ostream,
@@ -120,7 +124,6 @@ gstd_tcp_start (GstdCore *core, GSocketService **service, guint16 port)
     g_error_free (error);
     return GSTD_NO_CONNECTION;
   }
-    
 }
 
 GstdReturnCode
@@ -150,6 +153,55 @@ gstd_tcp_is_num (const gchar *str)
       return FALSE;
   }
   return TRUE;
+}
+
+static GstdReturnCode
+gstd_tcp_read (GstdCore *core, GstdObject *obj, gchar *args, gchar **response)
+{
+  gchar **tokens;
+  GParamSpec *pspec;
+  GObject *properties;
+  GValue value = G_VALUE_INIT;
+  
+  g_return_val_if_fail (GSTD_IS_CORE(core), GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (GSTD_IS_OBJECT(obj), GSTD_NULL_ARGUMENT);
+
+  // This may mean a potential leak
+  g_warn_if_fail (!*response);
+  
+  // Print the raw object
+  if (!args)
+    return gstd_object_to_string (obj, response);
+
+  tokens = g_strsplit (args, " ", -1);
+  
+  // Print the property
+  /* If its a GstdElement element we need to parse the pspec from
+     the internal element */
+  if (GSTD_IS_ELEMENT(obj))
+    gstd_object_read(obj, "gstelement", &properties, NULL);
+  else
+    properties = G_OBJECT(obj);
+  
+  pspec = g_object_class_find_property(G_OBJECT_GET_CLASS(properties), tokens[0]);
+  if (!pspec)
+      goto noprop;
+
+  /* Automagical type value serialization */
+  g_value_init (&value, pspec->value_type);
+  g_object_get_property(G_OBJECT(properties), tokens[0], &value);
+  *response = g_strdup_value_contents(&value);
+  g_value_unset(&value);
+
+  return GSTD_EOK;
+
+ noprop:
+  {
+    GST_ERROR_OBJECT(core, "Unexisting property \"%s\" in %s",
+		     tokens[0], GSTD_OBJECT_NAME(obj));
+    g_strfreev(tokens);
+    return GSTD_BAD_COMMAND;
+  }
 }
 
 static GstdReturnCode
@@ -339,7 +391,7 @@ gstd_tcp_parse_cmd (GstdCore *core, const gchar *cmd, gchar **response)
     ret = GSTD_EOK;
     g_print ("CREATE - %s - %s\n", GSTD_OBJECT_NAME(node), args); 
   } else if (!g_ascii_strcasecmp("READ", action)) {
-    ret = gstd_object_to_string(node, response);
+    ret = gstd_tcp_read(core, node, args, response);
   } else if (!g_ascii_strcasecmp("UPDATE", action)) {
     ret = gstd_tcp_update_by_type (core, node, args);
   } else if (!g_ascii_strcasecmp("DELETE", action)) {
