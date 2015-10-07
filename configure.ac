@@ -90,6 +90,7 @@ dnl =======================================================================
 AC_CONFIG_FILES([
 Makefile
 gstd/Makefile
+gstd_client/Makefile
 tests/Makefile
 tests/gstd/Makefile
 ])

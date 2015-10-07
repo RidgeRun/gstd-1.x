@@ -1,5 +1,5 @@
 ACLOCAL_AMFLAGS=-I m4
 
-SUBDIRS=gstd tests
+SUBDIRS=gstd gstd_client tests
 
 EXTRA_DIST=autogen.sh
