@@ -50,7 +50,6 @@ gint
 main (gint argc, gchar *argv[])
 {
   GstdCore *core;
-  GstdObject *obj;
 
   /* Initialize GStreamer subsystem before calling anything else */
   gst_init(&argc, &argv);
@@ -68,18 +67,6 @@ main (gint argc, gchar *argv[])
   /* Install a handler for the interrupt signal */
   signal (SIGINT, int_handler);
   gstd_pipeline_create (core, "pipe0", "videotestsrc ! osxvideosink");
-
-  gstd_get_by_uri(core, "pipelines/pipe0/elements", &obj);
-  //  gstd_pipeline_play(core, "pipe0");
-  //  sleep(1);
-  //  gstd_element_set (core, "pipe0", "videotestsrc0", "pattern", (gpointer)3);
-  //  sleep(1);
-  //  gstd_pipeline_null(core, "pipe0");
-    gchar *tostring;
-    gstd_object_to_string(obj, &tostring);
-
-    g_print ("%s\n", tostring);
-    g_free (tostring);
   
   g_main_loop_run (main_loop);
 

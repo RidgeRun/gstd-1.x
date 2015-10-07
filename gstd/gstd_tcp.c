@@ -42,6 +42,8 @@ static GstdReturnCode
 gstd_tcp_read (GstdCore *core, GstdObject *obj, gchar *args, gchar **reponse);
 static GstdReturnCode
 gstd_tcp_update_by_type (GstdCore *core, GstdObject *obj, gchar *args);
+static GstdReturnCode
+gstd_tcp_delete (GstdCore *core, GstdObject *obj, gchar *args);
   
 static gboolean
 gstd_tcp_callback  (GSocketService *service,
@@ -432,6 +434,19 @@ gstd_tcp_update_by_type (GstdCore *core, GstdObject *obj, gchar *args)
 }
 
 static GstdReturnCode
+gstd_tcp_delete (GstdCore *core, GstdObject *obj, gchar *args)
+{
+  gchar **tokens;
+  
+  g_return_val_if_fail (GSTD_IS_CORE(core), GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (GSTD_IS_OBJECT(obj), GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (args, GSTD_NULL_ARGUMENT);
+
+  tokens = g_strsplit (args, " ", -1);
+  return gstd_object_delete (obj, tokens[0]);
+}
+
+static GstdReturnCode
 gstd_tcp_parse_cmd (GstdCore *core, const gchar *cmd, gchar **response)
 {
   gchar **tokens;
@@ -459,7 +474,7 @@ gstd_tcp_parse_cmd (GstdCore *core, const gchar *cmd, gchar **response)
     ret = gstd_tcp_update_by_type (core, node, args);
     gstd_tcp_read(core, node, args, response);
   } else if (!g_ascii_strcasecmp("DELETE", action)) {
-    ret = gstd_object_delete (node, args);
+    ret = gstd_tcp_delete (core, node, args);
   } else
     goto badcommand;
   
