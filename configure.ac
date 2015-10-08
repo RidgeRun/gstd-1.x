@@ -1,17 +1,21 @@
 dnl required version of autoconf
 AC_PREREQ([2.53])
 
-dnl TODO: fill in your package name and package version here
-AC_INIT([gstd],[1.0.0])
+dnl Gstreamer's daemon package name and version
+AC_INIT([gstd],[0.0.1])
 
 dnl required version of gstreamer and gst-plugins-base
 GST_REQUIRED=1.0.0
 
-AC_CONFIG_SRCDIR([src/main.c])
+dnl required version of gio
+GIO_REQUIRED=2.44.1
+
+AC_CONFIG_SRCDIR([gstd/main.c])
 AC_CONFIG_HEADERS([config.h])
+AC_CONFIG_MACRO_DIRS([m4])
 
 dnl required version of automake
-AM_INIT_AUTOMAKE([1.10])
+AM_INIT_AUTOMAKE([1.10 subdir-objects])
 
 dnl enable mainainer mode by default
 AM_MAINTAINER_MODE([enable])
@@ -52,6 +56,24 @@ PKG_CHECK_MODULES(GST, [
   ])
 ])
 
+PKG_CHECK_MODULES(GIO, [
+    gio-2.0              >= $GST_REQUIRED
+  ], [
+    AC_SUBST(GIO_CFLAGS)
+    AC_SUBST(GIO_LIBS)
+  ], [
+  AC_MSG_ERROR([
+    Can't find the following GIO development packages:
+
+      gio-2.0              >= $GIO_REQUIRED
+
+    Please make sure you have the necessary GIO-2.0
+    development headers installed.
+  ])
+])
+
+AX_LIB_READLINE
+
 dnl check if compiler understands -Wall (if yes, add -Wall to GST_CFLAGS)
 AC_MSG_CHECKING([to see if compiler understands -Wall])
 save_CFLAGS="$CFLAGS"
@@ -69,7 +91,10 @@ dnl =======================================================================
 
 AC_CONFIG_FILES([
 Makefile
-src/Makefile
+gstd/Makefile
+gstd_client/Makefile
+tests/Makefile
+tests/gstd/Makefile
 ])
 AC_OUTPUT
 
