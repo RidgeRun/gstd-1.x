@@ -25,11 +25,11 @@
 #include <gst/gst.h>
 #include <signal.h>
 #include <unistd.h>
+#include <stdlib.h>
 
 #include "gstd.h"
-#include "gstd_pipeline.h"
-#include "gstd_element.h"
-#include "gstd_list.h"
+
+#define GSTD_CLIENT_DEFAULT_PORT 5000
 
 /* GLib main loop, we need it global to access it through the SIGINT
    handler */
@@ -50,7 +50,37 @@ gint
 main (gint argc, gchar *argv[])
 {
   GstdCore *core;
+  guint port;
+  gboolean version;
+  GError *error = NULL;
+  GOptionContext *context;
+  GOptionEntry entries[] = {
+    { "port", 'p', 0, G_OPTION_ARG_INT, &port, "Attach to the server through the given port (default 5000)",
+      "port" },
+    { "version", 'v', 0, G_OPTION_ARG_NONE, &version, "Print current gstd version", NULL },
+    { NULL }
+  };
 
+  // Initialize default
+  version = FALSE;
+  port = GSTD_CLIENT_DEFAULT_PORT;
+
+  context = g_option_context_new (" - gst-launch under steroids");
+  g_option_context_add_main_entries (context, entries, NULL);
+  g_option_context_add_group (context, gst_init_get_option_group ());
+  if (!g_option_context_parse (context, &argc, &argv, &error)) {
+    g_printerr ("%s\n", error->message);
+    g_error_free(error);
+    return EXIT_FAILURE;
+  }
+
+  // Print the version and exit
+  if (version) {
+    g_print ("" PACKAGE_STRING "\n");
+    g_print ("Copyright (c) 2015 RigeRun Engineering\n");
+    return EXIT_SUCCESS;
+  }
+  
   /* Initialize GStreamer subsystem before calling anything else */
   gst_init(&argc, &argv);
 
@@ -62,7 +92,7 @@ main (gint argc, gchar *argv[])
   GST_INFO ("Starting application...");
   main_loop = g_main_loop_new (NULL, FALSE);
 
-  core = gstd_new ("Core0", 5000);
+  core = gstd_new ("Core0", port);
   
   /* Install a handler for the interrupt signal */
 
