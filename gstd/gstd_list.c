@@ -239,6 +239,7 @@ gstd_list_create (GstdObject * object, const gchar *property, va_list va)
   GstdList *self = GSTD_LIST(object);
   GObject *newnode;
   GList *found;
+  GstdReturnCode ret;
   
   g_return_val_if_fail (GSTD_IS_LIST (object), GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (property, GSTD_NULL_ARGUMENT);
@@ -250,6 +251,12 @@ gstd_list_create (GstdObject * object, const gchar *property, va_list va)
   /* Everything setup, create the new resource */
   newnode = g_object_new_valist (self->node_type, property, va);
 
+  /* Check if there was an error creating the object */
+
+  ret = gstd_object_get_code(GSTD_OBJECT(newnode));
+  if (ret)
+    goto error;
+  
   /* Test if the resource to create already exists */
   found = g_list_find_custom (self->list, GSTD_OBJECT_NAME(newnode),
 			      gstd_list_find_node);
@@ -268,6 +275,13 @@ gstd_list_create (GstdObject * object, const gchar *property, va_list va)
     GST_ERROR_OBJECT(object, "Cannot create resources in \"%s\"",
 		     GSTD_OBJECT_NAME(self));
     return GSTD_NO_CREATE;
+  }
+ error:
+  {
+    GST_ERROR_OBJECT(object, "Error creating object \"%s\"",
+		     GSTD_OBJECT_NAME(self));
+    g_object_unref(newnode);
+    return ret;
   }
  exists:
   {

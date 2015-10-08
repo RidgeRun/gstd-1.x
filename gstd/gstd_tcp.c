@@ -536,6 +536,7 @@ gstd_tcp_parse_raw_cmd (GstdCore *core, gchar *action, gchar *args, gchar **resp
   } else
     goto badcommand;
 
+  g_object_unref(node);
   return ret;
   
  nonode:
