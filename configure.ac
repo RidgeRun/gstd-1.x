@@ -8,7 +8,7 @@ dnl required version of gstreamer and gst-plugins-base
 GST_REQUIRED=1.0.0
 
 dnl required version of gio
-GIO_REQUIRED=2.44    .1
+GIO_REQUIRED=2.44.1
 
 AC_CONFIG_SRCDIR([gstd/main.c])
 AC_CONFIG_HEADERS([config.h])

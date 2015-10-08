@@ -80,6 +80,11 @@ struct _GstdPipeline
   GstdList *elements;
 };
 
+struct _GstdPipelineClass
+{
+  GstdObjectClass parent_class;
+};  
+
 G_DEFINE_TYPE (GstdPipeline, gstd_pipeline, GSTD_TYPE_OBJECT)
 
 /* VTable */
@@ -220,6 +225,8 @@ gstd_to_gst (GstdPipelineState gstd)
   case GSTD_PIPELINE_NULL:
     return GST_STATE_NULL;
   }
+  //Shhhh gcc
+  return GST_STATE_NULL;
 }
 
 static void
