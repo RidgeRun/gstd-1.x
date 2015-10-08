@@ -31,8 +31,22 @@
 
 G_BEGIN_DECLS
 
-#define GSTD_TYPE_CORE gstd_core_get_type ()
-G_DECLARE_FINAL_TYPE (GstdCore, gstd_core, GSTD, CORE, GstdObject);
+#define GSTD_TYPE_CORE \
+  (gstd_core_get_type())
+#define GSTD_CORE(obj) \
+  (G_TYPE_CHECK_INSTANCE_CAST((obj),GSTD_TYPE_CORE,GstdCore))
+#define GSTD_CORE_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_CAST((klass),GSTD_TYPE_CORE,GstdCoreClass))
+#define GSTD_IS_CORE(obj) \
+  (G_TYPE_CHECK_INSTANCE_TYPE((obj),GSTD_TYPE_CORE))
+#define GSTD_IS_CORE_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_TYPE((klass),GSTD_TYPE_CORE))
+#define GSTD_CORE_GET_CLASS(obj) \
+  (G_TYPE_INSTANCE_GET_CLASS ((obj), GSTD_TYPE_CORE, GstdCoreClass))
+
+typedef struct _GstdCore GstdCore;
+typedef struct _GstdCoreClass GstdCoreClass;
+GType gstd_core_get_type();
 
 GstdCore *
 gstd_new (const gchar *name, const guint16 port);

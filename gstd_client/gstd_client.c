@@ -39,7 +39,7 @@ extern gchar *readline ();
 #  endif /* !defined(HAVE_READLINE_H) */
 gchar *cmdline = NULL;
 #else /* !defined(HAVE_READLINE_READLINE_H) */
-#  define readline
+
 #endif /* HAVE_LIBREADLINE */
 
 #ifdef HAVE_READLINE_HISTORY
@@ -53,9 +53,7 @@ extern gint write_history ();
 extern gint read_history ();
 #  endif /* defined(HAVE_READLINE_HISTORY_H) */
 #else
-#    define add_history
-#    define write_history 
-#    define read_history
+
 #endif /* HAVE_READLINE_HISTORY */
 
 /* cmdline defaults */
@@ -245,7 +243,11 @@ main (gint argc, gchar *argv[])
   remaining = NULL;
   file = NULL;
   quit = FALSE;
+  version = FALSE;
+  inter = FALSE;
   port = GSTD_CLIENT_DEFAULT_PORT;
+  address = NULL;
+  quiet = FALSE;
   
   context = g_option_context_new ("[COMMANDS...] - gst-launch under steroids");
   g_option_context_add_main_entries (context, entries, NULL);
@@ -263,7 +265,7 @@ main (gint argc, gchar *argv[])
   quiet = quiet || file || remaining;
   
   if (version) {
-    g_print ("" PACKAGE_STRING);
+    g_print ("" PACKAGE_STRING "\n");
     g_print ("Copyright (c) 2015 RigeRun Engineering\n");
     return EXIT_SUCCESS;
   }

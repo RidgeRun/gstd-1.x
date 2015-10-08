@@ -29,8 +29,23 @@ G_BEGIN_DECLS
 /*
  * Type declaration.
  */
-#define GSTD_TYPE_LIST gstd_list_get_type ()
-G_DECLARE_FINAL_TYPE (GstdList, gstd_list, GSTD, LIST, GstdObject);
+
+#define GSTD_TYPE_LIST \
+  (gstd_list_get_type())
+#define GSTD_LIST(obj) \
+  (G_TYPE_CHECK_INSTANCE_CAST((obj),GSTD_TYPE_LIST,GstdList))
+#define GSTD_LIST_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_CAST((klass),GSTD_TYPE_LIST,GstdListClass))
+#define GSTD_IS_LIST(obj) \
+  (G_TYPE_CHECK_INSTANCE_TYPE((obj),GSTD_TYPE_LIST))
+#define GSTD_IS_LIST_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_TYPE((klass),GSTD_TYPE_LIST))
+#define GSTD_LIST_GET_CLASS(obj) \
+  (G_TYPE_INSTANCE_GET_CLASS ((obj), GSTD_TYPE_LIST, GstdListClass))
+
+typedef struct _GstdList GstdList;
+typedef struct _GstdListClass GstdListClass;
+GType gstd_list_get_type();
 
 G_END_DECLS
 

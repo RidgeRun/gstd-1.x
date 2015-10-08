@@ -67,6 +67,11 @@ struct _GstdList
   GList *list;
 };
 
+struct _GstdListClass
+{
+  GstdObjectClass parent_class;
+}; 
+
 G_DEFINE_TYPE (GstdList, gstd_list, GSTD_TYPE_OBJECT)
 
 /* VTable */

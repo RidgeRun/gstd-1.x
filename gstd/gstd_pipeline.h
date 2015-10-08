@@ -31,8 +31,22 @@ G_BEGIN_DECLS
 /*
  * Type declaration.
  */
-#define GSTD_TYPE_PIPELINE gstd_pipeline_get_type ()
-G_DECLARE_FINAL_TYPE (GstdPipeline, gstd_pipeline, GSTD, PIPELINE, GstdObject);
+#define GSTD_TYPE_PIPELINE \
+  (gstd_pipeline_get_type())
+#define GSTD_PIPELINE(obj) \
+  (G_TYPE_CHECK_INSTANCE_CAST((obj),GSTD_TYPE_PIPELINE,GstdPipeline))
+#define GSTD_PIPELINE_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_CAST((klass),GSTD_TYPE_PIPELINE,GstdPipelineClass))
+#define GSTD_IS_PIPELINE(obj) \
+  (G_TYPE_CHECK_INSTANCE_TYPE((obj),GSTD_TYPE_PIPELINE))
+#define GSTD_IS_PIPELINE_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_TYPE((klass),GSTD_TYPE_PIPELINE))
+#define GSTD_PIPELINE_GET_CLASS(obj) \
+  (G_TYPE_INSTANCE_GET_CLASS ((obj), GSTD_TYPE_PIPELINE, GstdPipelineClass))
+
+typedef struct _GstdPipeline GstdPipeline;
+typedef struct _GstdPipelineClass GstdPipelineClass;
+GType gstd_pipeline_get_type();
 
 typedef enum {
   GSTD_PIPELINE_NULL,

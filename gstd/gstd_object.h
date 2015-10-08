@@ -94,7 +94,6 @@ struct _GstdObjectClass
 };
 
 GType gstd_object_get_type(void);
-G_DEFINE_AUTOPTR_CLEANUP_FUNC(GstdObject, g_object_unref)
 
 #define GSTD_OBJECT_DEFAULT_NAME NULL
 

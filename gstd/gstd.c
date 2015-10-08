@@ -50,6 +50,11 @@ struct _GstdCore
   GSocketService *service;
 };
 
+struct _GstdCoreClass
+{
+  GstdObjectClass parent_class;
+};
+
 G_DEFINE_TYPE (GstdCore, gstd_core, GSTD_TYPE_OBJECT)
 
 /* VTable */

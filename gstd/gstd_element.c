@@ -48,6 +48,12 @@ struct _GstdElement
   GstElement *element;
 };
 
+struct _GstdElementClass
+{
+  GstdObjectClass parent_class;
+}; 
+
+
 G_DEFINE_TYPE (GstdElement, gstd_element, GSTD_TYPE_OBJECT)
 
 /* VTable */
