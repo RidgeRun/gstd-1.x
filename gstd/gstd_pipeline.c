@@ -173,7 +173,12 @@ static void
 gstd_pipeline_constructed (GObject *object)
 {
   GstdPipeline *self = GSTD_PIPELINE(object);
-  gstd_pipeline_create (self, GSTD_OBJECT_NAME(self),0, self->description);
+  GstdReturnCode ret;
+
+  ret = gstd_pipeline_create (self, GSTD_OBJECT_NAME(self),0, self->description);
+
+  // Capture any possible error
+  gstd_object_set_code(GSTD_OBJECT(self), ret);
 }
 
 static void
@@ -182,6 +187,9 @@ gstd_pipeline_dispose (GObject *object)
   GstdPipeline *self = GSTD_PIPELINE(object);
 
   GST_INFO_OBJECT(self, "Disposing %s pipeline", GSTD_OBJECT_NAME(self));
+
+  /* Stop the pipe if playing */
+  gstd_object_update(GSTD_OBJECT(self), "state", GSTD_PIPELINE_NULL, NULL);
   
   if (self->description) {
     g_free(self->description);
@@ -281,6 +289,7 @@ gstd_pipeline_set_property (GObject      *object,
   GstdPipelineState state;
   GEnumValue *evalue;
   GEnumClass *eclass;
+  GstStateChangeReturn stateret;
 
   gstd_object_set_code (GSTD_OBJECT(self), GSTD_EOK);
   
@@ -296,10 +305,15 @@ gstd_pipeline_set_property (GObject      *object,
     eclass = g_type_class_ref (GSTD_TYPE_PIPELINE_STATE);
     evalue = g_enum_get_value (eclass, state);
 
-    gst_element_set_state (self->pipeline, gstd_to_gst(state));
-
-    GST_INFO_OBJECT(self, "Changed state to %d (%s)", state,
-		    evalue->value_name);
+    stateret = gst_element_set_state (self->pipeline, gstd_to_gst(state));
+    if (GST_STATE_CHANGE_FAILURE == stateret) {
+      GST_ERROR_OBJECT(self, "Failed to change %s to %s", GSTD_OBJECT_NAME(self),
+		       evalue->value_name);
+      gstd_object_set_code (GSTD_OBJECT(self), GSTD_STATE_ERROR);
+    } else {
+      GST_INFO_OBJECT(self, "Changed state to %d (%s)", state,
+		      evalue->value_name);
+    }
     g_type_class_unref (eclass);
     break;
   default:
@@ -337,7 +351,7 @@ gstd_pipeline_create (GstdPipeline *self, const gchar *name,
   g_return_val_if_fail (self, GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (index != -1, GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (description, GSTD_NULL_ARGUMENT);
-  
+
   error = NULL;
   self->pipeline = gst_parse_launch(description, &error);
   if (!self->pipeline)
@@ -373,9 +387,6 @@ gstd_pipeline_create (GstdPipeline *self, const gchar *name,
       GST_ERROR_OBJECT (self, "Unable to create pipeline: %s", error->message);
       g_error_free (error);
     }
-    else
-      GST_ERROR_OBJECT (self, "Unable to create pipeline");
-
     return GSTD_BAD_DESCRIPTION;
   }
  }
