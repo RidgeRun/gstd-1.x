@@ -158,7 +158,9 @@ gstd_pipeline_init (GstdPipeline *self)
   self->description = g_strdup(GSTD_PIPELINE_DEFAULT_DESCRIPTION);
   self->pipeline = NULL;
   self->elements = g_object_new (GSTD_TYPE_LIST, "name", "elements",
-				 "node-type", GSTD_TYPE_ELEMENT, NULL);
+				 "node-type", GSTD_TYPE_ELEMENT,
+				 "flags", GSTD_PARAM_READ |
+				 GSTD_PARAM_CREATE, NULL);
 
 }
 
@@ -422,12 +424,7 @@ gstd_pipeline_fill_elements (GstdPipeline *self, GstElement *element)
   gst_iterator_free (it);
 
   // Lock the elements from now on
-  gint flags;
-  gstd_object_read(GSTD_OBJECT(self->elements), "flags", &flags, NULL);
-  GST_ERROR("Flags before %x", flags);
   gstd_object_update(GSTD_OBJECT(self->elements), "flags", GSTD_PARAM_READ, NULL);
-  gstd_object_read(GSTD_OBJECT(self->elements), "flags", &flags, NULL);
-  GST_ERROR("Flags after %x", flags);
   GST_DEBUG_OBJECT(self, "Elements where saved");
 
   return GSTD_EOK;

@@ -82,8 +82,6 @@ struct _GstdClientData {
   GSocketConnection *con;
 };
 
-
-
 /* VTable */
 static gint
 gstd_client_cmd_quit(gchar *, gchar *, GstdClientData *);
@@ -125,6 +123,31 @@ static GstdClientCmd cmds[] = {
                                   "read <URI> <name>"},
   {"sh", gstd_client_cmd_sh, "Executes a shell command", "sh <command>"},
   {"source", gstd_client_cmd_source, "Sources a file with commands", "source <file>"},
+
+  // High level commands
+  {"pipeline_create", gstd_client_cmd_tcp, "Creates a new pipeline based on the name and description",
+   "pipeline_create <name> <description>"},
+  {"pipeline_delete", gstd_client_cmd_tcp, "Deletes the pipeline with the given name",
+   "pipeline_delete <name>"},
+  {"pipeline_play", gstd_client_cmd_tcp, "Sets the pipeline to playing",
+   "pipeline_play <name>"},
+  {"pipeline_pause", gstd_client_cmd_tcp, "Sets the pipeline to paused",
+   "pipeline_pause <name>"},
+  {"pipeline_stop", gstd_client_cmd_tcp, "Sets the pipeline to null",
+   "pipeline_stop <name>"},
+  
+  {"element_set", gstd_client_cmd_tcp, "Sets a property in an element of a given pipeline",
+   "element_set <pipe> <element> <property> <value>"},
+  {"element_get", gstd_client_cmd_tcp, "Queries a property in an element of a given pipeline",
+   "element_set <pipe> <element> <property>"},
+
+  {"list_pipelines", gstd_client_cmd_tcp, "List the existing pipelines",
+   "list_pipeline"},
+  {"list_elements", gstd_client_cmd_tcp, "List the elements in a given pipeline",
+   "list_elements <pipe>"},
+  {"list_properties", gstd_client_cmd_tcp, "List the properties of an element in a given pipeline",
+   "list_properties <pipe> <elemement>"},
+  
   {NULL}
 };
 
@@ -271,7 +294,11 @@ main (gint argc, gchar *argv[])
 
   if (!inter)
     return EXIT_SUCCESS;
-  
+
+#ifndef HAVE_LIBREADLINE
+  // No readline, no interaction
+  quit = TRUE;
+#endif
 
   gstd_client_header (quiet);
   /* Jump here in case of an interrupt, so we can exit */

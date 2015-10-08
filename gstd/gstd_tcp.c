@@ -28,6 +28,12 @@ GST_DEBUG_CATEGORY_STATIC(gstd_tcp_debug);
 
 #define GSTD_DEBUG_DEFAULT_LEVEL GST_LEVEL_INFO
 
+typedef GstdReturnCode GstdTCPFunc (GstdCore*, gchar *,gchar *, gchar **);
+typedef struct _GstdTCPCmd {
+  gchar *cmd;
+  GstdTCPFunc *callback;
+} GstdTCPCmd;
+
 /* VTable */
 static gboolean
 gstd_tcp_callback  (GSocketService *service,
@@ -37,14 +43,57 @@ gstd_tcp_callback  (GSocketService *service,
 static GstdReturnCode
 gstd_tcp_parse_cmd (GstdCore *core, const gchar *cmd, gchar **response);
 static GstdReturnCode
+gstd_tcp_parse_raw_cmd (GstdCore *core, gchar *action, gchar *args, gchar **response);
+static GstdReturnCode
 gstd_tcp_create (GstdCore *core, GstdObject *obj, gchar *args, gchar **response);
 static GstdReturnCode
 gstd_tcp_read (GstdCore *core, GstdObject *obj, gchar *args, gchar **reponse);
 static GstdReturnCode
-gstd_tcp_update_by_type (GstdCore *core, GstdObject *obj, gchar *args);
+gstd_tcp_update_by_type (GstdCore *core, GstdObject *obj, gchar *args, gchar **response);
 static GstdReturnCode
-gstd_tcp_delete (GstdCore *core, GstdObject *obj, gchar *args);
+gstd_tcp_delete (GstdCore *core, GstdObject *obj, gchar *args, gchar **response);
+static GstdReturnCode
+gstd_tcp_pipeline_create (GstdCore *, gchar *, gchar *, gchar **);
+static GstdReturnCode
+gstd_tcp_pipeline_delete (GstdCore *, gchar *, gchar *, gchar **);
+static GstdReturnCode
+gstd_tcp_pipeline_play (GstdCore *, gchar *, gchar *, gchar **);
+static GstdReturnCode
+gstd_tcp_pipeline_pause (GstdCore *, gchar *, gchar *, gchar **);
+static GstdReturnCode
+gstd_tcp_pipeline_stop (GstdCore *, gchar *, gchar *, gchar **);
+static GstdReturnCode
+gstd_tcp_element_set (GstdCore *, gchar *, gchar *, gchar **);
+static GstdReturnCode
+gstd_tcp_element_get (GstdCore *, gchar *, gchar *, gchar **);
+static GstdReturnCode
+gstd_tcp_list_pipelines (GstdCore *, gchar *, gchar *, gchar **);
+static GstdReturnCode
+gstd_tcp_list_elements (GstdCore *, gchar *, gchar *, gchar **);
+static GstdReturnCode
+gstd_tcp_list_properties (GstdCore *, gchar *, gchar *, gchar **);
+
+static GstdTCPCmd cmds[] = {
+  {"create", gstd_tcp_parse_raw_cmd},
+  {"read", gstd_tcp_parse_raw_cmd},
+  {"update", gstd_tcp_parse_raw_cmd},
+  {"delete", gstd_tcp_parse_raw_cmd},
+
+  {"pipeline_create", gstd_tcp_pipeline_create},
+  {"pipeline_delete", gstd_tcp_pipeline_delete},
+  {"pipeline_play", gstd_tcp_pipeline_play},
+  {"pipeline_pause", gstd_tcp_pipeline_pause},
+  {"pipeline_stop", gstd_tcp_pipeline_stop},
   
+  {"element_set", gstd_tcp_element_set},
+  {"element_get", gstd_tcp_element_get},
+
+  {"list_pipelines", gstd_tcp_list_pipelines},
+  {"list_elements", gstd_tcp_list_elements},
+  {"list_properties", gstd_tcp_list_properties},
+  {NULL}
+};
+
 static gboolean
 gstd_tcp_callback  (GSocketService *service,
                     GSocketConnection *connection,
@@ -271,7 +320,7 @@ gstd_tcp_read (GstdCore *core, GstdObject *obj, gchar *args, gchar **response)
 }
 
 static GstdReturnCode
-gstd_tcp_update_by_type (GstdCore *core, GstdObject *obj, gchar *args)
+gstd_tcp_update_by_type (GstdCore *core, GstdObject *obj, gchar *args, gchar **response)
 {
   gchar **tokens;
   gchar **property;
@@ -284,6 +333,8 @@ gstd_tcp_update_by_type (GstdCore *core, GstdObject *obj, gchar *args)
   g_return_val_if_fail (GSTD_IS_OBJECT(obj), GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (args, GSTD_NULL_ARGUMENT);
 
+  *response = NULL;
+  
   tokens = g_strsplit (args, " ", -1);
   property = tokens;
   while (*property) {
@@ -434,7 +485,7 @@ gstd_tcp_update_by_type (GstdCore *core, GstdObject *obj, gchar *args)
 }
 
 static GstdReturnCode
-gstd_tcp_delete (GstdCore *core, GstdObject *obj, gchar *args)
+gstd_tcp_delete (GstdCore *core, GstdObject *obj, gchar *args, gchar **response)
 {
   gchar **tokens;
   
@@ -442,44 +493,51 @@ gstd_tcp_delete (GstdCore *core, GstdObject *obj, gchar *args)
   g_return_val_if_fail (GSTD_IS_OBJECT(obj), GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (args, GSTD_NULL_ARGUMENT);
 
+  *response = NULL;
+  
   tokens = g_strsplit (args, " ", -1);
   return gstd_object_delete (obj, tokens[0]);
 }
 
 static GstdReturnCode
-gstd_tcp_parse_cmd (GstdCore *core, const gchar *cmd, gchar **response)
+gstd_tcp_parse_raw_cmd (GstdCore *core, gchar *action, gchar *args, gchar **response)
 {
   gchar **tokens;
-  gchar *action, *uri, *args;
+  gchar *uri, *rest;
   GstdObject *node;
   GstdReturnCode ret;
 
   g_return_val_if_fail (GSTD_IS_CORE(core), GSTD_NULL_ARGUMENT);
-  g_return_val_if_fail (cmd, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (action, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (args, GSTD_NULL_ARGUMENT);
   g_warn_if_fail (!*response);
 
-  tokens = g_strsplit (cmd, " ", 3);
-  action = tokens[0];
-  uri = tokens[1];
-  args = tokens[2];
+  
+  tokens = g_strsplit (args, " ", 2);
+  uri = tokens[0];
+  rest = tokens[1];
+
+  // Alias the empty string to the base
+  if (!uri)
+    uri = "/";
 
   if (gstd_get_by_uri (core, uri, &node))
     goto nonode;
-  
+
   if (!g_ascii_strcasecmp("CREATE", action)) {
-    ret = gstd_tcp_create(core, node, args, response);
+    ret = gstd_tcp_create(core, node, rest, response);
   } else if (!g_ascii_strcasecmp("READ", action)) {
-    ret = gstd_tcp_read(core, node, args, response);
+    ret = gstd_tcp_read(core, node, rest, response);
   } else if (!g_ascii_strcasecmp("UPDATE", action)) {
-    ret = gstd_tcp_update_by_type (core, node, args);
-    gstd_tcp_read(core, node, args, response);
+    ret = gstd_tcp_update_by_type (core, node, rest, response);
+    gstd_tcp_read(core, node, rest, response);
   } else if (!g_ascii_strcasecmp("DELETE", action)) {
-    ret = gstd_tcp_delete (core, node, args);
+    ret = gstd_tcp_delete (core, node, rest, response);
   } else
     goto badcommand;
-  
-  return ret;
 
+  return ret;
+  
  nonode:
   {
     GST_ERROR_OBJECT(core, "Malformed URI \"%s\"", uri);
@@ -493,4 +551,227 @@ gstd_tcp_parse_cmd (GstdCore *core, const gchar *cmd, gchar **response)
     g_object_unref (node);
     return GSTD_BAD_COMMAND;
   }
+}
+
+static GstdReturnCode
+gstd_tcp_parse_cmd (GstdCore *core, const gchar *cmd, gchar **response)
+{
+  gchar **tokens;
+  gchar *action, *args;
+  GstdTCPCmd *cb;
+
+  g_return_val_if_fail (GSTD_IS_CORE(core), GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (cmd, GSTD_NULL_ARGUMENT);
+  g_warn_if_fail (!*response);
+
+  tokens = g_strsplit (cmd, " ", 2);
+  action = tokens[0];
+  args = tokens[1];
+
+  cb = cmds;
+  while (cb) {
+    if (!g_ascii_strcasecmp(cb->cmd, action)) {
+      return cb->callback (core, action, args, response);
+    }
+    cb++;
+  }
+
+  GST_ERROR_OBJECT(core, "Unknown command \"%s\"", action);
+  g_strfreev (tokens);
+
+  return GSTD_BAD_COMMAND;
+}
+
+static GstdReturnCode
+gstd_tcp_pipeline_create (GstdCore *core, gchar *action, gchar *args, gchar **response)
+{
+  GstdReturnCode ret;
+  gchar *uri;
+  gchar **tokens;
+  
+  g_return_val_if_fail (GSTD_IS_CORE(core), GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (args, GSTD_NULL_ARGUMENT);
+
+  tokens = g_strsplit(args, " ", 2);
+  g_return_val_if_fail (tokens[0], GSTD_BAD_COMMAND);
+  g_return_val_if_fail (tokens[1], GSTD_BAD_COMMAND);
+  
+  uri = g_strdup_printf("/pipelines name %s description %s", tokens[0], tokens[1]);
+
+  ret = gstd_tcp_parse_raw_cmd(core, "create", uri, response);
+
+  g_free(uri);
+  g_strfreev(tokens);
+
+  return ret;
+}
+
+static GstdReturnCode
+gstd_tcp_pipeline_delete (GstdCore *core, gchar *action, gchar *args, gchar **response)
+{
+  GstdReturnCode ret;
+  gchar *uri;
+  
+  g_return_val_if_fail (GSTD_IS_CORE(core), GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (args, GSTD_NULL_ARGUMENT);
+  
+  uri = g_strdup_printf("/pipelines %s", args);
+  ret = gstd_tcp_parse_raw_cmd(core, "delete", uri, response);
+  g_free(uri);
+
+  return ret;
+}
+
+static GstdReturnCode
+gstd_tcp_pipeline_play (GstdCore *core, gchar *action, gchar *args, gchar **response)
+{
+  GstdReturnCode ret;
+  gchar *uri;
+  
+  g_return_val_if_fail (GSTD_IS_CORE(core), GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (args, GSTD_NULL_ARGUMENT);
+
+  uri = g_strdup_printf("/pipelines/%s state playing", args);
+  ret = gstd_tcp_parse_raw_cmd(core, "update", uri, response);
+  g_free(uri);
+
+  return ret;
+}
+
+static GstdReturnCode
+gstd_tcp_pipeline_pause (GstdCore *core, gchar *action, gchar *args, gchar **response)
+{
+  GstdReturnCode ret;
+  gchar *uri;
+  
+  g_return_val_if_fail (GSTD_IS_CORE(core), GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (args, GSTD_NULL_ARGUMENT);
+
+  uri = g_strdup_printf("/pipelines/%s state paused", args);
+  ret = gstd_tcp_parse_raw_cmd(core, "update", uri, response);
+  g_free(uri);
+
+  return ret;
+}
+
+static GstdReturnCode
+gstd_tcp_pipeline_stop (GstdCore *core, gchar *action, gchar *args, gchar **response)
+{
+  GstdReturnCode ret;
+  gchar *uri;
+  
+  g_return_val_if_fail (GSTD_IS_CORE(core), GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (args, GSTD_NULL_ARGUMENT);
+
+  uri = g_strdup_printf("/pipelines/%s state null", args);
+  ret = gstd_tcp_parse_raw_cmd(core, "update", uri, response);
+  g_free(uri);
+
+  return ret;
+}
+
+static GstdReturnCode
+gstd_tcp_element_set (GstdCore *core, gchar *action, gchar *args, gchar **response)
+{
+  GstdReturnCode ret;
+  gchar *uri;
+  gchar **tokens;
+  
+  g_return_val_if_fail (GSTD_IS_CORE(core), GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (args, GSTD_NULL_ARGUMENT);
+
+  tokens = g_strsplit(args, " ", 4);
+  g_return_val_if_fail (tokens[0], GSTD_BAD_COMMAND);
+  g_return_val_if_fail (tokens[1], GSTD_BAD_COMMAND);
+  g_return_val_if_fail (tokens[2], GSTD_BAD_COMMAND);
+  g_return_val_if_fail (tokens[3], GSTD_BAD_COMMAND);
+  
+  uri = g_strdup_printf("/pipelines/%s/elements/%s %s %s",
+			tokens[0], tokens[1], tokens[2], tokens[3]);
+  ret = gstd_tcp_parse_raw_cmd(core, "update", uri, response);
+
+  g_free(uri);
+  g_strfreev(tokens);
+
+  return ret;
+}
+
+static GstdReturnCode
+gstd_tcp_element_get (GstdCore *core, gchar *action, gchar *args, gchar **response)
+{
+  GstdReturnCode ret;
+  gchar *uri;
+  gchar **tokens;
+  
+  g_return_val_if_fail (GSTD_IS_CORE(core), GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (args, GSTD_NULL_ARGUMENT);
+
+  tokens = g_strsplit(args, " ", 3);
+  g_return_val_if_fail (tokens[0], GSTD_BAD_COMMAND);
+  g_return_val_if_fail (tokens[1], GSTD_BAD_COMMAND);
+  g_return_val_if_fail (tokens[2], GSTD_BAD_COMMAND);
+
+  uri = g_strdup_printf("/pipelines/%s/elements/%s %s",
+			tokens[0], tokens[1], tokens[2]);
+  ret = gstd_tcp_parse_raw_cmd(core, "read", uri, response);
+
+  g_free(uri);
+  g_strfreev(tokens);
+
+  return ret;
+}
+
+static GstdReturnCode
+gstd_tcp_list_pipelines (GstdCore *core, gchar *action, gchar *args, gchar **response)
+{
+  GstdReturnCode ret;
+  gchar *uri;
+  
+  g_return_val_if_fail (GSTD_IS_CORE(core), GSTD_NULL_ARGUMENT);
+
+  uri = g_strdup_printf("/pipelines");
+  ret = gstd_tcp_parse_raw_cmd(core, "read", uri, response);
+  g_free(uri);
+
+  return ret;
+}
+
+static GstdReturnCode
+gstd_tcp_list_elements (GstdCore *core, gchar *action, gchar *args, gchar **response)
+{
+  GstdReturnCode ret;
+  gchar *uri;
+  
+  g_return_val_if_fail (GSTD_IS_CORE(core), GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (args, GSTD_NULL_ARGUMENT);
+
+  uri = g_strdup_printf("/pipelines/%s/elements/", args);
+  ret = gstd_tcp_parse_raw_cmd(core, "read", uri, response);
+  g_free(uri);
+
+  return ret;
+}
+
+static GstdReturnCode
+gstd_tcp_list_properties (GstdCore *core, gchar *action, gchar *args, gchar **response)
+{
+  GstdReturnCode ret;
+  gchar *uri;
+  gchar **tokens;
+  
+  g_return_val_if_fail (GSTD_IS_CORE(core), GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (args, GSTD_NULL_ARGUMENT);
+
+  tokens = g_strsplit(args, " ", 2);
+  g_return_val_if_fail (tokens[0], GSTD_BAD_COMMAND);
+  g_return_val_if_fail (tokens[1], GSTD_BAD_COMMAND);
+  
+  uri = g_strdup_printf("/pipelines/%s/elements/%s",
+			tokens[0], tokens[1]);
+  ret = gstd_tcp_parse_raw_cmd(core, "read", uri, response);
+
+  g_free(uri);
+  g_strfreev(tokens);
+
+  return ret;
 }

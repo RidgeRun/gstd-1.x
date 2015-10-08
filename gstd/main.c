@@ -65,6 +65,7 @@ main (gint argc, gchar *argv[])
   core = gstd_new ("Core0", 5000);
   
   /* Install a handler for the interrupt signal */
+
   signal (SIGINT, int_handler);
   
   g_main_loop_run (main_loop);
