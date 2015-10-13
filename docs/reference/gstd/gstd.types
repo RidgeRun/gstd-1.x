@@ -1,0 +1,6 @@
+gstd_core_get_type
+gstd_element_get_type
+gstd_list_get_type
+gstd_object_flags_get_type
+gstd_object_get_type
+gstd_pipeline_get_type

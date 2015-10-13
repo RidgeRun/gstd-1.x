@@ -8,6 +8,8 @@ autoreconf --verbose --force --install || {
  exit 1;
 }
 
+gtkdocize || exit 1
+
 echo
 echo "Now run './configure' with your system settings followed by 'make' to compile this module."
 echo

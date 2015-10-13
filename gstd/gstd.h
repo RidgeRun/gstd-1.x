@@ -17,6 +17,40 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Gstd.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+/**
+ * SECTION:gstd
+ * @short_description: GstdCore Object
+ * @title: GstdCore Object
+ * @see_also:#GstdObject
+ * @include: gstd.h
+ *
+ * A GstdCore encapsulates a GStreamer Daemon session. It holds the
+ * structure of pipelines, elements and properties, and provides
+ * mechanisms to the user to interact with them. An application may
+ * instanciate several GstdCore objects, and each one will hold a
+ * separate list of pipelines. Unless the specific pipelines share
+ * physical resources among them, they should operate independently.
+ *
+ * GstdCore is resource oriented. This means that it exposes its
+ * different resources (pipelines, states, elements, properties,
+ * etc...) via unique URIs, forming a minimalist ReST server.
+ *
+ * A GstdCore is created and deleted as any other GObject:
+ * |[<!-- language="C" -->
+ * gchar *name;
+ * GstdCore *gstd;
+ *
+ * gstd = gstd_core_new ("MySession", 3000);
+ * g_object_get (G_OBJECT(gstd), "name", &name, NULL);
+ * g_print ("The session name is \"%s\"", name);
+ *
+ * g_free (name);
+ * g_object_unref (gstd);
+ * ]|
+ * 
+ */
+
 #ifndef __GSTD_H__
 #define __GSTD_H__
 
@@ -27,6 +61,8 @@
 #include <gst/gst.h>
 #include "gstd_object.h"
 #include "gstd_pipeline.h"
+#include "gstd_element.h"
+#include "gstd_list.h"
 #include "gstd_return_codes.h"
 
 G_BEGIN_DECLS
@@ -55,7 +91,7 @@ GstdReturnCode
 gstd_pipeline_create (GstdCore *gstd, const gchar *name, const gchar *description);
 
 GstdReturnCode
-gstd_pipeline_destroy (GstdCore *gstd, const gchar *name);
+gstd_pipeline_delete (GstdCore *gstd, const gchar *name);
 
 GstdReturnCode
 gstd_element_get (GstdCore *gstd, const gchar *pipe, const gchar *name,
@@ -72,8 +108,6 @@ gstd_pipeline_null (GstdCore *gstd, const gchar *pipe);
 
 GstdReturnCode
 gstd_get_by_uri (GstdCore *gstd, const gchar *uri, GstdObject **node);
-
-
 
 G_END_DECLS
 

@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.3//EN"
+               "http://www.oasis-open.org/docbook/xml/4.3/docbookx.dtd"
+[
+  <!ENTITY % local.common.attrib "xmlns:xi  CDATA  #FIXED 'http://www.w3.org/2003/XInclude'">
+]>
+<book id="index">
+  <bookinfo>
+    <title>Gstd Reference Manual</title>
+    <releaseinfo>
+      for Gstd 0.1.0.
+      The latest version of this documentation can be found on-line at
+      <ulink role="online-location" url="http://[SERVER]/gstd/index.html">http://[SERVER]/gstd/</ulink>.
+    </releaseinfo>
+  </bookinfo>
+
+  <chapter>
+    <title>[Insert title here]</title>
+    <xi:include href="xml/gstd.xml"/>
+    <xi:include href="xml/gstd_debug.xml"/>
+    <xi:include href="xml/gstd_element.xml"/>
+    <xi:include href="xml/gstd_list.xml"/>
+    <xi:include href="xml/gstd_object.xml"/>
+    <xi:include href="xml/gstd_param_list.xml"/>
+    <xi:include href="xml/gstd_pipeline.xml"/>
+    <xi:include href="xml/gstd_return_codes.xml"/>
+    <xi:include href="xml/gstd_tcp.xml"/>
+
+  </chapter>
+  <chapter id="object-tree">
+    <title>Object Hierarchy</title>
+    <xi:include href="xml/tree_index.sgml"/>
+  </chapter>
+  <index id="api-index-full">
+    <title>API Index</title>
+    <xi:include href="xml/api-index-full.xml"><xi:fallback /></xi:include>
+  </index>
+  <index id="deprecated-api-index" role="deprecated">
+    <title>Index of deprecated API</title>
+    <xi:include href="xml/api-index-deprecated.xml"><xi:fallback /></xi:include>
+  </index>
+  <!-- enable this when you use gobject introspection annotations
+  <xi:include href="xml/annotation-glossary.xml"><xi:fallback /></xi:include>
+  -->
+</book>
