@@ -32,7 +32,7 @@ enum {
 #define GSTD_LIST_DEFAULT_NODE_TYPE G_TYPE_NONE
 #define GSTD_LIST_DEFAULT_FLAGS GSTD_PARAM_READ | GSTD_PARAM_CREATE | GSTD_PARAM_DELETE
 
-/* Gstd Core debugging category */
+/* Gstd List debugging category */
 GST_DEBUG_CATEGORY_STATIC(gstd_list_debug);
 #define GST_CAT_DEFAULT gstd_list_debug
 

@@ -20,28 +20,28 @@
 
 /**
  * SECTION:gstd
- * @short_description: GstdCore Object
- * @title: GstdCore Object
+ * @short_description: GstdSession Object
+ * @title: GstdSession Object
  * @see_also:#GstdObject
  * @include: gstd.h
  *
- * A GstdCore encapsulates a GStreamer Daemon session. It holds the
+ * A GstdSession encapsulates a GStreamer Daemon session. It holds the
  * structure of pipelines, elements and properties, and provides
  * mechanisms to the user to interact with them. An application may
- * instanciate several GstdCore objects, and each one will hold a
+ * instanciate several GstdSession objects, and each one will hold a
  * separate list of pipelines. Unless the specific pipelines share
  * physical resources among them, they should operate independently.
  *
- * GstdCore is resource oriented. This means that it exposes its
+ * GstdSession is resource oriented. This means that it exposes its
  * different resources (pipelines, states, elements, properties,
  * etc...) via unique URIs, forming a minimalist ReST server.
  *
- * A GstdCore is created and deleted as any other GObject:
+ * A GstdSession is created and deleted as any other GObject:
  * |[<!-- language="C" -->
  * gchar *name;
- * GstdCore *gstd;
+ * GstdSession *gstd;
  *
- * gstd = gstd_core_new ("MySession", 3000);
+ * gstd = gstd_session_new ("MySession", 3000);
  * g_object_get (G_OBJECT(gstd), "name", &name, NULL);
  * g_print ("The session name is \"%s\"", name);
  *
@@ -67,47 +67,47 @@
 
 G_BEGIN_DECLS
 
-#define GSTD_TYPE_CORE \
-  (gstd_core_get_type())
-#define GSTD_CORE(obj) \
-  (G_TYPE_CHECK_INSTANCE_CAST((obj),GSTD_TYPE_CORE,GstdCore))
-#define GSTD_CORE_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_CAST((klass),GSTD_TYPE_CORE,GstdCoreClass))
-#define GSTD_IS_CORE(obj) \
-  (G_TYPE_CHECK_INSTANCE_TYPE((obj),GSTD_TYPE_CORE))
-#define GSTD_IS_CORE_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_TYPE((klass),GSTD_TYPE_CORE))
-#define GSTD_CORE_GET_CLASS(obj) \
-  (G_TYPE_INSTANCE_GET_CLASS ((obj), GSTD_TYPE_CORE, GstdCoreClass))
+#define GSTD_TYPE_SESSION \
+  (gstd_session_get_type())
+#define GSTD_SESSION(obj) \
+  (G_TYPE_CHECK_INSTANCE_CAST((obj),GSTD_TYPE_SESSION,GstdSession))
+#define GSTD_SESSION_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_CAST((klass),GSTD_TYPE_SESSION,GstdSessionClass))
+#define GSTD_IS_SESSION(obj) \
+  (G_TYPE_CHECK_INSTANCE_TYPE((obj),GSTD_TYPE_SESSION))
+#define GSTD_IS_SESSION_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_TYPE((klass),GSTD_TYPE_SESSION))
+#define GSTD_SESSION_GET_CLASS(obj) \
+  (G_TYPE_INSTANCE_GET_CLASS ((obj), GSTD_TYPE_SESSION, GstdSessionClass))
 
-typedef struct _GstdCore GstdCore;
-typedef struct _GstdCoreClass GstdCoreClass;
-GType gstd_core_get_type();
+typedef struct _GstdSession GstdSession;
+typedef struct _GstdSessionClass GstdSessionClass;
+GType gstd_session_get_type();
 
-GstdCore *
+GstdSession *
 gstd_new (const gchar *name, const guint16 port);
 
 GstdReturnCode
-gstd_pipeline_create (GstdCore *gstd, const gchar *name, const gchar *description);
+gstd_pipeline_create (GstdSession *gstd, const gchar *name, const gchar *description);
 
 GstdReturnCode
-gstd_pipeline_delete (GstdCore *gstd, const gchar *name);
+gstd_pipeline_delete (GstdSession *gstd, const gchar *name);
 
 GstdReturnCode
-gstd_element_get (GstdCore *gstd, const gchar *pipe, const gchar *name,
+gstd_element_get (GstdSession *gstd, const gchar *pipe, const gchar *name,
 		  const gchar *property, gpointer value);
 GstdReturnCode
-gstd_element_set (GstdCore *gstd, const gchar *pipe, const gchar *name,
+gstd_element_set (GstdSession *gstd, const gchar *pipe, const gchar *name,
 		  const gchar *property, gpointer value);
 
 GstdReturnCode
-gstd_pipeline_play (GstdCore *gstd, const gchar *pipe);
+gstd_pipeline_play (GstdSession *gstd, const gchar *pipe);
 
 GstdReturnCode
-gstd_pipeline_null (GstdCore *gstd, const gchar *pipe);
+gstd_pipeline_null (GstdSession *gstd, const gchar *pipe);
 
 GstdReturnCode
-gstd_get_by_uri (GstdCore *gstd, const gchar *uri, GstdObject **node);
+gstd_get_by_uri (GstdSession *gstd, const gchar *uri, GstdObject **node);
 
 G_END_DECLS
 

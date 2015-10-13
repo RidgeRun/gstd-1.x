@@ -32,7 +32,7 @@ enum {
 #define GSTD_PIPELINE_DEFAULT_DESCRIPTION NULL
 #define GSTD_PIPELINE_DEFAULT_STATE GSTD_PIPELINE_NULL
 
-/* Gstd Core debugging category */
+/* Gstd Pipeline debugging category */
 GST_DEBUG_CATEGORY_STATIC(gstd_pipeline_debug);
 #define GST_CAT_DEFAULT gstd_pipeline_debug
 

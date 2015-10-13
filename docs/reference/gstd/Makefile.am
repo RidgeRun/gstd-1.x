@@ -62,8 +62,7 @@ expand_content_files=
 # e.g. GTKDOC_CFLAGS=-I$(top_srcdir) -I$(top_builddir) $(GTK_DEBUG_FLAGS)
 # e.g. GTKDOC_LIBS=$(top_builddir)/gtk/$(gtktargetlib)
 GTKDOC_CFLAGS=$(GST_CFLAGS) $(GIO_CFLAGS) -I$(top_srcdir)/gstd/
-#GTKDOC_LIBS=$(GST_LIBS) $(GIO_LIBS) $(top_builddir)/gstd/libgst-core.la
-GTKDOC_LIBS=$(top_builddir)/gstd/.libs/libgstd-core.dylib
+GTKDOC_LIBS=$(top_builddir)/gstd/libgstd-core.la
 
 
 # This includes the standard gtk-doc make rules, copied by gtkdocize.

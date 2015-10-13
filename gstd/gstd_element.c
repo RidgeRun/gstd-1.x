@@ -28,7 +28,7 @@ enum {
 
 #define GSTD_ELEMENT_DEFAULT_GSTELEMENT NULL
 
-/* Gstd Core debugging category */
+/* Gstd Session debugging category */
 GST_DEBUG_CATEGORY_STATIC(gstd_element_debug);
 #define GST_CAT_DEFAULT gstd_element_debug
 

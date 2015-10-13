@@ -27,7 +27,7 @@ enum {
   N_PROPERTIES // NOT A PROPERTY
 };
 
-/* Gstd Core debugging category */
+/* Gstd Object debugging category */
 GST_DEBUG_CATEGORY_STATIC(gstd_object_debug);
 #define GST_CAT_DEFAULT gstd_object_debug
 

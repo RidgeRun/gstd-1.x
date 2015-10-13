@@ -33,10 +33,10 @@ G_BEGIN_DECLS
 #define GSTD_TCP_DEFAULT_PORT 5000
 
 GstdReturnCode
-gstd_tcp_start (GstdCore *core, GSocketService **service, guint16 port);
+gstd_tcp_start (GstdSession *session, GSocketService **service, guint16 port);
 
 GstdReturnCode
-gstd_tcp_stop (GstdCore *core, GSocketService **service);
+gstd_tcp_stop (GstdSession *session, GSocketService **service);
 
 G_END_DECLS
 
