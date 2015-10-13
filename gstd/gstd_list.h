@@ -21,8 +21,7 @@
 #ifndef __GSTD_LIST_H__
 #define __GSTD_LIST_H__
 
-#include <glib.h>
-#include "gstd_object.h"
+#include <glib-object.h>
 
 G_BEGIN_DECLS
 

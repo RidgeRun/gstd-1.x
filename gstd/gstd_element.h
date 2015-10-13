@@ -21,10 +21,7 @@
 #ifndef __GSTD_ELEMENT_H__
 #define __GSTD_ELEMENT_H__
 
-#include <gst/gst.h>
-
-#include "gstd_object.h"
-#include "gstd_return_codes.h"
+#include <glib-object.h>
 
 G_BEGIN_DECLS
 

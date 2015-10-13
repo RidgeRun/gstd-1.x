@@ -17,9 +17,17 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Gstd.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "gstd_element.h"
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <string.h>
+#include <gst/gst.h>
 #include <gobject/gvaluecollector.h>
+
+#include "gstd_element.h"
+#include "gstd_object.h"
 
 enum {
   PROP_GSTELEMENT = 1,

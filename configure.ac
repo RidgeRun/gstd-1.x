@@ -13,7 +13,7 @@ GIO_REQUIRED=2.44.1
 dnl check for gtk-doc
 GTK_DOC_CHECK([1.14],[--flavour no-tmpl])
 
-AC_CONFIG_SRCDIR([gstd/main.c])
+AC_CONFIG_SRCDIR([gstd/gstd.c])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIRS([m4])
 

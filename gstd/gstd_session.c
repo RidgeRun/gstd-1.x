@@ -17,11 +17,19 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Gstd.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "gstd.h"
-#include "gstd_list.h"
-#include "gstd_tcp.h"
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <string.h>
 #include <stdio.h>
+#include <gst/gst.h>
+
+#include "gstd_session.h"
+#include "gstd_list.h"
+#include "gstd_tcp.h"
+#include "gstd_pipeline.h"
 
 /* Gstd Session debugging category */
 GST_DEBUG_CATEGORY_STATIC(gstd_session_debug);

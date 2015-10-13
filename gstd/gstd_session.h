@@ -51,19 +51,12 @@
  * 
  */
 
-#ifndef __GSTD_H__
-#define __GSTD_H__
+#ifndef __GSTD_SESSION___
+#define __GSTD_SESSION___
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include <gst/gst.h>
-#include "gstd_object.h"
-#include "gstd_pipeline.h"
-#include "gstd_element.h"
-#include "gstd_list.h"
-#include "gstd_return_codes.h"
+#include <glib.h>
+#include <gstd/gstd_return_codes.h>
+#include <gstd/gstd_object.h>
 
 G_BEGIN_DECLS
 
@@ -111,4 +104,4 @@ gstd_get_by_uri (GstdSession *gstd, const gchar *uri, GstdObject **node);
 
 G_END_DECLS
 
-#endif //__GSTD_H__
+#endif //__GSTD_SESSION___

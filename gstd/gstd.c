@@ -22,7 +22,6 @@
 #include "config.h"
 #endif
 
-#include <gst/gst.h>
 #include <signal.h>
 #include <unistd.h>
 #include <stdlib.h>

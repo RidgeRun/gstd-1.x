@@ -20,13 +20,9 @@
 #ifndef __GSTD_TCP_H__
 #define __GSTD_TCP_H__
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include <gst/gst.h>
 #include <gio/gio.h>
-#include "gstd.h"
+#include <gstd/gstd_return_codes.h>
+#include <gstd/gstd_session.h>
 
 G_BEGIN_DECLS
 

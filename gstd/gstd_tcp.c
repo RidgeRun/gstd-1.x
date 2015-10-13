@@ -17,10 +17,16 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Gstd.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include <stdio.h>
+#include <gst/gst.h>
+
 #include "gstd_tcp.h"
 #include "gstd_element.h"
-#include <stdio.h>
-#include <ctype.h>
 
 /* Gstd TCP debugging category */
 GST_DEBUG_CATEGORY_STATIC(gstd_tcp_debug);

@@ -20,15 +20,8 @@
 #ifndef __GSTD_OBJECT_H__
 #define __GSTD_OBJECT_H__
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include <gst/gst.h>
-#include <string.h>
-#include <stdarg.h>
-
-#include "gstd_return_codes.h"
+#include <glib-object.h>
+#include <gstd/gstd_return_codes.h>
 
 G_BEGIN_DECLS
 

@@ -18,8 +18,16 @@
  * along with Gstd.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "gstd_list.h"
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <gobject/gvaluecollector.h>
+#include <gst/gst.h>
+#include <string.h>
+
+#include "gstd_list.h"
+#include "gstd_object.h"
 
 enum {
   PROP_COUNT = 1,

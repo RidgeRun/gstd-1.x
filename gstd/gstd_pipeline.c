@@ -17,10 +17,18 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Gstd.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "gstd_pipeline.h"
-#include "gstd_element.h"
-#include "gstd_list.h"
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <string.h>
+#include <gst/gst.h>
+
+#include "gstd_pipeline.h"
+#include "gstd_object.h"
+#include "gstd_list.h"
+#include "gstd_element.h"
 
 enum {
   PROP_DESCRIPTION = 1,
