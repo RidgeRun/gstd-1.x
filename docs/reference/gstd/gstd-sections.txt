@@ -1,5 +1,5 @@
 <SECTION>
-<FILE>gstd</FILE>
+<FILE>gstd_session</FILE>
 gstd_new
 gstd_pipeline_create
 gstd_pipeline_delete

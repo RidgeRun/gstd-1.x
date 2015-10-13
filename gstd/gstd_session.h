@@ -19,36 +19,94 @@
  */
 
 /**
- * SECTION:gstd
+ * SECTION:gstd_session
  * @short_description: GstdSession Object
  * @title: GstdSession Object
  * @see_also:#GstdObject
- * @include: gstd.h
+ * @include: gstd/gstd.h
  *
- * A GstdSession encapsulates a GStreamer Daemon session. It holds the
+ * # Introduction #
+ *
+ * A #GstdSession encapsulates a GStreamer Daemon session. It holds the
  * structure of pipelines, elements and properties, and provides
  * mechanisms to the user to interact with them. An application may
- * instanciate several GstdSession objects, and each one will hold a
+ * instanciate several #GstdSession objects, and each one will hold a
  * separate list of pipelines. Unless the specific pipelines share
  * physical resources among them, they should operate independently.
  *
- * GstdSession is resource oriented. This means that it exposes its
- * different resources (pipelines, states, elements, properties,
- * etc...) via unique URIs, forming a minimalist ReST server.
- *
- * A GstdSession is created and deleted as any other GObject:
+ * A #GstdSession is created and deleted as any other GObject:
  * |[<!-- language="C" -->
+ * #include <gstd/gstd.h>
+ * 
  * gchar *name;
  * GstdSession *gstd;
  *
- * gstd = gstd_session_new ("MySession", 3000);
+ * gstd = g_object_new (GSTD_TYPE_SESSION, "name", "MySession", "port", 3000, NULL);
  * g_object_get (G_OBJECT(gstd), "name", &name, NULL);
  * g_print ("The session name is \"%s\"", name);
  *
  * g_free (name);
  * g_object_unref (gstd);
  * ]|
- * 
+ *
+ * If the g_object_new() notation yet seems too cryptic, the
+ * convenience gstd_session_new() wrapper may be used in a similar
+ * way.
+ *
+ * |[<!-- language="C" -->
+ * GstdSession *gstd = gstd_session_new ("MySession", 3000);
+ * ]|
+ *
+ * # Design #
+ *
+ * #GstdSession is resource oriented. This means that it exposes its
+ * different resources (pipelines, states, elements, properties,
+ * etc...) via unique URIs. These resources can be accessed via four
+ * generic
+ * [CRUD](https://en.wikipedia.org/wiki/Create,_read,_update_and_delete)
+ * operations (create, read, update and delete) that perform different
+ * actions over them, accordingly. These altogether form a minimalist
+ * ReST server that may easily adapt to different IPCs.
+ *
+ * Currently, the structure of a #GstdSession is similar to the following:
+ *
+ * |[
+ *  Session
+ *  ├── name
+ *  ├── port
+ *  ╰── pipelines
+ *      ├── count
+ *      ├── Pipeline1
+ *      │   ├── name
+ *      │   ├── state
+ *      │   ╰── elements
+ *      │       ├── count
+ *      │       ├── Element1
+ *      │       │   ├── name
+ *      │       │   ├── Property1
+ *      │       │   ├── Property2
+ *      │       │   ├── ...
+ *      │       │   ╰── PropertyN
+ *      │       ├── Element2
+ *      │       ├── ...
+ *      │       ╰── ElementN
+ *      ├── Pipeline2
+ *      ├── ...
+ *      ╰── PipelineN
+ * ]|
+ *
+ * - So, the state of Pipeline1 can be accessed via
+ * |[
+ * /pipelines/Pipeline1/state
+ * ]|
+ * - The amount of elements in Pipeline2 can be accessed via
+ * |[
+ * /pipelines/Pipeline2/elements/count
+ * ]|
+ * - Property1 of Element1 in Pipeline3 can be accessed via
+ * |[
+ * /pipelines/Pipeline2/elements/Element3/Property1
+ * ]|
  */
 
 #ifndef __GSTD_SESSION___

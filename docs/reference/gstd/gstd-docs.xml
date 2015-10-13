@@ -16,7 +16,7 @@
 
   <chapter>
     <title>[Insert title here]</title>
-    <xi:include href="xml/gstd.xml"/>
+    <xi:include href="xml/gstd_session.xml"/>
     <xi:include href="xml/gstd_debug.xml"/>
     <xi:include href="xml/gstd_element.xml"/>
     <xi:include href="xml/gstd_list.xml"/>
