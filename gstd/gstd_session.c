@@ -219,7 +219,7 @@ gstd_session_constructed (GObject *object)
 
 
 GstdSession *
-gstd_new (const gchar *name, const guint16 port)
+gstd_session_new (const gchar *name, const guint16 port)
 {
   return GSTD_SESSION(g_object_new (GSTD_TYPE_SESSION, "name", name, "port", port, NULL));
 }
@@ -259,7 +259,7 @@ gstd_pipeline_destroy (GstdSession *gstd, const gchar *name)
 }
 
 GstdReturnCode
-gstd_pipeline_state (GstdSession *gstd, const gchar *pipe, const GstdPipelineState state)
+gstd_pipeline_set_state (GstdSession *gstd, const gchar *pipe, const GstdPipelineState state)
 {
   GstdObject *pipeline;
   gchar *uri;
@@ -287,15 +287,49 @@ gstd_pipeline_state (GstdSession *gstd, const gchar *pipe, const GstdPipelineSta
 }
 
 GstdReturnCode
+gstd_pipeline_get_state (GstdSession *gstd, const gchar *pipe, GstdPipelineState *state)
+{
+  GstdObject *pipeline;
+  gchar *uri;
+  GstdReturnCode ret;
+
+  g_return_val_if_fail (GSTD_IS_SESSION(gstd), GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (pipe, GSTD_NULL_ARGUMENT);
+
+  uri = g_strdup_printf ("/pipelines/%s/", pipe);
+  ret = gstd_get_by_uri (gstd, uri, &pipeline);
+  if (ret)
+    goto noelement;
+  
+  ret = gstd_object_read (pipeline, "state", state, NULL);
+  
+  g_object_unref(pipeline);
+  g_free (uri);
+
+  return ret;
+  
+ noelement:
+  {
+    return ret;
+  }
+}
+
+GstdReturnCode
 gstd_pipeline_play (GstdSession *gstd, const gchar *pipe)
 {
-  return gstd_pipeline_state (gstd, pipe, GSTD_PIPELINE_PLAYING);
+  return gstd_pipeline_set_state (gstd, pipe, GSTD_PIPELINE_PLAYING);
 }
 
 GstdReturnCode
 gstd_pipeline_null (GstdSession *gstd, const gchar *pipe)
 {
-  return gstd_pipeline_state (gstd, pipe, GSTD_PIPELINE_NULL);
+  return gstd_pipeline_set_state (gstd, pipe, GSTD_PIPELINE_NULL);
+}
+
+GstdReturnCode
+gstd_pipeline_pause (GstdSession *gstd, const gchar *pipe)
+{
+  return gstd_pipeline_set_state (gstd, pipe, GSTD_PIPELINE_PAUSED);
 }
 
 typedef GstdReturnCode eaccess (GstdObject *, const gchar *, ...);

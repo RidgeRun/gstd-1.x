@@ -1,12 +1,15 @@
 <SECTION>
 <FILE>gstd_session</FILE>
-gstd_new
+gstd_session_new
 gstd_pipeline_create
 gstd_pipeline_delete
 gstd_element_get
 gstd_element_set
 gstd_pipeline_play
+gstd_pipeline_pause
 gstd_pipeline_null
+gstd_pipeline_set_state
+gstd_pipeline_get_state
 gstd_get_by_uri
 <SUBSECTION Standard>
 GSTD_CORE

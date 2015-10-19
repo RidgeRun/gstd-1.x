@@ -91,7 +91,7 @@ main (gint argc, gchar *argv[])
   GST_INFO ("Starting application...");
   main_loop = g_main_loop_new (NULL, FALSE);
 
-  session = gstd_new ("Session0", port);
+  session = gstd_session_new ("Session0", port);
   
   /* Install a handler for the interrupt signal */
 

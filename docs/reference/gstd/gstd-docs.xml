@@ -39,7 +39,7 @@
     <title>Index of deprecated API</title>
     <xi:include href="xml/api-index-deprecated.xml"><xi:fallback /></xi:include>
   </index>
-  <!-- enable this when you use gobject introspection annotations
+  <!-- Support gobject introspection annotations -->
   <xi:include href="xml/annotation-glossary.xml"><xi:fallback /></xi:include>
-  -->
+
 </book>
