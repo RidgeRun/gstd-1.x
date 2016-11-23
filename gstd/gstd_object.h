@@ -29,6 +29,7 @@
 #include <stdarg.h>
 
 #include "gstd_return_codes.h"
+#include "gstd_icreator.h"
 
 G_BEGIN_DECLS
 
@@ -66,6 +67,9 @@ struct _GstdObject
    * The return code set by the last function
    */
   GstdReturnCode code;
+
+  /* CRUD behaviour */
+  GstdICreator * creator;
 };
 
 #define GSTD_OBJECT_NAME(obj) (GSTD_OBJECT(obj)->name)
@@ -82,8 +86,6 @@ struct _GstdObjectClass
 {
   GObjectClass parent_class;
 
-  GstdReturnCode (*create)    (GstdObject *object, const gchar *property,
-			       va_list va);
   GstdReturnCode (*read)      (GstdObject *object, const gchar *property,
 			       va_list va);
   GstdReturnCode (*update)    (GstdObject *object, const gchar *property,
@@ -109,8 +111,10 @@ GType gstd_object_flags_get_type (void);
 #define GSTD_PARAM_IS_READ(p)   (p & GSTD_PARAM_READ)
 #define GSTD_PARAM_IS_UPDATE(p) (p & GSTD_PARAM_UPDATE)
 #define GSTD_PARAM_IS_DELETE(p) (p & GSTD_PARAM_DELETE)
+
 GstdReturnCode
-gstd_object_create (GstdObject *object, const gchar *property, ...);
+gstd_object_create (GstdObject *object, const gchar *name,
+    const gchar *description);
 GstdReturnCode
 gstd_object_read (GstdObject *object, const gchar *property, ...);
 GstdReturnCode

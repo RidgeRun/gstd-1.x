@@ -422,8 +422,9 @@ gstd_pipeline_fill_elements (GstdPipeline *self, GstElement *element)
       gste = g_value_get_object (&item);
       GST_LOG_OBJECT(self,
           "Saving element \"%s\"", GST_OBJECT_NAME(gste));
-      gstd_object_create (GSTD_OBJECT(self->elements), "name", GST_OBJECT_NAME(gste),
-			  "gstelement", gste, NULL);
+      //TODO:
+      /* gstd_object_create (GSTD_OBJECT(self->elements), GST_OBJECT_NAME(gste), */
+      /* 			  gste); */
       g_value_reset (&item);
       break;
     case GST_ITERATOR_RESYNC:

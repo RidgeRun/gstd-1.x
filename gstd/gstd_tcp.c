@@ -238,7 +238,7 @@ gstd_tcp_create (GstdCore *core, GstdObject *obj, gchar *args, gchar **response)
   if (!description || description[0] == '\0')
     goto nodescription;
 
-  ret = gstd_object_create (obj, "name", name, "description", description, NULL);
+  ret = gstd_object_create (obj, name, description);
   if (ret)
     goto noobject;
 
