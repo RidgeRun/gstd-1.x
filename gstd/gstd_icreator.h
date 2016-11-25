@@ -33,10 +33,20 @@ G_BEGIN_DECLS
 typedef struct _GstdICreator GstdICreator;
 typedef struct _GstdICreatorInterface GstdICreatorInterface;
 
+// Avoid cyclic dependecies by forward declaration
+typedef struct _GstdObject GstdObject;
+
+struct _GstdICreatorInterface {
+  GTypeInterface parent;
+
+  void (* create) (GstdICreator *self, const gchar * name,
+      const gchar * description, GstdObject ** out);
+};
+
 GType gstd_icreator_get_type (void);
 
 void gstd_icreator_create (GstdICreator *self, const gchar * name,
-    const gchar * description);
+    const gchar * description, GstdObject ** out);
 
 G_END_DECLS
 

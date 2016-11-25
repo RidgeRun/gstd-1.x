@@ -42,6 +42,9 @@ GST_DEBUG_CATEGORY_STATIC(gstd_list_debug);
 static gint
 gstd_list_find_node (gconstpointer, gconstpointer);
 static GstdReturnCode
+gstd_list_create (GstdObject * object, const gchar *name,
+const gchar * description);
+static GstdReturnCode
 gstd_list_read (GstdObject *, const gchar *, va_list);
 static GstdReturnCode
 gstd_list_delete (GstdObject *, const gchar *);
@@ -125,6 +128,7 @@ gstd_list_class_init (GstdListClass *klass)
                                      N_PROPERTIES,
                                      properties);
 
+  gstd_object_class->create = gstd_list_create;
   gstd_object_class->read = gstd_list_read;
   gstd_object_class->delete = gstd_list_delete;
   gstd_object_class->to_string = gstd_list_to_string;
@@ -228,6 +232,49 @@ gstd_list_find_node (gconstpointer _obj, gconstpointer _name)
   GST_LOG("Comparing %s vs %s", GSTD_OBJECT_NAME(obj),name);
   
   return strcmp(GSTD_OBJECT_NAME(obj), name);
+}
+
+static GstdReturnCode
+gstd_list_create (GstdObject * object, const gchar *name,
+    const gchar * description)
+{
+  GstdList *self;
+  GstdObject *out;
+  GList *found;
+
+  g_return_val_if_fail (GSTD_IS_OBJECT(object), GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (name, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (description, GSTD_NULL_ARGUMENT);
+
+  self = GSTD_LIST(object);
+
+  g_return_val_if_fail (object->creator, GSTD_MISSING_INITIALIZATION);
+
+  /* Test if the resource to create already exists */
+  found = g_list_find_custom (self->list, name,
+			      gstd_list_find_node);
+  if (found)
+    goto exists;
+
+  gstd_icreator_create(object->creator, name, description, &out);
+
+
+
+  self->list = g_list_append (self->list, out);
+  self->count = g_list_length (self->list);
+  GST_INFO_OBJECT(self, "Appended %s to %s list", GSTD_OBJECT_NAME(out),
+		  GSTD_OBJECT_NAME(self));
+
+  return GSTD_EOK;
+
+ exists:
+  {
+    GST_ERROR_OBJECT(object, "The resource \"%s\" already exists in \"%s\"",
+		     name, GSTD_OBJECT_NAME(self));
+    return GSTD_EXISTING_RESOURCE;
+  }
+
+  return GSTD_EOK;
 }
 
 static GstdReturnCode

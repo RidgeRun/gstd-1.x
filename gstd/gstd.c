@@ -20,6 +20,7 @@
 #include "gstd.h"
 #include "gstd_list.h"
 #include "gstd_tcp.h"
+#include "gstd_pipeline_creator.h"
 #include <string.h>
 #include <stdio.h>
 
@@ -122,8 +123,8 @@ gstd_core_init (GstdCore *self)
 					   GSTD_PARAM_CREATE | GSTD_PARAM_READ |
 					   GSTD_PARAM_UPDATE | GSTD_PARAM_DELETE, NULL));
 
-  //TODO:
-  //gstd_list_set_creator(self->pipelines, g_object_new (GSTD_TYPE_PIPELINE_CREATOR);
+  gstd_list_set_creator(self->pipelines,
+      g_object_new (GSTD_TYPE_PIPELINE_CREATOR,NULL));
 
   self->port = GSTD_TCP_DEFAULT_PORT;
   self->service = NULL;

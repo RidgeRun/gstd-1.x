@@ -86,6 +86,8 @@ struct _GstdObjectClass
 {
   GObjectClass parent_class;
 
+  GstdReturnCode (*create)    (GstdObject *object, const gchar *name,
+			       const gchar *description);
   GstdReturnCode (*read)      (GstdObject *object, const gchar *property,
 			       va_list va);
   GstdReturnCode (*update)    (GstdObject *object, const gchar *property,

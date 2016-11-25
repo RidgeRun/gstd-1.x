@@ -20,13 +20,6 @@
 
 #include "gstd_icreator.h"
 
-struct _GstdICreatorInterface {
-  GTypeInterface parent;
-
-  void (* create) (GstdICreator *self, const gchar * name,
-      const gchar * description);
-};
-
 G_DEFINE_INTERFACE (GstdICreator, gstd_icreator, G_TYPE_OBJECT);
 
 static void
@@ -37,9 +30,9 @@ gstd_icreator_default_init (GstdICreatorInterface *iface)
 
 void
 gstd_icreator_create (GstdICreator *self, const gchar *name,
-    const gchar *description)
+    const gchar *description, GstdObject ** out)
 {
   g_return_if_fail (self);
   
-  GSTD_ICREATOR_GET_INTERFACE (self)->create (self, name, description);
+  GSTD_ICREATOR_GET_INTERFACE (self)->create (self, name, description, out);
 }
