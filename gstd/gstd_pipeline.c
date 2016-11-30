@@ -21,6 +21,7 @@
 #include "gstd_element.h"
 #include "gstd_list.h"
 #include <string.h>
+#include "gstd_element_list.h"
 
 enum {
   PROP_DESCRIPTION = 1,
@@ -77,7 +78,7 @@ struct _GstdPipeline
   /**
    * The list of GstdElement held by the pipeline
    */
-  GstdList *elements;
+  GstdElementList *elements;
 };
 
 struct _GstdPipelineClass
@@ -131,7 +132,7 @@ gstd_pipeline_class_init (GstdPipelineClass *klass)
     g_param_spec_object ("elements",
 			 "Elements",
 			 "The elements in the pipeline",
-			 GSTD_TYPE_LIST,
+			 GSTD_TYPE_ELEMENT_LIST,
 			 G_PARAM_READABLE |
 			 G_PARAM_STATIC_STRINGS |
 			 GSTD_PARAM_READ);
@@ -162,10 +163,9 @@ gstd_pipeline_init (GstdPipeline *self)
   GST_INFO_OBJECT(self, "Initializing pipeline");
   self->description = g_strdup(GSTD_PIPELINE_DEFAULT_DESCRIPTION);
   self->pipeline = NULL;
-  self->elements = g_object_new (GSTD_TYPE_LIST, "name", "elements",
+  self->elements = g_object_new (GSTD_TYPE_ELEMENT_LIST, "name", "elements",
 				 "node-type", GSTD_TYPE_ELEMENT,
-				 "flags", GSTD_PARAM_READ |
-				 GSTD_PARAM_CREATE, NULL);
+				 "flags", GSTD_PARAM_READ, NULL);
 
 }
 
@@ -399,6 +399,7 @@ gstd_pipeline_fill_elements (GstdPipeline *self, GstElement *element)
   GValue item = G_VALUE_INIT;
   GstElement *gste;
   gboolean done;
+  GstdElement * gstd_element;
 
   g_return_val_if_fail (GSTD_IS_PIPELINE(self), GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (GST_IS_ELEMENT(element), GSTD_NULL_ARGUMENT);
@@ -422,9 +423,11 @@ gstd_pipeline_fill_elements (GstdPipeline *self, GstElement *element)
       gste = g_value_get_object (&item);
       GST_LOG_OBJECT(self,
           "Saving element \"%s\"", GST_OBJECT_NAME(gste));
-      //TODO:
-      /* gstd_object_create (GSTD_OBJECT(self->elements), GST_OBJECT_NAME(gste), */
-      /* 			  gste); */
+
+      gstd_element = g_object_new(GSTD_TYPE_ELEMENT, "name",
+				  GST_OBJECT_NAME(gste), "gstelement", gste, NULL);
+      gstd_element_list_append(self->elements, gstd_element);
+
       g_value_reset (&item);
       break;
     case GST_ITERATOR_RESYNC:
@@ -442,8 +445,6 @@ gstd_pipeline_fill_elements (GstdPipeline *self, GstElement *element)
   g_value_unset (&item);
   gst_iterator_free (it);
 
-  // Lock the elements from now on
-  gstd_object_update(GSTD_OBJECT(self->elements), "flags", GSTD_PARAM_READ, NULL);
   GST_DEBUG_OBJECT(self, "Elements where saved");
 
   return GSTD_EOK;

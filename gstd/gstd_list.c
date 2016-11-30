@@ -51,28 +51,6 @@ gstd_list_delete (GstdObject *, const gchar *);
 static GstdReturnCode
 gstd_list_to_string (GstdObject *, gchar **);
 
-/**
- * GstdList:
- * A wrapper for the conventional list
- */
-struct _GstdList
-{
-  GstdObject parent;
-  
-  guint count;
-
-  GType node_type;
-
-  GParamFlags flags;
-  
-  GList *list;
-};
-
-struct _GstdListClass
-{
-  GstdObjectClass parent_class;
-}; 
-
 G_DEFINE_TYPE (GstdList, gstd_list, GSTD_TYPE_OBJECT)
 
 /* VTable */
@@ -257,7 +235,7 @@ gstd_list_create (GstdObject * object, const gchar *name,
     goto exists;
 
   gstd_icreator_create(object->creator, name, description, &out);
-
+  self->count++;
 
 
   self->list = g_list_append (self->list, out);
