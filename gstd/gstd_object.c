@@ -21,6 +21,7 @@
 #include <gobject/gvaluecollector.h>
 #include "gstd_object.h"
 #include "gstd_list.h"
+#include "gstd_no_creator.h"
 
 enum {
   PROP_NAME = 1,
@@ -117,7 +118,8 @@ gstd_object_init (GstdObject *self)
 
   self->name = g_strdup(GSTD_OBJECT_DEFAULT_NAME);
   self->code = GSTD_EOK;
-  
+  self->creator = g_object_new (GSTD_TYPE_NO_CREATOR, NULL);
+
   g_mutex_init (&self->codelock);
 }
 
@@ -181,6 +183,8 @@ gstd_object_dispose (GObject *object)
     g_free (self->name);
     self->name = NULL;
   }
+
+  g_object_unref (self->creator);
   
   G_OBJECT_CLASS(gstd_object_parent_class)->dispose(object);
 }

@@ -8,7 +8,8 @@ libgstd_core_la_SOURCES = gstd.c 			\
 			  gstd_list.c			\
 			  gstd_tcp.c			\
 			  gstd_icreator.c		\
-			  gstd_pipeline_creator.c
+			  gstd_pipeline_creator.c	\
+			  gstd_no_creator.c
 
 libgstd_core_la_CFLAGS = $(GST_CFLAGS) $(GIO_CFLAGS)
 libgstd_core_la_LDFLAGS = $(GST_LIBS) $(GIO_LIBS)
@@ -29,6 +30,7 @@ include_HEADERS = gstd.h 			\
 		  gstd_list.h			\
 		  gstd_tcp.h			\
 		  gstd_icreator.h		\
-		  gstd_pipeline_creator.h
+		  gstd_pipeline_creator.h	\
+		  gstd_no_creator.h
 
 noinst_HEADERS = 
