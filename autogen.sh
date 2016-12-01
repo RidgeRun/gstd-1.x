@@ -3,12 +3,12 @@
 # ACLOCAL, AUTOPOINT and/or LIBTOOLIZE to the right versions, or leave them
 # unset and get the defaults
 
+gtkdocize || exit 1
+
 autoreconf --verbose --force --install || {
  echo 'autogen.sh failed';
  exit 1;
 }
-
-gtkdocize || exit 1
 
 echo
 echo "Now run './configure' with your system settings followed by 'make' to compile this module."

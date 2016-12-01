@@ -21,7 +21,6 @@ gstd_LDADD = libgstd-core.la
 
 gstdincludedir = $(includedir)/gstd
 gstdinclude_HEADERS = \
-		  gstd.h 		\
 		  gstd_session.h	\
 		  gstd_object.h		\
 		  gstd_return_codes.h 	\
