@@ -23,6 +23,8 @@
 
 #include <glib-object.h>
 
+#include "gstd_object.h"
+
 G_BEGIN_DECLS
 
 /*

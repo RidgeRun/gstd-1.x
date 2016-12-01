@@ -29,7 +29,7 @@
 #include "gstd_session.h"
 #include "gstd_list.h"
 #include "gstd_tcp.h"
-#include "gstd_pipeline.h"
+#include "gstd_pipeline_creator.h"
 
 /* Gstd Session debugging category */
 GST_DEBUG_CATEGORY_STATIC(gstd_session_debug);
@@ -129,6 +129,10 @@ gstd_session_init (GstdSession *self)
 					   "node-type", GSTD_TYPE_PIPELINE, "flags",
 					   GSTD_PARAM_CREATE | GSTD_PARAM_READ |
 					   GSTD_PARAM_UPDATE | GSTD_PARAM_DELETE, NULL));
+
+  gstd_list_set_creator(self->pipelines,
+      g_object_new (GSTD_TYPE_PIPELINE_CREATOR,NULL));
+
   self->port = GSTD_TCP_DEFAULT_PORT;
   self->service = NULL;
 }
@@ -235,8 +239,7 @@ gstd_pipeline_create (GstdSession *gstd, const gchar *name, const gchar *descrip
   g_return_val_if_fail (description, GSTD_NULL_ARGUMENT);
 
   gstd_object_read (GSTD_OBJECT(gstd), "pipelines", &list, NULL);
-  ret =  gstd_object_create (list, "name", name,
-			     "description", description, NULL);
+  ret =  gstd_object_create (list, name, description);
   g_object_unref (list);
   
   return ret;

@@ -23,6 +23,8 @@
 
 #include <glib-object.h>
 
+#include "gstd_object.h"
+
 G_BEGIN_DECLS
 
 /*
@@ -44,7 +46,32 @@ G_BEGIN_DECLS
 
 typedef struct _GstdList GstdList;
 typedef struct _GstdListClass GstdListClass;
+
+/**
+ * GstdList:
+ * A wrapper for the conventional list
+ */
+struct _GstdList
+{
+  GstdObject parent;
+
+  guint count;
+
+  GType node_type;
+
+  GParamFlags flags;
+
+  GList *list;
+};
+
+struct _GstdListClass
+{
+  GstdObjectClass parent_class;
+};
+
 GType gstd_list_get_type();
+
+void gstd_list_set_creator (GstdList *self, GstdICreator *creator);
 
 G_END_DECLS
 

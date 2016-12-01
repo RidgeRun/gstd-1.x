@@ -50,35 +50,14 @@ GST_DEBUG_CATEGORY_STATIC(gstd_list_debug);
 static gint
 gstd_list_find_node (gconstpointer, gconstpointer);
 static GstdReturnCode
-gstd_list_create (GstdObject *, const gchar *, va_list);
+gstd_list_create (GstdObject * object, const gchar *name,
+const gchar * description);
 static GstdReturnCode
 gstd_list_read (GstdObject *, const gchar *, va_list);
 static GstdReturnCode
 gstd_list_delete (GstdObject *, const gchar *);
 static GstdReturnCode
 gstd_list_to_string (GstdObject *, gchar **);
-
-/**
- * GstdList:
- * A wrapper for the conventional list
- */
-struct _GstdList
-{
-  GstdObject parent;
-  
-  guint count;
-
-  GType node_type;
-
-  GParamFlags flags;
-  
-  GList *list;
-};
-
-struct _GstdListClass
-{
-  GstdObjectClass parent_class;
-}; 
 
 G_DEFINE_TYPE (GstdList, gstd_list, GSTD_TYPE_OBJECT)
 
@@ -242,62 +221,46 @@ gstd_list_find_node (gconstpointer _obj, gconstpointer _name)
 }
 
 static GstdReturnCode
-gstd_list_create (GstdObject * object, const gchar *property, va_list va)
+gstd_list_create (GstdObject * object, const gchar *name,
+    const gchar * description)
 {
-  GstdList *self = GSTD_LIST(object);
-  GObject *newnode;
+  GstdList *self;
+  GstdObject *out;
   GList *found;
-  GstdReturnCode ret;
-  
-  g_return_val_if_fail (GSTD_IS_LIST (object), GSTD_NULL_ARGUMENT);
-  g_return_val_if_fail (property, GSTD_NULL_ARGUMENT);
 
-  /* Can we create resources on it */
-  if (!GSTD_PARAM_IS_CREATE(self->flags))
-    goto nocreate;
-  
-  /* Everything setup, create the new resource */
-  newnode = g_object_new_valist (self->node_type, property, va);
+  g_return_val_if_fail (GSTD_IS_OBJECT(object), GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (name, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (description, GSTD_NULL_ARGUMENT);
 
-  /* Check if there was an error creating the object */
+  self = GSTD_LIST(object);
 
-  ret = gstd_object_get_code(GSTD_OBJECT(newnode));
-  if (ret)
-    goto error;
-  
+  g_return_val_if_fail (object->creator, GSTD_MISSING_INITIALIZATION);
+
   /* Test if the resource to create already exists */
-  found = g_list_find_custom (self->list, GSTD_OBJECT_NAME(newnode),
+  found = g_list_find_custom (self->list, name,
 			      gstd_list_find_node);
   if (found)
     goto exists;
 
-  self->list = g_list_append (self->list, newnode);
+  gstd_icreator_create(object->creator, name, description, &out);
+  self->count++;
+
+
+  self->list = g_list_append (self->list, out);
   self->count = g_list_length (self->list);
-  GST_INFO_OBJECT(self, "Appended %s to %s list", GSTD_OBJECT_NAME(newnode),
+  GST_INFO_OBJECT(self, "Appended %s to %s list", GSTD_OBJECT_NAME(out),
 		  GSTD_OBJECT_NAME(self));
-  
+
   return GSTD_EOK;
 
- nocreate:
-  {
-    GST_ERROR_OBJECT(object, "Cannot create resources in \"%s\"",
-		     GSTD_OBJECT_NAME(self));
-    return GSTD_NO_CREATE;
-  }
- error:
-  {
-    GST_ERROR_OBJECT(object, "Error creating object \"%s\"",
-		     GSTD_OBJECT_NAME(self));
-    g_object_unref(newnode);
-    return ret;
-  }
  exists:
   {
     GST_ERROR_OBJECT(object, "The resource \"%s\" already exists in \"%s\"",
-		     GSTD_OBJECT_NAME(newnode), GSTD_OBJECT_NAME(self));
-    g_object_unref(newnode);
+		     name, GSTD_OBJECT_NAME(self));
     return GSTD_EXISTING_RESOURCE;
   }
+
+  return GSTD_EOK;
 }
 
 static GstdReturnCode
@@ -431,4 +394,20 @@ gstd_list_to_string (GstdObject *object, gchar **outstring)
   g_free (acc);
   
   return GSTD_EOK;
+}
+
+void
+gstd_list_set_creator (GstdList * self, GstdICreator * creator)
+{
+  GstdObject * object;
+
+  g_return_if_fail (self);
+
+  object = GSTD_OBJECT(self);
+
+  if (object->creator != NULL) {
+    g_object_unref (object->creator);
+  }
+
+  object->creator = creator;
 }

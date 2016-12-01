@@ -1,12 +1,16 @@
 # Core library if user wants to use as code base for its own application
 lib_LTLIBRARIES = libgstd-core.la
 
-libgstd_core_la_SOURCES = gstd_session.c	\
-			  gstd_object.c		\
-	                  gstd_pipeline.c 	\
-			  gstd_element.c	\
-			  gstd_list.c		\
-			  gstd_tcp.c
+libgstd_core_la_SOURCES = gstd_session.c		\
+			  gstd_object.c			\
+	                  gstd_pipeline.c 		\
+			  gstd_element.c		\
+			  gstd_list.c			\
+			  gstd_tcp.c			\
+			  gstd_icreator.c		\
+			  gstd_pipeline_creator.c	\
+			  gstd_no_creator.c		\
+			  gstd_element_list.c
 
 libgstd_core_la_CFLAGS = $(GST_CFLAGS) $(GIO_CFLAGS)
 libgstd_core_la_LDFLAGS = $(GST_LIBS) $(GIO_LIBS)
@@ -21,12 +25,16 @@ gstd_LDADD = libgstd-core.la
 
 gstdincludedir = $(includedir)/gstd
 gstdinclude_HEADERS = \
-		  gstd_session.h	\
-		  gstd_object.h		\
-		  gstd_return_codes.h 	\
-		  gstd_pipeline.h	\
-		  gstd_element.h	\
-		  gstd_list.h		\
-		  gstd_tcp.h
+		  gstd_session.h		\
+		  gstd_object.h			\
+		  gstd_return_codes.h 		\
+		  gstd_pipeline.h		\
+		  gstd_element.h		\
+		  gstd_list.h			\
+		  gstd_tcp.h			\
+		  gstd_icreator.h		\
+		  gstd_pipeline_creator.h	\
+		  gstd_no_creator.h		\
+		  gstd_element_list.h
 
 noinst_HEADERS = 
