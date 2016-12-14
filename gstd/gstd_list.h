@@ -72,6 +72,7 @@ struct _GstdListClass
 GType gstd_list_get_type();
 
 void gstd_list_set_creator (GstdList *self, GstdICreator *creator);
+void gstd_list_set_deleter (GstdList *self, GstdIDeleter *deleter);
 
 G_END_DECLS
 

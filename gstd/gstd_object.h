@@ -24,6 +24,7 @@
 #include <gstd_return_codes.h>
 
 #include "gstd_icreator.h"
+#include "gstd_ideleter.h"
 
 G_BEGIN_DECLS
 
@@ -64,6 +65,7 @@ struct _GstdObject
 
   /* CRUD behaviour */
   GstdICreator * creator;
+  GstdIDeleter * deleter;
 };
 
 #define GSTD_OBJECT_NAME(obj) (GSTD_OBJECT(obj)->name)
@@ -86,7 +88,7 @@ struct _GstdObjectClass
 			       va_list va);
   GstdReturnCode (*update)    (GstdObject *object, const gchar *property,
 			       va_list va);
-  GstdReturnCode (*delete)    (GstdObject *object, const gchar *property);
+  GstdReturnCode (*delete)    (GstdObject *object, const gchar *name);
 
   GstdReturnCode (*to_string) (GstdObject *object, gchar **outstring);
 };
