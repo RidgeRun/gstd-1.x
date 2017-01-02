@@ -55,7 +55,7 @@ const gchar * description);
 static GstdReturnCode
 gstd_list_read (GstdObject *, const gchar *, va_list);
 static GstdReturnCode
-gstd_list_delete (GstdObject *, const gchar *);
+gstd_list_delete (GstdObject *object, const gchar *name);
 static GstdReturnCode
 gstd_list_to_string (GstdObject *, gchar **);
 
@@ -321,37 +321,37 @@ gstd_list_read (GstdObject * object, const gchar *property, va_list va)
 }
 
 static GstdReturnCode
-gstd_list_delete (GstdObject * object, const gchar *node)
+gstd_list_delete (GstdObject *object, const gchar *node)
 {
-  GstdList *self = GSTD_LIST(object);
-  GList *found;
+  GstdList *self;
   GstdObject *todelete;
-  
-  g_return_val_if_fail (GSTD_IS_LIST (object), GSTD_NULL_ARGUMENT);
+  GList *found;
+
+  g_return_val_if_fail (GSTD_IS_OBJECT(object), GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (node, GSTD_NULL_ARGUMENT);
 
-  /* Can we create resources on it */
-  if (!GSTD_PARAM_IS_DELETE(self->flags))
-    goto nodelete;
+  self = GSTD_LIST(object);
 
+  g_return_val_if_fail (object->deleter, GSTD_MISSING_INITIALIZATION);
+
+  /* Test if the resource to delete exists */
   found = g_list_find_custom (self->list, node, gstd_list_find_node);
+
   if (!found)
     goto unexisting;
+
   todelete = GSTD_OBJECT(found->data);
 
   GST_INFO_OBJECT(self, "Deleting %s from %s list", GSTD_OBJECT_NAME(self),
 		   GSTD_OBJECT_NAME(self));
-  self->list = g_list_delete_link (self->list, found);
-  g_object_unref(todelete);
   
+  gstd_ideleter_delete(object->deleter, todelete);
+  self->count--;
+
+  self->list = g_list_delete_link (self->list, found);
+
   return GSTD_EOK;
 
- nodelete:
-  {
-    GST_ERROR_OBJECT(object, "Cannot delete resources from \"%s\"",
-		     GSTD_OBJECT_NAME(self));
-    return GSTD_NO_CREATE;
-  }
  unexisting:
   {
     GST_ERROR_OBJECT(object, "The resource \"%s\" doesn't exists in \"%s\"",
@@ -410,4 +410,21 @@ gstd_list_set_creator (GstdList * self, GstdICreator * creator)
   }
 
   object->creator = creator;
+}
+
+void
+gstd_list_set_deleter (GstdList * self, GstdIDeleter * deleter)
+{
+  GstdObject * object;
+
+  g_return_if_fail (self);
+  g_return_if_fail (deleter);
+
+  object = GSTD_OBJECT(self);
+
+  if (object->deleter != NULL) {
+    g_object_unref (object->deleter);
+  }
+
+  object->deleter = deleter;
 }

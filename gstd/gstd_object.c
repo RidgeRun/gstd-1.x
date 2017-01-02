@@ -29,6 +29,7 @@
 
 #include "gstd_object.h"
 #include "gstd_no_creator.h"
+#include "gstd_no_deleter.h"
 
 enum {
   PROP_NAME = 1,
@@ -58,7 +59,7 @@ gstd_object_read_default (GstdObject *, const gchar *, va_list);
 static GstdReturnCode
 gstd_object_update_default (GstdObject *, const gchar *, va_list);
 static GstdReturnCode
-gstd_object_delete_default (GstdObject *, const gchar *);
+gstd_object_delete_default (GstdObject *object, const gchar *name);
 static GstdReturnCode
 gstd_object_to_string_default (GstdObject *object, gchar **outstring);
 
@@ -126,6 +127,7 @@ gstd_object_init (GstdObject *self)
   self->name = g_strdup(GSTD_OBJECT_DEFAULT_NAME);
   self->code = GSTD_EOK;
   self->creator = g_object_new (GSTD_TYPE_NO_CREATOR, NULL);
+  self->deleter = g_object_new (GSTD_TYPE_NO_DELETER, NULL);
 
   g_mutex_init (&self->codelock);
 }
@@ -192,6 +194,7 @@ gstd_object_dispose (GObject *object)
   }
 
   g_object_unref (self->creator);
+  g_object_unref (self->deleter);
   
   G_OBJECT_CLASS(gstd_object_parent_class)->dispose(object);
 }
@@ -324,6 +327,13 @@ gstd_object_update_default (GstdObject *self, const gchar *property,
 static GstdReturnCode
 gstd_object_delete_default (GstdObject *object, const gchar *name)
 {
+  g_return_val_if_fail(GSTD_IS_OBJECT(object), GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail(name, GSTD_NULL_ARGUMENT);
+
+  g_return_val_if_fail(object->deleter, GSTD_MISSING_INITIALIZATION);
+
+  gstd_ideleter_delete(object->deleter, NULL);
+
   return GSTD_EOK;
 }
 

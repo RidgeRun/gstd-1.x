@@ -30,6 +30,7 @@
 #include "gstd_list.h"
 #include "gstd_tcp.h"
 #include "gstd_pipeline_creator.h"
+#include "gstd_pipeline_deleter.h"
 
 /* Gstd Session debugging category */
 GST_DEBUG_CATEGORY_STATIC(gstd_session_debug);
@@ -132,6 +133,9 @@ gstd_session_init (GstdSession *self)
 
   gstd_list_set_creator(self->pipelines,
       g_object_new (GSTD_TYPE_PIPELINE_CREATOR,NULL));
+
+  gstd_list_set_deleter(self->pipelines,
+      g_object_new (GSTD_TYPE_PIPELINE_DELETER,NULL));
 
   self->port = GSTD_TCP_DEFAULT_PORT;
   self->service = NULL;

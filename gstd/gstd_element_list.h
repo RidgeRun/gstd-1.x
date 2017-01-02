@@ -24,6 +24,7 @@
 #include <glib.h>
 #include "gstd_object.h"
 #include "gstd_icreator.h"
+#include "gstd_ideleter.h"
 #include "gstd_element.h"
 
 G_BEGIN_DECLS
@@ -36,7 +37,7 @@ G_BEGIN_DECLS
   (gstd_element_list_get_type())
 #define GSTD_ELEMENT_LIST(obj) \
   (G_TYPE_CHECK_INSTANCE_CAST((obj),GSTD_TYPE_ELEMENT_LIST,GstdElementList))
-#define GSTD_ELEMENT_LIST_CLApSS(klass) \
+#define GSTD_ELEMENT_LIST_CLASS(klass) \
   (G_TYPE_CHECK_CLASS_CAST((klass),GSTD_TYPE_ELEMENT_LIST,GstdElementListClass))
 #define GSTD_IS_ELEMENT_LIST(obj) \
   (G_TYPE_CHECK_INSTANCE_TYPE((obj),GSTD_TYPE_ELEMENT_LIST))
