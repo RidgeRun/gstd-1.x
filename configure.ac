@@ -10,6 +10,9 @@ GST_REQUIRED=1.0.0
 dnl required version of gio
 GIO_REQUIRED=2.44.1
 
+dnl required version of gio
+GJSON_REQUIRED=0.16.2
+
 dnl check for gtk-doc
 GTK_DOC_CHECK([1.14],[--flavour no-tmpl])
 
@@ -74,6 +77,23 @@ PKG_CHECK_MODULES(GIO, [
     development headers installed.
   ])
 ])
+
+PKG_CHECK_MODULES(GJSON, [
+    json-glib-1.0              >= $GJSON_REQUIRED
+  ], [
+    AC_SUBST(GJSON_CFLAGS)
+    AC_SUBST(GJSON_LIBS)
+  ], [
+  AC_MSG_ERROR([
+    Can't find the following GIO development packages:
+
+      json-glib-1.0              >= $GJSON_REQUIRED
+
+    Please make sure you have the necessary json-glib-1.0
+    development headers installed.
+  ])
+])
+
 
 dnl check for gtk-doc
 m4_ifdef([GTK_DOC_CHECK], [

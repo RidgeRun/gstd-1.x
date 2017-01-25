@@ -26,6 +26,7 @@
 #include <stdarg.h>
 #include <gst/gst.h>
 #include <gobject/gvaluecollector.h>
+#include <json-glib/json-glib.h>
 
 #include "gstd_object.h"
 #include "gstd_no_creator.h"
@@ -348,67 +349,94 @@ gstd_object_to_string_default (GstdObject *self, gchar **outstring)
   gchar *sflags;
   guint n, i;
   const gchar *typename;
-  const gchar *prolog = "{\n  [{\n";
-  const gchar *epilog = "}]\n}";
-  const gchar *new = "},{\n";
-  const gchar *fmt = "%s    name       : %s,\n"
-    "    value      : %s,\n"
-    "    param_spec : {\n"
-    "      blurb     : %s,\n"
-    "      type      : %s,\n"
-    "      access    : %s,\n"
-    "      construct : %s,\n"
-#if 0
-    "      create    : %s,\n"
-    "      read      : %s,\n"
-    "      update    : %s,\n"
-    "      delete    : %s\n"
-#endif
-    "    }\n  %s";
-  
-  gchar *buffer;
-  gchar *oldbuffer;
-  
+  JsonBuilder * jsonBuilder;
+  JsonNode * jsonNode;
+  JsonGenerator * jsonGenerator;
+  gchar * jsonStream;
+  gsize jsonStreamLength;
+
   g_return_val_if_fail (GSTD_IS_OBJECT(self), GSTD_NULL_ARGUMENT);
   g_warn_if_fail (!*outstring);
 
-  buffer = g_strdup(prolog);
-  
+  jsonBuilder = json_builder_new ();
+
+  json_builder_begin_object (jsonBuilder);
+
+
+  json_builder_set_member_name (jsonBuilder, "properties");
+  json_builder_begin_array (jsonBuilder);
+
   properties = g_object_class_list_properties(G_OBJECT_GET_CLASS(self), &n);
-  for (i=0;i<n;i++) {
+  for (i=0; i<n; i++) {
+    json_builder_begin_object (jsonBuilder);
+
+    json_builder_set_member_name (jsonBuilder,"name");
+    json_builder_add_string_value (jsonBuilder, properties[i]->name);
+
     typename = g_type_name(properties[i]->value_type);
-    /* Automagical type value serialization */
+
     g_value_init (&value, properties[i]->value_type);
     g_object_get_property(G_OBJECT(self), properties[i]->name, &value);
     svalue = g_strdup_value_contents(&value);
+
+    json_builder_set_member_name (jsonBuilder,"value");
+    json_builder_add_string_value (jsonBuilder, svalue);
+
+    json_builder_set_member_name (jsonBuilder, "param_spec");
+    json_builder_begin_object (jsonBuilder);
+
+
     g_value_unset(&value);
-    /* Automagical flags serialization */
+
     g_value_init (&flags, GSTD_TYPE_PARAM_FLAGS);
     g_value_set_flags (&flags, properties[i]->flags);
     sflags = g_strdup_value_contents(&flags);
     g_value_unset(&flags);
-      
-    oldbuffer = buffer;
-    buffer = g_strdup_printf(fmt, oldbuffer,
-        properties[i]->name, svalue,
-        properties[i]->_blurb,
-        typename,
-        sflags,
-	G_PARAM_CONSTRUCT_ONLY & properties[i]->flags ? "TRUE" : "FALSE",
-#if 0
-	GSTD_PARAM_IS_CREATE(properties[i]->flags) ? "TRUE" : "FALSE",
-	GSTD_PARAM_IS_READ(properties[i]->flags) ? "TRUE" : "FALSE",
-	GSTD_PARAM_IS_UPDATE(properties[i]->flags) ? "TRUE" : "FALSE",
-        GSTD_PARAM_IS_DELETE(properties[i]->flags) ? "TRUE" : "FALSE",
-#endif
-        i+1 != n ? new : epilog);
+
+    json_builder_set_member_name (jsonBuilder, "blurb");
+    json_builder_add_string_value (jsonBuilder,properties[i]->_blurb);
+
+    json_builder_set_member_name (jsonBuilder, "type");
+    json_builder_add_string_value (jsonBuilder,typename);
+
+    json_builder_set_member_name (jsonBuilder, "access");
+    json_builder_add_string_value (jsonBuilder,sflags);
+
+    json_builder_set_member_name (jsonBuilder, "construct");
+    json_builder_add_string_value (jsonBuilder,GSTD_PARAM_IS_DELETE(properties[i]->flags) ? "TRUE" : "FALSE");
+
+    json_builder_end_object (jsonBuilder);
 
     g_free (sflags);
     g_free (svalue);
-    g_free (oldbuffer);
+
+    json_builder_end_object (jsonBuilder);
   }
   g_free (properties);
-  *outstring = buffer;
+
+  json_builder_end_array (jsonBuilder); /* depth1 */
+
+  /* Closes the subobject inside the given builder  */
+  json_builder_end_object (jsonBuilder);
+
+  jsonNode = json_builder_get_root (jsonBuilder);
+
+  jsonGenerator = json_generator_new ();
+  json_generator_set_root (jsonGenerator, jsonNode);
+
+  /* Configure json format */
+  json_generator_set_indent_char (jsonGenerator,' ');
+  json_generator_set_indent (jsonGenerator,4);
+  json_generator_set_pretty (jsonGenerator,TRUE);
+
+  /* Generates a JSON data stream from generator and returns it as a buffer */
+  jsonStream = json_generator_to_data (jsonGenerator,&jsonStreamLength);
+
+  json_node_free (jsonNode);
+  g_object_unref (jsonGenerator);
+
+  *outstring = jsonStream;
+
   return GSTD_EOK;
 }
 
