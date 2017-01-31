@@ -81,7 +81,7 @@ gstd_session_constructed (GObject *);
 static GObject* 
 gstd_session_constructor(GType, guint, GObjectConstructParam *); 
 
-static GObject *session = NULL;
+static GObject *the_session = NULL;
 
 static GObject*
 gstd_session_constructor(GType type, guint n_construct_params,
@@ -90,15 +90,15 @@ gstd_session_constructor(GType type, guint n_construct_params,
   g_mutex_lock(&singletonMutex);
   GObject* object = NULL;
   g_print("Before instantiation \n");
-  if (session == NULL)
+  if (the_session == NULL)
   {
     g_print("Instantiating singleton \n");
     object = G_OBJECT_CLASS(gstd_session_parent_class)->constructor(type, n_construct_params, construct_params);
-    session = object;
+    the_session = object;
   }
   g_mutex_unlock(&singletonMutex);
-  object = g_object_ref (G_OBJECT (session));
-  return session;
+  object = g_object_ref (G_OBJECT (the_session));
+  return object;
 }
 
 static void
