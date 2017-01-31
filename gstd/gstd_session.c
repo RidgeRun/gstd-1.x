@@ -25,6 +25,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <gst/gst.h>
+#include <glib.h>
 
 #include "gstd_session.h"
 #include "gstd_list.h"
@@ -37,6 +38,8 @@ GST_DEBUG_CATEGORY_STATIC(gstd_session_debug);
 #define GST_CAT_DEFAULT gstd_session_debug
 
 #define GSTD_DEBUG_DEFAULT_LEVEL GST_LEVEL_INFO
+
+GMutex singletonMutex;
 
 enum {
   PROP_PIPELINES = 1,
@@ -75,6 +78,28 @@ static void
 gstd_session_dispose (GObject *);
 static void
 gstd_session_constructed (GObject *);
+static GObject* 
+gstd_session_constructor(GType, guint, GObjectConstructParam *); 
+
+static GObject *session = NULL;
+
+static GObject*
+gstd_session_constructor(GType type, guint n_construct_params,
+            GObjectConstructParam *construct_params)
+{
+  g_mutex_lock(&singletonMutex);
+  GObject* object = NULL;
+  g_print("Before instantiation \n");
+  if (session == NULL)
+  {
+    g_print("Instantiating singleton \n");
+    object = G_OBJECT_CLASS(gstd_session_parent_class)->constructor(type, n_construct_params, construct_params);
+    session = object;
+  }
+  g_mutex_unlock(&singletonMutex);
+  object = g_object_ref (G_OBJECT (session));
+  return session;
+}
 
 static void
 gstd_session_class_init (GstdSessionClass *klass)
@@ -87,6 +112,7 @@ gstd_session_class_init (GstdSessionClass *klass)
   object_class->get_property = gstd_session_get_property;
   object_class->dispose = gstd_session_dispose;
   object_class->constructed = gstd_session_constructed;
+  object_class->constructor = gstd_session_constructor;
 
   properties[PROP_PIPELINES] =
     g_param_spec_object ("pipelines",
@@ -124,21 +150,21 @@ gstd_session_class_init (GstdSessionClass *klass)
 static void
 gstd_session_init (GstdSession *self)
 {
-  GST_INFO_OBJECT(self, "Initializing gstd session");
+    GST_INFO_OBJECT(self, "Initializing gstd session");
 
-  self->pipelines = GSTD_LIST(g_object_new(GSTD_TYPE_LIST, "name", "pipelines",
-					   "node-type", GSTD_TYPE_PIPELINE, "flags",
-					   GSTD_PARAM_CREATE | GSTD_PARAM_READ |
-					   GSTD_PARAM_UPDATE | GSTD_PARAM_DELETE, NULL));
+    self->pipelines = GSTD_LIST(g_object_new(GSTD_TYPE_LIST, "name", "pipelines",
+              "node-type", GSTD_TYPE_PIPELINE, "flags",
+              GSTD_PARAM_CREATE | GSTD_PARAM_READ |
+              GSTD_PARAM_UPDATE | GSTD_PARAM_DELETE, NULL));
 
-  gstd_list_set_creator(self->pipelines,
-      g_object_new (GSTD_TYPE_PIPELINE_CREATOR,NULL));
+    gstd_list_set_creator(self->pipelines,
+        g_object_new (GSTD_TYPE_PIPELINE_CREATOR,NULL));
 
-  gstd_list_set_deleter(self->pipelines,
-      g_object_new (GSTD_TYPE_PIPELINE_DELETER,NULL));
+    gstd_list_set_deleter(self->pipelines,
+        g_object_new (GSTD_TYPE_PIPELINE_DELETER,NULL));
 
-  self->port = GSTD_TCP_DEFAULT_PORT;
-  self->service = NULL;
+    self->port = GSTD_TCP_DEFAULT_PORT;
+    self->service = NULL;
 }
 
 static void
