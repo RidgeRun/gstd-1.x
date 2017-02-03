@@ -28,6 +28,8 @@
 #include <stdio.h>
 #include <gst/gst.h>
 #include <glib.h>
+#include <glib/gprintf.h>
+#include <math.h>
 
 #include "gstd_session.h"
 #include "gstd_list.h"
@@ -46,6 +48,7 @@ static GObject *the_session = NULL;
 
 enum {
   PROP_PIPELINES = 1,
+  PROP_NAME,
   PROP_PORT,
   PROP_PID,
   N_PROPERTIES // NOT A PROPERTY
@@ -64,6 +67,7 @@ struct _GstdSession
 
   guint16 port;
   GPid pid;
+  const gchar* name;
   GSocketService *service;
 };
 
@@ -129,6 +133,15 @@ gstd_session_class_init (GstdSessionClass *klass)
 			 GSTD_PARAM_READ |
 			 GSTD_PARAM_DELETE);
 
+  properties[PROP_NAME] =
+    g_param_spec_string ("name",
+		       "Name",
+		       "The session name",
+		       "Session",
+		       G_PARAM_READWRITE |
+		       G_PARAM_CONSTRUCT_ONLY |
+		       G_PARAM_STATIC_STRINGS);
+
   properties[PROP_PORT] =
     g_param_spec_uint ("port",
 		       "Port",
@@ -180,6 +193,10 @@ gstd_session_init (GstdSession *self)
 
     self->port = GSTD_TCP_DEFAULT_PORT;
     self->pid = (GPid) getpid();
+    gssize length = (gssize) floor(log10((double)self->pid)) + 1;
+    gchar* buf = g_malloc (length);
+    g_sprintf(buf, "%d", self->pid);
+    self->name =  buf;
     self->service = NULL;
 }
 
@@ -197,6 +214,10 @@ gstd_session_get_property (GObject        *object,
   case PROP_PIPELINES:
     GST_DEBUG_OBJECT(self, "Returning pipeline list %p", self->pipelines);
     g_value_set_object (value, self->pipelines);
+    break;
+  case PROP_NAME:
+    GST_DEBUG_OBJECT(self, "Returning session name %s", self->name);
+    g_value_set_string (value, self->name);
     break;
   case PROP_PORT:
     GST_DEBUG_OBJECT(self, "Returning post %u", self->port);
@@ -229,6 +250,10 @@ gstd_session_set_property (GObject      *object,
   case PROP_PIPELINES:
     self->pipelines = g_value_get_object (value);
     GST_INFO_OBJECT(self, "Changed pipeline list to %p", self->pipelines);
+    break;
+  case PROP_NAME:
+    GST_DEBUG_OBJECT(self, "Changing session name %s", self->name);
+    self->name = g_value_get_string(value);
     break;
   case PROP_PORT:
     GST_DEBUG_OBJECT(self, "Changing port to %u", self->port);
