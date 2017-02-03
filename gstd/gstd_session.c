@@ -48,7 +48,6 @@ static GObject *the_session = NULL;
 
 enum {
   PROP_PIPELINES = 1,
-  PROP_NAME,
   PROP_PORT,
   PROP_PID,
   N_PROPERTIES // NOT A PROPERTY
@@ -67,7 +66,6 @@ struct _GstdSession
 
   guint16 port;
   GPid pid;
-  const gchar* name;
   GSocketService *service;
 };
 
@@ -119,8 +117,9 @@ gstd_session_class_init (GstdSessionClass *klass)
   object_class->set_property = gstd_session_set_property;
   object_class->get_property = gstd_session_get_property;
   object_class->dispose = gstd_session_dispose;
-  object_class->constructed = gstd_session_constructed;
   object_class->constructor = gstd_session_constructor;
+  object_class->constructed = gstd_session_constructed;
+  
 
   properties[PROP_PIPELINES] =
     g_param_spec_object ("pipelines",
@@ -132,15 +131,6 @@ gstd_session_class_init (GstdSessionClass *klass)
 			 GSTD_PARAM_CREATE |
 			 GSTD_PARAM_READ |
 			 GSTD_PARAM_DELETE);
-
-  properties[PROP_NAME] =
-    g_param_spec_string ("name",
-		       "Name",
-		       "The session name",
-		       "Session",
-		       G_PARAM_READWRITE |
-		       G_PARAM_CONSTRUCT_ONLY |
-		       G_PARAM_STATIC_STRINGS);
 
   properties[PROP_PORT] =
     g_param_spec_uint ("port",
@@ -161,8 +151,7 @@ gstd_session_class_init (GstdSessionClass *klass)
 		       G_MININT,
 		       G_MAXINT,
 		       -1,
-		       G_PARAM_READWRITE |
-		       G_PARAM_CONSTRUCT_ONLY |
+		       G_PARAM_READABLE |
 		       G_PARAM_STATIC_STRINGS);
 
   g_object_class_install_properties (object_class,
@@ -192,12 +181,8 @@ gstd_session_init (GstdSession *self)
         g_object_new (GSTD_TYPE_PIPELINE_DELETER,NULL));
 
     self->port = GSTD_TCP_DEFAULT_PORT;
-    self->pid = (GPid) getpid();
-    gssize length = (gssize) floor(log10((double)self->pid)) + 1;
-    gchar* buf = g_malloc (length);
-    g_sprintf(buf, "%d", self->pid);
-    self->name =  buf;
     self->service = NULL;
+    self->pid = -1;
 }
 
 static void
@@ -214,10 +199,6 @@ gstd_session_get_property (GObject        *object,
   case PROP_PIPELINES:
     GST_DEBUG_OBJECT(self, "Returning pipeline list %p", self->pipelines);
     g_value_set_object (value, self->pipelines);
-    break;
-  case PROP_NAME:
-    GST_DEBUG_OBJECT(self, "Returning session name %s", self->name);
-    g_value_set_string (value, self->name);
     break;
   case PROP_PORT:
     GST_DEBUG_OBJECT(self, "Returning post %u", self->port);
@@ -251,17 +232,9 @@ gstd_session_set_property (GObject      *object,
     self->pipelines = g_value_get_object (value);
     GST_INFO_OBJECT(self, "Changed pipeline list to %p", self->pipelines);
     break;
-  case PROP_NAME:
-    GST_DEBUG_OBJECT(self, "Changing session name %s", self->name);
-    self->name = g_value_get_string(value);
-    break;
   case PROP_PORT:
     GST_DEBUG_OBJECT(self, "Changing port to %u", self->port);
     self->port = g_value_get_uint (value);
-    break;
-  case PROP_PID:
-    GST_DEBUG_OBJECT(self, "Changing pid to %d", self->pid);
-    self->pid = g_value_get_int (value);
     break;
     
   default:
@@ -292,11 +265,28 @@ gstd_session_dispose (GObject *object)
   G_OBJECT_CLASS(gstd_session_parent_class)->dispose(object);
 }
 
+static void session_init_pid(GstdSession *self)
+{
+  self->pid = (GPid) getpid();
+}
+
+static void session_init_name(GstdSession *self)
+{
+  gssize length = (gssize) floor(log10((double)self->pid)) + 1;
+  gchar* buf = g_malloc (length);
+  g_sprintf(buf, "%d", self->pid);
+  self->parent.name = g_strjoin(NULL, "Session ", buf, NULL);
+  g_free(buf);
+}
+
 static void
 gstd_session_constructed (GObject *object)
 {
   GstdSession *self = GSTD_SESSION(object);
-  
+  session_init_pid(self);
+  if (self->parent.name == NULL){
+    session_init_name(self);
+  }
   gstd_tcp_start (self, &self->service, self->port);
 }
 

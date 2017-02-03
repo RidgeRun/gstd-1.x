@@ -29,10 +29,10 @@
 #include <unistd.h>
 
 void singleton_instantiation_test(){
-  GstdSession* temp1 = NULL;
-  GstdSession* temp2 = NULL;
-  gint port1 = 1;
-  gint port2 = 2;
+  GstdSession *temp1 = NULL, *temp2 = NULL;
+  gchar *name1, *name2;
+  gint port1 = 1, port2 = 2;
+  GPid pid1 = 1, pid2 = 2;
   temp1 = gstd_session_new ("Session0", 8001);
   g_assert_true (temp1 != temp2);
   temp2 = gstd_session_new ("Session0", 8002);
@@ -40,11 +40,20 @@ void singleton_instantiation_test(){
   g_object_get(temp1, "port", &port1, NULL);
   g_object_get(temp2, "port", &port2, NULL);
   g_print("GstdSession temp1 ptr: %p, GstdSession temp2 ptr: %p\n", temp1, temp2);
-  g_print("port 1: %d port 2: %d  \n", port1, port2);
+  g_print("Port 1: %d Port 2: %d  \n", port1, port2);
   g_assert_cmpint(port1, == , 8001);
   g_assert_cmpint(port1, == , port2);
+  g_object_get(temp1, "pid", &pid1, NULL);
+  g_object_get(temp2, "pid", &pid2, NULL);
+  g_print("PID 1: %d PID 2: %d  \n", pid1, pid2);
+  g_object_get(temp1, "name", &name1, NULL);
+  g_object_get(temp2, "name", &name2, NULL);
+  g_print("Name 1: %s Name 2: %s  \n", name1, name2);
+  g_assert_cmpint(pid1, == , pid1);
   g_object_unref(temp1);
   g_object_unref(temp2);
+  g_free(name1);
+  g_free(name2);
 }
 
 void session_mem_leak_test(){
