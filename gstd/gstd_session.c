@@ -26,6 +26,7 @@
 #include <stdio.h>
 #include <gst/gst.h>
 
+#include "gstd_debug.h"
 #include "gstd_session.h"
 #include "gstd_list.h"
 #include "gstd_tcp.h"
@@ -41,6 +42,7 @@ GST_DEBUG_CATEGORY_STATIC(gstd_session_debug);
 enum {
   PROP_PIPELINES = 1,
   PROP_PORT,
+  PROP_DEBUG,
   N_PROPERTIES // NOT A PROPERTY
 };
 
@@ -56,6 +58,7 @@ struct _GstdSession
   GstdList *pipelines;
 
   guint16 port;
+  GstdDebug *debug;
   GSocketService *service;
 };
 
@@ -81,7 +84,6 @@ gstd_session_class_init (GstdSessionClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
   GParamSpec *properties[N_PROPERTIES] = { NULL, };
-  guint debug_color;
 
   object_class->set_property = gstd_session_set_property;
   object_class->get_property = gstd_session_get_property;
@@ -111,14 +113,17 @@ gstd_session_class_init (GstdSessionClass *klass)
 		       G_PARAM_STATIC_STRINGS |
 		       GSTD_PARAM_READ);
 
+  properties[PROP_DEBUG] =
+    g_param_spec_object ("debug",
+		       "Debug",
+		       "The debug object containing debug information",
+           GSTD_TYPE_DEBUG,
+		       G_PARAM_READWRITE |
+		       G_PARAM_STATIC_STRINGS);
+
   g_object_class_install_properties (object_class,
                                      N_PROPERTIES,
                                      properties);
-  
-  /* Initialize debug category with nice colors */
-  debug_color = GST_DEBUG_FG_BLACK | GST_DEBUG_BOLD | GST_DEBUG_BG_WHITE;
-  GST_DEBUG_CATEGORY_INIT (gstd_session_debug, "gstdsession", debug_color,
-			   "Gstd Session category");
 }
 
 static void
@@ -130,6 +135,8 @@ gstd_session_init (GstdSession *self)
 					   "node-type", GSTD_TYPE_PIPELINE, "flags",
 					   GSTD_PARAM_CREATE | GSTD_PARAM_READ |
 					   GSTD_PARAM_UPDATE | GSTD_PARAM_DELETE, NULL));
+
+  self->debug = GSTD_DEBUG(g_object_new(GSTD_TYPE_DEBUG, "name", "Debug",NULL));
 
   gstd_list_set_creator(self->pipelines,
       g_object_new (GSTD_TYPE_PIPELINE_CREATOR,NULL));
@@ -160,6 +167,10 @@ gstd_session_get_property (GObject        *object,
     GST_DEBUG_OBJECT(self, "Returning post %u", self->port);
     g_value_set_uint (value, self->port);
     break;
+  case PROP_DEBUG:
+    GST_DEBUG_OBJECT(self, "Returning debug object %p", self->debug);
+    g_value_set_object (value, self->debug);
+    break;
     
   default:
     /* We don't have any other property... */
@@ -187,6 +198,10 @@ gstd_session_set_property (GObject      *object,
   case PROP_PORT:
     GST_DEBUG_OBJECT(self, "Changing port to %u", self->port);
     self->port = g_value_get_uint (value);
+    break;
+  case PROP_DEBUG:
+    self->debug = g_value_get_object(value);
+    GST_DEBUG_OBJECT(self, "Changing debug object to %p", self->debug);
     break;
     
   default:
