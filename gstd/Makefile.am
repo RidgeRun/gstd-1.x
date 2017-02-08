@@ -23,7 +23,7 @@ bin_PROGRAMS = gstd
 
 gstd_SOURCES = gstd.c
 gstd_CFLAGS = $(GST_CFLAGS) $(GIO_CFLAGS) $(GJSON_CFLAGS)
-gstd_LDFLAGS = $(GST_LIBS) $(GIO_LIBS) $(GJSON_LIBS)
+gstd_LDFLAGS = $(GST_LIBS) $(GIO_LIBS) $(GJSON_LIBS) -Wl,-rpath -Wl,$(libdir)
 gstd_LDADD = libgstd-core.la
 
 gstdincludedir = $(includedir)/gstd
