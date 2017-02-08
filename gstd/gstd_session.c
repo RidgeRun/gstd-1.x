@@ -44,7 +44,6 @@ GST_DEBUG_CATEGORY_STATIC(gstd_session_debug);
 #define GSTD_DEBUG_DEFAULT_LEVEL GST_LEVEL_INFO
 
 GMutex singletonMutex;
-static GObject *the_session = NULL;
 
 enum {
   PROP_PIPELINES = 1,
@@ -93,12 +92,11 @@ static GObject*
 gstd_session_constructor(GType type, guint n_construct_params,
             GObjectConstructParam *construct_params)
 {
+  static GObject *the_session = NULL;
   g_mutex_lock(&singletonMutex);
   GObject* object = NULL;
-  g_print("Before instantiation \n");
   if (the_session == NULL)
   {
-    g_print("Instantiating singleton \n");
     object = G_OBJECT_CLASS(gstd_session_parent_class)->constructor(type, n_construct_params, construct_params);
     the_session = object;
   }
