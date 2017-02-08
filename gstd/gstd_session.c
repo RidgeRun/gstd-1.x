@@ -124,6 +124,11 @@ gstd_session_class_init (GstdSessionClass *klass)
   g_object_class_install_properties (object_class,
                                      N_PROPERTIES,
                                      properties);
+
+  /* Initialize debug category with nice colors */
+  guint debug_color = GST_DEBUG_FG_BLACK | GST_DEBUG_BOLD | GST_DEBUG_BG_WHITE;
+  GST_DEBUG_CATEGORY_INIT (gstd_session_debug, "gstdsession", debug_color,
+                           "Gstd Session category");
 }
 
 static void

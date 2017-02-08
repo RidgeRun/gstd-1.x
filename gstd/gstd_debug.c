@@ -28,10 +28,12 @@
 #include "gstd/gstd_debug.h"
 #include "gstd/gstd_object.h"
 
+GST_DEBUG_CATEGORY_STATIC(gstd_debug_cat);
+
 enum {
-  PROP_LEVEL = 1,
+  PROP_ENABLE = 1,
   PROP_COLOR,
-  PROP_LIST,
+  PROP_THRESHOLD,
   PROP_FLAGS,
   N_PROPERTIES // NOT A PROPERTY
 };
@@ -39,10 +41,10 @@ enum {
 struct _GstdDebug
 {
   GstdObject parent;
-  
-  GstDebugLevel level;
-  GstDebugColorFlags color;
-  gchar* list;
+
+  gboolean enable;
+  gboolean color;
+  gchar* threshold;
   GParamFlags flags;
 };
 
@@ -63,7 +65,10 @@ gstd_debug_dispose (GObject *);
 static void
 gstd_debug_constructed (GObject *);
 static GstdReturnCode
+gstd_debug_update (GstdObject *object, const gchar *property, va_list va);
+static GstdReturnCode
 gstd_debug_to_string (GstdObject *, gchar **);
+
 
 static void
 gstd_debug_class_init (GstdDebugClass *klass)
@@ -76,32 +81,28 @@ gstd_debug_class_init (GstdDebugClass *klass)
   object_class->get_property = gstd_debug_get_property;
   object_class->dispose = gstd_debug_dispose;
   object_class->constructed = gstd_debug_constructed;
-  
-  gstd_object_class->to_string = gstd_debug_to_string;
 
-  properties[PROP_LEVEL] =
-    g_param_spec_enum ("level",
-           "Level",
-           "The current gstreamer debug level",
-           gst_debug_level_get_type(),
-           GST_LEVEL_NONE,
+  properties[PROP_ENABLE] =
+    g_param_spec_boolean ("enable",
+           "Enable",
+           "Current gstreamer debug enabled state",
+           gst_debug_is_active(),
            G_PARAM_READWRITE |
            G_PARAM_STATIC_STRINGS);
 
   properties[PROP_COLOR] =
-    g_param_spec_enum ("color",
+    g_param_spec_boolean ("color",
            "Color",
-           "The debug font color",
-           gst_debug_color_flags_get_type(),
-           GST_DEBUG_FG_BLACK | GST_DEBUG_BG_WHITE,
+           "Current gstreamer debug color enabled state",
+           gst_debug_is_colored(),
            G_PARAM_READWRITE |
            G_PARAM_STATIC_STRINGS);
 
-  properties[PROP_LIST] =
-    g_param_spec_string ("list",
-           "List",
-           "The gstreamer debug level list",
-           "*:0", //Set all elements to debug level 0
+  properties[PROP_THRESHOLD] =
+    g_param_spec_string ("threshold",
+           "Threshold",
+           "The gstreamer debug level threshold",
+           "0", //Set all elements to debug level 0
            G_PARAM_READWRITE |
            G_PARAM_STATIC_STRINGS);
 
@@ -119,9 +120,9 @@ gstd_debug_class_init (GstdDebugClass *klass)
                                      properties);
   
   /* Initialize debug category with nice colors */
-  /*debug_color = GST_DEBUG_FG_BLACK | GST_DEBUG_BOLD | GST_DEBUG_BG_WHITE;
-  GST_DEBUG_CATEGORY_INIT (gstd_debug, "gstd_debug", debug_color,
-			   "Gstd debug category");*/
+  guint debug_color = GST_DEBUG_FG_BLACK | GST_DEBUG_BOLD | GST_DEBUG_BG_WHITE;
+  GST_DEBUG_CATEGORY_INIT (gstd_debug_cat, "gstd_debug_cat", debug_color,
+			   "Gstd debug category");
 }
 
 static void
@@ -129,35 +130,38 @@ gstd_debug_init (GstdDebug *self)
 {
   GST_INFO_OBJECT(self, "Initializing gstd debug");
 
-  self->level = GST_LEVEL_NONE;
-  self->color = GST_DEBUG_FG_BLACK | GST_DEBUG_BOLD | GST_DEBUG_BG_WHITE;
-  self->list = "*.0";
+  self->enable = gst_debug_is_active();
+  self->color = gst_debug_is_colored();
+  self->threshold = "0";
 }
 
 static void
 gstd_debug_get_property (GObject        *object,
-			guint           property_id,
-			GValue         *value,
-			GParamSpec     *pspec)
+      guint           property_id,
+      GValue         *value,
+      GParamSpec     *pspec)
 {
   GstdDebug *self = GSTD_DEBUG(object);
 
   gstd_object_set_code (GSTD_OBJECT(self), GSTD_EOK);
   
   switch (property_id) {
-  case PROP_LEVEL:
-    self->level = gst_debug_get_default_threshold();
-    GST_DEBUG_OBJECT(self, "Returning debug level %d", self->level);
-    g_value_set_enum (value, self->level);
+    
+  case PROP_ENABLE:
+    self->enable = gst_debug_is_active();
+    GST_DEBUG_OBJECT(self, "Returning debug enabled %d", self->enable);
+    g_value_set_boolean (value, self->enable);
     break;
   case PROP_COLOR:
-    GST_DEBUG_OBJECT(self, "Returning debug color %d", self->color);
-    g_value_set_enum (value, self->color);
+    self->color = gst_debug_is_colored();
+    GST_DEBUG_OBJECT(self, "Returning debug colored %d", self->color);
+    g_value_set_boolean (value, self->color);
     break;
-  case PROP_LIST:
-    GST_DEBUG_OBJECT(self, "Returning debug list %s", self->list);
-    g_value_set_string (value, self->list);
+  case PROP_THRESHOLD:
+    GST_DEBUG_OBJECT(self, "Returning debug level threshold %s", self->threshold);
+    g_value_set_string (value, self->threshold);
     break;
+
   case PROP_FLAGS:
     GST_DEBUG_OBJECT(self, "Returning flags %u", self->flags);
     g_value_set_flags (value, self->flags);
@@ -182,22 +186,24 @@ gstd_debug_set_property (GObject      *object,
   gstd_object_set_code (GSTD_OBJECT(self), GSTD_EOK);
   
   switch (property_id) {
-  case PROP_LEVEL:
-    GST_DEBUG_OBJECT(self, "Changing debug level to %d", self->level);
-    g_print("Setting self->level from %d to %d \n", self->level, g_value_get_enum(value));
-    self->level = g_value_get_enum(value);
-    gst_debug_set_default_threshold(self->level);
+
+  case PROP_ENABLE:
+    GST_DEBUG_OBJECT(self, "Changing debug enabled to %d", self->enable);
+    g_print("Setting self->enable from %d to %d \n", self->enable, g_value_get_boolean(value));
+    self->enable = g_value_get_boolean(value);
+    gst_debug_set_active(self->enable);
     break;
   case PROP_COLOR:
-    GST_DEBUG_OBJECT(self, "Changing debug color to %d", self->color);
-    g_print("Setting self->color from %d to %d \n", self->color, g_value_get_enum(value));
-    self->color = g_value_get_enum(value);
+    GST_DEBUG_OBJECT(self, "Changing debug colored to %d", self->color);
+    g_print("Setting self->color from %d to %d \n", self->color, g_value_get_boolean(value));
+    self->color = g_value_get_boolean(value);
+    gst_debug_set_colored (self->color);
     break;
-  case PROP_LIST:
-    GST_DEBUG_OBJECT(self, "Changing debug list to %s", self->list);
-    g_print("Setting self->list from %s to %s \n", self->list, g_value_get_string(value));
-    self->list = g_value_get_string(value);
-    gst_debug_set_threshold_from_string(self->list, TRUE);
+  case PROP_THRESHOLD:
+    GST_DEBUG_OBJECT(self, "Changing debug threshold to %s", self->threshold);
+    g_print("Setting self->threshold from %s to %s \n", self->threshold, g_value_get_string(value));
+    self->threshold = g_value_dup_string(value);
+    gst_debug_set_threshold_from_string(self->threshold, TRUE);
     break;
 
   default:
@@ -227,26 +233,4 @@ GstdDebug *
 gstd_debug_new (GstDebugLevel lvl)
 {
   return GSTD_DEBUG(g_object_new (GSTD_TYPE_DEBUG, "level", GST_LEVEL_NONE, NULL));
-}
-
-static GstdReturnCode
-gstd_debug_to_string (GstdObject *object, gchar **outstring)
-{
-  GstdDebug *self = GSTD_DEBUG(object);
-  gchar *props;
-
-  g_return_val_if_fail (GSTD_IS_OBJECT(object), GSTD_NULL_ARGUMENT);
-  g_warn_if_fail (!*outstring);
-
-  /* Lets leverage the parent's class implementation */
-  GSTD_OBJECT_CLASS(gstd_debug_parent_class)->to_string(GSTD_OBJECT(object), &props);
-  // A little hack to remove the last bracket
-  props[strlen(props)-2] = '\0';
-  
-  //*outstring = g_strdup_printf("{%s,\n level : %d,\n color %d: ,\n list %s: \n}", props, self->level, self->color, self->list);
-  *outstring = g_strdup_printf("%d", self->level);
-
-  g_free (props);
-
-  return GSTD_EOK;
 }
