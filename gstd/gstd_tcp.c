@@ -25,6 +25,7 @@
 #include <stdio.h>
 #include <gst/gst.h>
 
+#include "gstd_ipc.h"
 #include "gstd_tcp.h"
 #include "gstd_element.h"
 
@@ -34,11 +35,32 @@ GST_DEBUG_CATEGORY_STATIC(gstd_tcp_debug);
 
 #define GSTD_DEBUG_DEFAULT_LEVEL GST_LEVEL_INFO
 
+struct _GstdTcp
+{
+  GstdIpc parent;
+  guint16 port;
+  GSocketService *service;
+};
+
+struct _GstdTcpClass
+{
+  GstdIpcClass parent_class;
+};
+
+
 typedef GstdReturnCode GstdTCPFunc (GstdSession*, gchar *,gchar *, gchar **);
 typedef struct _GstdTCPCmd {
   gchar *cmd;
   GstdTCPFunc *callback;
 } GstdTCPCmd;
+
+
+enum {
+  PROP_PORT = 1,
+  N_PROPERTIES // NOT A PROPERTY
+};
+
+G_DEFINE_TYPE (GstdTcp, gstd_tcp, GSTD_TYPE_IPC)
 
 /* VTable */
 static gboolean
@@ -78,6 +100,14 @@ static GstdReturnCode
 gstd_tcp_list_elements (GstdSession *, gchar *, gchar *, gchar **);
 static GstdReturnCode
 gstd_tcp_list_properties (GstdSession *, gchar *, gchar *, gchar **);
+static void
+gstd_tcp_set_property (GObject *, guint, const GValue *, GParamSpec *);
+static void
+gstd_tcp_get_property (GObject *, guint, GValue *, GParamSpec *);
+static void
+gstd_tcp_dispose (GObject *);
+gboolean
+gstd_tcp_init_get_option_group (GstdIpc * base,  GOptionGroup **group);
 
 static GstdTCPCmd cmds[] = {
   {"create", gstd_tcp_parse_raw_cmd},
@@ -99,6 +129,119 @@ static GstdTCPCmd cmds[] = {
   {"list_properties", gstd_tcp_list_properties},
   {NULL}
 };
+
+static void
+gstd_tcp_class_init (GstdTcpClass *klass)
+{
+  GObjectClass *object_class = G_OBJECT_CLASS (klass);
+  GstdIpcClass *gstdipc_class = GSTD_IPC_CLASS (klass);
+  GParamSpec *properties[N_PROPERTIES] = { NULL, };
+  guint debug_color;
+  object_class->set_property = gstd_tcp_set_property;
+  object_class->get_property = gstd_tcp_get_property;
+  gstdipc_class->ipc_start =  GST_DEBUG_FUNCPTR (gstd_tcp_start);
+  gstdipc_class->ipc_stop = GST_DEBUG_FUNCPTR (gstd_tcp_stop);
+  gstdipc_class->get_option_group=
+    GST_DEBUG_FUNCPTR (gstd_tcp_init_get_option_group);
+  object_class->dispose = gstd_tcp_dispose;
+
+  properties[PROP_PORT] =
+    g_param_spec_uint ("port",
+		       "Port",
+		       "The port to start listening to",
+		       0,
+		       G_MAXINT,
+		       GSTD_TCP_DEFAULT_PORT,
+		       G_PARAM_READWRITE |
+		       G_PARAM_CONSTRUCT_ONLY |
+		       G_PARAM_STATIC_STRINGS |
+		       GSTD_PARAM_READ);
+
+  g_object_class_install_properties (object_class,
+                                     N_PROPERTIES,
+                                     properties);
+  
+  /* Initialize debug category with nice colors */
+  debug_color = GST_DEBUG_FG_BLACK | GST_DEBUG_BOLD | GST_DEBUG_BG_WHITE;
+  GST_DEBUG_CATEGORY_INIT (gstd_tcp_debug, "gstdtcp", debug_color,
+			   "Gstd TCP category");
+}
+
+static void
+gstd_tcp_init (GstdTcp *self)
+{
+  GST_INFO_OBJECT(self, "Initializing gstd Tcp");
+  GstdIpc *base = GSTD_IPC(self);
+  self->port = GSTD_TCP_DEFAULT_PORT;
+  self->service = NULL;
+  base->enabled = FALSE;
+}
+
+static void
+gstd_tcp_get_property (GObject        *object,
+			guint           property_id,
+			GValue         *value,
+			GParamSpec     *pspec)
+{
+  GstdTcp *self = GSTD_TCP(object);
+
+  gstd_object_set_code (GSTD_OBJECT(self), GSTD_EOK);
+  
+  switch (property_id) {
+  case PROP_PORT:
+    GST_DEBUG_OBJECT(self, "Returning post %u", self->port);
+    g_value_set_uint (value, self->port);
+    break;
+    
+  default:
+    /* We don't have any other property... */
+    G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
+    gstd_object_set_code (GSTD_OBJECT(self), GSTD_NO_RESOURCE);
+    break;
+  }
+}
+
+static void
+gstd_tcp_set_property (GObject      *object,
+		   guint         property_id,
+		   const GValue *value,
+		   GParamSpec   *pspec)
+{
+  GstdTcp *self = GSTD_TCP(object);
+
+  gstd_object_set_code (GSTD_OBJECT(self), GSTD_EOK);
+  
+  switch (property_id) {
+  case PROP_PORT:
+    GST_DEBUG_OBJECT(self, "Changing port to %u", self->port);
+    self->port = g_value_get_uint (value);
+    GST_DEBUG_OBJECT(self, "Value changed %u", self->port);
+    break;
+    
+  default:
+    /* We don't have any other property... */
+    G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
+    gstd_object_set_code (GSTD_OBJECT(self), GSTD_NO_RESOURCE);
+    break;
+  }
+}
+
+
+static void
+gstd_tcp_dispose (GObject *object)
+{
+  GstdTcp *self = GSTD_TCP(object);
+  
+  GST_INFO_OBJECT(object, "Deinitializing gstd TCP");
+
+  if (self->service) {
+    self->service = NULL;
+  }
+  
+  G_OBJECT_CLASS(gstd_tcp_parent_class)->dispose(object);
+}
+
+
 
 static gboolean
 gstd_tcp_callback  (GSocketService *service,
@@ -144,10 +287,21 @@ gstd_tcp_callback  (GSocketService *service,
 }
 
 GstdReturnCode
-gstd_tcp_start (GstdSession *session, GSocketService **service, guint16 port)
+gstd_tcp_start (GstdIpc *base, GstdSession *session)
 {
   guint debug_color;
   GError *error = NULL;
+  GstdTcp *self = GSTD_TCP(base);
+  GSocketService **service = &self->service;
+  guint16 port = self->port;
+ 
+  base->session = session;
+  if(!base->enabled){
+    GST_DEBUG_OBJECT(self, "TCP not enabled, skipping");
+    goto out;
+  }
+
+  GST_DEBUG_OBJECT(self, "Starting TCP");
 
   if (!gstd_tcp_debug) {
     /* Initialize debug category with nice colors */
@@ -157,7 +311,7 @@ gstd_tcp_start (GstdSession *session, GSocketService **service, guint16 port)
   }
 
   // Close any existing connection
-  gstd_tcp_stop (session, service);
+  gstd_tcp_stop (base);
   
   *service = g_socket_service_new ();
 
@@ -174,7 +328,8 @@ gstd_tcp_start (GstdSession *session, GSocketService **service, guint16 port)
   
   /* start the socket service */
   g_socket_service_start (*service);
-  
+ 
+out:  
   return GSTD_EOK;
   
  noconnection:
@@ -186,10 +341,15 @@ gstd_tcp_start (GstdSession *session, GSocketService **service, guint16 port)
 }
 
 GstdReturnCode
-gstd_tcp_stop (GstdSession *session, GSocketService **service)
+gstd_tcp_stop (GstdIpc *base)
 {
-  GSocketListener *listener = G_SOCKET_LISTENER(*service);
+  GstdTcp *self = GSTD_TCP(base);
+  GSocketService **service = &self->service;
+  GstdSession *session = base->session;
+ GSocketListener *listener = G_SOCKET_LISTENER(*service);
+ 
 
+  GST_DEBUG_OBJECT(self, "TCP stop ");
   g_return_val_if_fail(session, GSTD_NULL_ARGUMENT);
   
   if (*service) {
@@ -781,4 +941,22 @@ gstd_tcp_list_properties (GstdSession *session, gchar *action, gchar *args, gcha
   g_strfreev(tokens);
 
   return ret;
+}
+
+
+gboolean
+gstd_tcp_init_get_option_group (GstdIpc * base,  GOptionGroup **group)
+{
+  GstdTcp *self = GSTD_TCP(base);
+  GST_DEBUG_OBJECT(self, "TCP init group callback ");
+  GOptionEntry tcp_args[] = {
+    { "enable-tcp-protocol", 't', 0,  G_OPTION_ARG_NONE, &base->enabled, "Enable attach the server through a given TCP port ", NULL},
+    { "port", 'p', 0, G_OPTION_ARG_INT, &self->port, "Attach to the server through the given port (default 5000)","port" },
+    {NULL}
+  };
+  *group = g_option_group_new ("gstd-tcp", ("TCP Options"),
+      ("Show TCP Options"), NULL, NULL);
+
+  g_option_group_add_entries (*group, tcp_args);
+  return TRUE;
 }
