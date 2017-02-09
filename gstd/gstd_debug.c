@@ -79,8 +79,8 @@ gstd_debug_dispose (GObject *);
 char* debug_obtain_default_level()
 {
   gint level = gst_debug_get_default_threshold();
-  gssize length = (gssize) floor(log10((double)level)) + 1;
-  gchar* buf = g_malloc (length);
+  gsize length = (level == 0) ? 1 : (gsize) floor(log10((double)level)) + 1;
+  gchar* buf = g_malloc (length*sizeof(gchar));
   g_sprintf(buf, "%d", level);
   return buf;
 }

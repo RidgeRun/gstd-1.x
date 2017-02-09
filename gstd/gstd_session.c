@@ -288,7 +288,7 @@ static void session_init_pid(GstdSession *self)
 
 static void session_init_name(GstdSession *self)
 {
-  gssize length = (gssize) floor(log10((double)self->pid)) + 1;
+  gssize length = (self->pid == 0) ? 1 : (gssize) floor(log10((double)self->pid)) + 1;
   gchar* buf = g_malloc (length);
   g_sprintf(buf, "%d", self->pid);
   self->parent.name = g_strjoin(NULL, "Session ", buf, NULL);
