@@ -31,6 +31,7 @@
 #include <glib/gprintf.h>
 #include <math.h>
 
+#include "gstd_debug.h"
 #include "gstd_session.h"
 #include "gstd_list.h"
 #include "gstd_tcp.h"
@@ -49,6 +50,7 @@ enum {
   PROP_PIPELINES = 1,
   PROP_PORT,
   PROP_PID,
+  PROP_DEBUG,
   N_PROPERTIES // NOT A PROPERTY
 };
 
@@ -65,6 +67,7 @@ struct _GstdSession
 
   guint16 port;
   GPid pid;
+  GstdDebug *debug;
   GSocketService *service;
 };
 
@@ -110,14 +113,12 @@ gstd_session_class_init (GstdSessionClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
   GParamSpec *properties[N_PROPERTIES] = { NULL, };
-  guint debug_color;
 
   object_class->set_property = gstd_session_set_property;
   object_class->get_property = gstd_session_get_property;
   object_class->dispose = gstd_session_dispose;
   object_class->constructor = gstd_session_constructor;
   object_class->constructed = gstd_session_constructed;
-  
 
   properties[PROP_PIPELINES] =
     g_param_spec_object ("pipelines",
@@ -142,7 +143,7 @@ gstd_session_class_init (GstdSessionClass *klass)
 		       G_PARAM_STATIC_STRINGS |
 		       GSTD_PARAM_READ);
 
-    properties[PROP_PID] =
+  properties[PROP_PID] =
     g_param_spec_int ("pid",
 		       "PID",
 		       "The session process identifier",
@@ -152,12 +153,20 @@ gstd_session_class_init (GstdSessionClass *klass)
 		       G_PARAM_READABLE |
 		       G_PARAM_STATIC_STRINGS);
 
+  properties[PROP_DEBUG] =
+    g_param_spec_object ("debug",
+		       "Debug",
+		       "The debug object containing debug information",
+           GSTD_TYPE_DEBUG,
+		       G_PARAM_READWRITE |
+		       G_PARAM_STATIC_STRINGS);
+
   g_object_class_install_properties (object_class,
                                      N_PROPERTIES,
                                      properties);
   
   /* Initialize debug category with nice colors */
-  debug_color = GST_DEBUG_FG_BLACK | GST_DEBUG_BOLD | GST_DEBUG_BG_WHITE;
+  guint debug_color = GST_DEBUG_FG_BLACK | GST_DEBUG_BOLD | GST_DEBUG_BG_WHITE;
   GST_DEBUG_CATEGORY_INIT (gstd_session_debug, "gstdsession", debug_color,
 			   "Gstd Session category");
 }
@@ -165,22 +174,23 @@ gstd_session_class_init (GstdSessionClass *klass)
 static void
 gstd_session_init (GstdSession *self)
 {
-    GST_INFO_OBJECT(self, "Initializing gstd session");
+  GST_INFO_OBJECT(self, "Initializing gstd session");
 
-    self->pipelines = GSTD_LIST(g_object_new(GSTD_TYPE_LIST, "name", "pipelines",
-              "node-type", GSTD_TYPE_PIPELINE, "flags",
-              GSTD_PARAM_CREATE | GSTD_PARAM_READ |
-              GSTD_PARAM_UPDATE | GSTD_PARAM_DELETE, NULL));
+  self->pipelines = GSTD_LIST(g_object_new(GSTD_TYPE_LIST, "name", "pipelines",
+					   "node-type", GSTD_TYPE_PIPELINE, "flags",
+					   GSTD_PARAM_CREATE | GSTD_PARAM_READ |
+					   GSTD_PARAM_UPDATE | GSTD_PARAM_DELETE, NULL));
 
-    gstd_list_set_creator(self->pipelines,
-        g_object_new (GSTD_TYPE_PIPELINE_CREATOR,NULL));
+  self->debug = GSTD_DEBUG(g_object_new(GSTD_TYPE_DEBUG, "name", "Debug",NULL));
 
-    gstd_list_set_deleter(self->pipelines,
-        g_object_new (GSTD_TYPE_PIPELINE_DELETER,NULL));
+  gstd_list_set_creator(self->pipelines,
+      g_object_new (GSTD_TYPE_PIPELINE_CREATOR,NULL));
 
-    self->port = GSTD_TCP_DEFAULT_PORT;
-    self->service = NULL;
-    self->pid = -1;
+  gstd_list_set_deleter(self->pipelines,
+      g_object_new (GSTD_TYPE_PIPELINE_DELETER,NULL));
+
+  self->port = GSTD_TCP_DEFAULT_PORT;
+  self->service = NULL;
 }
 
 static void
@@ -206,7 +216,11 @@ gstd_session_get_property (GObject        *object,
     GST_DEBUG_OBJECT(self, "Returning pid %d", self->pid);
     g_value_set_int (value, self->pid);
     break;
-    
+  case PROP_DEBUG:
+    GST_DEBUG_OBJECT(self, "Returning debug object %p", self->debug);
+    g_value_set_object (value, self->debug);
+    break;    
+
   default:
     /* We don't have any other property... */
     G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -233,6 +247,10 @@ gstd_session_set_property (GObject      *object,
   case PROP_PORT:
     GST_DEBUG_OBJECT(self, "Changing port to %u", self->port);
     self->port = g_value_get_uint (value);
+    break;
+  case PROP_DEBUG:
+    self->debug = g_value_get_object(value);
+    GST_DEBUG_OBJECT(self, "Changing debug object to %p", self->debug);
     break;
     
   default:
