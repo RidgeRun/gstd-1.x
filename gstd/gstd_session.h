@@ -54,7 +54,7 @@
  * way.
  *
  * |[<!-- language="C" -->
- * GstdSession *gstd = gstd_session_new ("MySession", 3000);
+ * GstdSession *gstd = gstd_session_new ("MySession");
  * ]|
  *
  * # Design #
@@ -174,6 +174,7 @@
 #include <gstd/gstd_return_codes.h>
 #include <gstd/gstd_object.h>
 #include <gstd/gstd_pipeline.h>
+#include "gstd_list.h"
 
 G_BEGIN_DECLS
 
@@ -192,7 +193,26 @@ G_BEGIN_DECLS
 
 typedef struct _GstdSession GstdSession;
 typedef struct _GstdSessionClass GstdSessionClass;
-GType gstd_session_get_type();
+
+struct _GstdSession
+{
+  GstdObject parent;
+  
+  /**
+   * The list of GstdPipelines created by the user
+   */
+  GstdList *pipelines;
+
+  GPid pid;
+};
+
+struct _GstdSessionClass
+{
+  GstdObjectClass parent_class;
+};
+
+GType gstd_session_get_type(void);
+
 
 /**
  * gstd_session_new: (constructor)
@@ -206,7 +226,7 @@ GType gstd_session_get_type();
  * usage using g_object_unref()
  */
 GstdSession *
-gstd_session_new (const gchar *name, const guint16 port);
+gstd_session_new (const gchar *name);
 
 /**
  * gstd_pipeline_create:

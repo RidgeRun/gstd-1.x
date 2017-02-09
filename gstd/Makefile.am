@@ -6,6 +6,7 @@ libgstd_core_la_SOURCES = gstd_session.c		\
 	                  gstd_pipeline.c 		\
 			  gstd_element.c		\
 			  gstd_list.c			\
+			  gstd_ipc.c			\
 			  gstd_tcp.c			\
 			  gstd_icreator.c		\
 			  gstd_pipeline_creator.c	\
@@ -35,6 +36,7 @@ gstdinclude_HEADERS = \
 		  gstd_pipeline.h		\
 		  gstd_element.h		\
 		  gstd_list.h			\
+		  gstd_ipc.h			\
 		  gstd_tcp.h			\
 		  gstd_icreator.h		\
 		  gstd_pipeline_creator.h	\
