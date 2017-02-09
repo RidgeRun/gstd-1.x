@@ -23,9 +23,6 @@
 #include <glib.h>
 #include <gst/gst.h>
 
-//GST_DEBUG_CATEGORY_EXTERN (gstd_debug);
-//#define GST_CAT_DEFAULT gstd_debug
-
 #define GSTD_DEBUG_DEFAULT_LEVEL GST_LEVEL_INFO
 
 G_BEGIN_DECLS
