@@ -175,6 +175,7 @@
 #include <gstd/gstd_object.h>
 #include <gstd/gstd_pipeline.h>
 #include "gstd_list.h"
+#include "gstd_debug.h"
 
 G_BEGIN_DECLS
 
@@ -202,8 +203,16 @@ struct _GstdSession
    * The list of GstdPipelines created by the user
    */
   GstdList *pipelines;
-
+  
+  /*
+   * The current process identifier
+   */
   GPid pid;
+
+  /*
+   * Object containing debug options
+   */
+  GstdDebug *debug;
 };
 
 struct _GstdSessionClass
