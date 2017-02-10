@@ -22,16 +22,6 @@
 #include "config.h"
 #endif
 
-#include <sys/types.h>
-#include <unistd.h>
-#include <string.h>
-#include <stdio.h>
-#include <gst/gst.h>
-#include <glib.h>
-#include <glib/gprintf.h>
-#include <math.h>
-
-#include "gstd_debug.h"
 #include "gstd_session.h"
 #include "gstd_list.h"
 #include "gstd_tcp.h"
@@ -44,7 +34,7 @@ GST_DEBUG_CATEGORY_STATIC(gstd_session_debug);
 
 #define GSTD_DEBUG_DEFAULT_LEVEL GST_LEVEL_INFO
 
-GMutex singletonMutex;
+GMutex singleton_mutex;
 
 enum {
   PROP_PIPELINES = 1,
@@ -54,6 +44,7 @@ enum {
 };
 
 #define GSTD_SESSION_DEFAULT_PIPELINES NULL
+#define GSTD_DEFAULT_PID -1
 
 G_DEFINE_TYPE (GstdSession, gstd_session, GSTD_TYPE_OBJECT)
 
@@ -64,8 +55,6 @@ static void
 gstd_session_get_property (GObject *, guint, GValue *, GParamSpec *);
 static void
 gstd_session_dispose (GObject *);
-static void
-gstd_session_constructed (GObject *);
 static GObject* 
 gstd_session_constructor(GType, guint, GObjectConstructParam *); 
 
@@ -75,14 +64,13 @@ gstd_session_constructor(GType type, guint n_construct_params,
             GObjectConstructParam *construct_params)
 {
   static GObject *the_session = NULL;
-  g_mutex_lock(&singletonMutex);
+  g_mutex_lock(&singleton_mutex);
   GObject* object = NULL;
-  if (the_session == NULL)
-  {
+  if (the_session == NULL){
     object = G_OBJECT_CLASS(gstd_session_parent_class)->constructor(type, n_construct_params, construct_params);
     the_session = object;
   }
-  g_mutex_unlock(&singletonMutex);
+  g_mutex_unlock(&singleton_mutex);
   object = g_object_ref (G_OBJECT (the_session));
   return object;
 }
@@ -96,9 +84,7 @@ gstd_session_class_init (GstdSessionClass *klass)
   object_class->set_property = gstd_session_set_property;
   object_class->get_property = gstd_session_get_property;
   object_class->dispose = gstd_session_dispose;
-  object_class->constructor = gstd_session_constructor;
-  object_class->constructed = gstd_session_constructed;
-  
+  object_class->constructor = gstd_session_constructor;  
 
   properties[PROP_PIPELINES] =
     g_param_spec_object ("pipelines",
@@ -117,7 +103,7 @@ gstd_session_class_init (GstdSessionClass *klass)
 		       "The session process identifier",
 		       G_MININT,
 		       G_MAXINT,
-		       -1,
+		       GSTD_DEFAULT_PID,
 		       G_PARAM_READABLE |
 		       G_PARAM_STATIC_STRINGS);
 
@@ -157,7 +143,7 @@ gstd_session_init (GstdSession *self)
     gstd_list_set_deleter(self->pipelines,
         g_object_new (GSTD_TYPE_PIPELINE_DELETER,NULL));
 
-    self->pid = -1;
+    self->pid = (GPid) getpid();
 }
 
 static void
@@ -207,10 +193,6 @@ gstd_session_set_property (GObject      *object,
     self->pipelines = g_value_get_object (value);
     GST_INFO_OBJECT(self, "Changed pipeline list to %p", self->pipelines);
     break;
-  case PROP_PID:
-    GST_DEBUG_OBJECT(self, "Changing pid to %u", self->pid);
-    self->pid = g_value_get_uint (value);
-    break;
   case PROP_DEBUG:
     self->debug = g_value_get_object(value);
     GST_DEBUG_OBJECT(self, "Changing debug object to %p", self->debug);
@@ -236,38 +218,28 @@ gstd_session_dispose (GObject *object)
     self->pipelines = NULL;
   }
 
+  if (self->debug){
+    g_object_unref (self->debug);
+    self->debug = NULL;
+  }
+
   G_OBJECT_CLASS(gstd_session_parent_class)->dispose(object);
 }
-
-static void session_init_pid(GstdSession *self)
-{
-  self->pid = (GPid) getpid();
-}
-
-static void session_init_name(GstdSession *self)
-{
-  gsize length = (self->pid == 0) ? 1 : (gsize) floor(log10(fabs((double)self->pid))) + 1;
-  gchar* buf = g_malloc (length);
-  g_sprintf(buf, "%d", self->pid);
-  self->parent.name = g_strjoin(NULL, "Session ", buf, NULL);
-  g_free(buf);
-}
-
-static void
-gstd_session_constructed (GObject *object)
-{
-  GstdSession *self = GSTD_SESSION(object);
-  session_init_pid(self);
-  if (self->parent.name == NULL){
-    session_init_name(self);
-  }
-}
-
 
 GstdSession *
 gstd_session_new (const gchar *name)
 {
-  return GSTD_SESSION(g_object_new (GSTD_TYPE_SESSION, "name", name, NULL));
+  GstdSession *self;
+  if (!name){
+    GPid tempPid = (GPid) getpid();
+    gchar* pid_name = g_strdup_printf ("Session %d", tempPid);
+    self = GSTD_SESSION(g_object_new (GSTD_TYPE_SESSION, "name", pid_name, NULL));
+    g_free(pid_name);
+  }
+  else{
+    self = GSTD_SESSION(g_object_new (GSTD_TYPE_SESSION, "name", name, NULL));
+  }
+  return self;
 }
 
 GstdReturnCode
