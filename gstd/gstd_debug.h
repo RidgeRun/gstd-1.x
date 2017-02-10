@@ -20,7 +20,6 @@
 #ifndef __GSTD_DEBUG_H__
 #define __GSTD_DEBUG_H__
 
-#include <glib.h>
 #include <gst/gst.h>
 
 #define GSTD_DEBUG_DEFAULT_LEVEL GST_LEVEL_INFO
@@ -46,15 +45,14 @@ GType gstd_debug_get_type();
 
 /**
  * gstd_debug_new: (constructor)
- * @lvl: (non nullable): Debug level.
  * 
- * Creates a new object to handle debuggin state.
+ * Creates a new object to handle debugging options.
  *
  * Returns: (transfer full) (nullable): A new #GstdDebug. Free after
  * usage using g_object_unref()
  */
 GstdDebug *
-gstd_debug_new (GstDebugLevel lvl);
+gstd_debug_new ();
 
 
 #endif // __GSTD_DEBUG_H__

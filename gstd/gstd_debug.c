@@ -22,9 +22,6 @@
 #include "config.h"
 #endif
 
-#include <string.h>
-#include <stdio.h>
-#include <math.h>
 #include <glib/gprintf.h>
 
 #include "gstd/gstd_debug.h"
@@ -76,13 +73,10 @@ gstd_debug_get_property (GObject *, guint, GValue *, GParamSpec *);
 static void
 gstd_debug_dispose (GObject *);
 
-char* debug_obtain_default_level()
+gchar* debug_obtain_default_level()
 {
   gint level = gst_debug_get_default_threshold();
-  gsize length = (level == 0) ? 1 : (gsize) floor(log10(fabs((double)level))) + 1;
-  gchar* buf = g_malloc (length*sizeof(gchar));
-  g_sprintf(buf, "%d", level);
-  return buf;
+  return g_strdup_printf ("%d", level);
 }
 
 static void
@@ -94,6 +88,8 @@ gstd_debug_class_init (GstdDebugClass *klass)
   object_class->set_property = gstd_debug_set_property;
   object_class->get_property = gstd_debug_get_property;
   object_class->dispose = gstd_debug_dispose;
+
+  gchar* temp_threshold = debug_obtain_default_level();
 
   properties[PROP_ENABLE] =
     g_param_spec_boolean ("enable",
@@ -115,7 +111,7 @@ gstd_debug_class_init (GstdDebugClass *klass)
     g_param_spec_string ("threshold",
            "Threshold",
            "The gstreamer debug level threshold",
-           debug_obtain_default_level(),
+           temp_threshold,
            G_PARAM_READWRITE |
            G_PARAM_STATIC_STRINGS);
 
@@ -134,8 +130,10 @@ gstd_debug_class_init (GstdDebugClass *klass)
   
   /* Initialize debug category with nice colors */
   guint debug_color = GST_DEBUG_FG_BLACK | GST_DEBUG_BOLD | GST_DEBUG_BG_WHITE;
-  GST_DEBUG_CATEGORY_INIT (gstd_debug_cat, "gstd_debug_cat", debug_color,
-			   "Gstd debug category");
+  GST_DEBUG_CATEGORY_INIT (gstd_debug_cat, "gstddebug", debug_color,
+         "Gstd debug category");
+
+  g_free(temp_threshold);
 }
 
 static void
@@ -211,8 +209,7 @@ gstd_debug_set_property (GObject      *object,
     gst_debug_set_colored (self->color);
     break;
   case PROP_THRESHOLD:
-    if (self->threshold)
-    {
+    if (self->threshold){
       g_free(self->threshold);
     }
     self->threshold = g_value_dup_string(value);
@@ -244,7 +241,7 @@ gstd_debug_dispose (GObject *object)
 
 
 GstdDebug *
-gstd_debug_new (GstDebugLevel lvl)
+gstd_debug_new ()
 {
-  return GSTD_DEBUG(g_object_new (GSTD_TYPE_DEBUG, "level", GST_LEVEL_NONE, NULL));
+  return GSTD_DEBUG(g_object_new (GSTD_TYPE_DEBUG, NULL));
 }
