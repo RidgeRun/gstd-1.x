@@ -32,9 +32,9 @@ void singleton_instantiation_test(){
   GstdSession *temp1 = NULL, *temp2 = NULL;
   gchar *name1, *name2;
   GPid pid1 = 1, pid2 = 2;
-  temp1 = gstd_session_new (NULL, 8001);
+  temp1 = gstd_session_new (NULL);
   g_assert_true (temp1 != temp2);
-  temp2 = gstd_session_new ("Session0", 8002);
+  temp2 = gstd_session_new ("Session0");
   g_assert_true (temp1 == temp2);
   g_print("GstdSession temp1 ptr: %p, GstdSession temp2 ptr: %p\n", temp1, temp2);
   g_object_get(temp1, "pid", &pid1, NULL);
@@ -63,7 +63,7 @@ void session_mem_leak_test(){
 void* instantiate_session_singleton(gpointer address){
   g_print("Array Adress: %p, ", address);
   GstdSession **sessionAdress = (GstdSession **) address;
-  *sessionAdress = gstd_session_new("SessionTest", 8002);
+  *sessionAdress = gstd_session_new("SessionTest");
   g_print("GstdSession ptr: %p \n", *sessionAdress);
   return NULL;
 }
