@@ -38,7 +38,7 @@
 static GMainLoop *main_loop;
 
 void
-int_handler(gint sig)
+int_handler (gint sig)
 {
   g_return_if_fail (main_loop);
 
@@ -49,7 +49,7 @@ int_handler(gint sig)
 }
 
 gint
-main (gint argc, gchar *argv[])
+main (gint argc, gchar * argv[])
 {
   GstdSession *session;
   guint i;
@@ -65,16 +65,18 @@ main (gint argc, gchar *argv[])
     GSTD_TYPE_TCP,
   };
 
-  guint num_ipcs = (sizeof(supported_ipcs)/sizeof(GType));
+  guint num_ipcs = (sizeof (supported_ipcs) / sizeof (GType));
   GstdIpc *Ipc_array[num_ipcs];
   GstdIpcClass *klass;
   GOptionGroup *optiongroup_array[num_ipcs];
 
   GOptionEntry entries[] = {
-    { "version", 'v', 0, G_OPTION_ARG_NONE, &version, "Print current gstd version", NULL },
-    { NULL }
+    {"version", 'v', 0, G_OPTION_ARG_NONE, &version,
+          "Print current gstd version", NULL}
+    ,
+    {NULL}
   };
-  
+
   /* Initialize default */
   version = FALSE;
   context = g_option_context_new (" - gst-launch under steroids");
@@ -84,32 +86,31 @@ main (gint argc, gchar *argv[])
   g_option_context_add_group (context, gstreamer_group);
 
   /* Initialize GStreamer subsystem before calling anything else */
-  gst_init(&argc, &argv);
+  gst_init (&argc, &argv);
 
   /* Install a handler for the interrupt signal */
   signal (SIGINT, int_handler);
- 
+
   /* Starting the application's main loop, necessary for 
      messaging and signaling subsystem */
   GST_INFO ("Starting application...");
   main_loop = g_main_loop_new (NULL, FALSE);
 
-  /*Create session*/
+  /*Create session */
   session = gstd_session_new ("Session0");
 
   /* Read option group for each IPC */
-  for(i=0; i < num_ipcs;i++)
-    {
-      Ipc_array[i]=GSTD_IPC( g_object_new (supported_ipcs[i],NULL));
-      klass = GSTD_IPC_GET_CLASS (Ipc_array[i]);
-      klass->get_option_group(Ipc_array[i],&optiongroup_array[i]);
-      g_option_context_add_group (context,optiongroup_array[i]);
-    }
+  for (i = 0; i < num_ipcs; i++) {
+    Ipc_array[i] = GSTD_IPC (g_object_new (supported_ipcs[i], NULL));
+    klass = GSTD_IPC_GET_CLASS (Ipc_array[i]);
+    klass->get_option_group (Ipc_array[i], &optiongroup_array[i]);
+    g_option_context_add_group (context, optiongroup_array[i]);
+  }
 
-  /*Parse the options before starting any IPC*/
+  /*Parse the options before starting any IPC */
   if (!g_option_context_parse (context, &argc, &argv, &error)) {
     g_printerr ("%s\n", error->message);
-    g_error_free(error);
+    g_error_free (error);
     return EXIT_FAILURE;
   }
 
@@ -118,32 +119,30 @@ main (gint argc, gchar *argv[])
     g_print ("" PACKAGE_STRING "\n");
     g_print ("Copyright (c) 2015 RigeRun Engineering\n");
     return EXIT_SUCCESS;
-  }  
-  
+  }
+
   /* Run start for each IPC (each start method checks for the enabled flag) */
-  for(i=0; i < num_ipcs; i++)
-    {
-      klass = GSTD_IPC_GET_CLASS (Ipc_array[i]);
-      klass->ipc_start(Ipc_array[i],session);
-    }
+  for (i = 0; i < num_ipcs; i++) {
+    klass = GSTD_IPC_GET_CLASS (Ipc_array[i]);
+    klass->ipc_start (Ipc_array[i], session);
+  }
   /* Install a handler for the interrupt signal */
 
   signal (SIGINT, int_handler);
-  
+
   g_main_loop_run (main_loop);
-  /* Application shut down*/
+  /* Application shut down */
   g_main_loop_unref (main_loop);
   main_loop = NULL;
 
-  /* Run stop for each IPC*/
-  for(i=0; i < num_ipcs; i++)
-    {
-      klass = GSTD_IPC_GET_CLASS (Ipc_array[i]);
-      klass->ipc_stop(Ipc_array[i]);
-      g_object_unref (Ipc_array[i]); 
-    }
+  /* Run stop for each IPC */
+  for (i = 0; i < num_ipcs; i++) {
+    klass = GSTD_IPC_GET_CLASS (Ipc_array[i]);
+    klass->ipc_stop (Ipc_array[i]);
+    g_object_unref (Ipc_array[i]);
+  }
   g_object_unref (session);
-  gst_deinit();
-  
+  gst_deinit ();
+
   return GSTD_EOK;
 }

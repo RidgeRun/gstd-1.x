@@ -23,13 +23,13 @@
 G_DEFINE_INTERFACE (GstdIDeleter, gstd_ideleter, G_TYPE_OBJECT);
 
 static void
-gstd_ideleter_default_init (GstdIDeleterInterface *iface)
+gstd_ideleter_default_init (GstdIDeleterInterface * iface)
 {
 
 }
 
 void
-gstd_ideleter_delete (GstdIDeleter *self, GstdObject *object)
+gstd_ideleter_delete (GstdIDeleter * self, GstdObject * object)
 {
   g_return_if_fail (self);
 

@@ -21,12 +21,12 @@
 #include "gstd_no_deleter.h"
 
 /* Gstd Core debugging category */
-GST_DEBUG_CATEGORY_STATIC(gstd_no_deleter_debug);
+GST_DEBUG_CATEGORY_STATIC (gstd_no_deleter_debug);
 #define GST_CAT_DEFAULT gstd_no_deleter_debug
 
 #define GSTD_DEBUG_DEFAULT_LEVEL GST_LEVEL_INFO
 
-static void gstd_no_deleter_delete (GstdIDeleter *iface, GstdObject *object);
+static void gstd_no_deleter_delete (GstdIDeleter * iface, GstdObject * object);
 
 typedef struct _GstdNoDeleterClass GstdNoDeleterClass;
 
@@ -45,34 +45,33 @@ struct _GstdNoDeleterClass
 };
 
 static void
-gstd_ideleter_interface_init (GstdIDeleterInterface *iface)
+gstd_ideleter_interface_init (GstdIDeleterInterface * iface)
 {
   iface->delete = gstd_no_deleter_delete;
 }
 
 G_DEFINE_TYPE_WITH_CODE (GstdNoDeleter, gstd_no_deleter, G_TYPE_OBJECT,
-                         G_IMPLEMENT_INTERFACE (GSTD_TYPE_IDELETER,
-                                                gstd_ideleter_interface_init));
+    G_IMPLEMENT_INTERFACE (GSTD_TYPE_IDELETER, gstd_ideleter_interface_init));
 
 static void
-gstd_no_deleter_class_init (GstdNoDeleterClass *klass)
+gstd_no_deleter_class_init (GstdNoDeleterClass * klass)
 {
   guint debug_color;
 
   /* Initialize debug category with nice colors */
   debug_color = GST_DEBUG_FG_BLACK | GST_DEBUG_BOLD | GST_DEBUG_BG_WHITE;
   GST_DEBUG_CATEGORY_INIT (gstd_no_deleter_debug, "gstdnodeleter", debug_color,
-			   "Gstd No Deleter category");
+      "Gstd No Deleter category");
 }
 
 static void
-gstd_no_deleter_init (GstdNoDeleter *self)
+gstd_no_deleter_init (GstdNoDeleter * self)
 {
-  GST_INFO_OBJECT(self, "Initializing no deleter");
+  GST_INFO_OBJECT (self, "Initializing no deleter");
 }
 
 static void
-gstd_no_deleter_delete (GstdIDeleter *iface, GstdObject *object)
+gstd_no_deleter_delete (GstdIDeleter * iface, GstdObject * object)
 {
-  GST_ERROR_OBJECT(iface, "Unable to delete on this resource");
+  GST_ERROR_OBJECT (iface, "Unable to delete on this resource");
 }

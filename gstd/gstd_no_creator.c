@@ -21,13 +21,13 @@
 #include "gstd_no_creator.h"
 
 /* Gstd Core debugging category */
-GST_DEBUG_CATEGORY_STATIC(gstd_no_creator_debug);
+GST_DEBUG_CATEGORY_STATIC (gstd_no_creator_debug);
 #define GST_CAT_DEFAULT gstd_no_creator_debug
 
 #define GSTD_DEBUG_DEFAULT_LEVEL GST_LEVEL_INFO
 
-static void gstd_no_creator_create (GstdICreator *iface,
-   const gchar *name, const gchar *description, GstdObject **out);
+static void gstd_no_creator_create (GstdICreator * iface,
+    const gchar * name, const gchar * description, GstdObject ** out);
 
 typedef struct _GstdNoCreatorClass GstdNoCreatorClass;
 
@@ -43,40 +43,39 @@ struct _GstdNoCreator
 struct _GstdNoCreatorClass
 {
   GObjectClass parent_class;
-};  
+};
 
 
 static void
-gstd_icreator_interface_init (GstdICreatorInterface *iface)
+gstd_icreator_interface_init (GstdICreatorInterface * iface)
 {
   iface->create = gstd_no_creator_create;
 }
 
 G_DEFINE_TYPE_WITH_CODE (GstdNoCreator, gstd_no_creator, G_TYPE_OBJECT,
-                         G_IMPLEMENT_INTERFACE (GSTD_TYPE_ICREATOR,
-                                                gstd_icreator_interface_init));
+    G_IMPLEMENT_INTERFACE (GSTD_TYPE_ICREATOR, gstd_icreator_interface_init));
 
 static void
-gstd_no_creator_class_init (GstdNoCreatorClass *klass)
+gstd_no_creator_class_init (GstdNoCreatorClass * klass)
 {
   guint debug_color;
-  
+
   /* Initialize debug category with nice colors */
   debug_color = GST_DEBUG_FG_BLACK | GST_DEBUG_BOLD | GST_DEBUG_BG_WHITE;
   GST_DEBUG_CATEGORY_INIT (gstd_no_creator_debug, "gstdnocreator", debug_color,
-			   "Gstd No Creator category");
+      "Gstd No Creator category");
 }
 
 static void
-gstd_no_creator_init (GstdNoCreator *self)
+gstd_no_creator_init (GstdNoCreator * self)
 {
-  GST_INFO_OBJECT(self, "Initializing no creator");
+  GST_INFO_OBJECT (self, "Initializing no creator");
 }
 
 static void
-gstd_no_creator_create (GstdICreator *iface, const gchar *name,
-    const gchar *description, GstdObject ** out)
+gstd_no_creator_create (GstdICreator * iface, const gchar * name,
+    const gchar * description, GstdObject ** out)
 {
-  GST_ERROR_OBJECT(iface, "Unable to create on this resource");
+  GST_ERROR_OBJECT (iface, "Unable to create on this resource");
   *out = NULL;
 }

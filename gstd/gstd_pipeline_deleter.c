@@ -31,13 +31,13 @@
 
 
 /* Gstd Core debugging category */
-GST_DEBUG_CATEGORY_STATIC(gstd_pipeline_deleter_debug);
+GST_DEBUG_CATEGORY_STATIC (gstd_pipeline_deleter_debug);
 #define GST_CAT_DEFAULT gstd_pipeline_deleter_debug
 
 #define GSTD_DEBUG_DEFAULT_LEVEL GST_LEVEL_INFO
 
-static void gstd_pipeline_deleter_delete (GstdIDeleter *iface,
-					  GstdObject *object);
+static void gstd_pipeline_deleter_delete (GstdIDeleter * iface,
+    GstdObject * object);
 
 typedef struct _GstdPipelineDeleterClass GstdPipelineDeleterClass;
 
@@ -57,39 +57,39 @@ struct _GstdPipelineDeleterClass
 
 
 static void
-gstd_ideleter_interface_init (GstdIDeleterInterface *iface)
+gstd_ideleter_interface_init (GstdIDeleterInterface * iface)
 {
   iface->delete = gstd_pipeline_deleter_delete;
 }
 
-G_DEFINE_TYPE_WITH_CODE (GstdPipelineDeleter, gstd_pipeline_deleter, G_TYPE_OBJECT,
-                         G_IMPLEMENT_INTERFACE (GSTD_TYPE_IDELETER,
-                                                gstd_ideleter_interface_init));
+G_DEFINE_TYPE_WITH_CODE (GstdPipelineDeleter, gstd_pipeline_deleter,
+    G_TYPE_OBJECT, G_IMPLEMENT_INTERFACE (GSTD_TYPE_IDELETER,
+        gstd_ideleter_interface_init));
 
 static void
-gstd_pipeline_deleter_class_init (GstdPipelineDeleterClass *klass)
+gstd_pipeline_deleter_class_init (GstdPipelineDeleterClass * klass)
 {
   guint debug_color;
 
   /* Initialize debug category with nice colors */
   debug_color = GST_DEBUG_FG_BLACK | GST_DEBUG_BOLD | GST_DEBUG_BG_WHITE;
-  GST_DEBUG_CATEGORY_INIT (gstd_pipeline_deleter_debug, "gstdpipelinedeleter", debug_color,
-			   "Gstd Pipeline Deleter category");
+  GST_DEBUG_CATEGORY_INIT (gstd_pipeline_deleter_debug, "gstdpipelinedeleter",
+      debug_color, "Gstd Pipeline Deleter category");
 }
 
 static void
-gstd_pipeline_deleter_init (GstdPipelineDeleter *self)
+gstd_pipeline_deleter_init (GstdPipelineDeleter * self)
 {
-  GST_INFO_OBJECT(self, "Initializing pipeline deleter");
+  GST_INFO_OBJECT (self, "Initializing pipeline deleter");
 }
 
 static void
-gstd_pipeline_deleter_delete (GstdIDeleter *iface, GstdObject *object)
+gstd_pipeline_deleter_delete (GstdIDeleter * iface, GstdObject * object)
 {
   g_return_if_fail (iface);
 
   /* Stop the pipe if playing */
-  gstd_object_update(GSTD_OBJECT(object), "state", GSTD_PIPELINE_NULL, NULL);
+  gstd_object_update (GSTD_OBJECT (object), "state", GSTD_PIPELINE_NULL, NULL);
 
-  g_object_unref(object);
+  g_object_unref (object);
 }

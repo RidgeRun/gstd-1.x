@@ -22,13 +22,13 @@
 #include "gstd_pipeline.h"
 
 /* Gstd Core debugging category */
-GST_DEBUG_CATEGORY_STATIC(gstd_pipeline_creator_debug);
+GST_DEBUG_CATEGORY_STATIC (gstd_pipeline_creator_debug);
 #define GST_CAT_DEFAULT gstd_pipeline_creator_debug
 
 #define GSTD_DEBUG_DEFAULT_LEVEL GST_LEVEL_INFO
 
-static void gstd_pipeline_creator_create (GstdICreator *iface,
-   const gchar *name, const gchar *description, GstdObject **out);
+static void gstd_pipeline_creator_create (GstdICreator * iface,
+    const gchar * name, const gchar * description, GstdObject ** out);
 
 typedef struct _GstdPipelineCreatorClass GstdPipelineCreatorClass;
 
@@ -44,41 +44,41 @@ struct _GstdPipelineCreator
 struct _GstdPipelineCreatorClass
 {
   GObjectClass parent_class;
-};  
+};
 
 
 static void
-gstd_icreator_interface_init (GstdICreatorInterface *iface)
+gstd_icreator_interface_init (GstdICreatorInterface * iface)
 {
   iface->create = gstd_pipeline_creator_create;
 }
 
-G_DEFINE_TYPE_WITH_CODE (GstdPipelineCreator, gstd_pipeline_creator, G_TYPE_OBJECT,
-                         G_IMPLEMENT_INTERFACE (GSTD_TYPE_ICREATOR,
-                                                gstd_icreator_interface_init));
+G_DEFINE_TYPE_WITH_CODE (GstdPipelineCreator, gstd_pipeline_creator,
+    G_TYPE_OBJECT, G_IMPLEMENT_INTERFACE (GSTD_TYPE_ICREATOR,
+        gstd_icreator_interface_init));
 
 static void
-gstd_pipeline_creator_class_init (GstdPipelineCreatorClass *klass)
+gstd_pipeline_creator_class_init (GstdPipelineCreatorClass * klass)
 {
   guint debug_color;
-  
+
   /* Initialize debug category with nice colors */
   debug_color = GST_DEBUG_FG_BLACK | GST_DEBUG_BOLD | GST_DEBUG_BG_WHITE;
-  GST_DEBUG_CATEGORY_INIT (gstd_pipeline_creator_debug, "gstdpipelinecreator", debug_color,
-			   "Gstd Pipeline Creator category");
+  GST_DEBUG_CATEGORY_INIT (gstd_pipeline_creator_debug, "gstdpipelinecreator",
+      debug_color, "Gstd Pipeline Creator category");
 }
 
 static void
-gstd_pipeline_creator_init (GstdPipelineCreator *self)
+gstd_pipeline_creator_init (GstdPipelineCreator * self)
 {
-  GST_INFO_OBJECT(self, "Initializing pipeline creator");
+  GST_INFO_OBJECT (self, "Initializing pipeline creator");
 }
 
 static void
-gstd_pipeline_creator_create (GstdICreator *iface, const gchar *name,
-    const gchar *description, GstdObject ** out)
+gstd_pipeline_creator_create (GstdICreator * iface, const gchar * name,
+    const gchar * description, GstdObject ** out)
 {
-  GstdPipeline * pipeline;
+  GstdPipeline *pipeline;
 
   g_return_if_fail (iface);
   g_return_if_fail (name);
@@ -88,7 +88,7 @@ gstd_pipeline_creator_create (GstdICreator *iface, const gchar *name,
       description, NULL);
 
   if (pipeline) {
-    *out = GSTD_OBJECT(pipeline);
+    *out = GSTD_OBJECT (pipeline);
   } else {
     *out = NULL;
   }

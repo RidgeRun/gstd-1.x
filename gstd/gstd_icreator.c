@@ -23,16 +23,16 @@
 G_DEFINE_INTERFACE (GstdICreator, gstd_icreator, G_TYPE_OBJECT);
 
 static void
-gstd_icreator_default_init (GstdICreatorInterface *iface)
+gstd_icreator_default_init (GstdICreatorInterface * iface)
 {
-  
+
 }
 
 void
-gstd_icreator_create (GstdICreator *self, const gchar *name,
-    const gchar *description, GstdObject ** out)
+gstd_icreator_create (GstdICreator * self, const gchar * name,
+    const gchar * description, GstdObject ** out)
 {
   g_return_if_fail (self);
-  
+
   GSTD_ICREATOR_GET_INTERFACE (self)->create (self, name, description, out);
 }
