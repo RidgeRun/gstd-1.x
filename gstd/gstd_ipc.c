@@ -1,6 +1,6 @@
 /*
  * Gstreamer Daemon - Gst Launch under steroids
- * Copyright (C) 2015 RidgeRun Engineering <support@ridgerun.com>
+ * Copyright (C) 2016 RidgeRun Engineering <support@ridgerun.com>
  *
  * This file is part of Gstd.
  *
@@ -74,6 +74,8 @@ static void
 gstd_ipc_init (GstdIpc * self)
 {
   GST_INFO_OBJECT (self, "Initializing gstd IPC");
+  self->enabled = FALSE;
+  self->session = NULL;
 }
 
 static void
