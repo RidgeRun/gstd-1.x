@@ -26,7 +26,6 @@
 #include "gstd_ideleter.h"
 
 G_BEGIN_DECLS
-
 /*
  * Type declaration.
  */
@@ -42,11 +41,9 @@ G_BEGIN_DECLS
   (G_TYPE_CHECK_CLASS_TYPE((klass),GSTD_TYPE_NO_DELETER))
 #define GSTD_NO_DELETER_GET_CLASS(obj) \
   (G_TYPE_INSTANCE_GET_CLASS ((obj), GSTD_TYPE_NO_DELETER, GstdNoDeleterClass))
-
 typedef struct _GstdNoDeleter GstdNoDeleter;
 
-GType gstd_no_deleter_get_type();
+GType gstd_no_deleter_get_type ();
 
 G_END_DECLS
-
 #endif // __GSTD_NO_DELETER_H__

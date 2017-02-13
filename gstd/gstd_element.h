@@ -24,7 +24,6 @@
 #include <glib-object.h>
 
 G_BEGIN_DECLS
-
 /*
  * Type declaration.
  */
@@ -40,11 +39,9 @@ G_BEGIN_DECLS
   (G_TYPE_CHECK_CLASS_TYPE((klass),GSTD_TYPE_ELEMENT))
 #define GSTD_ELEMENT_GET_CLASS(obj) \
   (G_TYPE_INSTANCE_GET_CLASS ((obj), GSTD_TYPE_ELEMENT, GstdElementClass))
-
 typedef struct _GstdElement GstdElement;
 typedef struct _GstdElementClass GstdElementClass;
-GType gstd_element_get_type();
+GType gstd_element_get_type ();
 
 G_END_DECLS
-
 #endif // __GSTD_ELEMENT_H__

@@ -25,7 +25,6 @@
 #define GSTD_DEBUG_DEFAULT_LEVEL GST_LEVEL_INFO
 
 G_BEGIN_DECLS
-
 #define GSTD_TYPE_DEBUG \
   (gstd_debug_get_type())
 #define GSTD_DEBUG(obj) \
@@ -38,10 +37,9 @@ G_BEGIN_DECLS
   (G_TYPE_CHECK_CLASS_TYPE((klass),GSTD_TYPE_DEBUG))
 #define GSTD_DEBUG_GET_CLASS(obj) \
   (G_TYPE_INSTANCE_GET_CLASS ((obj), GSTD_TYPE_DEBUG, GstdDebugClass))
-
 typedef struct _GstdDebug GstdDebug;
 typedef struct _GstdDebugClass GstdDebugClass;
-GType gstd_debug_get_type();
+GType gstd_debug_get_type ();
 
 /**
  * gstd_debug_new: (constructor)
@@ -51,9 +49,7 @@ GType gstd_debug_get_type();
  * Returns: (transfer full) (nullable): A new #GstdDebug. Free after
  * usage using g_object_unref()
  */
-GstdDebug *
-gstd_debug_new ();
+GstdDebug *gstd_debug_new ();
 
 
 #endif // __GSTD_DEBUG_H__
-

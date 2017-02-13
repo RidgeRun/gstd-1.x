@@ -26,9 +26,7 @@
 #include "gstd_ipc.h"
 
 G_BEGIN_DECLS
-
 #define GSTD_TCP_DEFAULT_PORT 5000
-
 #define GSTD_TYPE_TCP \
   (gstd_tcp_get_type())
 #define GSTD_TCP(obj) \
@@ -41,20 +39,15 @@ G_BEGIN_DECLS
   (G_TYPE_CHECK_CLASS_TYPE((klass),GSTD_TYPE_TCP))
 #define GSTD_TCP_GET_CLASS(obj) \
   (G_TYPE_INSTANCE_GET_CLASS ((obj), GSTD_TYPE_TPC, GstdTcpClass))
-
-
 typedef struct _GstdTcp GstdTcp;
 typedef struct _GstdTcpClass GstdTcpClass;
-GType gstd_tcp_get_type();
+GType gstd_tcp_get_type ();
 
 
-GstdReturnCode
-gstd_tcp_start (GstdIpc *base, GstdSession *session);
+GstdReturnCode gstd_tcp_start (GstdIpc * base, GstdSession * session);
 
-GstdReturnCode
-gstd_tcp_stop (GstdIpc *base);
+GstdReturnCode gstd_tcp_stop (GstdIpc * base);
 
 
 G_END_DECLS
-
 #endif //__GSTD_TCP_H__

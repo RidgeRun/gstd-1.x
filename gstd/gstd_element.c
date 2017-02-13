@@ -302,8 +302,8 @@ gstd_element_to_string (GstdObject * object, gchar ** outstring)
   g_warn_if_fail (!*outstring);
 
   /* Lets leverage the parent's class implementation */
-  GSTD_OBJECT_CLASS (gstd_element_parent_class)->
-      to_string (GSTD_OBJECT (object), &props);
+  GSTD_OBJECT_CLASS (gstd_element_parent_class)->to_string (GSTD_OBJECT
+      (object), &props);
   // A little hack to remove the last bracket
   props[strlen (props) - 2] = '\0';
 

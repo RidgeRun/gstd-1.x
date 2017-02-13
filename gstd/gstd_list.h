@@ -26,11 +26,9 @@
 #include "gstd_object.h"
 
 G_BEGIN_DECLS
-
 /*
  * Type declaration.
  */
-
 #define GSTD_TYPE_LIST \
   (gstd_list_get_type())
 #define GSTD_LIST(obj) \
@@ -43,7 +41,6 @@ G_BEGIN_DECLS
   (G_TYPE_CHECK_CLASS_TYPE((klass),GSTD_TYPE_LIST))
 #define GSTD_LIST_GET_CLASS(obj) \
   (G_TYPE_INSTANCE_GET_CLASS ((obj), GSTD_TYPE_LIST, GstdListClass))
-
 typedef struct _GstdList GstdList;
 typedef struct _GstdListClass GstdListClass;
 
@@ -69,11 +66,10 @@ struct _GstdListClass
   GstdObjectClass parent_class;
 };
 
-GType gstd_list_get_type();
+GType gstd_list_get_type ();
 
-void gstd_list_set_creator (GstdList *self, GstdICreator *creator);
-void gstd_list_set_deleter (GstdList *self, GstdIDeleter *deleter);
+void gstd_list_set_creator (GstdList * self, GstdICreator * creator);
+void gstd_list_set_deleter (GstdList * self, GstdIDeleter * deleter);
 
 G_END_DECLS
-
 #endif // __GSTD_LIST_H__

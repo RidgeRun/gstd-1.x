@@ -178,7 +178,6 @@
 #include "gstd_debug.h"
 
 G_BEGIN_DECLS
-
 #define GSTD_TYPE_SESSION \
   (gstd_session_get_type())
 #define GSTD_SESSION(obj) \
@@ -191,19 +190,18 @@ G_BEGIN_DECLS
   (G_TYPE_CHECK_CLASS_TYPE((klass),GSTD_TYPE_SESSION))
 #define GSTD_SESSION_GET_CLASS(obj) \
   (G_TYPE_INSTANCE_GET_CLASS ((obj), GSTD_TYPE_SESSION, GstdSessionClass))
-
 typedef struct _GstdSession GstdSession;
 typedef struct _GstdSessionClass GstdSessionClass;
 
 struct _GstdSession
 {
   GstdObject parent;
-  
+
   /**
    * The list of GstdPipelines created by the user
    */
   GstdList *pipelines;
-  
+
   /*
    * The current process identifier
    */
@@ -220,7 +218,7 @@ struct _GstdSessionClass
   GstdObjectClass parent_class;
 };
 
-GType gstd_session_get_type(void);
+GType gstd_session_get_type (void);
 
 
 /**
@@ -234,8 +232,7 @@ GType gstd_session_get_type(void);
  * Returns: (transfer full) (nullable): A new #GstdSession. Free after
  * usage using g_object_unref()
  */
-GstdSession *
-gstd_session_new (const gchar *name);
+GstdSession *gstd_session_new (const gchar * name);
 
 /**
  * gstd_pipeline_create:
@@ -252,7 +249,8 @@ gstd_session_new (const gchar *name);
  * Values other that #GSTD_EOK will not create a pipeline.
  */
 GstdReturnCode
-gstd_pipeline_create (GstdSession *gstd, const gchar *name, const gchar *description);
+gstd_pipeline_create (GstdSession * gstd, const gchar * name,
+    const gchar * description);
 
 /**
  * gstd_pipeline_delete:
@@ -263,8 +261,7 @@ gstd_pipeline_create (GstdSession *gstd, const gchar *name, const gchar *descrip
  *
  * Returns: A #GstdReturnCode describing the result of the operation.
  */
-GstdReturnCode
-gstd_pipeline_delete (GstdSession *gstd, const gchar *name);
+GstdReturnCode gstd_pipeline_delete (GstdSession * gstd, const gchar * name);
 
 /**
  * gstd_element_get:
@@ -294,8 +291,8 @@ gstd_pipeline_delete (GstdSession *gstd, const gchar *name);
  * Returns: A #GstdReturnCode describing the result of the operation.
  */
 GstdReturnCode
-gstd_element_get (GstdSession *gstd, const gchar *pipe, const gchar *name,
-		  const gchar *property, gpointer value);
+gstd_element_get (GstdSession * gstd, const gchar * pipe, const gchar * name,
+    const gchar * property, gpointer value);
 
 /**
  * gstd_element_set:
@@ -321,8 +318,8 @@ gstd_element_get (GstdSession *gstd, const gchar *pipe, const gchar *name,
  * Returns: A #GstdReturnCode describing the result of the operation.
  */
 GstdReturnCode
-gstd_element_set (GstdSession *gstd, const gchar *pipe, const gchar *name,
-		  const gchar *property, gpointer value);
+gstd_element_set (GstdSession * gstd, const gchar * pipe, const gchar * name,
+    const gchar * property, gpointer value);
 
 /**
  * gstd_pipeline_play:
@@ -333,8 +330,7 @@ gstd_element_set (GstdSession *gstd, const gchar *pipe, const gchar *name,
  *
  * Returns: A #GstdReturnCode describing the result of the operation.
  */
-GstdReturnCode
-gstd_pipeline_play (GstdSession *gstd, const gchar *pipe);
+GstdReturnCode gstd_pipeline_play (GstdSession * gstd, const gchar * pipe);
 
 /**
  * gstd_pipeline_null:
@@ -345,8 +341,7 @@ gstd_pipeline_play (GstdSession *gstd, const gchar *pipe);
  *
  * Returns: A #GstdReturnCode describing the result of the operation.
  */
-GstdReturnCode
-gstd_pipeline_null (GstdSession *gstd, const gchar *pipe);
+GstdReturnCode gstd_pipeline_null (GstdSession * gstd, const gchar * pipe);
 
 /**
  * gstd_pipeline_pause:
@@ -357,8 +352,7 @@ gstd_pipeline_null (GstdSession *gstd, const gchar *pipe);
  *
  * Returns: A #GstdReturnCode describing the result of the operation.
  */
-GstdReturnCode
-gstd_pipeline_pause (GstdSession *gstd, const gchar *pipe);
+GstdReturnCode gstd_pipeline_pause (GstdSession * gstd, const gchar * pipe);
 
 /**
  * gstd_pipeline_set_state:
@@ -371,7 +365,8 @@ gstd_pipeline_pause (GstdSession *gstd, const gchar *pipe);
  * Returns: A #GstdReturnCode describing the result of the operation.
  */
 GstdReturnCode
-gstd_pipeline_set_state (GstdSession *gstd, const gchar *pipe, const GstdPipelineState state);
+gstd_pipeline_set_state (GstdSession * gstd, const gchar * pipe,
+    const GstdPipelineState state);
 
 /**
  * gstd_pipeline_get_state:
@@ -384,11 +379,11 @@ gstd_pipeline_set_state (GstdSession *gstd, const gchar *pipe, const GstdPipelin
  * Returns: A #GstdReturnCode describing the result of the operation.
  */
 GstdReturnCode
-gstd_pipeline_get_state (GstdSession *gstd, const gchar *pipe, GstdPipelineState *state);
+gstd_pipeline_get_state (GstdSession * gstd, const gchar * pipe,
+    GstdPipelineState * state);
 
 GstdReturnCode
-gstd_get_by_uri (GstdSession *gstd, const gchar *uri, GstdObject **node);
+gstd_get_by_uri (GstdSession * gstd, const gchar * uri, GstdObject ** node);
 
 G_END_DECLS
-
 #endif //__GSTD_SESSION___

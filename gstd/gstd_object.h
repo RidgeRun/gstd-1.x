@@ -27,7 +27,6 @@
 #include "gstd_ideleter.h"
 
 G_BEGIN_DECLS
-
 #define GSTD_TYPE_OBJECT \
   (gstd_object_get_type())
 #define GSTD_OBJECT(obj) \
@@ -40,10 +39,9 @@ G_BEGIN_DECLS
   (G_TYPE_CHECK_CLASS_TYPE((klass),GSTD_TYPE_OBJECT))
 #define GSTD_OBJECT_GET_CLASS(obj) \
   (G_TYPE_INSTANCE_GET_CLASS ((obj), GSTD_TYPE_OBJECT, GstdObjectClass))
-
 typedef struct _GstdObject GstdObject;
 typedef struct _GstdObjectClass GstdObjectClass;
-     
+
 struct _GstdObject
 {
   GObject parent;
@@ -64,36 +62,34 @@ struct _GstdObject
   GstdReturnCode code;
 
   /* CRUD behaviour */
-  GstdICreator * creator;
-  GstdIDeleter * deleter;
+  GstdICreator *creator;
+  GstdIDeleter *deleter;
 };
 
 #define GSTD_OBJECT_NAME(obj) (GSTD_OBJECT(obj)->name)
 #define GSTD_OBJECT_CODE(obj) (GSTD_OBJECT(obj)->code)
 
-void
-gstd_object_set_code (GstdObject *self, GstdReturnCode code);
+void gstd_object_set_code (GstdObject * self, GstdReturnCode code);
 
-GstdReturnCode
-gstd_object_get_code (GstdObject *self);
+GstdReturnCode gstd_object_get_code (GstdObject * self);
 
 
 struct _GstdObjectClass
 {
   GObjectClass parent_class;
 
-  GstdReturnCode (*create)    (GstdObject *object, const gchar *name,
-			       const gchar *description);
-  GstdReturnCode (*read)      (GstdObject *object, const gchar *property,
-			       va_list va);
-  GstdReturnCode (*update)    (GstdObject *object, const gchar *property,
-			       va_list va);
-  GstdReturnCode (*delete)    (GstdObject *object, const gchar *name);
+    GstdReturnCode (*create) (GstdObject * object, const gchar * name,
+      const gchar * description);
+    GstdReturnCode (*read) (GstdObject * object, const gchar * property,
+      va_list va);
+    GstdReturnCode (*update) (GstdObject * object, const gchar * property,
+      va_list va);
+    GstdReturnCode (*delete) (GstdObject * object, const gchar * name);
 
-  GstdReturnCode (*to_string) (GstdObject *object, gchar **outstring);
+    GstdReturnCode (*to_string) (GstdObject * object, gchar ** outstring);
 };
 
-GType gstd_object_get_type(void);
+GType gstd_object_get_type (void);
 
 #define GSTD_OBJECT_DEFAULT_NAME NULL
 
@@ -111,17 +107,14 @@ GType gstd_object_flags_get_type (void);
 #define GSTD_PARAM_IS_DELETE(p) (p & GSTD_PARAM_DELETE)
 
 GstdReturnCode
-gstd_object_create (GstdObject *object, const gchar *name,
-    const gchar *description);
+gstd_object_create (GstdObject * object, const gchar * name,
+    const gchar * description);
 GstdReturnCode
-gstd_object_read (GstdObject *object, const gchar *property, ...);
+gstd_object_read (GstdObject * object, const gchar * property, ...);
 GstdReturnCode
-gstd_object_update (GstdObject *object, const gchar *property, ...);
-GstdReturnCode
-gstd_object_delete (GstdObject *object, const gchar *name);
-GstdReturnCode
-gstd_object_to_string (GstdObject *object, gchar **outstring);
+gstd_object_update (GstdObject * object, const gchar * property, ...);
+GstdReturnCode gstd_object_delete (GstdObject * object, const gchar * name);
+GstdReturnCode gstd_object_to_string (GstdObject * object, gchar ** outstring);
 
 G_END_DECLS
-
 #endif //__GSTD_OBJECT_H__

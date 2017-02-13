@@ -952,10 +952,10 @@ gstd_tcp_init_get_option_group (GstdIpc * base, GOptionGroup ** group)
   GST_DEBUG_OBJECT (self, "TCP init group callback ");
   GOptionEntry tcp_args[] = {
     {"enable-tcp-protocol", 't', 0, G_OPTION_ARG_NONE, &base->enabled,
-          "Enable attach the server through a given TCP port ", NULL}
+        "Enable attach the server through a given TCP port ", NULL}
     ,
     {"port", 'p', 0, G_OPTION_ARG_INT, &self->port,
-          "Attach to the server through the given port (default 5000)", "port"}
+        "Attach to the server through the given port (default 5000)", "port"}
     ,
     {NULL}
   };

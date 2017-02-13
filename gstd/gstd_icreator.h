@@ -24,30 +24,28 @@
 #include <gst/gst.h>
 
 G_BEGIN_DECLS
-
 #define GSTD_TYPE_ICREATOR                (gstd_icreator_get_type ())
 #define GSTD_ICREATOR(obj)                (G_TYPE_CHECK_INSTANCE_CAST ((obj), GSTD_TYPE_ICREATOR, GstdICreator))
 #define GSTD_IS_ICREATOR(obj)             (G_TYPE_CHECK_INSTANCE_TYPE ((obj), GSTD_TYPE_ICREATOR))
 #define GSTD_ICREATOR_GET_INTERFACE(inst) (G_TYPE_INSTANCE_GET_INTERFACE ((inst), GSTD_TYPE_ICREATOR, GstdICreatorInterface))
-
 typedef struct _GstdICreator GstdICreator;
 typedef struct _GstdICreatorInterface GstdICreatorInterface;
 
 // Avoid cyclic dependecies by forward declaration
 typedef struct _GstdObject GstdObject;
 
-struct _GstdICreatorInterface {
+struct _GstdICreatorInterface
+{
   GTypeInterface parent;
 
-  void (* create) (GstdICreator *self, const gchar * name,
+  void (*create) (GstdICreator * self, const gchar * name,
       const gchar * description, GstdObject ** out);
 };
 
 GType gstd_icreator_get_type (void);
 
-void gstd_icreator_create (GstdICreator *self, const gchar * name,
+void gstd_icreator_create (GstdICreator * self, const gchar * name,
     const gchar * description, GstdObject ** out);
 
 G_END_DECLS
-
 #endif // __GSTD_ICREATOR_H__

@@ -28,11 +28,9 @@
 #include "gstd_element.h"
 
 G_BEGIN_DECLS
-
 /*
  * Type declaration.
  */
-
 #define GSTD_TYPE_ELEMENT_LIST \
   (gstd_element_list_get_type())
 #define GSTD_ELEMENT_LIST(obj) \
@@ -45,12 +43,10 @@ G_BEGIN_DECLS
   (G_TYPE_CHECK_CLASS_TYPE((klass),GSTD_TYPE_ELEMENT_LIST))
 #define GSTD_ELEMENT_LIST_GET_CLASS(obj) \
   (G_TYPE_INSTANCE_GET_CLASS ((obj), GSTD_TYPE_ELEMENT_LIST, GstdElementListClass))
-
 typedef struct _GstdElementList GstdElementList;
 typedef struct _GstdElementListClass GstdElementListClass;
-GType gstd_element_list_get_type();
-GstdReturnCode gstd_element_list_append(GstdElementList *, GstdElement *);
+GType gstd_element_list_get_type ();
+GstdReturnCode gstd_element_list_append (GstdElementList *, GstdElement *);
 
 G_END_DECLS
-
 #endif // __GSTD_ELEMENT_LIST_H__

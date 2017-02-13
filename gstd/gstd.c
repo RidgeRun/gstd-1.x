@@ -71,7 +71,7 @@ main (gint argc, gchar * argv[])
 
   GOptionEntry entries[] = {
     {"version", 'v', 0, G_OPTION_ARG_NONE, &version,
-          "Print current gstd version", NULL}
+        "Print current gstd version", NULL}
     ,
     {NULL}
   };

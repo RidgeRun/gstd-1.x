@@ -59,7 +59,6 @@
 #include <gstd/gstd_session.h>
 
 G_BEGIN_DECLS
-
 #define GSTD_TYPE_IPC \
   (gstd_ipc_get_type())
 #define GSTD_IPC(obj) \
@@ -72,7 +71,6 @@ G_BEGIN_DECLS
   (G_TYPE_CHECK_CLASS_TYPE((klass),GSTD_TYPE_IPC))
 #define GSTD_IPC_GET_CLASS(obj) \
   (G_TYPE_INSTANCE_GET_CLASS ((obj), GSTD_TYPE_IPC, GstdIpcClass))
-
 typedef struct _GstdIpc GstdIpc;
 typedef struct _GstdIpcClass GstdIpcClass;
 
@@ -94,19 +92,18 @@ struct _GstdIpcClass
 {
   GstdObjectClass parent_class;
 
-  GstdReturnCode (*ipc_start)  (GstdIpc *, GstdSession *);
+    GstdReturnCode (*ipc_start) (GstdIpc *, GstdSession *);
 
-  GstdReturnCode (*ipc_stop) (GstdIpc *);
+    GstdReturnCode (*ipc_stop) (GstdIpc *);
 
-  gboolean (*get_option_group) (GstdIpc *, GOptionGroup **);
+    gboolean (*get_option_group) (GstdIpc *, GOptionGroup **);
 
 };
 
-GType gstd_ipc_get_type(void);
+GType gstd_ipc_get_type (void);
 
 void gstd_ipc_get_option_group (GstdIpc *, GOptionGroup **);
 void gstd_ipc_start (GstdIpc *, GstdSession *);
 void gstd_ipc_stop (GstdIpc *);
 G_END_DECLS
-
 #endif //__GSTD_IPC___
