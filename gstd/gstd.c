@@ -66,8 +66,7 @@ main (gint argc, gchar * argv[])
   };
 
   guint num_ipcs = (sizeof (supported_ipcs) / sizeof (GType));
-  GstdIpc *Ipc_array[num_ipcs];
-  GstdIpcClass *klass;
+  GstdIpc *ipc_array[num_ipcs];
   GOptionGroup *optiongroup_array[num_ipcs];
 
   GOptionEntry entries[] = {
@@ -101,9 +100,8 @@ main (gint argc, gchar * argv[])
 
   /* Read option group for each IPC */
   for (i = 0; i < num_ipcs; i++) {
-    Ipc_array[i] = GSTD_IPC (g_object_new (supported_ipcs[i], NULL));
-    klass = GSTD_IPC_GET_CLASS (Ipc_array[i]);
-    klass->get_option_group (Ipc_array[i], &optiongroup_array[i]);
+    ipc_array[i] = GSTD_IPC (g_object_new (supported_ipcs[i], NULL));
+    gstd_ipc_get_option_group (ipc_array[i], &optiongroup_array[i]);
     g_option_context_add_group (context, optiongroup_array[i]);
   }
 
@@ -123,8 +121,7 @@ main (gint argc, gchar * argv[])
 
   /* Run start for each IPC (each start method checks for the enabled flag) */
   for (i = 0; i < num_ipcs; i++) {
-    klass = GSTD_IPC_GET_CLASS (Ipc_array[i]);
-    klass->ipc_start (Ipc_array[i], session);
+    gstd_ipc_start (ipc_array[i], session);
   }
   /* Install a handler for the interrupt signal */
 
@@ -137,9 +134,8 @@ main (gint argc, gchar * argv[])
 
   /* Run stop for each IPC */
   for (i = 0; i < num_ipcs; i++) {
-    klass = GSTD_IPC_GET_CLASS (Ipc_array[i]);
-    klass->ipc_stop (Ipc_array[i]);
-    g_object_unref (Ipc_array[i]);
+    gstd_ipc_stop (ipc_array[i]);
+    g_object_unref (ipc_array[i]);
   }
   g_object_unref (session);
   gst_deinit ();

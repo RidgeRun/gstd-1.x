@@ -120,3 +120,28 @@ gstd_ipc_dispose (GObject * object)
 
   G_OBJECT_CLASS (gstd_ipc_parent_class)->dispose (object);
 }
+
+
+void
+gstd_ipc_get_option_group (GstdIpc * ipc, GOptionGroup ** group)
+{
+  GstdIpcClass *klass;
+  klass = GSTD_IPC_GET_CLASS (ipc);
+  klass->get_option_group (ipc, group);
+}
+
+void
+gstd_ipc_start (GstdIpc * ipc, GstdSession * session)
+{
+  GstdIpcClass *klass;
+  klass = GSTD_IPC_GET_CLASS (ipc);
+  klass->ipc_start (ipc, session);
+}
+
+void
+gstd_ipc_stop (GstdIpc * ipc)
+{
+  GstdIpcClass *klass;
+  klass = GSTD_IPC_GET_CLASS (ipc);
+  klass->ipc_stop (ipc);
+}
