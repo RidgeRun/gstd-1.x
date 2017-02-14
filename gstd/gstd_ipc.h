@@ -92,9 +92,9 @@ struct _GstdIpcClass
 {
   GstdObjectClass parent_class;
 
-    GstdReturnCode (*ipc_start) (GstdIpc *, GstdSession *);
+    GstdReturnCode (*start) (GstdIpc *, GstdSession *);
 
-    GstdReturnCode (*ipc_stop) (GstdIpc *);
+    GstdReturnCode (*stop) (GstdIpc *);
 
     gboolean (*get_option_group) (GstdIpc *, GOptionGroup **);
 

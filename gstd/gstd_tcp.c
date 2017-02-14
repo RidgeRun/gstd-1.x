@@ -140,8 +140,8 @@ gstd_tcp_class_init (GstdTcpClass * klass)
   guint debug_color;
   object_class->set_property = gstd_tcp_set_property;
   object_class->get_property = gstd_tcp_get_property;
-  gstdipc_class->ipc_start = GST_DEBUG_FUNCPTR (gstd_tcp_start);
-  gstdipc_class->ipc_stop = GST_DEBUG_FUNCPTR (gstd_tcp_stop);
+  gstdipc_class->start = GST_DEBUG_FUNCPTR (gstd_tcp_start);
+  gstdipc_class->stop = GST_DEBUG_FUNCPTR (gstd_tcp_stop);
   gstdipc_class->get_option_group =
       GST_DEBUG_FUNCPTR (gstd_tcp_init_get_option_group);
   object_class->dispose = gstd_tcp_dispose;
@@ -330,8 +330,9 @@ gstd_tcp_stop (GstdIpc * base)
   GSocketListener *listener = G_SOCKET_LISTENER (*service);
 
 
-  GST_DEBUG_OBJECT (self, "TCP stop ");
   g_return_val_if_fail (session, GSTD_NULL_ARGUMENT);
+
+  GST_DEBUG_OBJECT (self, "Entering TCP stop ");
 
   if (*service) {
     GST_INFO_OBJECT (session, "Closing TCP connection for %s",

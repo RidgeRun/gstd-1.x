@@ -150,7 +150,7 @@ gstd_ipc_start (GstdIpc * ipc, GstdSession * session)
   ipc->session = g_object_ref (session);
 
   klass = GSTD_IPC_GET_CLASS (ipc);
-  klass->ipc_start (ipc, session);
+  klass->start (ipc, session);
 }
 
 void
@@ -159,5 +159,5 @@ gstd_ipc_stop (GstdIpc * ipc)
   GstdIpcClass *klass;
   g_return_if_fail (ipc);
   klass = GSTD_IPC_GET_CLASS (ipc);
-  klass->ipc_stop (ipc);
+  klass->stop (ipc);
 }
