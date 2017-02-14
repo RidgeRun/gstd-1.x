@@ -128,6 +128,7 @@ void
 gstd_ipc_get_option_group (GstdIpc * ipc, GOptionGroup ** group)
 {
   GstdIpcClass *klass;
+  g_return_if_fail (ipc);
   klass = GSTD_IPC_GET_CLASS (ipc);
   klass->get_option_group (ipc, group);
 }
@@ -136,6 +137,8 @@ void
 gstd_ipc_start (GstdIpc * ipc, GstdSession * session)
 {
   GstdIpcClass *klass;
+  g_return_if_fail (ipc);
+  g_return_if_fail (session);
   klass = GSTD_IPC_GET_CLASS (ipc);
   klass->ipc_start (ipc, session);
 }
@@ -144,6 +147,7 @@ void
 gstd_ipc_stop (GstdIpc * ipc)
 {
   GstdIpcClass *klass;
+  g_return_if_fail (ipc);
   klass = GSTD_IPC_GET_CLASS (ipc);
   klass->ipc_stop (ipc);
 }
