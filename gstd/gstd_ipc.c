@@ -120,6 +120,11 @@ gstd_ipc_dispose (GObject * object)
 
   GST_INFO_OBJECT (self, "Deinitializing gstd IPC");
 
+  if(self->session)
+    g_object_unref(self->session);
+
+  self->session = NULL;
+
   G_OBJECT_CLASS (gstd_ipc_parent_class)->dispose (object);
 }
 
@@ -137,8 +142,13 @@ void
 gstd_ipc_start (GstdIpc * ipc, GstdSession * session)
 {
   GstdIpcClass *klass;
+
   g_return_if_fail (ipc);
   g_return_if_fail (session);
+
+
+  ipc->session = g_object_ref (session);
+
   klass = GSTD_IPC_GET_CLASS (ipc);
   klass->ipc_start (ipc, session);
 }

@@ -280,7 +280,6 @@ gstd_tcp_start (GstdIpc * base, GstdSession * session)
   GSocketService **service = &self->service;
   guint16 port = self->port;
 
-  base->session = session;
   if (!base->enabled) {
     GST_DEBUG_OBJECT (self, "TCP not enabled, skipping");
     goto out;
