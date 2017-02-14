@@ -129,16 +129,16 @@ gstd_ipc_dispose (GObject * object)
 }
 
 
-void
+gboolean
 gstd_ipc_get_option_group (GstdIpc * ipc, GOptionGroup ** group)
 {
   GstdIpcClass *klass;
   g_return_if_fail (ipc);
   klass = GSTD_IPC_GET_CLASS (ipc);
-  klass->get_option_group (ipc, group);
+  return klass->get_option_group (ipc, group);
 }
 
-void
+GstdReturnCode
 gstd_ipc_start (GstdIpc * ipc, GstdSession * session)
 {
   GstdIpcClass *klass;
@@ -153,11 +153,11 @@ gstd_ipc_start (GstdIpc * ipc, GstdSession * session)
   klass->start (ipc, session);
 }
 
-void
+GstdReturnCode
 gstd_ipc_stop (GstdIpc * ipc)
 {
   GstdIpcClass *klass;
   g_return_if_fail (ipc);
   klass = GSTD_IPC_GET_CLASS (ipc);
-  klass->stop (ipc);
+  return klass->stop (ipc);
 }

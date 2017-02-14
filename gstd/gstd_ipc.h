@@ -102,8 +102,8 @@ struct _GstdIpcClass
 
 GType gstd_ipc_get_type (void);
 
-void gstd_ipc_get_option_group (GstdIpc *, GOptionGroup **);
-void gstd_ipc_start (GstdIpc *, GstdSession *);
-void gstd_ipc_stop (GstdIpc *);
+gboolean gstd_ipc_get_option_group (GstdIpc *, GOptionGroup **);
+GstdReturnCode gstd_ipc_start (GstdIpc *, GstdSession *);
+GstdReturnCode gstd_ipc_stop (GstdIpc *);
 G_END_DECLS
 #endif //__GSTD_IPC___
