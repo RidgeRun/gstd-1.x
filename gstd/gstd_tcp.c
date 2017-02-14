@@ -56,15 +56,17 @@ typedef struct _GstdTCPCmd
 } GstdTCPCmd;
 
 
-enum
-{
-  PROP_PORT = 1,
-  N_PROPERTIES                  // NOT A PROPERTY
-};
+G_DEFINE_TYPE (GstdTcp, gstd_tcp, GSTD_TYPE_IPC);
 
-G_DEFINE_TYPE (GstdTcp, gstd_tcp, GSTD_TYPE_IPC)
+     enum
+     {
+       PROP_PORT = 1,
+       N_PROPERTIES             // NOT A PROPERTY
+     };
+
 
 /* VTable */
+
      static gboolean
          gstd_tcp_callback (GSocketService * service,
     GSocketConnection * connection,

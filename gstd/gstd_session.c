@@ -47,7 +47,7 @@ enum
 #define GSTD_SESSION_DEFAULT_PIPELINES NULL
 #define GSTD_DEFAULT_PID -1
 
-G_DEFINE_TYPE (GstdSession, gstd_session, GSTD_TYPE_OBJECT)
+G_DEFINE_TYPE (GstdSession, gstd_session, GSTD_TYPE_OBJECT);
 
 /* VTable */
      static void

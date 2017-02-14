@@ -64,7 +64,7 @@ struct _GstdDebugClass
   GstdObjectClass parent_class;
 };
 
-G_DEFINE_TYPE (GstdDebug, gstd_debug, GSTD_TYPE_OBJECT)
+G_DEFINE_TYPE (GstdDebug, gstd_debug, GSTD_TYPE_OBJECT);
 
 /* VTable */
      static void

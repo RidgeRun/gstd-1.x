@@ -37,14 +37,16 @@ GST_DEBUG_CATEGORY_STATIC (gstd_ipc_debug);
 
 #define GSTD_DEBUG_DEFAULT_LEVEL GST_LEVEL_INFO
 
-enum
-{
-  N_PROPERTIES                  // NOT A PROPERTY
-};
+G_DEFINE_TYPE (GstdIpc, gstd_ipc, GSTD_TYPE_OBJECT);
 
-G_DEFINE_TYPE (GstdIpc, gstd_ipc, GSTD_TYPE_OBJECT)
+     enum
+     {
+       N_PROPERTIES             // NOT A PROPERTY
+     };
+
 
 /* VTable */
+
      static void
          gstd_ipc_set_property (GObject * object,
     guint property_id, const GValue * value, GParamSpec * pspec);
@@ -120,8 +122,8 @@ gstd_ipc_dispose (GObject * object)
 
   GST_INFO_OBJECT (self, "Deinitializing gstd IPC");
 
-  if(self->session)
-    g_object_unref(self->session);
+  if (self->session)
+    g_object_unref (self->session);
 
   self->session = NULL;
 

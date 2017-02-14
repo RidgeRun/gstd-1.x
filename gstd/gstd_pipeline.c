@@ -95,7 +95,7 @@ struct _GstdPipelineClass
   GstdObjectClass parent_class;
 };
 
-G_DEFINE_TYPE (GstdPipeline, gstd_pipeline, GSTD_TYPE_OBJECT)
+G_DEFINE_TYPE (GstdPipeline, gstd_pipeline, GSTD_TYPE_OBJECT);
 
 /* VTable */
      static void

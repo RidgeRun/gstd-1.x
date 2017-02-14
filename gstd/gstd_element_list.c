@@ -49,9 +49,10 @@ struct _GstdElementListClass
   GstdObjectClass parent_class;
 };
 
-G_DEFINE_TYPE (GstdElementList, gstd_element_list, GSTD_TYPE_LIST)
+G_DEFINE_TYPE (GstdElementList, gstd_element_list, GSTD_TYPE_LIST);
 
-     static void gstd_element_list_class_init (GstdElementListClass * klass)
+static void
+gstd_element_list_class_init (GstdElementListClass * klass)
 {
   GstdObjectClass *gstd_object_class = GSTD_OBJECT_CLASS (klass);
   guint debug_color;
