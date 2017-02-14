@@ -18,30 +18,32 @@
  * along with Gstd.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __GSTD_ELEMENT_H__
-#define __GSTD_ELEMENT_H__
+#ifndef __GSTD_NO_CREATOR_H__
+#define __GSTD_NO_CREATOR_H__
 
-#include <glib-object.h>
+#include <gst/gst.h>
+
+#include "gstd_icreator.h"
 
 G_BEGIN_DECLS
 /*
  * Type declaration.
  */
-#define GSTD_TYPE_ELEMENT \
-  (gstd_element_get_type())
-#define GSTD_ELEMENT(obj) \
-  (G_TYPE_CHECK_INSTANCE_CAST((obj),GSTD_TYPE_ELEMENT,GstdElement))
-#define GSTD_ELEMENT_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_CAST((klass),GSTD_TYPE_ELEMENT,GstdElementClass))
-#define GSTD_IS_ELEMENT(obj) \
-  (G_TYPE_CHECK_INSTANCE_TYPE((obj),GSTD_TYPE_ELEMENT))
-#define GSTD_IS_ELEMENT_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_TYPE((klass),GSTD_TYPE_ELEMENT))
-#define GSTD_ELEMENT_GET_CLASS(obj) \
-  (G_TYPE_INSTANCE_GET_CLASS ((obj), GSTD_TYPE_ELEMENT, GstdElementClass))
-typedef struct _GstdElement GstdElement;
-typedef struct _GstdElementClass GstdElementClass;
-GType gstd_element_get_type ();
+#define GSTD_TYPE_NO_CREATOR \
+  (gstd_no_creator_get_type())
+#define GSTD_NO_CREATOR(obj) \
+  (G_TYPE_CHECK_INSTANCE_CAST((obj),GSTD_TYPE_NO_CREATOR,GstdNoCreator))
+#define GSTD_NO_CREATOR_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_CAST((klass),GSTD_TYPE_NO_CREATOR,GstdNoCreatorClass))
+#define GSTD_IS_NO_CREATOR(obj) \
+  (G_TYPE_CHECK_INSTANCE_TYPE((obj),GSTD_TYPE_NO_CREATOR))
+#define GSTD_IS_NO_CREATOR_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_TYPE((klass),GSTD_TYPE_NO_CREATOR))
+#define GSTD_NO_CREATOR_GET_CLASS(obj) \
+  (G_TYPE_INSTANCE_GET_CLASS ((obj), GSTD_TYPE_NO_CREATOR, GstdNoCreatorClass))
+typedef struct _GstdNoCreator GstdNoCreator;
+
+GType gstd_no_creator_get_type ();
 
 G_END_DECLS
-#endif // __GSTD_ELEMENT_H__
+#endif // __GSTD_NO_CREATOR_H__

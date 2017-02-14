@@ -1,30 +1,49 @@
 # Core library if user wants to use as code base for its own application
 lib_LTLIBRARIES = libgstd-core.la
 
-libgstd_core_la_SOURCES = gstd.c 		\
-			  gstd_object.c		\
-	                  gstd_pipeline.c 	\
-			  gstd_element.c	\
-			  gstd_list.c		\
-			  gstd_tcp.c
+libgstd_core_la_SOURCES = gstd_session.c		\
+			  gstd_object.c			\
+	                  gstd_pipeline.c 		\
+			  gstd_element.c		\
+			  gstd_list.c			\
+			  gstd_ipc.c			\
+			  gstd_tcp.c			\
+			  gstd_icreator.c		\
+			  gstd_pipeline_creator.c	\
+			  gstd_no_creator.c		\
+			  gstd_element_list.c		\
+			  gstd_ideleter.c		\
+			  gstd_pipeline_deleter.c	\
+			  gstd_no_deleter.c			\
+			  gstd_debug.c
 
-libgstd_core_la_CFLAGS = $(GST_CFLAGS) $(GIO_CFLAGS)
-libgstd_core_la_LDFLAGS = $(GST_LIBS) $(GIO_LIBS)
+libgstd_core_la_CFLAGS = $(GST_CFLAGS) $(GIO_CFLAGS) $(GJSON_CFLAGS)
+libgstd_core_la_LDFLAGS = $(GST_LIBS) $(GIO_LIBS) $(GJSON_LIBS)
 
-# Standalone application that used libgstd-core
+# Standalone application that uses libgstd-core
 bin_PROGRAMS = gstd
 
-gstd_SOURCES = main.c
-gstd_CFLAGS = $(GST_CFLAGS) $(GIO_CFLAGS)
-gstd_LDFLAGS = $(GST_LIBS) $(GIO_LIBS)
+gstd_SOURCES = gstd.c
+gstd_CFLAGS = $(GST_CFLAGS) $(GIO_CFLAGS) $(GJSON_CFLAGS)
+gstd_LDFLAGS = $(GST_LIBS) $(GIO_LIBS) $(GJSON_LIBS) -Wl,-rpath -Wl,$(libdir)
 gstd_LDADD = libgstd-core.la
 
-include_HEADERS = gstd.h 		\
-		  gstd_object.h		\
-		  gstd_return_codes.h 	\
-		  gstd_pipeline.h	\
-		  gstd_element.h	\
-		  gstd_list.h		\
-		  gstd_tcp.h
+gstdincludedir = $(includedir)/gstd
+gstdinclude_HEADERS = \
+		  gstd_session.h		\
+		  gstd_object.h			\
+		  gstd_return_codes.h 		\
+		  gstd_pipeline.h		\
+		  gstd_element.h		\
+		  gstd_list.h			\
+		  gstd_ipc.h			\
+		  gstd_tcp.h			\
+		  gstd_icreator.h		\
+		  gstd_pipeline_creator.h	\
+		  gstd_no_creator.h		\
+		  gstd_element_list.h		\
+		  gstd_ideleter.h		\
+		  gstd_pipeline_deleter.h	\
+		  gstd_no_deleter.h
 
 noinst_HEADERS = 

@@ -40,30 +40,31 @@ test_get_list_existing (gpointer fixture, gconstpointer data)
   GList *elements = NULL;
   GstdReturnCode ret;
   guint size;
-  
+
   ret = gstd_pipeline_create (NULL, TEST_PIPE, &outpipe);
   g_assert_cmpint (ret, ==, GSTD_EOK);
 
-  ret = gstd_element_get_list(outpipe, &elements);
+  ret = gstd_element_get_list (outpipe, &elements);
   g_assert_cmpint (ret, ==, GSTD_EOK);
 
-  size = g_list_length(elements);
+  size = g_list_length (elements);
   g_assert_cmpint (size, ==, 2);
 
-  g_assert_cmpstr (GSTD_PIPELINE_NAME(GSTD_ELEMENT_PIPELINE((GstdElement *)(elements->data))), ==, outpipe->name);
-  g_assert_cmpstr (GST_OBJECT_NAME(GSTD_ELEMENT_ELEMENT((GstdElement *)(elements->data))), ==, "fakesink0");
+  g_assert_cmpstr (GSTD_PIPELINE_NAME (GSTD_ELEMENT_PIPELINE ((GstdElement
+                  *) (elements->data))), ==, outpipe->name);
+  g_assert_cmpstr (GST_OBJECT_NAME (GSTD_ELEMENT_ELEMENT ((GstdElement
+                  *) (elements->data))), ==, "fakesink0");
 }
 
 gint
-main (gint argc, gchar *argv[])
+main (gint argc, gchar * argv[])
 {
   g_test_init (&argc, &argv, NULL);
   gst_init (&argc, &argv);
-  
+
   // Install the tests.
   g_test_add ("/gstd/gstd_element/get_list/existing",
-	      gpointer, NULL, test_set_up,
-	      test_get_list_existing, test_tear_down);
-  
+      gpointer, NULL, test_set_up, test_get_list_existing, test_tear_down);
+
   return g_test_run ();
 }

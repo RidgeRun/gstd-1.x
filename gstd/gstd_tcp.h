@@ -20,24 +20,34 @@
 #ifndef __GSTD_TCP_H__
 #define __GSTD_TCP_H__
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include <gst/gst.h>
 #include <gio/gio.h>
-#include "gstd.h"
+#include <gstd/gstd_return_codes.h>
+#include <gstd/gstd_session.h>
+#include "gstd_ipc.h"
 
 G_BEGIN_DECLS
-
 #define GSTD_TCP_DEFAULT_PORT 5000
+#define GSTD_TYPE_TCP \
+  (gstd_tcp_get_type())
+#define GSTD_TCP(obj) \
+  (G_TYPE_CHECK_INSTANCE_CAST((obj),GSTD_TYPE_TCP,GstdTcp))
+#define GSTD_TCP_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_CAST((klass),GSTD_TYPE_TCP,GstdTcpClass))
+#define GSTD_IS_TCP(obj) \
+  (G_TYPE_CHECK_INSTANCE_TYPE((obj),GSTD_TYPE_TCP))
+#define GSTD_IS_TCP_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_TYPE((klass),GSTD_TYPE_TCP))
+#define GSTD_TCP_GET_CLASS(obj) \
+  (G_TYPE_INSTANCE_GET_CLASS ((obj), GSTD_TYPE_TPC, GstdTcpClass))
+typedef struct _GstdTcp GstdTcp;
+typedef struct _GstdTcpClass GstdTcpClass;
+GType gstd_tcp_get_type ();
 
-GstdReturnCode
-gstd_tcp_start (GstdCore *core, GSocketService **service, guint16 port);
 
-GstdReturnCode
-gstd_tcp_stop (GstdCore *core, GSocketService **service);
+GstdReturnCode gstd_tcp_start (GstdIpc * base, GstdSession * session);
+
+GstdReturnCode gstd_tcp_stop (GstdIpc * base);
+
 
 G_END_DECLS
-
 #endif //__GSTD_TCP_H__

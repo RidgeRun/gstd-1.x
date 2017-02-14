@@ -21,13 +21,11 @@
 #ifndef __GSTD_PIPELINE_H__
 #define __GSTD_PIPELINE_H__
 
-#include <gst/gst.h>
+#include <glib-object.h>
 
 #include "gstd_object.h"
-#include "gstd_return_codes.h"
 
 G_BEGIN_DECLS
-
 /*
  * Type declaration.
  */
@@ -43,17 +41,16 @@ G_BEGIN_DECLS
   (G_TYPE_CHECK_CLASS_TYPE((klass),GSTD_TYPE_PIPELINE))
 #define GSTD_PIPELINE_GET_CLASS(obj) \
   (G_TYPE_INSTANCE_GET_CLASS ((obj), GSTD_TYPE_PIPELINE, GstdPipelineClass))
-
 typedef struct _GstdPipeline GstdPipeline;
 typedef struct _GstdPipelineClass GstdPipelineClass;
-GType gstd_pipeline_get_type();
+GType gstd_pipeline_get_type ();
 
-typedef enum {
+typedef enum
+{
   GSTD_PIPELINE_NULL,
   GSTD_PIPELINE_PAUSED,
   GSTD_PIPELINE_PLAYING,
 } GstdPipelineState;
 
 G_END_DECLS
-
 #endif // __GSTD_PIPELINE_H__

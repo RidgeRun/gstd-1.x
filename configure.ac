@@ -2,7 +2,7 @@ dnl required version of autoconf
 AC_PREREQ([2.53])
 
 dnl Gstreamer's daemon package name and version
-AC_INIT([gstd],[0.0.1])
+AC_INIT([gstd],[0.2.0])
 
 dnl required version of gstreamer and gst-plugins-base
 GST_REQUIRED=1.0.0
@@ -10,7 +10,13 @@ GST_REQUIRED=1.0.0
 dnl required version of gio
 GIO_REQUIRED=2.44.1
 
-AC_CONFIG_SRCDIR([gstd/main.c])
+dnl required version of gio
+GJSON_REQUIRED=0.16.2
+
+dnl check for gtk-doc
+GTK_DOC_CHECK([1.14],[--flavour no-tmpl])
+
+AC_CONFIG_SRCDIR([gstd/gstd.c])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIRS([m4])
 
@@ -72,6 +78,30 @@ PKG_CHECK_MODULES(GIO, [
   ])
 ])
 
+PKG_CHECK_MODULES(GJSON, [
+    json-glib-1.0              >= $GJSON_REQUIRED
+  ], [
+    AC_SUBST(GJSON_CFLAGS)
+    AC_SUBST(GJSON_LIBS)
+  ], [
+  AC_MSG_ERROR([
+    Can't find the following GIO development packages:
+
+      json-glib-1.0              >= $GJSON_REQUIRED
+
+    Please make sure you have the necessary json-glib-1.0
+    development headers installed.
+  ])
+])
+
+
+dnl check for gtk-doc
+m4_ifdef([GTK_DOC_CHECK], [
+GTK_DOC_CHECK([1.14],[--flavour no-tmpl --docdir docs])
+],[
+AM_CONDITIONAL([ENABLE_GTK_DOC], false)
+])
+
 AX_LIB_READLINE
 
 dnl check if compiler understands -Wall (if yes, add -Wall to GST_CFLAGS)
@@ -95,6 +125,9 @@ gstd/Makefile
 gstd_client/Makefile
 tests/Makefile
 tests/gstd/Makefile
+docs/Makefile
+docs/reference/Makefile
+docs/reference/gstd/Makefile
 ])
 AC_OUTPUT
 

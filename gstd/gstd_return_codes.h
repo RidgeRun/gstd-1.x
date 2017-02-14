@@ -29,17 +29,18 @@
 
 typedef enum _GstdReturnCode GstdReturnCode;
 
-enum _GstdReturnCode {
+enum _GstdReturnCode
+{
   /**
    * Everything went OK 
    */
   GSTD_EOK = 0,
-  
+
   /**
    * A mandatory argument was passed NULL
    */
   GSTD_NULL_ARGUMENT = 1,
-  
+
   /**
    * A bad pipeline description was provided
    */

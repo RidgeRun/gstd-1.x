@@ -21,15 +21,14 @@
 #ifndef __GSTD_LIST_H__
 #define __GSTD_LIST_H__
 
-#include <glib.h>
+#include <glib-object.h>
+
 #include "gstd_object.h"
 
 G_BEGIN_DECLS
-
 /*
  * Type declaration.
  */
-
 #define GSTD_TYPE_LIST \
   (gstd_list_get_type())
 #define GSTD_LIST(obj) \
@@ -42,11 +41,35 @@ G_BEGIN_DECLS
   (G_TYPE_CHECK_CLASS_TYPE((klass),GSTD_TYPE_LIST))
 #define GSTD_LIST_GET_CLASS(obj) \
   (G_TYPE_INSTANCE_GET_CLASS ((obj), GSTD_TYPE_LIST, GstdListClass))
-
 typedef struct _GstdList GstdList;
 typedef struct _GstdListClass GstdListClass;
-GType gstd_list_get_type();
+
+/**
+ * GstdList:
+ * A wrapper for the conventional list
+ */
+struct _GstdList
+{
+  GstdObject parent;
+
+  guint count;
+
+  GType node_type;
+
+  GParamFlags flags;
+
+  GList *list;
+};
+
+struct _GstdListClass
+{
+  GstdObjectClass parent_class;
+};
+
+GType gstd_list_get_type ();
+
+void gstd_list_set_creator (GstdList * self, GstdICreator * creator);
+void gstd_list_set_deleter (GstdList * self, GstdIDeleter * deleter);
 
 G_END_DECLS
-
 #endif // __GSTD_LIST_H__
