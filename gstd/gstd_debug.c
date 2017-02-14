@@ -67,14 +67,13 @@ struct _GstdDebugClass
 G_DEFINE_TYPE (GstdDebug, gstd_debug, GSTD_TYPE_OBJECT);
 
 /* VTable */
-     static void
-         gstd_debug_set_property (GObject *, guint, const GValue *,
-    GParamSpec *);
-     static void gstd_debug_get_property (GObject *, guint, GValue *,
-    GParamSpec *);
-     static void gstd_debug_dispose (GObject *);
+static void
+gstd_debug_set_property (GObject *, guint, const GValue *, GParamSpec *);
+static void gstd_debug_get_property (GObject *, guint, GValue *, GParamSpec *);
+static void gstd_debug_dispose (GObject *);
 
-     gchar *debug_obtain_default_level ()
+gchar *
+debug_obtain_default_level ()
 {
   gint level = gst_debug_get_default_threshold ();
   return g_strdup_printf ("%d", level);

@@ -47,24 +47,21 @@ GST_DEBUG_CATEGORY_STATIC (gstd_object_debug);
 G_DEFINE_TYPE (GstdObject, gstd_object, G_TYPE_OBJECT);
 
 /* VTable */
-     static void
-         gstd_object_set_property (GObject *, guint, const GValue *,
-    GParamSpec *);
-     static void gstd_object_get_property (GObject *, guint, GValue *,
-    GParamSpec *);
-     static void gstd_object_dispose (GObject *);
-     static GstdReturnCode
-         gstd_object_create_default (GstdObject * object, const gchar * name,
+static void
+gstd_object_set_property (GObject *, guint, const GValue *, GParamSpec *);
+static void gstd_object_get_property (GObject *, guint, GValue *, GParamSpec *);
+static void gstd_object_dispose (GObject *);
+static GstdReturnCode
+gstd_object_create_default (GstdObject * object, const gchar * name,
     const gchar * description);
-     static GstdReturnCode
-         gstd_object_read_default (GstdObject *, const gchar *, va_list);
-     static GstdReturnCode
-         gstd_object_update_default (GstdObject *, const gchar *, va_list);
-     static GstdReturnCode
-         gstd_object_delete_default (GstdObject * object, const gchar * name);
-     static GstdReturnCode
-         gstd_object_to_string_default (GstdObject * object,
-    gchar ** outstring);
+static GstdReturnCode
+gstd_object_read_default (GstdObject *, const gchar *, va_list);
+static GstdReturnCode
+gstd_object_update_default (GstdObject *, const gchar *, va_list);
+static GstdReturnCode
+gstd_object_delete_default (GstdObject * object, const gchar * name);
+static GstdReturnCode
+gstd_object_to_string_default (GstdObject * object, gchar ** outstring);
 
 GType
 gstd_object_flags_get_type (void)

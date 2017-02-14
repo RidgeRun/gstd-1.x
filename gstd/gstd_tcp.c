@@ -58,80 +58,78 @@ typedef struct _GstdTCPCmd
 
 G_DEFINE_TYPE (GstdTcp, gstd_tcp, GSTD_TYPE_IPC);
 
-     enum
-     {
-       PROP_PORT = 1,
-       N_PROPERTIES             // NOT A PROPERTY
-     };
+enum
+{
+  PROP_PORT = 1,
+  N_PROPERTIES                  // NOT A PROPERTY
+};
 
 
 /* VTable */
 
-     static gboolean
-         gstd_tcp_callback (GSocketService * service,
+static gboolean
+gstd_tcp_callback (GSocketService * service,
     GSocketConnection * connection,
     GObject * source_object, gpointer user_data);
-     static GstdReturnCode
-         gstd_tcp_parse_cmd (GstdSession * session, const gchar * cmd,
+static GstdReturnCode
+gstd_tcp_parse_cmd (GstdSession * session, const gchar * cmd,
     gchar ** response);
-     static GstdReturnCode gstd_tcp_parse_raw_cmd (GstdSession * session,
+static GstdReturnCode gstd_tcp_parse_raw_cmd (GstdSession * session,
     gchar * action, gchar * args, gchar ** response);
-     static GstdReturnCode gstd_tcp_create (GstdSession * session,
+static GstdReturnCode gstd_tcp_create (GstdSession * session,
     GstdObject * obj, gchar * args, gchar ** response);
-     static GstdReturnCode gstd_tcp_read (GstdSession * session,
+static GstdReturnCode gstd_tcp_read (GstdSession * session,
     GstdObject * obj, gchar * args, gchar ** reponse);
-     static GstdReturnCode gstd_tcp_update_by_type (GstdSession * session,
+static GstdReturnCode gstd_tcp_update_by_type (GstdSession * session,
     GstdObject * obj, gchar * args, gchar ** response);
-     static GstdReturnCode gstd_tcp_delete (GstdSession * session,
+static GstdReturnCode gstd_tcp_delete (GstdSession * session,
     GstdObject * obj, gchar * args, gchar ** response);
-     static GstdReturnCode gstd_tcp_pipeline_create (GstdSession *, gchar *,
+static GstdReturnCode gstd_tcp_pipeline_create (GstdSession *, gchar *,
     gchar *, gchar **);
-     static GstdReturnCode gstd_tcp_pipeline_delete (GstdSession *, gchar *,
+static GstdReturnCode gstd_tcp_pipeline_delete (GstdSession *, gchar *,
     gchar *, gchar **);
-     static GstdReturnCode gstd_tcp_pipeline_play (GstdSession *, gchar *,
+static GstdReturnCode gstd_tcp_pipeline_play (GstdSession *, gchar *,
     gchar *, gchar **);
-     static GstdReturnCode gstd_tcp_pipeline_pause (GstdSession *, gchar *,
+static GstdReturnCode gstd_tcp_pipeline_pause (GstdSession *, gchar *,
     gchar *, gchar **);
-     static GstdReturnCode gstd_tcp_pipeline_stop (GstdSession *, gchar *,
+static GstdReturnCode gstd_tcp_pipeline_stop (GstdSession *, gchar *,
     gchar *, gchar **);
-     static GstdReturnCode gstd_tcp_element_set (GstdSession *, gchar *,
+static GstdReturnCode gstd_tcp_element_set (GstdSession *, gchar *,
     gchar *, gchar **);
-     static GstdReturnCode gstd_tcp_element_get (GstdSession *, gchar *,
+static GstdReturnCode gstd_tcp_element_get (GstdSession *, gchar *,
     gchar *, gchar **);
-     static GstdReturnCode gstd_tcp_list_pipelines (GstdSession *, gchar *,
+static GstdReturnCode gstd_tcp_list_pipelines (GstdSession *, gchar *,
     gchar *, gchar **);
-     static GstdReturnCode gstd_tcp_list_elements (GstdSession *, gchar *,
+static GstdReturnCode gstd_tcp_list_elements (GstdSession *, gchar *,
     gchar *, gchar **);
-     static GstdReturnCode gstd_tcp_list_properties (GstdSession *, gchar *,
+static GstdReturnCode gstd_tcp_list_properties (GstdSession *, gchar *,
     gchar *, gchar **);
-     static void gstd_tcp_set_property (GObject *, guint, const GValue *,
+static void gstd_tcp_set_property (GObject *, guint, const GValue *,
     GParamSpec *);
-     static void gstd_tcp_get_property (GObject *, guint, GValue *,
-    GParamSpec *);
-     static void gstd_tcp_dispose (GObject *);
-gboolean
-gstd_tcp_init_get_option_group (GstdIpc * base, GOptionGroup ** group);
+static void gstd_tcp_get_property (GObject *, guint, GValue *, GParamSpec *);
+static void gstd_tcp_dispose (GObject *);
+gboolean gstd_tcp_init_get_option_group (GstdIpc * base, GOptionGroup ** group);
 
-     static GstdTCPCmd cmds[] = {
-       {"create", gstd_tcp_parse_raw_cmd},
-       {"read", gstd_tcp_parse_raw_cmd},
-       {"update", gstd_tcp_parse_raw_cmd},
-       {"delete", gstd_tcp_parse_raw_cmd},
+static GstdTCPCmd cmds[] = {
+  {"create", gstd_tcp_parse_raw_cmd},
+  {"read", gstd_tcp_parse_raw_cmd},
+  {"update", gstd_tcp_parse_raw_cmd},
+  {"delete", gstd_tcp_parse_raw_cmd},
 
-       {"pipeline_create", gstd_tcp_pipeline_create},
-       {"pipeline_delete", gstd_tcp_pipeline_delete},
-       {"pipeline_play", gstd_tcp_pipeline_play},
-       {"pipeline_pause", gstd_tcp_pipeline_pause},
-       {"pipeline_stop", gstd_tcp_pipeline_stop},
+  {"pipeline_create", gstd_tcp_pipeline_create},
+  {"pipeline_delete", gstd_tcp_pipeline_delete},
+  {"pipeline_play", gstd_tcp_pipeline_play},
+  {"pipeline_pause", gstd_tcp_pipeline_pause},
+  {"pipeline_stop", gstd_tcp_pipeline_stop},
 
-       {"element_set", gstd_tcp_element_set},
-       {"element_get", gstd_tcp_element_get},
+  {"element_set", gstd_tcp_element_set},
+  {"element_get", gstd_tcp_element_get},
 
-       {"list_pipelines", gstd_tcp_list_pipelines},
-       {"list_elements", gstd_tcp_list_elements},
-       {"list_properties", gstd_tcp_list_properties},
-       {NULL}
-     };
+  {"list_pipelines", gstd_tcp_list_pipelines},
+  {"list_elements", gstd_tcp_list_elements},
+  {"list_properties", gstd_tcp_list_properties},
+  {NULL}
+};
 
 static void
 gstd_tcp_class_init (GstdTcpClass * klass)

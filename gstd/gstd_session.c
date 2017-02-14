@@ -50,17 +50,17 @@ enum
 G_DEFINE_TYPE (GstdSession, gstd_session, GSTD_TYPE_OBJECT);
 
 /* VTable */
-     static void
-         gstd_session_set_property (GObject *, guint, const GValue *,
+static void
+gstd_session_set_property (GObject *, guint, const GValue *, GParamSpec *);
+static void gstd_session_get_property (GObject *, guint, GValue *,
     GParamSpec *);
-     static void gstd_session_get_property (GObject *, guint, GValue *,
-    GParamSpec *);
-     static void gstd_session_dispose (GObject *);
-     static GObject *gstd_session_constructor (GType, guint,
+static void gstd_session_dispose (GObject *);
+static GObject *gstd_session_constructor (GType, guint,
     GObjectConstructParam *);
 
 
-     static GObject *gstd_session_constructor (GType type,
+static GObject *
+gstd_session_constructor (GType type,
     guint n_construct_params, GObjectConstructParam * construct_params)
 {
   static GObject *the_session = NULL;

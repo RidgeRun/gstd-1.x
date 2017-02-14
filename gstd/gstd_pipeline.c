@@ -98,22 +98,21 @@ struct _GstdPipelineClass
 G_DEFINE_TYPE (GstdPipeline, gstd_pipeline, GSTD_TYPE_OBJECT);
 
 /* VTable */
-     static void
-         gstd_pipeline_get_property (GObject *, guint, GValue *, GParamSpec *);
-     static void
-         gstd_pipeline_set_property (GObject *, guint, const GValue *,
-    GParamSpec *);
-     static void gstd_pipeline_constructed (GObject *);
-     static void gstd_pipeline_dispose (GObject *);
-     static GstdReturnCode
-         gstd_pipeline_create (GstdPipeline *, const gchar *, gint,
-    const gchar *);
-     static GstdReturnCode gstd_pipeline_fill_elements (GstdPipeline *,
+static void
+gstd_pipeline_get_property (GObject *, guint, GValue *, GParamSpec *);
+static void
+gstd_pipeline_set_property (GObject *, guint, const GValue *, GParamSpec *);
+static void gstd_pipeline_constructed (GObject *);
+static void gstd_pipeline_dispose (GObject *);
+static GstdReturnCode
+gstd_pipeline_create (GstdPipeline *, const gchar *, gint, const gchar *);
+static GstdReturnCode gstd_pipeline_fill_elements (GstdPipeline *,
     GstElement *);
-     static GstState gstd_to_gst (GstdPipelineState);
-     static GstdPipelineState gst_to_gstd (GstState);
+static GstState gstd_to_gst (GstdPipelineState);
+static GstdPipelineState gst_to_gstd (GstState);
 
-     static void gstd_pipeline_class_init (GstdPipelineClass * klass)
+static void
+gstd_pipeline_class_init (GstdPipelineClass * klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
   GParamSpec *properties[N_PROPERTIES] = { NULL, };

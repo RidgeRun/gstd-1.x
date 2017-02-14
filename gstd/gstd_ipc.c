@@ -39,25 +39,25 @@ GST_DEBUG_CATEGORY_STATIC (gstd_ipc_debug);
 
 G_DEFINE_TYPE (GstdIpc, gstd_ipc, GSTD_TYPE_OBJECT);
 
-     enum
-     {
-       N_PROPERTIES             // NOT A PROPERTY
-     };
+enum
+{
+  N_PROPERTIES                  // NOT A PROPERTY
+};
 
 
 /* VTable */
 
-     static void
-         gstd_ipc_set_property (GObject * object,
+static void
+gstd_ipc_set_property (GObject * object,
     guint property_id, const GValue * value, GParamSpec * pspec);
 
-     static void
-         gstd_ipc_get_property (GObject *, guint, GValue *, GParamSpec *);
+static void gstd_ipc_get_property (GObject *, guint, GValue *, GParamSpec *);
 
 
-     static void gstd_ipc_dispose (GObject * object);
+static void gstd_ipc_dispose (GObject * object);
 
-     static void gstd_ipc_class_init (GstdIpcClass * klass)
+static void
+gstd_ipc_class_init (GstdIpcClass * klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
   guint debug_color;

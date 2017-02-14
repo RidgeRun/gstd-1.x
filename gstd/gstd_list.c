@@ -60,14 +60,13 @@ static GstdReturnCode gstd_list_to_string (GstdObject *, gchar **);
 G_DEFINE_TYPE (GstdList, gstd_list, GSTD_TYPE_OBJECT);
 
 /* VTable */
-     static void
-         gstd_list_get_property (GObject *, guint, GValue *, GParamSpec *);
-     static void
-         gstd_list_set_property (GObject *, guint, const GValue *,
-    GParamSpec *);
-     static void gstd_list_dispose (GObject *);
+static void gstd_list_get_property (GObject *, guint, GValue *, GParamSpec *);
+static void
+gstd_list_set_property (GObject *, guint, const GValue *, GParamSpec *);
+static void gstd_list_dispose (GObject *);
 
-     static void gstd_list_class_init (GstdListClass * klass)
+static void
+gstd_list_class_init (GstdListClass * klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
   GstdObjectClass *gstd_object_class = GSTD_OBJECT_CLASS (klass);

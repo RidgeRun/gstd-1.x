@@ -67,20 +67,19 @@ struct _GstdElementClass
 G_DEFINE_TYPE (GstdElement, gstd_element, GSTD_TYPE_OBJECT);
 
 /* VTable */
-     static void
-         gstd_element_get_property (GObject *, guint, GValue *, GParamSpec *);
-     static void
-         gstd_element_set_property (GObject *, guint, const GValue *,
-    GParamSpec *);
-     static void gstd_element_dispose (GObject *);
-     static GstdReturnCode
-         gstd_element_read (GstdObject *, const gchar *, va_list);
-     static GstdReturnCode
-         gstd_element_update (GstdObject *, const gchar *, va_list);
-     static GstdReturnCode gstd_element_to_string (GstdObject *, gchar **);
-     void gstd_element_internal_to_string (GstdElement *, gchar **);
+static void
+gstd_element_get_property (GObject *, guint, GValue *, GParamSpec *);
+static void
+gstd_element_set_property (GObject *, guint, const GValue *, GParamSpec *);
+static void gstd_element_dispose (GObject *);
+static GstdReturnCode gstd_element_read (GstdObject *, const gchar *, va_list);
+static GstdReturnCode
+gstd_element_update (GstdObject *, const gchar *, va_list);
+static GstdReturnCode gstd_element_to_string (GstdObject *, gchar **);
+void gstd_element_internal_to_string (GstdElement *, gchar **);
 
-     static void gstd_element_class_init (GstdElementClass * klass)
+static void
+gstd_element_class_init (GstdElementClass * klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
   GstdObjectClass *gstd_object_class = GSTD_OBJECT_CLASS (klass);
