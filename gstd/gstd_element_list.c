@@ -33,7 +33,7 @@ GST_DEBUG_CATEGORY_STATIC (gstd_element_list_debug);
 static GstdReturnCode
 gstd_element_list_create (GstdObject * object, const gchar * name,
     const gchar * description);
-static GstdReturnCode gstd_element_list_delete (GstdObject * object);
+static GstdReturnCode gstd_element_list_delete (GstdObject * object, const gchar* name);
 
 /**
  * GstdElementList:
@@ -105,9 +105,8 @@ gstd_element_list_append (GstdElementList * self, GstdElement * element)
 }
 
 static GstdReturnCode
-gstd_element_list_delete (GstdObject * object)
+gstd_element_list_delete (GstdObject * object, const gchar *name)
 {
-  GstdElement *element;
   g_return_val_if_fail (GSTD_IS_OBJECT (object), GSTD_NULL_ARGUMENT);
 
   gstd_ideleter_delete (object->deleter, NULL);

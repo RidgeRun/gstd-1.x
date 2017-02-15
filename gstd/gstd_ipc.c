@@ -135,7 +135,7 @@ gboolean
 gstd_ipc_get_option_group (GstdIpc * ipc, GOptionGroup ** group)
 {
   GstdIpcClass *klass;
-  g_return_if_fail (ipc);
+  g_return_val_if_fail (ipc, FALSE);
   klass = GSTD_IPC_GET_CLASS (ipc);
   return klass->get_option_group (ipc, group);
 }
@@ -145,21 +145,21 @@ gstd_ipc_start (GstdIpc * ipc, GstdSession * session)
 {
   GstdIpcClass *klass;
 
-  g_return_if_fail (ipc);
-  g_return_if_fail (session);
+  g_return_val_if_fail (ipc, GSTD_IPC_ERROR);
+  g_return_val_if_fail (session, GSTD_IPC_ERROR);
 
 
   ipc->session = g_object_ref (session);
 
   klass = GSTD_IPC_GET_CLASS (ipc);
-  klass->start (ipc, session);
+  return klass->start (ipc, session);
 }
 
 GstdReturnCode
 gstd_ipc_stop (GstdIpc * ipc)
 {
   GstdIpcClass *klass;
-  g_return_if_fail (ipc);
+  g_return_val_if_fail (GSTD_IS_OBJECT(ipc), GSTD_IPC_ERROR);
   klass = GSTD_IPC_GET_CLASS (ipc);
   return klass->stop (ipc);
 }

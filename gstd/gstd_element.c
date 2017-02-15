@@ -332,7 +332,7 @@ gstd_element_internal_to_string (GstdElement * self, gchar ** outstring)
   gchar *jsonStream;
   gsize jsonStreamLength;
 
-  g_return_val_if_fail (GSTD_IS_OBJECT (self), GSTD_NULL_ARGUMENT);
+  g_return_if_fail (GSTD_IS_OBJECT (self));
   g_warn_if_fail (!*outstring);
 
   jsonBuilder = json_builder_new ();
