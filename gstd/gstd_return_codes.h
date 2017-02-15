@@ -90,6 +90,8 @@ enum _GstdReturnCode
   GSTD_BAD_VALUE = 13,
 
   GSTD_STATE_ERROR = 14,
+
+  GSTD_IPC_ERROR = 15
 };
 
 

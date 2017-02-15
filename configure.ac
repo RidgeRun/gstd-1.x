@@ -2,7 +2,7 @@ dnl required version of autoconf
 AC_PREREQ([2.53])
 
 dnl Gstreamer's daemon package name and version
-AC_INIT([gstd],[0.2.0])
+AC_INIT([gstd],[0.2.2])
 
 dnl required version of gstreamer and gst-plugins-base
 GST_REQUIRED=1.0.0
@@ -12,9 +12,6 @@ GIO_REQUIRED=2.44.1
 
 dnl required version of gio
 GJSON_REQUIRED=0.16.2
-
-dnl check for gtk-doc
-GTK_DOC_CHECK([1.14],[--flavour no-tmpl])
 
 AC_CONFIG_SRCDIR([gstd/gstd.c])
 AC_CONFIG_HEADERS([config.h])
