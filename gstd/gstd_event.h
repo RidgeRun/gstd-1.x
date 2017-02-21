@@ -2,6 +2,7 @@
 #define __GSTD_EVENT_H__
 
 #include <gst/gst.h>
+#include <gstd_object.h>
 
 G_BEGIN_DECLS
 #define GSTD_TYPE_EVENT \
@@ -21,21 +22,15 @@ typedef struct _GstdEventClass GstdEventClass;
 GType gstd_event_get_type ();
 
 
-enum
-{
-  N_PROPERTIES                  // NOT A PROPERTY
-};
-
-struct _GstdEvent
-{
-  GObject parent;
-
-  GParamFlags flags;
-};
-
-struct _GstdEventClass
-{
-  GstdObjectClass parent_class;
+/**
+ * gstd_event_new: (constructor)
+ * 
+ * Creates a new object that sends events.
+ *
+ * Returns: (transfer full) (nullable): A new #GstdEvent. Free after
+ * usage using g_object_unref()
+ */
+GstdEvent *gstd_event_new ();
 
 /**
  * gstd_event_send_event:
@@ -49,21 +44,8 @@ struct _GstdEventClass
  * Returns: (transfer full) (nullable): A new #GstdEvent. Free after
  * usage using g_object_unref()
  */
-  gboolean (*gstd_event_send_event)(
-      GstdEvent *gstd_event, GstdObject *receiver, gchar *event_type, gchar *decription);
-};
-
-G_DEFINE_ABSTRACT_TYPE (GstdEvent, gstd_event, GObject);
-
-/**
- * gstd_event_new: (constructor)
- * 
- * Creates a new object that sends events.
- *
- * Returns: (transfer full) (nullable): A new #GstdEvent. Free after
- * usage using g_object_unref()
- */
-GstdEvent *gstd_event_new ();
+gboolean gstd_event_send_event(
+      GstdEvent *gstd_event, GstdObject *receiver, gchar *event_type, gchar *description);
 
 G_END_DECLS
 
