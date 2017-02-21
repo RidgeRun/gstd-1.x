@@ -30,12 +30,14 @@
 #include "gstd_list.h"
 #include "gstd_element.h"
 #include "gstd_element_list.h"
+#include "gstd_event.h"
 
 enum
 {
   PROP_DESCRIPTION = 1,
   PROP_ELEMENTS,
   PROP_STATE,
+  PROP_EVENT,
   N_PROPERTIES                  // NOT A PROPERTY
 };
 
@@ -78,6 +80,11 @@ struct _GstdPipeline
    * The GstLaunch syntax used to create the pipeline
    */
   gchar *description;
+
+  /**
+   * The gstd event handler for this pipeline
+   */
+   GstdEvent *event;
 
   /**
    * A Gstreamer element holding the pipeline
@@ -146,6 +153,12 @@ gstd_pipeline_class_init (GstdPipelineClass * klass)
       G_PARAM_READWRITE |
       G_PARAM_STATIC_STRINGS | GSTD_PARAM_READ | GSTD_PARAM_UPDATE);
 
+  properties[PROP_EVENT] =
+      g_param_spec_object ("event", "Event",
+      "The event handler of the pipeline",
+      GSTD_TYPE_EVENT,
+      G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
+
   g_object_class_install_properties (object_class, N_PROPERTIES, properties);
 
   /* Initialize debug category with nice colors */
@@ -162,7 +175,7 @@ gstd_pipeline_init (GstdPipeline * self)
   self->pipeline = NULL;
   self->elements = g_object_new (GSTD_TYPE_ELEMENT_LIST, "name", "elements",
       "node-type", GSTD_TYPE_ELEMENT, "flags", GSTD_PARAM_READ, NULL);
-
+  self->event = g_object_new (GSTD_TYPE_EVENT, NULL);
 }
 
 static void
@@ -202,6 +215,11 @@ gstd_pipeline_dispose (GObject * object)
   if (self->elements) {
     g_object_unref (self->elements);
     self->elements = NULL;
+  }
+
+  if(self->event){
+    g_object_unref (self->event);
+    self->event = NULL;
   }
 
   G_OBJECT_CLASS (gstd_pipeline_parent_class)->dispose (object);
@@ -266,6 +284,10 @@ gstd_pipeline_get_property (GObject * object,
       GST_DEBUG_OBJECT (self, "Returning pipeline state %d (%s)", state,
           evalue->value_name);
       g_type_class_unref (eclass);
+      break;
+    case PROP_EVENT:
+      GST_DEBUG_OBJECT (self, "Returning event handler %p", self->event);
+      g_value_set_object (value, self->event);
       break;
     default:
       /* We don't have any other property... */
