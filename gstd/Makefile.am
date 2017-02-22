@@ -14,9 +14,10 @@ libgstd_core_la_SOURCES = gstd_session.c		\
 			  gstd_element_list.c		\
 			  gstd_ideleter.c		\
 			  gstd_pipeline_deleter.c	\
-			  gstd_no_deleter.c			\
-			  gstd_debug.c				\
-			  gstd_event_handler.c
+			  gstd_no_deleter.c		\
+			  gstd_debug.c			\
+			  gstd_event_handler.c		\
+			  gstd_event_factory.c		
 
 libgstd_core_la_CFLAGS = $(GST_CFLAGS) $(GIO_CFLAGS) $(GJSON_CFLAGS)
 libgstd_core_la_LDFLAGS = $(GST_LIBS) $(GIO_LIBS) $(GJSON_LIBS)
@@ -45,6 +46,6 @@ gstdinclude_HEADERS = \
 		  gstd_element_list.h		\
 		  gstd_ideleter.h		\
 		  gstd_pipeline_deleter.h	\
-		  gstd_no_deleter.h
+		  gstd_no_deleter.h		
 
 noinst_HEADERS = 
