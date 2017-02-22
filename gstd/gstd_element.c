@@ -29,10 +29,12 @@
 
 #include "gstd_element.h"
 #include "gstd_object.h"
+#include "gstd_event_handler.h"
 
 enum
 {
   PROP_GSTELEMENT = 1,
+  PROP_EVENT,
   N_PROPERTIES                  // NOT A PROPERTY
 };
 
@@ -56,6 +58,11 @@ struct _GstdElement
    * A Gstreamer element holding the element
    */
   GstElement *element;
+
+    /**
+   * The gstd event handler for this element
+   */
+   GstdEventHandler *event_handler;
 };
 
 struct _GstdElementClass
@@ -98,6 +105,12 @@ gstd_element_class_init (GstdElementClass * klass)
       G_PARAM_READWRITE |
       G_PARAM_CONSTRUCT_ONLY | G_PARAM_STATIC_STRINGS | GSTD_PARAM_READ);
 
+  properties[PROP_EVENT] =
+      g_param_spec_object ("event", "Event",
+      "The event handler of the element",
+      GSTD_TYPE_EVENT_HANDLER,
+      G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
+
   g_object_class_install_properties (object_class, N_PROPERTIES, properties);
 
   gstd_object_class->read = gstd_element_read;
@@ -115,6 +128,7 @@ gstd_element_init (GstdElement * self)
 {
   GST_INFO_OBJECT (self, "Initializing element");
   self->element = GSTD_ELEMENT_DEFAULT_GSTELEMENT;
+  self->event_handler = g_object_new (GSTD_TYPE_EVENT_HANDLER, NULL);
 }
 
 static void
@@ -127,6 +141,11 @@ gstd_element_dispose (GObject * object)
   if (self->element) {
     g_object_unref (self->element);
     self->element = NULL;
+  }
+
+  if(self->event_handler){
+    g_object_unref (self->event_handler);
+    self->event_handler = NULL;
   }
 
   G_OBJECT_CLASS (gstd_element_parent_class)->dispose (object);
@@ -145,6 +164,10 @@ gstd_element_get_property (GObject * object,
       GST_DEBUG_OBJECT (self, "Returning gstelement %p (%s)", self->element,
           GST_OBJECT_NAME (self->element));
       g_value_set_object (value, self->element);
+      break;
+    case PROP_EVENT:
+      GST_DEBUG_OBJECT (self, "Returning event handler %p", self->event_handler);
+      g_value_set_object (value, self->event_handler);
       break;
     default:
       /* We don't have any other property... */
