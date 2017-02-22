@@ -22,7 +22,7 @@
 #include "config.h"
 #endif
 
-#include <stdio.h>
+#include <string.h>
 #include <glib.h>
 #include <gst/gst.h>
 #include "gstd_event_factory.h"
