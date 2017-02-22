@@ -1,6 +1,6 @@
 /*
  * Gstreamer Daemon - Gst Launch under steroids
- * Copyright (C) 2015 RidgeRun Engineering <support@ridgerun.com>
+ * Copyright (C) 2016 RidgeRun Engineering <support@ridgerun.com>
  *
  * This file is part of Gstd.
  *
@@ -23,11 +23,13 @@
 #endif
 
 #include <stdio.h>
+#include <string.h>
 #include <gst/gst.h>
 
 #include "gstd_ipc.h"
 #include "gstd_tcp.h"
 #include "gstd_element.h"
+#include "gstd_event_handler.h"
 
 /* Gstd TCP debugging category */
 GST_DEBUG_CATEGORY_STATIC (gstd_tcp_debug);
@@ -367,7 +369,7 @@ gstd_tcp_create (GstdSession * session, GstdObject * obj, gchar * args,
   GstdReturnCode ret;
 
   g_return_val_if_fail (GSTD_IS_SESSION (session), GSTD_NULL_ARGUMENT);
-  g_return_val_if_fail (GSTD_IS_OBJECT (obj), GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (G_IS_OBJECT (obj), GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (args, GSTD_NULL_ARGUMENT);
 
   // This may mean a potential leak
@@ -379,6 +381,13 @@ gstd_tcp_create (GstdSession * session, GstdObject * obj, gchar * args,
 
   // Tokens has the form {'name', <name>, 'description', <description>}
   tokens = g_strsplit (args, " ", 4);
+
+  if(strcmp(tokens[0],"event") == 0){
+  tokens = g_strsplit (args, " ", 3);
+    ret = gstd_event_handler_send_event (GSTD_EVENT_HANDLER (obj), tokens[1], tokens[2]);
+    return ret; 
+  }  
+  
   name = tokens[1];
   description = tokens[3];
 
