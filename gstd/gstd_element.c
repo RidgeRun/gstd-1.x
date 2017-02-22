@@ -128,8 +128,7 @@ gstd_element_init (GstdElement * self)
 {
   GST_INFO_OBJECT (self, "Initializing element");
   self->element = GSTD_ELEMENT_DEFAULT_GSTELEMENT;
-  self->event_handler = g_object_new (GSTD_TYPE_EVENT_HANDLER,"receiver",
-				      G_OBJECT(self), NULL);
+  self->event_handler = NULL;
 }
 
 static void
@@ -189,6 +188,12 @@ gstd_element_set_property (GObject * object,
   switch (property_id) {
     case PROP_GSTELEMENT:
       self->element = g_object_ref (g_value_get_object (value));
+	  if(self->event_handler){
+	    g_object_unref (self->event_handler);
+	  }
+      self->event_handler = g_object_new (GSTD_TYPE_EVENT_HANDLER,"receiver",
+				      G_OBJECT(self->element), NULL);
+
       GST_DEBUG_OBJECT (self, "Setting element %p (%s)", self->element,
           GST_OBJECT_NAME (self->element));
       break;

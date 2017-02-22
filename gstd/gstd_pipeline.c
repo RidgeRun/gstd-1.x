@@ -173,10 +173,9 @@ gstd_pipeline_init (GstdPipeline * self)
   GST_INFO_OBJECT (self, "Initializing pipeline");
   self->description = g_strdup (GSTD_PIPELINE_DEFAULT_DESCRIPTION);
   self->pipeline = NULL;
+  self->event_handler = NULL;
   self->elements = g_object_new (GSTD_TYPE_ELEMENT_LIST, "name", "elements",
       "node-type", GSTD_TYPE_ELEMENT, "flags", GSTD_PARAM_READ, NULL);
-  self->event_handler = g_object_new (GSTD_TYPE_EVENT_HANDLER,"receiver",
-				      G_OBJECT(self), NULL);
 }
 
 static void
@@ -188,7 +187,12 @@ gstd_pipeline_constructed (GObject * object)
   ret =
       gstd_pipeline_create (self, GSTD_OBJECT_NAME (self), 0,
       self->description);
-
+  
+  self->event_handler = g_object_new (GSTD_TYPE_EVENT_HANDLER,"receiver",
+				      G_OBJECT(self->pipeline), NULL);
+  if (!self->event_handler){
+    ret = ret | GSTD_BAD_VALUE ;
+  }
   // Capture any possible error
   gstd_object_set_code (GSTD_OBJECT (self), ret);
 }
