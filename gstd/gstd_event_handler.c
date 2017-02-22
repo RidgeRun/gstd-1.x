@@ -3,6 +3,7 @@
 #endif
 
 #include "gstd_event_handler.h"
+#include "gstd_event_factory.h"
 
 
 enum
@@ -63,10 +64,11 @@ gstd_event_handler_init (GstdEventHandler * self)
 }
 
 gboolean gstd_event_handler_send_event(
-      GstdEventHandler *self, GstdObject *receiver, gchar *event_type, gchar *description)
+      GstdEventHandler *self, gchar *event_type, gchar *description)
 {
     GST_INFO_OBJECT (self, "Event Handler sending event %s", event_type);
-    return FALSE;
+    GstEvent *event = gstd_event_factory_make(event_type, description);
+    return gst_element_send_event (GST_ELEMENT(self->receiver), event);
 }
 
 

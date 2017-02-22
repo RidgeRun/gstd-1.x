@@ -36,17 +36,16 @@ GstdEventHandler *gstd_event_handler_new (GObject *receiver);
 /**
  * gstd_event_send_event:
  * @gstd_event: The member of the corresponding element that will send a gst event.
- * @receiver: The object that will receive the event.
  * @event_type: Event type that will be sent. 
  * @description: (nullable) Parameters of the event_type.
  * 
- * Sends the specified event to the receiver.
+ * Sends the specified event to the receiver object.
  *
  * Returns: (transfer full) (nullable): A new #GstdEvent. Free after
  * usage using g_object_unref()
  */
 gboolean gstd_event_handler_send_event(
-      GstdEventHandler *gstd_event_handler, GstdObject *receiver, gchar *event_type, gchar *description);
+      GstdEventHandler *gstd_event_handler, gchar *event_type, gchar *description);
 
 G_END_DECLS
 
