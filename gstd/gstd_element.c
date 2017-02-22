@@ -128,7 +128,8 @@ gstd_element_init (GstdElement * self)
 {
   GST_INFO_OBJECT (self, "Initializing element");
   self->element = GSTD_ELEMENT_DEFAULT_GSTELEMENT;
-  self->event_handler = g_object_new (GSTD_TYPE_EVENT_HANDLER, NULL);
+  self->event_handler = g_object_new (GSTD_TYPE_EVENT_HANDLER,"receiver",
+				      G_OBJECT(self), NULL);
 }
 
 static void

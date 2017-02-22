@@ -4,9 +4,11 @@
 
 #include "gstd_event_handler.h"
 
+
 enum
 {
-  N_PROPERTIES                  // NOT A PROPERTY
+PROP_RECEIVER =1 ,
+N_PROPERTIES                  // NOT A PROPERTY
 };
 
 struct _GstdEventHandler
@@ -14,6 +16,8 @@ struct _GstdEventHandler
   GObject parent;
 
   GParamFlags flags;
+
+  GObject *receiver;
 };
 
 struct _GstdEventHandlerClass
@@ -21,6 +25,9 @@ struct _GstdEventHandlerClass
   GObjectClass parent_class;
 };
 
+static void
+gstd_event_handler_set_property (GObject *,
+				   guint, const GValue *, GParamSpec *);
 G_DEFINE_TYPE (GstdEventHandler, gstd_event_handler, G_TYPE_OBJECT);
 
 /* Gstd Event debugging category */
@@ -33,6 +40,13 @@ gstd_event_handler_class_init (GstdEventHandlerClass * klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
   GParamSpec *properties[N_PROPERTIES] = { NULL, };
+  object_class->set_property = gstd_event_handler_set_property;
+
+  properties[PROP_RECEIVER] =
+      g_param_spec_object ("receiver",
+      "Receiver",
+      "The object that will receive the event",
+      G_TYPE_OBJECT,  G_PARAM_CONSTRUCT_ONLY | G_PARAM_WRITABLE | G_PARAM_STATIC_STRINGS);
 
   g_object_class_install_properties (object_class, N_PROPERTIES, properties);
 
@@ -53,4 +67,29 @@ gboolean gstd_event_handler_send_event(
 {
     GST_INFO_OBJECT (self, "Event Handler sending event %s", event_type);
     return FALSE;
+}
+
+
+GstdEventHandler *
+gstd_event_handler_new (GObject *receiver)
+{ 
+return GSTD_EVENT_HANDLER (g_object_new (GSTD_TYPE_EVENT_HANDLER, "receiver", receiver, NULL));
+}
+
+static void
+gstd_event_handler_set_property (GObject * object,
+    guint property_id, const GValue * value, GParamSpec * pspec)
+{
+  GstdEventHandler *self = GSTD_EVENT_HANDLER (object);
+
+  switch (property_id) {
+    case PROP_RECEIVER:
+      self->receiver = g_value_get_object (value);
+      GST_INFO_OBJECT (self, "Changed receiver to %p", self->receiver);
+      break;
+    default:
+      /* We don't have any other property... */
+      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
+      break;
+  }
 }

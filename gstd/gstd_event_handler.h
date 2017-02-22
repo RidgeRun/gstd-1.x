@@ -24,13 +24,14 @@ GType gstd_event_handler_get_type ();
 
 /**
  * gstd_event_new: (constructor)
- * 
+ * @receiver: The object that will receive the event.
+ *
  * Creates a new object that sends events.
  *
  * Returns: (transfer full) (nullable): A new #GstdEvent. Free after
  * usage using g_object_unref()
  */
-GstdEventHandler *gstd_event_handler_new ();
+GstdEventHandler *gstd_event_handler_new (GObject *receiver);
 
 /**
  * gstd_event_send_event:

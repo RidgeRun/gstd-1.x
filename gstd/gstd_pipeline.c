@@ -175,7 +175,8 @@ gstd_pipeline_init (GstdPipeline * self)
   self->pipeline = NULL;
   self->elements = g_object_new (GSTD_TYPE_ELEMENT_LIST, "name", "elements",
       "node-type", GSTD_TYPE_ELEMENT, "flags", GSTD_PARAM_READ, NULL);
-  self->event_handler = g_object_new (GSTD_TYPE_EVENT_HANDLER, NULL);
+  self->event_handler = g_object_new (GSTD_TYPE_EVENT_HANDLER,"receiver",
+				      G_OBJECT(self), NULL);
 }
 
 static void
