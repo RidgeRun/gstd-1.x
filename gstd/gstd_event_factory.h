@@ -21,48 +21,8 @@
 #define __GSTD_EVENT_FACTORY_H__
 
 
-
-typedef enum _GstdEventType GstdEventType;
-
-enum _GstdEventType
-{
-
-  GSTD_EVENT_UNKNOWN = 0,
-  
-  GSTD_EVENT_FLUSH_START = 1,
-
-  GSTD_EVENT_FLUSH_STOP = 2,
-
-  GSTD_EVENT_STREAM_START = 3,
-
-  GSTD_EVENT_CAPS = 4,
-
-  GSTD_EVENT_SEGMENT = 5,
-
-  GSTD_EVENT_TAG = 6,
-
-  GSTD_EVENT_BUFFERSIZE = 7,
-
-  GSTD_EVENT_SINK_MESSAGE = 8,
-
-  GSTD_EVENT_EOS = 9,
-
-  GSTD_EVENT_TOC = 10,
-
-  GSTD_EVENT_SEGMENT_DONE = 11,
-
-  GSTD_EVENT_GAP = 12,
-
-  GSTD_EVENT_QOS = 13,
-
-  GSTD_EVENT_SEEK = 14,
-
-  GSTD_EVENT_NAVIGATION = 15
-};
-
 GstEvent *
-gstd_event_factory_make ( GstdEventType, gchar *);
-
+gstd_event_factory_make (gchar *name, gchar *description);
 
 
 #endif //__GSTD_EVENT_FACTORY_H__
