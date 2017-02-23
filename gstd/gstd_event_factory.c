@@ -24,7 +24,11 @@
 
 #include <string.h>
 #include <gst/gst.h>
+#include <glib/gprintf.h>
+#include <errno.h>
+
 #include "gstd_event_factory.h"
+
 
 #define GSTD_EVENT_FACTORY_SEEK_RATE_DEFAULT 1.0
 #define GSTD_EVENT_FACTORY_SEEK_FORMAT_DEFAULT GST_FORMAT_TIME
@@ -74,6 +78,8 @@ enum _GstdEventType
   GSTD_EVENT_NAVIGATION = 15
 };
 
+static gboolean gstd_ascii_to_gint64(const gchar *, gint64 *);
+static gboolean gstd_ascii_to_double(const gchar *, gdouble *);
 GstdEventType gstd_event_factory_parse_event (const gchar *);
 static GstEvent *gstd_event_factory_make_seek_event (const gchar *);
 
@@ -102,6 +108,28 @@ gstd_event_factory_make (const gchar * name, const gchar * description)
   return event;
 }
 
+static gboolean gstd_ascii_to_gint64(const gchar *full_string, gint64 *out_value){
+  g_return_val_if_fail(out_value, FALSE);
+  errno = 0;
+  *out_value = g_ascii_strtod(full_string, NULL);
+  if ((errno == ERANGE && (*out_value == LONG_MAX || *out_value == LONG_MIN)) || (errno != 0 && *out_value == 0)){
+    return FALSE;
+  }
+  return TRUE;
+}
+
+static gboolean gstd_ascii_to_double(const gchar *full_string, gdouble *out_value){
+  g_return_val_if_fail(out_value, FALSE);
+  errno = 0;
+  *out_value = g_ascii_strtod(full_string, NULL);
+  if ((errno == ERANGE && (*out_value == LONG_MAX || *out_value == LONG_MIN)) || (errno != 0 && *out_value == 0)){
+    return FALSE;
+  }
+  return TRUE;
+}
+
+
+
 static GstEvent *
 gstd_event_factory_make_seek_event (const gchar * description)
 {
@@ -118,40 +146,43 @@ gstd_event_factory_make_seek_event (const gchar * description)
   //Assume all 7 properties come with at most one value
   gchar **tokens = g_strsplit (description, " ", 7);
 
-  if (strncmp (tokens[0], "rate", 6)) {
-    return NULL;
+  
+  if (!gstd_ascii_to_double(tokens[0], &rate)){
+    return GSTD_EVENT_ERROR;
   }
-  rate = g_ascii_strtod (tokens[1], NULL);
 
-  if (strncmp (tokens[2], "format", 8)) {
-    return NULL;
+  gint64 temp_format;
+  if (!gstd_ascii_to_gint64(tokens[1], &temp_format)){
+    return GSTD_EVENT_ERROR;
   }
-  format = g_ascii_strtoll (tokens[3], NULL, 0);
+  format = (GstFormat)temp_format;
 
-  if (strncmp (tokens[4], "flags", 7)) {
-    return NULL;
-  }
-  flags = g_ascii_strtoll (tokens[5], NULL, 0);
 
-  if (strncmp (tokens[6], "start_type", 12)) {
-    return NULL;
+  gint64 temp_flags;
+  if (!gstd_ascii_to_gint64(tokens[2], &temp_flags)){
+    return GSTD_EVENT_ERROR;
   }
-  start_type = g_ascii_strtoll (tokens[7], NULL, 0);
+  flags = (GstSeekFlags)temp_flags;
 
-  if (strncmp (tokens[8], "start", 7)) {
-    return NULL;
+  gint64 temp_start_type;
+  if (!gstd_ascii_to_gint64(tokens[3], &temp_start_type)){
+    return GSTD_EVENT_ERROR;
   }
-  start = g_ascii_strtoll (tokens[9], NULL, 0);
+  start_type = (GstSeekType)start_type;
 
-  if (strncmp (tokens[10], "stop_type", 11)) {
-    return NULL;
+  if (!gstd_ascii_to_gint64(tokens[4], &start)){
+    return GSTD_EVENT_ERROR;
   }
-  stop_type = g_ascii_strtoll (tokens[11], NULL, 0);
 
-  if (strncmp (tokens[12], "stop", 6)) {
-    return NULL;
+  gint64 temp_stop_type;
+  if (!gstd_ascii_to_gint64(tokens[5], &temp_stop_type)){
+    return GSTD_EVENT_ERROR;
   }
-  stop = g_ascii_strtoll (tokens[13], NULL, 0);
+  stop = (GstSeekType)temp_stop_type;
+
+  if (!gstd_ascii_to_gint64(tokens[6], &stop)){
+    return GSTD_EVENT_ERROR;
+  }
 
   return gst_event_new_seek (rate, format, flags, start_type, start, stop_type,
       stop);
