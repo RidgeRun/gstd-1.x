@@ -82,6 +82,7 @@ static void
 gstd_event_handler_init (GstdEventHandler * self)
 {
   GST_INFO_OBJECT (self, "Initializing gstd event handler");
+  self->receiver = NULL;
 }
 
 gboolean

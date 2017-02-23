@@ -61,8 +61,7 @@ GstdEventHandler *gstd_event_handler_new (GObject * receiver);
  * 
  * Sends the specified event to the receiver object.
  *
- * Returns: (transfer full) (nullable): A new #GstdEvent. Free after
- * usage using g_object_unref()
+ * Returns: TRUE if the event is sent succesfully to the receiver. FALSE otherwise.
  */
 gboolean gstd_event_handler_send_event (GstdEventHandler * gstd_event_handler,
     const gchar * event_type, const gchar * description);

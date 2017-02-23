@@ -187,8 +187,7 @@ gstd_pipeline_constructed (GObject * object)
       gstd_pipeline_create (self, GSTD_OBJECT_NAME (self), 0,
       self->description);
 
-  self->event_handler = g_object_new (GSTD_TYPE_EVENT_HANDLER, "receiver",
-      G_OBJECT (self->pipeline), NULL);
+  self->event_handler = gstd_event_handler_new (G_OBJECT (self->pipeline));
   if (!self->event_handler) {
     ret = ret | GSTD_BAD_VALUE;
   }
