@@ -20,6 +20,7 @@
 #ifndef __GSTD_EVENT_FACTORY_H__
 #define __GSTD_EVENT_FACTORY_H__
 
+#include <gst/gst.h>
 
 GstEvent *gstd_event_factory_make (const gchar * name, const gchar * description);
 

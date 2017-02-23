@@ -23,8 +23,6 @@
 #endif
 
 #include <string.h>
-#include <gst/gst.h>
-#include <glib/gprintf.h>
 #include <errno.h>
 
 #include "gstd_event_factory.h"

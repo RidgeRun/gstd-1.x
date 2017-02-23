@@ -376,7 +376,7 @@ gstd_tcp_create (GstdSession * session, GstdObject * obj, gchar * args,
   g_warn_if_fail (!*response);
 
   GST_FIXME_OBJECT (session,
-      "Currently hardcoded to create pipelines, we must be "
+      "Currently hardcoded to create pipelines and events, we must be "
       "generic enough to create any type of object");
 
   // Tokens has the form {'name', <name>, 'description', <description>}
