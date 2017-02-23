@@ -86,7 +86,6 @@ gstd_event_factory_make (const gchar * name, const gchar * description)
 {
 
   g_return_val_if_fail (name, GSTD_EVENT_ERROR);
-  g_return_val_if_fail (description, GSTD_EVENT_ERROR);
 
   GstEvent *event = NULL;
   GstdEventType type = gstd_event_factory_parse_event (name);
@@ -166,7 +165,7 @@ gstd_event_factory_make_seek_event (const gchar * description)
   if (!gstd_ascii_to_gint64(tokens[3], &temp_start_type)){
     return GSTD_EVENT_ERROR;
   }
-  start_type = (GstSeekType)start_type;
+  start_type = (GstSeekType)temp_start_type;
 
   if (!gstd_ascii_to_gint64(tokens[4], &start)){
     return GSTD_EVENT_ERROR;
@@ -176,7 +175,7 @@ gstd_event_factory_make_seek_event (const gchar * description)
   if (!gstd_ascii_to_gint64(tokens[5], &temp_stop_type)){
     return GSTD_EVENT_ERROR;
   }
-  stop = (GstSeekType)temp_stop_type;
+  stop_type = (GstSeekType)temp_stop_type;
 
   if (!gstd_ascii_to_gint64(tokens[6], &stop)){
     return GSTD_EVENT_ERROR;
