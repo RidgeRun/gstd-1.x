@@ -24,6 +24,7 @@
 
 #include <string.h>
 #include <errno.h>
+#include <math.h>
 
 #include "gstd_event_factory.h"
 
@@ -119,7 +120,7 @@ static gboolean gstd_ascii_to_double(const gchar *full_string, gdouble *out_valu
   g_return_val_if_fail(out_value, FALSE);
   errno = 0;
   *out_value = g_ascii_strtod(full_string, NULL);
-  if ((errno == ERANGE && (*out_value == LONG_MAX || *out_value == LONG_MIN)) || (errno != 0 && *out_value == 0)){
+  if ((errno == ERANGE && (*out_value == HUGE_VALF || *out_value == HUGE_VALL)) || (errno != 0 && *out_value == 0)){
     return FALSE;
   }
   return TRUE;
