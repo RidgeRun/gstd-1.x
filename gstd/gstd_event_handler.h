@@ -18,8 +18,8 @@
  * along with Gstd.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __GSTD_EVENT_H__
-#define __GSTD_EVENT_H__
+#ifndef __GSTD_EVENT_HANDLER_H__
+#define __GSTD_EVENT_HANDLER_H__
 
 #include <gst/gst.h>
 #include <gstd_object.h>
@@ -68,4 +68,4 @@ gboolean gstd_event_handler_send_event (GstdEventHandler * gstd_event_handler,
     const gchar * event_type, const gchar * description);
 
 G_END_DECLS
-#endif // __GSTD_EVENT_H__
+#endif // __GSTD_EVENT_HANDLER_H__
