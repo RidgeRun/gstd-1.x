@@ -23,7 +23,6 @@
 #endif
 
 #include <string.h>
-#include <glib.h>
 #include <gst/gst.h>
 #include "gstd_event_factory.h"
 
@@ -34,6 +33,7 @@
 #define GSTD_EVENT_FACTORY_SEEK_START_DEFAULT 1*GST_SECOND
 #define GSTD_EVENT_FACTORY_SEEK_STOP_TYPE_DEFAULT GST_SEEK_TYPE_SET
 #define GSTD_EVENT_FACTORY_SEEK_STOP_DEFAULT GST_CLOCK_TIME_NONE
+#define GSTD_EVENT_ERROR NULL
 
 
 typedef enum _GstdEventType GstdEventType;
@@ -74,12 +74,15 @@ enum _GstdEventType
   GSTD_EVENT_NAVIGATION = 15
 };
 
-GstdEventType gstd_event_factory_parse_event (gchar *);
-static GstEvent *gstd_event_factory_make_seek_event (gchar *);
+GstdEventType gstd_event_factory_parse_event (const gchar *);
+static GstEvent *gstd_event_factory_make_seek_event (const gchar *);
 
 GstEvent *
-gstd_event_factory_make (gchar * name, gchar * description)
+gstd_event_factory_make (const gchar * name, const gchar * description)
 {
+
+  g_return_val_if_fail (name, GSTD_EVENT_ERROR);
+  g_return_val_if_fail (description, GSTD_EVENT_ERROR);
 
   GstEvent *event = NULL;
   GstdEventType type = gstd_event_factory_parse_event (name);
@@ -92,6 +95,7 @@ gstd_event_factory_make (gchar * name, gchar * description)
       event = gstd_event_factory_make_seek_event (description);
       break;
     default:
+      event = GSTD_EVENT_ERROR;
       break;
   }
 
@@ -99,8 +103,10 @@ gstd_event_factory_make (gchar * name, gchar * description)
 }
 
 static GstEvent *
-gstd_event_factory_make_seek_event (gchar * description)
+gstd_event_factory_make_seek_event (const gchar * description)
 {
+  g_return_val_if_fail (description, GSTD_EVENT_ERROR);
+
   gdouble rate = GSTD_EVENT_FACTORY_SEEK_RATE_DEFAULT;
   GstFormat format = GSTD_EVENT_FACTORY_SEEK_FORMAT_DEFAULT;
   GstSeekFlags flags = GSTD_EVENT_FACTORY_SEEK_FLAGS_DEFAULT;
@@ -110,7 +116,7 @@ gstd_event_factory_make_seek_event (gchar * description)
   gint64 stop = GSTD_EVENT_FACTORY_SEEK_STOP_DEFAULT;
 
   //Assume all 7 properties come with at most one value
-  gchar **tokens = g_strsplit (description, " ", 14);
+  gchar **tokens = g_strsplit (description, " ", 7);
 
   if (strncmp (tokens[0], "rate", 6)) {
     return NULL;
@@ -152,7 +158,7 @@ gstd_event_factory_make_seek_event (gchar * description)
 }
 
 GstdEventType
-gstd_event_factory_parse_event (gchar * name)
+gstd_event_factory_parse_event (const gchar * name)
 {
   GstdEventType ret = GSTD_EVENT_UNKNOWN;
   if (!strncmp (name, "eos", 5)) {

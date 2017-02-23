@@ -45,7 +45,7 @@ GstdEventHandler *gstd_event_handler_new (GObject * receiver);
  * usage using g_object_unref()
  */
 gboolean gstd_event_handler_send_event (GstdEventHandler * gstd_event_handler,
-    gchar * event_type, gchar * description);
+    const gchar * event_type, const gchar * description);
 
 G_END_DECLS
 #endif // __GSTD_EVENT_H__
