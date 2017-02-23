@@ -84,7 +84,7 @@ struct _GstdPipeline
   /**
    * The gstd event handler for this pipeline
    */
-   GstdEventHandler *event_handler;
+  GstdEventHandler *event_handler;
 
   /**
    * A Gstreamer element holding the pipeline
@@ -156,8 +156,7 @@ gstd_pipeline_class_init (GstdPipelineClass * klass)
   properties[PROP_EVENT] =
       g_param_spec_object ("event", "Event",
       "The event handler of the pipeline",
-      GSTD_TYPE_EVENT_HANDLER,
-      G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
+      GSTD_TYPE_EVENT_HANDLER, G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
   g_object_class_install_properties (object_class, N_PROPERTIES, properties);
 
@@ -187,11 +186,11 @@ gstd_pipeline_constructed (GObject * object)
   ret =
       gstd_pipeline_create (self, GSTD_OBJECT_NAME (self), 0,
       self->description);
-  
-  self->event_handler = g_object_new (GSTD_TYPE_EVENT_HANDLER,"receiver",
-				      G_OBJECT(self->pipeline), NULL);
-  if (!self->event_handler){
-    ret = ret | GSTD_BAD_VALUE ;
+
+  self->event_handler = g_object_new (GSTD_TYPE_EVENT_HANDLER, "receiver",
+      G_OBJECT (self->pipeline), NULL);
+  if (!self->event_handler) {
+    ret = ret | GSTD_BAD_VALUE;
   }
   // Capture any possible error
   gstd_object_set_code (GSTD_OBJECT (self), ret);
@@ -222,7 +221,7 @@ gstd_pipeline_dispose (GObject * object)
     self->elements = NULL;
   }
 
-  if(self->event_handler){
+  if (self->event_handler) {
     g_object_unref (self->event_handler);
     self->event_handler = NULL;
   }
@@ -291,7 +290,8 @@ gstd_pipeline_get_property (GObject * object,
       g_type_class_unref (eclass);
       break;
     case PROP_EVENT:
-      GST_DEBUG_OBJECT (self, "Returning event handler %p", self->event_handler);
+      GST_DEBUG_OBJECT (self, "Returning event handler %p",
+          self->event_handler);
       g_value_set_object (value, self->event_handler);
       break;
     default:

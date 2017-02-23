@@ -35,7 +35,7 @@ enum _GstdReturnCode
   /**
    * Everything went OK 
    */
-  GSTD_EOK = 0 ,
+  GSTD_EOK = 0,
 
   /**
    * A mandatory argument was passed NULL
@@ -50,12 +50,12 @@ enum _GstdReturnCode
   /**
    * The name trying to be used already exist
    */
-  GSTD_EXISTING_NAME =  1 << 2,
+  GSTD_EXISTING_NAME = 1 << 2,
 
   /**
    * Missing initialization
    */
-  GSTD_MISSING_INITIALIZATION = 1 <<  3,
+  GSTD_MISSING_INITIALIZATION = 1 << 3,
 
   /**
    * The requested pipeline was not found
@@ -75,7 +75,7 @@ enum _GstdReturnCode
   /**
    * The resource to create already exists
    */
-  GSTD_EXISTING_RESOURCE = 1 <<  7,
+  GSTD_EXISTING_RESOURCE = 1 << 7,
 
   /**
    * Cannot update the given property

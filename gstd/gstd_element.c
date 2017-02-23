@@ -62,7 +62,7 @@ struct _GstdElement
     /**
    * The gstd event handler for this element
    */
-   GstdEventHandler *event_handler;
+  GstdEventHandler *event_handler;
 };
 
 struct _GstdElementClass
@@ -108,8 +108,7 @@ gstd_element_class_init (GstdElementClass * klass)
   properties[PROP_EVENT] =
       g_param_spec_object ("event", "Event",
       "The event handler of the element",
-      GSTD_TYPE_EVENT_HANDLER,
-      G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
+      GSTD_TYPE_EVENT_HANDLER, G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
   g_object_class_install_properties (object_class, N_PROPERTIES, properties);
 
@@ -143,7 +142,7 @@ gstd_element_dispose (GObject * object)
     self->element = NULL;
   }
 
-  if(self->event_handler){
+  if (self->event_handler) {
     g_object_unref (self->event_handler);
     self->event_handler = NULL;
   }
@@ -166,7 +165,8 @@ gstd_element_get_property (GObject * object,
       g_value_set_object (value, self->element);
       break;
     case PROP_EVENT:
-      GST_DEBUG_OBJECT (self, "Returning event handler %p", self->event_handler);
+      GST_DEBUG_OBJECT (self, "Returning event handler %p",
+          self->event_handler);
       g_value_set_object (value, self->event_handler);
       break;
     default:
@@ -188,11 +188,11 @@ gstd_element_set_property (GObject * object,
   switch (property_id) {
     case PROP_GSTELEMENT:
       self->element = g_object_ref (g_value_get_object (value));
-	  if(self->event_handler){
-	    g_object_unref (self->event_handler);
-	  }
-      self->event_handler = g_object_new (GSTD_TYPE_EVENT_HANDLER,"receiver",
-				      G_OBJECT(self->element), NULL);
+      if (self->event_handler) {
+        g_object_unref (self->event_handler);
+      }
+      self->event_handler = g_object_new (GSTD_TYPE_EVENT_HANDLER, "receiver",
+          G_OBJECT (self->element), NULL);
 
       GST_DEBUG_OBJECT (self, "Setting element %p (%s)", self->element,
           GST_OBJECT_NAME (self->element));

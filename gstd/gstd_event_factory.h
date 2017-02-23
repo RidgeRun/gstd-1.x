@@ -21,13 +21,7 @@
 #define __GSTD_EVENT_FACTORY_H__
 
 
-GstEvent *
-gstd_event_factory_make (gchar *name, gchar *description);
+GstEvent *gstd_event_factory_make (gchar * name, gchar * description);
 
 
 #endif //__GSTD_EVENT_FACTORY_H__
-
-
-
-
-

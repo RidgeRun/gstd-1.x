@@ -382,12 +382,14 @@ gstd_tcp_create (GstdSession * session, GstdObject * obj, gchar * args,
   // Tokens has the form {'name', <name>, 'description', <description>}
   tokens = g_strsplit (args, " ", 4);
 
-  if(strcmp(tokens[0],"event") == 0){
-  tokens = g_strsplit (args, " ", 3);
-    ret = gstd_event_handler_send_event (GSTD_EVENT_HANDLER (obj), tokens[1], tokens[2]);
-    return ret; 
-  }  
-  
+  if (strcmp (tokens[0], "event") == 0) {
+    tokens = g_strsplit (args, " ", 3);
+    ret =
+        gstd_event_handler_send_event (GSTD_EVENT_HANDLER (obj), tokens[1],
+        tokens[2]);
+    return ret;
+  }
+
   name = tokens[1];
   description = tokens[3];
 

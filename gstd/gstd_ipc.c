@@ -159,7 +159,7 @@ GstdReturnCode
 gstd_ipc_stop (GstdIpc * ipc)
 {
   GstdIpcClass *klass;
-  g_return_val_if_fail (GSTD_IS_OBJECT(ipc), GSTD_IPC_ERROR);
+  g_return_val_if_fail (GSTD_IS_OBJECT (ipc), GSTD_IPC_ERROR);
   klass = GSTD_IPC_GET_CLASS (ipc);
   return klass->stop (ipc);
 }

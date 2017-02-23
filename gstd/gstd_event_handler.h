@@ -31,7 +31,7 @@ GType gstd_event_handler_get_type ();
  * Returns: (transfer full) (nullable): A new #GstdEvent. Free after
  * usage using g_object_unref()
  */
-GstdEventHandler *gstd_event_handler_new (GObject *receiver);
+GstdEventHandler *gstd_event_handler_new (GObject * receiver);
 
 /**
  * gstd_event_send_event:
@@ -44,9 +44,8 @@ GstdEventHandler *gstd_event_handler_new (GObject *receiver);
  * Returns: (transfer full) (nullable): A new #GstdEvent. Free after
  * usage using g_object_unref()
  */
-gboolean gstd_event_handler_send_event(
-      GstdEventHandler *gstd_event_handler, gchar *event_type, gchar *description);
+gboolean gstd_event_handler_send_event (GstdEventHandler * gstd_event_handler,
+    gchar * event_type, gchar * description);
 
 G_END_DECLS
-
 #endif // __GSTD_EVENT_H__
