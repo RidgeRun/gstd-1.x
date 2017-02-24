@@ -86,10 +86,12 @@ GstEvent *
 gstd_event_factory_make (const gchar * name, const gchar * description)
 {
 
+  GstEvent *event = NULL;
+  GstdEventType type = NULL;
+
   g_return_val_if_fail (name, GSTD_EVENT_ERROR);
 
-  GstEvent *event = NULL;
-  GstdEventType type = gstd_event_factory_parse_event (name);
+  type = gstd_event_factory_parse_event (name);
 
   switch (type) {
     case GSTD_EVENT_EOS:
@@ -131,7 +133,6 @@ static gboolean gstd_ascii_to_double(const gchar *full_string, gdouble *out_valu
 static GstEvent *
 gstd_event_factory_make_seek_event (const gchar * description)
 {
-  g_return_val_if_fail (description, GSTD_EVENT_ERROR);
 
   gdouble rate = GSTD_EVENT_FACTORY_SEEK_RATE_DEFAULT;
   GstFormat format = GSTD_EVENT_FACTORY_SEEK_FORMAT_DEFAULT;
@@ -140,6 +141,8 @@ gstd_event_factory_make_seek_event (const gchar * description)
   gint64 start = GSTD_EVENT_FACTORY_SEEK_START_DEFAULT;
   GstSeekType stop_type = GSTD_EVENT_FACTORY_SEEK_STOP_TYPE_DEFAULT;
   gint64 stop = GSTD_EVENT_FACTORY_SEEK_STOP_DEFAULT;
+
+  g_return_val_if_fail (name, GSTD_EVENT_ERROR);
 
   //Assume all 7 properties come with at most one value
   gchar **tokens = g_strsplit (description, " ", 7);
