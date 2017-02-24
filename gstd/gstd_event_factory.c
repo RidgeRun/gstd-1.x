@@ -87,7 +87,7 @@ gstd_event_factory_make (const gchar * name, const gchar * description)
 {
 
   GstEvent *event = NULL;
-  GstdEventType type = NULL;
+  GstdEventType type;
 
   g_return_val_if_fail (name, GSTD_EVENT_ERROR);
 
@@ -142,7 +142,7 @@ gstd_event_factory_make_seek_event (const gchar * description)
   GstSeekType stop_type = GSTD_EVENT_FACTORY_SEEK_STOP_TYPE_DEFAULT;
   gint64 stop = GSTD_EVENT_FACTORY_SEEK_STOP_DEFAULT;
 
-  g_return_val_if_fail (name, GSTD_EVENT_ERROR);
+  g_return_val_if_fail (description, GSTD_EVENT_ERROR);
 
   //Assume all 7 properties come with at most one value
   gchar **tokens = g_strsplit (description, " ", 7);
