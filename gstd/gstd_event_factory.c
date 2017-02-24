@@ -189,7 +189,11 @@ gstd_event_factory_make_seek_event (const gchar * description)
 GstdEventType
 gstd_event_factory_parse_event (const gchar * name)
 {
+
   GstdEventType ret = GSTD_EVENT_UNKNOWN;
+
+  g_return_val_if_fail (name, GSTD_EVENT_UNKNOWN);
+
   if (!strncmp (name, "eos", 5)) {
     ret = GSTD_EVENT_EOS;
   } else if (!strncmp (name, "seek", 6)) {
