@@ -1,3 +1,4 @@
+
 /*
  * Gstreamer Daemon - Gst Launch under steroids
  * Copyright (C) 2015 RidgeRun Engineering <support@ridgerun.com>
@@ -39,59 +40,59 @@ enum _GstdReturnCode
   /**
    * A mandatory argument was passed NULL
    */
-  GSTD_NULL_ARGUMENT = 1,
+  GSTD_NULL_ARGUMENT = 1 << 0,
 
   /**
    * A bad pipeline description was provided
    */
-  GSTD_BAD_DESCRIPTION = 2,
+  GSTD_BAD_DESCRIPTION = 1 << 1,
 
   /**
    * The name trying to be used already exist
    */
-  GSTD_EXISTING_NAME = 3,
+  GSTD_EXISTING_NAME = 1 << 2,
 
   /**
    * Missing initialization
    */
-  GSTD_MISSING_INITIALIZATION = 4,
+  GSTD_MISSING_INITIALIZATION = 1 << 3,
 
   /**
    * The requested pipeline was not found
    */
-  GSTD_NO_PIPELINE = 5,
+  GSTD_NO_PIPELINE = 1 << 4,
 
   /**
    * The requested resource was not found
    */
-  GSTD_NO_RESOURCE = 6,
+  GSTD_NO_RESOURCE = 1 << 5,
 
   /**
    * Cannot create a resource in the given property
    */
-  GSTD_NO_CREATE = 7,
+  GSTD_NO_CREATE = 1 << 6,
 
   /**
    * The resource to create already exists
    */
-  GSTD_EXISTING_RESOURCE = 8,
+  GSTD_EXISTING_RESOURCE = 1 << 7,
 
   /**
    * Cannot update the given property
    */
-  GSTD_NO_UPDATE = 9,
+  GSTD_NO_UPDATE = 1 << 8,
 
-  GSTD_BAD_COMMAND = 10,
+  GSTD_BAD_COMMAND = 1 << 9,
 
-  GSTD_NO_READ = 11,
+  GSTD_NO_READ = 1 << 10,
 
-  GSTD_NO_CONNECTION = 12,
+  GSTD_NO_CONNECTION = 1 << 11,
 
-  GSTD_BAD_VALUE = 13,
+  GSTD_BAD_VALUE = 1 << 12,
 
-  GSTD_STATE_ERROR = 14,
+  GSTD_STATE_ERROR = 1 << 13,
 
-  GSTD_IPC_ERROR = 15
+  GSTD_IPC_ERROR = 1 << 14
 };
 
 
