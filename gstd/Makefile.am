@@ -9,6 +9,7 @@ libgstd_core_la_SOURCES = gstd_session.c		\
 			  gstd_ipc.c			\
 			  gstd_tcp.c			\
 			  gstd_icreator.c		\
+			  gstd_iformatter.c		\
 			  gstd_pipeline_creator.c	\
 			  gstd_no_creator.c		\
 			  gstd_element_list.c		\
@@ -41,6 +42,7 @@ gstdinclude_HEADERS = \
 		  gstd_ipc.h			\
 		  gstd_tcp.h			\
 		  gstd_icreator.h		\
+		  gstd_iformatter.h		\
 		  gstd_pipeline_creator.h	\
 		  gstd_no_creator.h		\
 		  gstd_element_list.h		\
