@@ -25,6 +25,9 @@
 
 #include "gstd_icreator.h"
 #include "gstd_ideleter.h"
+#include "gstd_iformatter.h"
+
+typedef struct _GstdIFormatter GstdIFormatter;
 
 G_BEGIN_DECLS
 #define GSTD_TYPE_OBJECT \
@@ -64,6 +67,8 @@ struct _GstdObject
   /* CRUD behaviour */
   GstdICreator *creator;
   GstdIDeleter *deleter;
+
+  GstdIFormatter * formatter;
 };
 
 #define GSTD_OBJECT_NAME(obj) (GSTD_OBJECT(obj)->name)

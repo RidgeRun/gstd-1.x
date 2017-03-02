@@ -32,6 +32,8 @@
 #include "gstd_no_creator.h"
 #include "gstd_no_deleter.h"
 
+#include "gstd_json_builder.h"
+
 enum
 {
   PROP_NAME = 1,
@@ -122,7 +124,7 @@ gstd_object_init (GstdObject * self)
   self->code = GSTD_EOK;
   self->creator = g_object_new (GSTD_TYPE_NO_CREATOR, NULL);
   self->deleter = g_object_new (GSTD_TYPE_NO_DELETER, NULL);
-
+  self->formatter = g_object_new (GSTD_TYPE_JSON_BUILDER, NULL);
   g_mutex_init (&self->codelock);
 }
 
@@ -337,94 +339,65 @@ gstd_object_to_string_default (GstdObject * self, gchar ** outstring)
   gchar *sflags;
   guint n, i;
   const gchar *typename;
-  JsonBuilder *jsonBuilder;
-  JsonNode *jsonNode;
-  JsonGenerator *jsonGenerator;
-  gchar *jsonStream;
-  gsize jsonStreamLength;
+  
+  gstd_iformatter_begin_object (self->formatter);
+  gstd_iformatter_set_member_name (self->formatter,"properties");
+  gstd_iformatter_begin_array (self->formatter);
+  
+  properties = g_object_class_list_properties(G_OBJECT_GET_CLASS(self), &n);
+  for (i=0; i<n; i++) {
+    /* Describe each parameter using a structure */
+    gstd_iformatter_begin_object (self->formatter);
 
-  g_return_val_if_fail (GSTD_IS_OBJECT (self), GSTD_NULL_ARGUMENT);
-  g_warn_if_fail (!*outstring);
+    gstd_iformatter_set_member_name (self->formatter,"name");
 
-  jsonBuilder = json_builder_new ();
+    gstd_iformatter_set_member_value (self->formatter, properties[i]->name);
 
-  json_builder_begin_object (jsonBuilder);
-
-
-  json_builder_set_member_name (jsonBuilder, "properties");
-  json_builder_begin_array (jsonBuilder);
-
-  properties = g_object_class_list_properties (G_OBJECT_GET_CLASS (self), &n);
-  for (i = 0; i < n; i++) {
-    json_builder_begin_object (jsonBuilder);
-
-    json_builder_set_member_name (jsonBuilder, "name");
-    json_builder_add_string_value (jsonBuilder, properties[i]->name);
-
-    typename = g_type_name (properties[i]->value_type);
+    typename = g_type_name(properties[i]->value_type);
 
     g_value_init (&value, properties[i]->value_type);
-    g_object_get_property (G_OBJECT (self), properties[i]->name, &value);
-    svalue = g_strdup_value_contents (&value);
+    g_object_get_property(G_OBJECT(self), properties[i]->name, &value);
+    svalue = g_strdup_value_contents(&value);
 
-    json_builder_set_member_name (jsonBuilder, "value");
-    json_builder_add_string_value (jsonBuilder, svalue);
+    gstd_iformatter_set_member_name (self->formatter,"value");
+    gstd_iformatter_set_member_value (self->formatter, svalue);
 
-    json_builder_set_member_name (jsonBuilder, "param_spec");
-    json_builder_begin_object (jsonBuilder);
+    gstd_iformatter_set_member_name (self->formatter, "param_spec");
+    /* Describe the parameter specs using a structure */
+    gstd_iformatter_begin_object (self->formatter);
 
-
-    g_value_unset (&value);
+    g_value_unset(&value);
 
     g_value_init (&flags, GSTD_TYPE_PARAM_FLAGS);
     g_value_set_flags (&flags, properties[i]->flags);
-    sflags = g_strdup_value_contents (&flags);
-    g_value_unset (&flags);
+    sflags = g_strdup_value_contents(&flags);
+    g_value_unset(&flags);
 
-    json_builder_set_member_name (jsonBuilder, "blurb");
-    json_builder_add_string_value (jsonBuilder, properties[i]->_blurb);
+    gstd_iformatter_set_member_name (self->formatter, "blurb");
+    gstd_iformatter_set_member_value (self->formatter,properties[i]->_blurb);
 
-    json_builder_set_member_name (jsonBuilder, "type");
-    json_builder_add_string_value (jsonBuilder, typename);
+    gstd_iformatter_set_member_name (self->formatter, "type");
+    gstd_iformatter_set_member_value (self->formatter,typename);
 
-    json_builder_set_member_name (jsonBuilder, "access");
-    json_builder_add_string_value (jsonBuilder, sflags);
+    gstd_iformatter_set_member_name (self->formatter, "access");
+    gstd_iformatter_set_member_value (self->formatter,sflags);
 
-    json_builder_set_member_name (jsonBuilder, "construct");
-    json_builder_add_string_value (jsonBuilder,
-        GSTD_PARAM_IS_DELETE (properties[i]->flags) ? "TRUE" : "FALSE");
-
-    json_builder_end_object (jsonBuilder);
+    gstd_iformatter_set_member_name (self->formatter, "construct");
+    gstd_iformatter_set_member_value (self->formatter,GSTD_PARAM_IS_DELETE(properties[i]->flags) ? "TRUE" : "FALSE");
+    /* Close parameter specs structure */
+    gstd_iformatter_end_object (self->formatter);
 
     g_free (sflags);
     g_free (svalue);
-
-    json_builder_end_object (jsonBuilder);
+    /* Close parameter structure */
+    gstd_iformatter_end_object (self->formatter);
   }
   g_free (properties);
 
-  json_builder_end_array (jsonBuilder); /* depth1 */
+  gstd_iformatter_end_array (self->formatter); 
+  gstd_iformatter_end_object (self->formatter);
 
-  /* Closes the subobject inside the given builder  */
-  json_builder_end_object (jsonBuilder);
-
-  jsonNode = json_builder_get_root (jsonBuilder);
-
-  jsonGenerator = json_generator_new ();
-  json_generator_set_root (jsonGenerator, jsonNode);
-
-  /* Configure json format */
-  json_generator_set_indent_char (jsonGenerator, ' ');
-  json_generator_set_indent (jsonGenerator, 4);
-  json_generator_set_pretty (jsonGenerator, TRUE);
-
-  /* Generates a JSON data stream from generator and returns it as a buffer */
-  jsonStream = json_generator_to_data (jsonGenerator, &jsonStreamLength);
-
-  json_node_free (jsonNode);
-  g_object_unref (jsonGenerator);
-
-  *outstring = jsonStream;
+  gstd_iformatter_generator (self->formatter, outstring);
 
   return GSTD_EOK;
 }
