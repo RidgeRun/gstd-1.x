@@ -21,6 +21,10 @@
 #ifndef __GSTD_PIPELINE_BUS_H__
 #define __GSTD_PIPELINE_BUS_H__
 
+#include <gst/gst.h>
+#include <gstd_object.h>
+
+
 G_BEGIN_DECLS
 #define GSTD_TYPE_PIPELINE_BUS \
   (gstd_pipeline_bus_get_type())
@@ -34,8 +38,10 @@ G_BEGIN_DECLS
   (G_TYPE_CHECK_CLASS_TYPE((klass),GSTD_TYPE_PIPELINE_BUS))
 #define GSTD_PIPELINE_BUS_GET_CLASS(obj) \
   (G_TYPE_INSTANCE_GET_CLASS ((obj), GSTD_TYPE_PIPELINE_BUS, GstdPipelineBusClass))
+
 typedef struct _GstdPipelineBus GstdPipelineBus;
 typedef struct _GstdPipelineBusClass GstdPipelineBusClass;
+
 GType gstd_pipeline_bus_get_type ();
 
 /**
@@ -46,7 +52,7 @@ GType gstd_pipeline_bus_get_type ();
  * Returns: (transfer full) (nullable): A new #GstdPipelinebus. Free after
  * usage using g_object_unref()
  */
-GstdPipelineBusHandler *gstd_pipeline_bus_new ();
+GstdPipelineBus *gstd_pipeline_bus_new ();
 
 G_END_DECLS
 #endif // __GSTD_PIPELINE_BUS_H__

@@ -30,7 +30,7 @@ enum
   N_PROPERTIES                  // NOT A PROPERTY
 };
 
-struct _GstdPipelinebus
+struct _GstdPipelineBus
 {
   GstdObject parent;
 
@@ -44,7 +44,8 @@ struct _GstdPipelineBusClass
 static void
 gstd_pipeline_bus_set_property (GObject *,
     guint, const GValue *, GParamSpec *);
-G_DEFINE_TYPE (GstdPipelineBus, gstd_pipeline_bus, G_TYPE_OBJECT);
+
+G_DEFINE_TYPE (GstdPipelineBus, gstd_pipeline_bus, GSTD_TYPE_OBJECT);
 
 /* Gstd Event debugging category */
 GST_DEBUG_CATEGORY_STATIC (gstd_pipeline_bus_debug);
@@ -55,7 +56,6 @@ static void
 gstd_pipeline_bus_class_init (GstdPipelineBusClass * klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
-  GParamSpec *properties[N_PROPERTIES] = { NULL, };
   object_class->set_property = gstd_pipeline_bus_set_property;
 
 
@@ -82,7 +82,7 @@ static void
 gstd_pipeline_bus_set_property (GObject * object,
     guint property_id, const GValue * value, GParamSpec * pspec)
 {
-  GstdPipelineBus *self = GSTD_PIPELINE_BUS (object);
+  /*  GstdPipelineBus *self = GSTD_PIPELINE_BUS (object);*/
 
   switch (property_id) {
     default:
