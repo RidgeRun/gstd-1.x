@@ -1,6 +1,6 @@
 /*
  * Gstreamer Daemon - Gst Launch under steroids
- * Copyright (C) 2015 RidgeRun Engineering <support@ridgerun.com>
+ * Copyright (C) 2015-2017 RidgeRun Engineering <support@ridgerun.com>
  *
  * This file is part of Gstd.
  *
@@ -44,7 +44,7 @@ typedef struct _GstdJsonBuilderClass GstdJsonBuilderClass;
 struct _GstdJsonBuilder
 {
   GObject parent;
-  JsonBuilder * jsonBuilder;
+  JsonBuilder * json_builder;
 };
 
 struct _GstdJsonBuilderClass
@@ -71,7 +71,7 @@ gstd_json_builder_init (GstdJsonBuilder *self)
 {
   GST_INFO_OBJECT(self,"Initializing Json builder");
   
-  self->jsonBuilder = json_builder_new ();
+  self->json_builder = json_builder_new ();
 }
 
 static void
@@ -80,7 +80,7 @@ gstd_json_builder_begin_object (GstdIFormatter *iface)
   GstdJsonBuilder *self;
     
   self = GSTD_JSON_BUILDER(iface);
-  json_builder_begin_object (self->jsonBuilder);
+  json_builder_begin_object (self->json_builder);
 }
 
 static void
@@ -89,7 +89,7 @@ gstd_json_builder_end_object (GstdIFormatter *iface)
   GstdJsonBuilder *self;
 
   self = GSTD_JSON_BUILDER(iface);
-  json_builder_end_object (self->jsonBuilder);
+  json_builder_end_object (self->json_builder);
 }
 
 static void
@@ -98,7 +98,7 @@ gstd_json_builder_begin_array (GstdIFormatter *iface)
   GstdJsonBuilder *self;
 
   self = GSTD_JSON_BUILDER(iface);
-  json_builder_begin_array (self->jsonBuilder);
+  json_builder_begin_array (self->json_builder);
 }
 
 static void gstd_json_builder_end_array (GstdIFormatter *iface)
@@ -106,7 +106,7 @@ static void gstd_json_builder_end_array (GstdIFormatter *iface)
   GstdJsonBuilder *self;
 
   self = GSTD_JSON_BUILDER(iface);
-  json_builder_end_array (self->jsonBuilder);
+  json_builder_end_array (self->json_builder);
 }
 
 static void
@@ -115,7 +115,7 @@ gstd_json_set_member_name (GstdIFormatter *iface, const gchar * name)
   GstdJsonBuilder *self;
 
   self = GSTD_JSON_BUILDER(iface);
-  json_builder_set_member_name (self->jsonBuilder, name);
+  json_builder_set_member_name (self->json_builder, name);
 }
 
 static void
@@ -124,41 +124,41 @@ gstd_json_set_member_value (GstdIFormatter *iface, const gchar * value)
   GstdJsonBuilder *self;
 
   self = GSTD_JSON_BUILDER(iface);
-  json_builder_add_string_value (self->jsonBuilder, value);
+  json_builder_add_string_value (self->json_builder, value);
 }
 
 static void
 gstd_json_builder_generator (GstdIFormatter *iface, gchar **outstring)
 {
   GstdJsonBuilder *self;
-  JsonNode * jsonNode;
-  JsonGenerator * jsonGenerator;
-  gchar * jsonStream;
-  gsize jsonStreamLength;
-  JsonBuilder * jsonBuilder;
+  JsonNode * json_node;
+  JsonGenerator * json_generator;
+  gchar * json_stream;
+  gsize json_stream_length;
+  JsonBuilder * json_builder;
   
   self = GSTD_JSON_BUILDER(iface);
-  jsonBuilder = self->jsonBuilder;
+  json_builder = self->json_builder;
 
-  jsonNode = json_builder_get_root (jsonBuilder);
+  json_node = json_builder_get_root (json_builder);
 
-  jsonGenerator = json_generator_new ();
-  json_generator_set_root (jsonGenerator, jsonNode);
+  json_generator = json_generator_new ();
+  json_generator_set_root (json_generator, json_node);
 
   /* Configure json format */
-  json_generator_set_indent_char (jsonGenerator,JSON_INDENT_CHAR);
-  json_generator_set_indent (jsonGenerator,JSON_INDENT_LEVEL);
-  json_generator_set_pretty (jsonGenerator,JSON_SET_PRETTY);
+  json_generator_set_indent_char (json_generator,JSON_INDENT_CHAR);
+  json_generator_set_indent (json_generator,JSON_INDENT_LEVEL);
+  json_generator_set_pretty (json_generator,JSON_SET_PRETTY);
 
   /* Generates a JSON data stream from generator and returns it as a buffer */
-  jsonStream = json_generator_to_data (jsonGenerator,&jsonStreamLength);
+  json_stream = json_generator_to_data (json_generator,&json_stream_length);
 
-  json_node_free (jsonNode);
-  g_object_unref (jsonGenerator);
+  json_node_free (json_node);
+  g_object_unref (json_generator);
   /* Resets the state of the builder back to its initial state. */
-  json_builder_reset (jsonBuilder);
+  json_builder_reset (json_builder);
 
-  *outstring = jsonStream;
+  *outstring = json_stream;
 }
 
 static void
