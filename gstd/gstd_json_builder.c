@@ -78,7 +78,9 @@ static void
 gstd_json_builder_begin_object (GstdIFormatter *iface)
 {
   GstdJsonBuilder *self;
-    
+
+  g_return_val_if_fail (GSTD_IS_JSON_BUILDER (iface), GSTD_NULL_ARGUMENT);
+
   self = GSTD_JSON_BUILDER(iface);
   json_builder_begin_object (self->json_builder);
 }
@@ -87,6 +89,8 @@ static void
 gstd_json_builder_end_object (GstdIFormatter *iface)
 {
   GstdJsonBuilder *self;
+
+  g_return_val_if_fail (GSTD_IS_JSON_BUILDER (iface), GSTD_NULL_ARGUMENT);
 
   self = GSTD_JSON_BUILDER(iface);
   json_builder_end_object (self->json_builder);
@@ -97,6 +101,8 @@ gstd_json_builder_begin_array (GstdIFormatter *iface)
 {
   GstdJsonBuilder *self;
 
+  g_return_val_if_fail (GSTD_IS_JSON_BUILDER (iface), GSTD_NULL_ARGUMENT);
+
   self = GSTD_JSON_BUILDER(iface);
   json_builder_begin_array (self->json_builder);
 }
@@ -104,6 +110,8 @@ gstd_json_builder_begin_array (GstdIFormatter *iface)
 static void gstd_json_builder_end_array (GstdIFormatter *iface)
 {
   GstdJsonBuilder *self;
+
+  g_return_val_if_fail (GSTD_IS_JSON_BUILDER (iface), GSTD_NULL_ARGUMENT);
 
   self = GSTD_JSON_BUILDER(iface);
   json_builder_end_array (self->json_builder);
@@ -114,6 +122,8 @@ gstd_json_set_member_name (GstdIFormatter *iface, const gchar * name)
 {
   GstdJsonBuilder *self;
 
+  g_return_val_if_fail (GSTD_IS_JSON_BUILDER (iface), GSTD_NULL_ARGUMENT);
+
   self = GSTD_JSON_BUILDER(iface);
   json_builder_set_member_name (self->json_builder, name);
 }
@@ -122,6 +132,8 @@ static void
 gstd_json_set_member_value (GstdIFormatter *iface, const gchar * value)
 {
   GstdJsonBuilder *self;
+
+  g_return_val_if_fail (GSTD_IS_JSON_BUILDER (iface), GSTD_NULL_ARGUMENT);
 
   self = GSTD_JSON_BUILDER(iface);
   json_builder_add_string_value (self->json_builder, value);
@@ -136,8 +148,10 @@ gstd_json_builder_generator (GstdIFormatter *iface, gchar **outstring)
   gchar * json_stream;
   gsize json_stream_length;
   JsonBuilder * json_builder;
-  
+
+  g_return_val_if_fail (GSTD_IS_JSON_BUILDER (iface), GSTD_NULL_ARGUMENT);
   self = GSTD_JSON_BUILDER(iface);
+
   json_builder = self->json_builder;
 
   json_node = json_builder_get_root (json_builder);
