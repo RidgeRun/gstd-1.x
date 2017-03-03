@@ -420,5 +420,5 @@ gstd_element_internal_to_string (GstdElement * self, gchar ** outstring)
   gstd_iformatter_end_array (self->formatter); 
   gstd_iformatter_end_object (self->formatter);
 
-  gstd_iformatter_generator (self->formatter, outstring);
+  gstd_iformatter_generate (self->formatter, outstring);
 }

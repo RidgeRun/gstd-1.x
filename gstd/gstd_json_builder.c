@@ -140,7 +140,7 @@ gstd_json_set_member_value (GstdIFormatter *iface, const gchar * value)
 }
 
 static void
-gstd_json_builder_generator (GstdIFormatter *iface, gchar **outstring)
+gstd_json_builder_generate (GstdIFormatter *iface, gchar **outstring)
 {
   GstdJsonBuilder *self;
   JsonNode * json_node;
@@ -184,5 +184,5 @@ gstd_iformatter_interface_init (GstdIFormatterInterface *iface)
   iface->end_array = gstd_json_builder_end_array;
   iface->set_member_name = gstd_json_set_member_name;
   iface->set_member_value = gstd_json_set_member_value;
-  iface->generator = gstd_json_builder_generator;
+  iface->generate = gstd_json_builder_generate;
 }

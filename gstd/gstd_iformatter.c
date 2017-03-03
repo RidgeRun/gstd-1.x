@@ -65,11 +65,11 @@ gstd_iformatter_set_member_value (GstdIFormatter *self, const gchar * value)
 }
 
 void
-gstd_iformatter_generator (GstdIFormatter *self, gchar **outstring)
+gstd_iformatter_generate (GstdIFormatter *self, gchar **outstring)
 {
     g_return_if_fail (self);
   
-    GSTD_IFORMATTER_GET_INTERFACE (self)->generator (self, outstring);
+    GSTD_IFORMATTER_GET_INTERFACE (self)->generate (self, outstring);
 }
 
 

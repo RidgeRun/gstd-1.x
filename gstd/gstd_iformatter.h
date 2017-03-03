@@ -56,7 +56,7 @@ struct _GstdIFormatterInterface
   
   void (*set_member_value) (GstdIFormatter *self, const gchar * value);
 
-  void (*generator) (GstdIFormatter *self, gchar **outstring);
+  void (*generate) (GstdIFormatter *self, gchar **outstring);
 };
 
 void gstd_iformatter_begin_object (GstdIFormatter *self);
@@ -71,7 +71,7 @@ void gstd_iformatter_set_member_name (GstdIFormatter *self, const gchar * name);
 
 void gstd_iformatter_set_member_value (GstdIFormatter *self, const gchar * value);
 
-void gstd_iformatter_generator (GstdIFormatter *self, gchar **outstring);
+void gstd_iformatter_generate (GstdIFormatter *self, gchar **outstring);
 
 G_END_DECLS
 

@@ -397,7 +397,7 @@ gstd_object_to_string_default (GstdObject * self, gchar ** outstring)
   gstd_iformatter_end_array (self->formatter); 
   gstd_iformatter_end_object (self->formatter);
 
-  gstd_iformatter_generator (self->formatter, outstring);
+  gstd_iformatter_generate (self->formatter, outstring);
 
   return GSTD_EOK;
 }
