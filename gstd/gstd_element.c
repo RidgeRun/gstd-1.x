@@ -124,6 +124,7 @@ gstd_element_class_init (GstdElementClass * klass)
   debug_color = GST_DEBUG_FG_BLACK | GST_DEBUG_BOLD | GST_DEBUG_BG_WHITE;
   GST_DEBUG_CATEGORY_INIT (gstd_element_debug, "gstdelement", debug_color,
       "Gstd Element category");
+
 }
 
 static void
@@ -151,6 +152,9 @@ gstd_element_dispose (GObject * object)
     g_object_unref (self->event_handler);
     self->event_handler = NULL;
   }
+
+  /* Free formatter */
+  g_object_unref (self->formatter);
 
   G_OBJECT_CLASS (gstd_element_parent_class)->dispose (object);
 }

@@ -56,6 +56,9 @@ struct _GstdJsonBuilderClass
 static void
 gstd_iformatter_interface_init (GstdIFormatterInterface *iface);
 
+static void
+gstd_json_builder_finalize( GObject *object);
+
 G_DEFINE_TYPE_WITH_CODE (GstdJsonBuilder, gstd_json_builder, G_TYPE_OBJECT,
                          G_IMPLEMENT_INTERFACE (GSTD_TYPE_IFORMATTER,
                                                 gstd_iformatter_interface_init));
@@ -63,7 +66,9 @@ G_DEFINE_TYPE_WITH_CODE (GstdJsonBuilder, gstd_json_builder, G_TYPE_OBJECT,
 static void
 gstd_json_builder_class_init (GstdJsonBuilderClass *klass)
 {
+    GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
+    object_class->finalize = gstd_json_builder_finalize;
 }
 
 static void
@@ -173,6 +178,16 @@ gstd_json_builder_generate (GstdIFormatter *iface, gchar **outstring)
   json_builder_reset (json_builder);
 
   *outstring = json_stream;
+}
+
+static void
+gstd_json_builder_finalize( GObject *object)
+{
+  GstdJsonBuilder *self = GSTD_JSON_BUILDER (object);
+  GST_DEBUG_OBJECT (self, "finalize");
+
+  g_object_unref (self->json_builder);
+  G_OBJECT_CLASS (gstd_json_builder_parent_class)->finalize (object);
 }
 
 static void

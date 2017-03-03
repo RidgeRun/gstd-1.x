@@ -72,7 +72,6 @@ gstd_iformatter_generate (GstdIFormatter *self, gchar **outstring)
     GSTD_IFORMATTER_GET_INTERFACE (self)->generate (self, outstring);
 }
 
-
 static void
 gstd_iformatter_default_init (GstdIFormatterInterface *iface)
 {

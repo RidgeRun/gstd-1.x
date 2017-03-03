@@ -37,9 +37,6 @@ GType gstd_iformatter_get_type (void);
 typedef struct _GstdIFormatter GstdIFormatter;
 typedef struct _GstdIFormatterInterface GstdIFormatterInterface;
 
-// Avoid cyclic dependecies by forward declaration
-typedef struct _GstdObject GstdObject;
-
 struct _GstdIFormatterInterface
 {
   GTypeInterface parent_iface;

@@ -64,6 +64,7 @@ static GstdReturnCode
 gstd_object_delete_default (GstdObject * object, const gchar * name);
 static GstdReturnCode
 gstd_object_to_string_default (GstdObject * object, gchar ** outstring);
+void gstd_object_finalize( GObject *object);
 
 GType
 gstd_object_flags_get_type (void)
@@ -92,6 +93,7 @@ gstd_object_class_init (GstdObjectClass * klass)
   object_class->set_property = gstd_object_set_property;
   object_class->get_property = gstd_object_get_property;
   object_class->dispose = gstd_object_dispose;
+  object_class->finalize = gstd_object_finalize;
 
   properties[PROP_NAME] =
       g_param_spec_string ("name",
@@ -126,6 +128,17 @@ gstd_object_init (GstdObject * self)
   self->deleter = g_object_new (GSTD_TYPE_NO_DELETER, NULL);
   self->formatter = g_object_new (GSTD_TYPE_JSON_BUILDER, NULL);
   g_mutex_init (&self->codelock);
+}
+
+void gstd_object_finalize( GObject *object)
+{
+  GstdObject *self = GSTD_OBJECT(object);
+  GST_DEBUG_OBJECT (self, "finalize");
+
+  /* Free formatter */
+  g_object_unref (self->formatter);
+
+  G_OBJECT_CLASS (gstd_object_parent_class)->finalize (object);
 }
 
 static void
