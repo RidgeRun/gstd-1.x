@@ -208,6 +208,15 @@ gstd_pipeline_constructed (GObject * object)
   if (!self->event_handler) {
     ret = ret | GSTD_BAD_VALUE;
   }
+
+  self->pipeline_bus =  
+    gstd_pipeline_bus_new (gst_pipeline_get_bus(GST_PIPELINE (self->pipeline)));
+
+  if (!self->pipeline_bus) {
+    ret = ret | GSTD_BAD_VALUE;
+  }
+
+
   // Capture any possible error
   gstd_object_set_code (GSTD_OBJECT (self), ret);
 }

@@ -52,7 +52,7 @@ GType gstd_pipeline_bus_get_type ();
  * Returns: (transfer full) (nullable): A new #GstdPipelinebus. Free after
  * usage using g_object_unref()
  */
-GstdPipelineBus *gstd_pipeline_bus_new ();
+GstdPipelineBus *gstd_pipeline_bus_new (GstBus* bus);
 
 G_END_DECLS
 #endif // __GSTD_PIPELINE_BUS_H__

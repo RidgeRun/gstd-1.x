@@ -27,12 +27,15 @@
 
 enum
 {
+  PROP_BUS = 1,
   N_PROPERTIES                  // NOT A PROPERTY
 };
 
 struct _GstdPipelineBus
 {
   GstdObject parent;
+
+  GstBus *bus;
 
 };
 
@@ -56,7 +59,17 @@ static void
 gstd_pipeline_bus_class_init (GstdPipelineBusClass * klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
+  GParamSpec *properties[N_PROPERTIES] = { NULL, };  
   object_class->set_property = gstd_pipeline_bus_set_property;
+
+  properties[PROP_BUS] =
+      g_param_spec_object ("bus",
+      "Bus",
+      "The bus of the pipeline which wil be used to get events from",
+      G_TYPE_OBJECT,
+      G_PARAM_CONSTRUCT_ONLY | G_PARAM_WRITABLE | G_PARAM_STATIC_STRINGS);
+
+  g_object_class_install_properties (object_class, N_PROPERTIES, properties);
 
 
   /* Initialize debug category with nice colors */
@@ -67,24 +80,28 @@ gstd_pipeline_bus_class_init (GstdPipelineBusClass * klass)
 
 static void
 gstd_pipeline_bus_init (GstdPipelineBus * self)
-{
+{ 
   GST_INFO_OBJECT (self, "Initializing gstd pipeline bus handler");
+  self->bus = NULL;
 }
 
 
 GstdPipelineBus *
-gstd_pipeline_bus_new (GObject * receiver)
+gstd_pipeline_bus_new (GstBus* bus)
 {
-  return GSTD_PIPELINE_BUS (g_object_new (GSTD_TYPE_PIPELINE_BUS,  NULL));
+  return GSTD_PIPELINE_BUS (g_object_new (GSTD_TYPE_PIPELINE_BUS,"bus", bus , NULL));
 }
 
 static void
 gstd_pipeline_bus_set_property (GObject * object,
     guint property_id, const GValue * value, GParamSpec * pspec)
 {
-  /*  GstdPipelineBus *self = GSTD_PIPELINE_BUS (object);*/
+  GstdPipelineBus *self = GSTD_PIPELINE_BUS (object);
 
   switch (property_id) {
+      self->bus = g_value_get_object (value);
+      GST_INFO_OBJECT (self, "Changed bus to %p", self->bus);
+      break;
     default:
       /* We don't have any other property... */
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
