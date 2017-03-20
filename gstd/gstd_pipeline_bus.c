@@ -35,7 +35,9 @@ struct _GstdPipelineBus
 {
   GstdObject parent;
 
-  GstBus *bus;
+  GObject *bus;
+
+  GQueue *messages;
 
 };
 
@@ -47,6 +49,9 @@ struct _GstdPipelineBusClass
 static void
 gstd_pipeline_bus_set_property (GObject *,
     guint, const GValue *, GParamSpec *);
+static void
+gstd_pipeline_bus_dispose (GObject *);
+
 
 G_DEFINE_TYPE (GstdPipelineBus, gstd_pipeline_bus, GSTD_TYPE_OBJECT);
 
@@ -61,7 +66,7 @@ gstd_pipeline_bus_class_init (GstdPipelineBusClass * klass)
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
   GParamSpec *properties[N_PROPERTIES] = { NULL, };  
   object_class->set_property = gstd_pipeline_bus_set_property;
-
+  object_class->dispose = gstd_pipeline_bus_dispose;
   properties[PROP_BUS] =
       g_param_spec_object ("bus",
       "Bus",
@@ -83,6 +88,7 @@ gstd_pipeline_bus_init (GstdPipelineBus * self)
 { 
   GST_INFO_OBJECT (self, "Initializing gstd pipeline bus handler");
   self->bus = NULL;
+  self->messages = g_queue_new();
 }
 
 
@@ -99,12 +105,88 @@ gstd_pipeline_bus_set_property (GObject * object,
   GstdPipelineBus *self = GSTD_PIPELINE_BUS (object);
 
   switch (property_id) {
-      self->bus = g_value_get_object (value);
-      GST_INFO_OBJECT (self, "Changed bus to %p", self->bus);
-      break;
-    default:
-      /* We don't have any other property... */
-      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
-      break;
+  case PROP_BUS:
+    self->bus = g_value_get_object (value);
+    GST_INFO_OBJECT (self, "Changed bus to %p", self->bus);
+    break;
+  default:
+    /* We don't have any other property... */
+    G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
+    break;
   }
+}
+
+
+gboolean
+gstd_pipeline_bus_read_messages (GstdPipelineBus *self, gchar ** messages)
+{
+  GST_INFO_OBJECT (self, "Reading pipeline messages ");
+  guint64 endtime;
+  guint64 currenttime;
+  GstMessage *msg = NULL ;
+  char *num_messages = NULL;
+  char *iter_message = NULL;
+  char *iter_tmp_message = NULL;
+  GError *error;
+  gchar *parsed_txt;
+  endtime = g_get_monotonic_time () + 10 * G_TIME_SPAN_SECOND;
+  currenttime = g_get_monotonic_time ();
+
+  while(endtime > currenttime)
+    {
+    
+      if(!(msg = gst_bus_timed_pop(GST_BUS(self->bus), 5*GST_SECOND))){
+	 GST_INFO_OBJECT (self, "Timeout wating for messages");
+      }
+      
+      if (msg != NULL){
+	g_queue_push_tail (self->messages, (gpointer) msg);
+      }    
+      currenttime = g_get_monotonic_time ();
+   
+  }
+
+  num_messages = g_strdup_printf ("{\n messages : %d\n  }", g_queue_get_length (self->messages));
+
+  while( 0 < g_queue_get_length (self->messages)){
+    msg  = (GstMessage *) g_queue_pop_head (self->messages);
+
+    switch (GST_MESSAGE_TYPE (msg)) {
+    case GST_MESSAGE_ERROR:{
+      gst_message_parse_error (msg, &error, &parsed_txt);
+      iter_tmp_message = g_strdup_printf ("{\n GST_MESSAGE_ERROR : %s\n  }", parsed_txt);
+      gst_message_unref (msg);
+      iter_message = g_strjoin (NULL,iter_message,iter_tmp_message,NULL );
+      g_free(iter_tmp_message);
+      break;
+    }
+    default:
+      gst_message_unref (msg);
+      break;
+    }
+  }
+
+  *messages = g_strdup_printf ("{\n    %s : %s\n  }", num_messages, iter_message);
+  g_free(num_messages);
+  
+  if(iter_message)
+    g_free(num_messages);
+  
+  return TRUE;
+}
+
+
+static void
+gstd_pipeline_bus_dispose (GObject * object)
+{
+  GstdPipelineBus *self = GSTD_PIPELINE_BUS (object);
+
+  GST_INFO_OBJECT (self, "Disposing %s pipeline bus", GSTD_OBJECT_NAME (self));
+
+  if (self->messages) {
+    g_queue_free(self->messages);
+    self->messages = NULL;
+  }
+
+  G_OBJECT_CLASS (gstd_pipeline_bus_parent_class)->dispose (object);
 }

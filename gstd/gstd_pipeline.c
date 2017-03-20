@@ -155,8 +155,8 @@ gstd_pipeline_class_init (GstdPipelineClass * klass)
       G_PARAM_READABLE | G_PARAM_STATIC_STRINGS | GSTD_PARAM_READ);
 
   properties[PROP_PIPELINE_BUS] =
-      g_param_spec_object ("pipeline-bus",
-      "PipelineBus",
+      g_param_spec_object ("bus",
+      "Bus",
       "The bus callback for this element",
       GSTD_TYPE_PIPELINE_BUS,
       G_PARAM_READABLE | G_PARAM_STATIC_STRINGS | GSTD_PARAM_READ);
@@ -247,7 +247,7 @@ gstd_pipeline_dispose (GObject * object)
   }
 
   if (self->pipeline_bus) {
-    g_object_unref (self->pipeline);
+    g_object_unref (self->pipeline_bus);
     self->pipeline = NULL;
   }
 
@@ -312,7 +312,8 @@ gstd_pipeline_get_property (GObject * object,
       break;
     case  PROP_PIPELINE_BUS:
       GST_DEBUG_OBJECT (self, "Returning pipeline bus %p", self->pipeline_bus);
-      g_value_set_object (value, self->pipeline_bus);
+       g_value_set_object (value, self->pipeline_bus);
+      // g_value_set_object (value, self->elements);
       break;
     case PROP_STATE:
       state = gst_to_gstd (GST_STATE (self->pipeline));

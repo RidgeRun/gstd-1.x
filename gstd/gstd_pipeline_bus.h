@@ -54,5 +54,19 @@ GType gstd_pipeline_bus_get_type ();
  */
 GstdPipelineBus *gstd_pipeline_bus_new (GstBus* bus);
 
+/**
+ * gstd_event_send_event:
+ * @gstd_event: The member of the corresponding element that will send a gst event.
+ * @event_type: Event type that will be sent. 
+ * @description: (nullable) Parameters of the event_type.
+ * 
+ * Sends the specified event to the receiver object.
+ *
+ * Returns: TRUE if the event is sent succesfully to the receiver. FALSE otherwise.
+ */
+gboolean
+gstd_pipeline_bus_read_messages (GstdPipelineBus *self, gchar ** messages);
+
+
 G_END_DECLS
 #endif // __GSTD_PIPELINE_BUS_H__
