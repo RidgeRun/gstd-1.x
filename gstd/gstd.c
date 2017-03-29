@@ -122,12 +122,7 @@ main (gint argc, gchar * argv[])
     return EXIT_SUCCESS;
   }
 
-  /* Run start for each IPC (each start method checks for the enabled flag) */
-  for (i = 0; i < num_ipcs; i++) {
-    gstd_ipc_start (ipc_array[i], session);
-  }
-
-   /* If no IPC selected use tcp */
+  /* If no IPC selected use tcp */
   g_value_init(&ipc_enabled_property, G_TYPE_BOOLEAN);
   for (i = 0; i < num_ipcs; i++) {
     g_object_get_property((GObject *) ipc_array[i], "enabled", &ipc_enabled_property);
@@ -137,6 +132,11 @@ main (gint argc, gchar * argv[])
       g_value_init(&enable_tcp, G_TYPE_BOOLEAN);
       g_value_set_boolean (&enable_tcp, TRUE);
       g_object_set_property((GObject *) ipc_array[0], "enabled", &enable_tcp);
+  }
+
+  /* Run start for each IPC (each start method checks for the enabled flag) */
+  for (i = 0; i < num_ipcs; i++) {
+    gstd_ipc_start (ipc_array[i], session);
   }
 
   /* Install a handler for the interrupt signal */
