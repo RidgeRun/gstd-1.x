@@ -31,11 +31,13 @@
 #include "gstd_element.h"
 #include "gstd_element_list.h"
 #include "gstd_event_handler.h"
+#include "gstd_pipeline_bus.h"
 
 enum
 {
   PROP_DESCRIPTION = 1,
   PROP_ELEMENTS,
+  PROP_PIPELINE_BUS,
   PROP_STATE,
   PROP_EVENT,
   N_PROPERTIES                  // NOT A PROPERTY
@@ -85,6 +87,13 @@ struct _GstdPipeline
    * The gstd event handler for this pipeline
    */
   GstdEventHandler *event_handler;
+
+
+  /**
+   * The Gstd Bus callback for this pipeline
+   */
+
+  GstdPipelineBus *pipeline_bus;
 
   /**
    * A Gstreamer element holding the pipeline
@@ -145,6 +154,13 @@ gstd_pipeline_class_init (GstdPipelineClass * klass)
       GSTD_TYPE_ELEMENT_LIST,
       G_PARAM_READABLE | G_PARAM_STATIC_STRINGS | GSTD_PARAM_READ);
 
+  properties[PROP_PIPELINE_BUS] =
+      g_param_spec_object ("bus",
+      "Bus",
+      "The bus callback for this element",
+      GSTD_TYPE_PIPELINE_BUS,
+      G_PARAM_READABLE | G_PARAM_STATIC_STRINGS | GSTD_PARAM_READ);
+
   properties[PROP_STATE] =
       g_param_spec_enum ("state", "State",
       "The state of the pipeline",
@@ -173,6 +189,7 @@ gstd_pipeline_init (GstdPipeline * self)
   self->description = g_strdup (GSTD_PIPELINE_DEFAULT_DESCRIPTION);
   self->pipeline = NULL;
   self->event_handler = NULL;
+  self->pipeline_bus = NULL;
   self->elements = g_object_new (GSTD_TYPE_ELEMENT_LIST, "name", "elements",
       "node-type", GSTD_TYPE_ELEMENT, "flags", GSTD_PARAM_READ, NULL);
 }
@@ -191,6 +208,15 @@ gstd_pipeline_constructed (GObject * object)
   if (!self->event_handler) {
     ret = ret | GSTD_BAD_VALUE;
   }
+
+  self->pipeline_bus =  
+    gstd_pipeline_bus_new (gst_pipeline_get_bus(GST_PIPELINE (self->pipeline)));
+
+  if (!self->pipeline_bus) {
+    ret = ret | GSTD_BAD_VALUE;
+  }
+
+
   // Capture any possible error
   gstd_object_set_code (GSTD_OBJECT (self), ret);
 }
@@ -218,6 +244,11 @@ gstd_pipeline_dispose (GObject * object)
   if (self->elements) {
     g_object_unref (self->elements);
     self->elements = NULL;
+  }
+
+  if (self->pipeline_bus) {
+    g_object_unref (self->pipeline_bus);
+    self->pipeline = NULL;
   }
 
   if (self->event_handler) {
@@ -278,6 +309,11 @@ gstd_pipeline_get_property (GObject * object,
     case PROP_ELEMENTS:
       GST_DEBUG_OBJECT (self, "Returning element list %p", self->elements);
       g_value_set_object (value, self->elements);
+      break;
+    case  PROP_PIPELINE_BUS:
+      GST_DEBUG_OBJECT (self, "Returning pipeline bus %p", self->pipeline_bus);
+       g_value_set_object (value, self->pipeline_bus);
+      // g_value_set_object (value, self->elements);
       break;
     case PROP_STATE:
       state = gst_to_gstd (GST_STATE (self->pipeline));
