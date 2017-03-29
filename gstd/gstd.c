@@ -58,8 +58,6 @@ main (gint argc, gchar * argv[])
   GOptionContext *context;
   GOptionGroup *gstreamer_group;
   gboolean ipc_selected = FALSE;
-  GValue ipc_enabled_property;
-  GValue enable_tcp;
 
   /* Array to specify gstd how many IPCs are supported, 
    * IPCs should be added this array.
@@ -123,15 +121,16 @@ main (gint argc, gchar * argv[])
   }
 
   /* If no IPC selected use tcp */
-  g_value_init(&ipc_enabled_property, G_TYPE_BOOLEAN);
   for (i = 0; i < num_ipcs; i++) {
-    g_object_get_property((GObject *) ipc_array[i], "enabled", &ipc_enabled_property);
-    ipc_selected = ipc_selected || g_value_get_boolean(&ipc_enabled_property);
+    g_object_get (G_OBJECT(ipc_array[i]), "enabled", &ipc_selected, NULL);
+
+    if (ipc_selected) {
+      break;
+    }
   }
+
   if (!ipc_selected) {
-      g_value_init(&enable_tcp, G_TYPE_BOOLEAN);
-      g_value_set_boolean (&enable_tcp, TRUE);
-      g_object_set_property((GObject *) ipc_array[0], "enabled", &enable_tcp);
+    g_object_set(G_OBJECT(ipc_array[0]), "enabled", TRUE, NULL);
   }
 
   /* Run start for each IPC (each start method checks for the enabled flag) */
