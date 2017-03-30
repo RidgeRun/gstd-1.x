@@ -57,6 +57,7 @@ main (gint argc, gchar * argv[])
   GError *error = NULL;
   GOptionContext *context;
   GOptionGroup *gstreamer_group;
+  gboolean ipc_selected = FALSE;
 
   /* Array to specify gstd how many IPCs are supported, 
    * IPCs should be added this array.
@@ -119,10 +120,24 @@ main (gint argc, gchar * argv[])
     return EXIT_SUCCESS;
   }
 
+  /* If no IPC selected use tcp */
+  for (i = 0; i < num_ipcs; i++) {
+    g_object_get (G_OBJECT(ipc_array[i]), "enabled", &ipc_selected, NULL);
+
+    if (ipc_selected) {
+      break;
+    }
+  }
+
+  if (!ipc_selected) {
+    g_object_set(G_OBJECT(ipc_array[0]), "enabled", TRUE, NULL);
+  }
+
   /* Run start for each IPC (each start method checks for the enabled flag) */
   for (i = 0; i < num_ipcs; i++) {
     gstd_ipc_start (ipc_array[i], session);
   }
+
   /* Install a handler for the interrupt signal */
 
   signal (SIGINT, int_handler);
