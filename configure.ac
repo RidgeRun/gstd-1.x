@@ -110,6 +110,9 @@ if test "x$ax_cv_lib_readline" = "xno"; then
         - ncurses  : "sudo apt-get install libncurses5-dev"
         - ncurserw : "sudo apt-get install libncursesw5-dev"
   ])
+else
+  AC_SUBST(READLINE_CFLAGS, )
+  AC_SUBST(READLINE_LIBS, $ax_cv_lib_readline)
 fi
 
 
