@@ -391,7 +391,7 @@ gstd_tcp_create (GstdSession * session, GstdObject * obj, gchar * args,
     ret =
         gstd_event_handler_send_event (GSTD_EVENT_HANDLER (obj), tokens[1],
         tokens[2]);
-    return ret;
+    return GSTD_EOK;
   }
 
   name = tokens[1];
@@ -518,16 +518,16 @@ gstd_tcp_update_by_type (GstdSession * session, GstdObject * obj, gchar * args,
 
   tokens = g_strsplit (args, " ", -1);
   property = tokens;
-   if (!property)
-      goto novalue;
+  if (!property)
+    goto novalue;
 
-  
+
 
   while (*property) {
     prop = *property++;
     svalue = *property++;
 
-  
+
     if (!svalue)
       goto novalue;
 
@@ -723,7 +723,7 @@ gstd_tcp_parse_raw_cmd (GstdSession * session, gchar * action, gchar * args,
     ret = gstd_tcp_read (session, node, rest, response);
   } else if (!g_ascii_strcasecmp ("UPDATE", action)) {
     ret = gstd_tcp_update_by_type (session, node, rest, response);
-    if(ret)
+    if (ret)
       goto nonode;
     ret = gstd_tcp_read (session, node, rest, response);
   } else if (!g_ascii_strcasecmp ("DELETE", action)) {
@@ -792,9 +792,9 @@ gstd_tcp_pipeline_create (GstdSession * session, gchar * action, gchar * args,
   tokens = g_strsplit (args, " ", 2);
   g_return_val_if_fail (tokens[0], GSTD_BAD_COMMAND);
   g_return_val_if_fail (tokens[1], GSTD_BAD_COMMAND);
-  
+
   tokens[1] = g_strcanon (tokens[1], GSTD_PIPELINE_ALLOWED_CHARACTERS, ' ');
-  
+
   uri =
       g_strdup_printf ("/pipelines name %s description %s", tokens[0],
       tokens[1]);
