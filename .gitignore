@@ -25,3 +25,6 @@ gstd/gstd
 test-driver
 .dirstamp
 stamp-h1
+docs/gtk-doc.make
+gtk-doc.m4
+libtool.orig
