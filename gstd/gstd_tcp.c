@@ -319,6 +319,7 @@ out:
 noconnection:
   {
     GST_ERROR_OBJECT (session, "%s", error->message);
+    g_printerr ("%s\n", error->message);
     g_error_free (error);
     return GSTD_NO_CONNECTION;
   }

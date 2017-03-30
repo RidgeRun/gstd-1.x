@@ -58,7 +58,7 @@ main (gint argc, gchar * argv[])
   GOptionContext *context;
   GOptionGroup *gstreamer_group;
   gboolean ipc_selected = FALSE;
-
+  GstdReturnCode ret;
   /* Array to specify gstd how many IPCs are supported, 
    * IPCs should be added this array.
    */
@@ -135,7 +135,12 @@ main (gint argc, gchar * argv[])
 
   /* Run start for each IPC (each start method checks for the enabled flag) */
   for (i = 0; i < num_ipcs; i++) {
-    gstd_ipc_start (ipc_array[i], session);
+    ret = gstd_ipc_start (ipc_array[i], session);
+    if(ret)
+      {
+	g_printerr ("Couldn't start IPC : (%s)\n", G_OBJECT_TYPE_NAME(ipc_array[i]));
+	return EXIT_FAILURE;
+      }
   }
 
   /* Install a handler for the interrupt signal */
