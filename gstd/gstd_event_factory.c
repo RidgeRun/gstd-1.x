@@ -79,8 +79,10 @@ enum _GstdEventType
 
 static gboolean gstd_ascii_to_gint64(const gchar *, gint64 *);
 static gboolean gstd_ascii_to_double(const gchar *, gdouble *);
+static gboolean gstd_ascii_to_boolean(const gchar *, gboolean *);
 GstdEventType gstd_event_factory_parse_event (const gchar *);
 static GstEvent *gstd_event_factory_make_seek_event (const gchar *);
+static GstEvent *gstd_event_factory_make_flush_stop_event (const gchar *);
 
 GstEvent *
 gstd_event_factory_make (const gchar * name, const gchar * description)
@@ -99,6 +101,12 @@ gstd_event_factory_make (const gchar * name, const gchar * description)
       break;
     case GSTD_EVENT_SEEK:
       event = gstd_event_factory_make_seek_event (description);
+      break;
+    case GSTD_EVENT_FLUSH_START:
+      event = gst_event_new_flush_start ();
+      break;
+    case GSTD_EVENT_FLUSH_STOP:
+      event = gstd_event_factory_make_flush_stop_event(description);
       break;
     default:
       event = GSTD_EVENT_ERROR;
@@ -126,6 +134,23 @@ static gboolean gstd_ascii_to_double(const gchar *full_string, gdouble *out_valu
     return FALSE;
   }
   return TRUE;
+}
+
+static gboolean gstd_ascii_to_boolean(const gchar *full_string, gboolean *out_value){
+  gboolean ret;
+
+  g_return_val_if_fail(full_string, FALSE);
+  g_return_val_if_fail(out_value, FALSE);
+  ret = FALSE;
+
+  if (!g_ascii_strcasecmp (full_string, "true")) {
+    *out_value = TRUE;
+    ret = TRUE;
+  } else if (!g_ascii_strcasecmp (full_string, "false")) {
+    *out_value = FALSE;
+    ret = TRUE;
+  }
+  return ret;
 }
 
 
@@ -189,6 +214,17 @@ gstd_event_factory_make_seek_event (const gchar * description)
       stop);
 }
 
+static GstEvent *
+gstd_event_factory_make_flush_stop_event (const gchar * description)
+{
+  gboolean reset_time;
+  if (!gstd_ascii_to_boolean(description, &reset_time)){
+    return GSTD_EVENT_ERROR;
+  }
+
+  return gst_event_new_flush_stop (reset_time);
+}
+
 GstdEventType
 gstd_event_factory_parse_event (const gchar * name)
 {
@@ -197,10 +233,14 @@ gstd_event_factory_parse_event (const gchar * name)
 
   g_return_val_if_fail (name, GSTD_EVENT_UNKNOWN);
 
-  if (!strncmp (name, "eos", 5)) {
+  if (!strcmp (name, "eos")) {
     ret = GSTD_EVENT_EOS;
-  } else if (!strncmp (name, "seek", 6)) {
+  } else if (!strcmp (name, "seek")) {
     ret = GSTD_EVENT_SEEK;
+  } else if (!strcmp (name, "flush-start")) {
+    ret = GSTD_EVENT_FLUSH_START;
+  } else if (!strcmp (name, "flush-stop")) {
+    ret = GSTD_EVENT_FLUSH_STOP;
   }
   return ret;
 }
