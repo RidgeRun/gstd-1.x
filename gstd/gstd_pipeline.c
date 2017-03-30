@@ -203,10 +203,13 @@ gstd_pipeline_constructed (GObject * object)
   ret =
       gstd_pipeline_create (self, GSTD_OBJECT_NAME (self), 0,
       self->description);
+  if(GSTD_EOK != ret)
+    goto out;
 
   self->event_handler = gstd_event_handler_new (G_OBJECT (self->pipeline));
   if (!self->event_handler) {
     ret = ret | GSTD_BAD_VALUE;
+    goto out;
   }
 
   self->pipeline_bus =  
@@ -214,9 +217,10 @@ gstd_pipeline_constructed (GObject * object)
 
   if (!self->pipeline_bus) {
     ret = ret | GSTD_BAD_VALUE;
+    goto out;
   }
 
-
+ out:
   // Capture any possible error
   gstd_object_set_code (GSTD_OBJECT (self), ret);
 }
