@@ -100,6 +100,18 @@ AM_CONDITIONAL([ENABLE_GTK_DOC], false)
 ])
 
 AX_LIB_READLINE
+if test "x$ax_cv_lib_readline" = "xno"; then
+  AC_MSG_ERROR([
+       Please install readline development packages. In Debian based
+       systems you may run:
+         - readline : "sudo apt-get install libreadline-dev"
+
+       Additionally, install one of the following:
+        - ncurses  : "sudo apt-get install libncurses5-dev"
+        - ncurserw : "sudo apt-get install libncursesw5-dev"
+  ])
+fi
+
 
 dnl check if compiler understands -Wall (if yes, add -Wall to GST_CFLAGS)
 AC_MSG_CHECKING([to see if compiler understands -Wall])
