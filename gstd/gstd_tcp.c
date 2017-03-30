@@ -266,7 +266,8 @@ gstd_tcp_callback (GSocketService * service,
 
   /* Prepend the code to the output */
   response =
-      g_strdup_printf ("{\n  \"code\" : %d,\n  \"response\" : %s\n}", ret, output);
+      g_strdup_printf ("{\n  \"code\" : %d,\n  \"response\" : %s\n}", ret,
+      output);
   g_free (output);
 
   g_output_stream_write (ostream, response, size, NULL, NULL);
@@ -450,17 +451,16 @@ gstd_tcp_read (GstdSession * session, GstdObject * obj, gchar * args,
   if (!args)
     return gstd_object_to_string (obj, response);
 
-  
+
   tokens = g_strsplit (args, " ", -1);
 
 
   // Print the property
   /* If its a GstdElement element we need to parse the pspec from
      the internal element */
-  if (GSTD_IS_ELEMENT (obj)){
+  if (GSTD_IS_ELEMENT (obj)) {
     gstd_object_read (obj, "gstelement", &properties, NULL);
-  }
-  else
+  } else
     properties = G_OBJECT (obj);
 
   pspec =
@@ -468,17 +468,17 @@ gstd_tcp_read (GstdSession * session, GstdObject * obj, gchar * args,
   if (!pspec)
     goto noprop;
 
-  /*Fix Me: Bus callback must be read differently*/
+  /*Fix Me: Bus callback must be read differently */
   if (strcmp (tokens[0], "bus") == 0) {
-    GstdPipelineBus * pipelinebus = NULL;
+    GstdPipelineBus *pipelinebus = NULL;
     g_value_init (&value, pspec->value_type);
     g_object_get_property (G_OBJECT (properties), tokens[0], &value);
     pipelinebus = (GstdPipelineBus *) g_value_get_object (&value);
     gstd_pipeline_bus_read_messages (pipelinebus, response);
-    
+
     return GSTD_EOK;
   }
-  
+
   /* Automagical type value serialization */
   g_value_init (&value, pspec->value_type);
   g_object_get_property (G_OBJECT (properties), tokens[0], &value);
