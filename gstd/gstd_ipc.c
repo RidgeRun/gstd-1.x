@@ -41,7 +41,8 @@ G_DEFINE_TYPE (GstdIpc, gstd_ipc, GSTD_TYPE_OBJECT);
 
 enum
 {
-  N_PROPERTIES                  // NOT A PROPERTY
+  N_PROPERTIES,                  // NOT A PROPERTY
+  PROP_ENABLED
 };
 
 
@@ -66,6 +67,11 @@ gstd_ipc_class_init (GstdIpcClass * klass)
   object_class->get_property = gstd_ipc_get_property;
   object_class->dispose = gstd_ipc_dispose;
 
+  /* Properties */
+  g_object_class_install_property (object_class, PROP_ENABLED,
+      g_param_spec_boolean("enabled", "ENABLED",
+      "IPC enable", FALSE, G_PARAM_READWRITE));
+
   /* Initialize debug category with nice colors */
   debug_color = GST_DEBUG_FG_BLACK | GST_DEBUG_BOLD | GST_DEBUG_BG_WHITE;
   GST_DEBUG_CATEGORY_INIT (gstd_ipc_debug, "gstdIPC", debug_color,
@@ -89,7 +95,9 @@ gstd_ipc_get_property (GObject * object,
   gstd_object_set_code (GSTD_OBJECT (self), GSTD_EOK);
 
   switch (property_id) {
-
+    case PROP_ENABLED:
+      g_value_set_boolean (value, self->enabled);
+      break;
     default:
       /* We don't have any other property... */
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -107,6 +115,9 @@ gstd_ipc_set_property (GObject * object,
   gstd_object_set_code (GSTD_OBJECT (self), GSTD_EOK);
 
   switch (property_id) {
+    case PROP_ENABLED:
+      self->enabled = g_value_get_boolean (value);
+      break;
     default:
       /* We don't have any other property... */
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
