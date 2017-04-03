@@ -225,8 +225,8 @@ gstd_list_create (GstdObject * object, const gchar * name,
     goto exists;
 
   gstd_icreator_create (object->creator, name, description, &out);
-  ret = GSTD_OBJECT_CODE(out);
-  if(ret)
+  ret = GSTD_OBJECT_CODE (out);
+  if (ret)
     goto error;
 
   self->count++;
@@ -243,15 +243,15 @@ exists:
     GST_ERROR_OBJECT (object, "The resource \"%s\" already exists in \"%s\"",
         name, GSTD_OBJECT_NAME (self));
     ret = GSTD_EXISTING_RESOURCE;
-	 return ret;
+    return ret;
 
   }
 
 error:
   {
-    g_object_unref(out);
+    g_object_unref (out);
     GST_ERROR_OBJECT (object, "Could not create the resourse  \"%s\" on \"%s\"",
-		      name, GSTD_OBJECT_NAME (self));
+        name, GSTD_OBJECT_NAME (self));
     return ret;
   }
 }

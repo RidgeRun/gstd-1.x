@@ -77,8 +77,8 @@ enum _GstdEventType
   GSTD_EVENT_NAVIGATION = 15
 };
 
-static gboolean gstd_ascii_to_gint64(const gchar *, gint64 *);
-static gboolean gstd_ascii_to_double(const gchar *, gdouble *);
+static gboolean gstd_ascii_to_gint64 (const gchar *, gint64 *);
+static gboolean gstd_ascii_to_double (const gchar *, gdouble *);
 GstdEventType gstd_event_factory_parse_event (const gchar *);
 static GstEvent *gstd_event_factory_make_seek_event (const gchar *);
 
@@ -108,21 +108,27 @@ gstd_event_factory_make (const gchar * name, const gchar * description)
   return event;
 }
 
-static gboolean gstd_ascii_to_gint64(const gchar *full_string, gint64 *out_value){
-  g_return_val_if_fail(out_value, FALSE);
+static gboolean
+gstd_ascii_to_gint64 (const gchar * full_string, gint64 * out_value)
+{
+  g_return_val_if_fail (out_value, FALSE);
   errno = 0;
-  *out_value = g_ascii_strtod(full_string, NULL);
-  if ((errno == ERANGE && (*out_value == LONG_MAX || *out_value == LONG_MIN)) || (errno != 0 && *out_value == 0)){
+  *out_value = g_ascii_strtod (full_string, NULL);
+  if ((errno == ERANGE && (*out_value == LONG_MAX || *out_value == LONG_MIN))
+      || (errno != 0 && *out_value == 0)) {
     return FALSE;
   }
   return TRUE;
 }
 
-static gboolean gstd_ascii_to_double(const gchar *full_string, gdouble *out_value){
-  g_return_val_if_fail(out_value, FALSE);
+static gboolean
+gstd_ascii_to_double (const gchar * full_string, gdouble * out_value)
+{
+  g_return_val_if_fail (out_value, FALSE);
   errno = 0;
-  *out_value = g_ascii_strtod(full_string, NULL);
-  if ((errno == ERANGE && (*out_value == HUGE_VALF || *out_value == HUGE_VALL)) || (errno != 0 && *out_value == 0)){
+  *out_value = g_ascii_strtod (full_string, NULL);
+  if ((errno == ERANGE && (*out_value == HUGE_VALF || *out_value == HUGE_VALL))
+      || (errno != 0 && *out_value == 0)) {
     return FALSE;
   }
   return TRUE;
@@ -147,41 +153,41 @@ gstd_event_factory_make_seek_event (const gchar * description)
   //Assume all 7 properties come with at most one value
   gchar **tokens = g_strsplit (description, " ", 7);
 
-  
-  if (!gstd_ascii_to_double(tokens[0], &rate)){
+
+  if (!gstd_ascii_to_double (tokens[0], &rate)) {
     return GSTD_EVENT_ERROR;
   }
 
   gint64 temp_format;
-  if (!gstd_ascii_to_gint64(tokens[1], &temp_format)){
+  if (!gstd_ascii_to_gint64 (tokens[1], &temp_format)) {
     return GSTD_EVENT_ERROR;
   }
-  format = (GstFormat)temp_format;
+  format = (GstFormat) temp_format;
 
 
   gint64 temp_flags;
-  if (!gstd_ascii_to_gint64(tokens[2], &temp_flags)){
+  if (!gstd_ascii_to_gint64 (tokens[2], &temp_flags)) {
     return GSTD_EVENT_ERROR;
   }
-  flags = (GstSeekFlags)temp_flags;
+  flags = (GstSeekFlags) temp_flags;
 
   gint64 temp_start_type;
-  if (!gstd_ascii_to_gint64(tokens[3], &temp_start_type)){
+  if (!gstd_ascii_to_gint64 (tokens[3], &temp_start_type)) {
     return GSTD_EVENT_ERROR;
   }
-  start_type = (GstSeekType)temp_start_type;
+  start_type = (GstSeekType) temp_start_type;
 
-  if (!gstd_ascii_to_gint64(tokens[4], &start)){
+  if (!gstd_ascii_to_gint64 (tokens[4], &start)) {
     return GSTD_EVENT_ERROR;
   }
 
   gint64 temp_stop_type;
-  if (!gstd_ascii_to_gint64(tokens[5], &temp_stop_type)){
+  if (!gstd_ascii_to_gint64 (tokens[5], &temp_stop_type)) {
     return GSTD_EVENT_ERROR;
   }
-  stop_type = (GstSeekType)temp_stop_type;
+  stop_type = (GstSeekType) temp_stop_type;
 
-  if (!gstd_ascii_to_gint64(tokens[6], &stop)){
+  if (!gstd_ascii_to_gint64 (tokens[6], &stop)) {
     return GSTD_EVENT_ERROR;
   }
 

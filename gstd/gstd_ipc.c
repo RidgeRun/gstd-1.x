@@ -41,7 +41,7 @@ G_DEFINE_TYPE (GstdIpc, gstd_ipc, GSTD_TYPE_OBJECT);
 
 enum
 {
-  N_PROPERTIES,                  // NOT A PROPERTY
+  N_PROPERTIES,                 // NOT A PROPERTY
   PROP_ENABLED
 };
 
@@ -69,8 +69,8 @@ gstd_ipc_class_init (GstdIpcClass * klass)
 
   /* Properties */
   g_object_class_install_property (object_class, PROP_ENABLED,
-      g_param_spec_boolean("enabled", "ENABLED",
-      "IPC enable", FALSE, G_PARAM_READWRITE));
+      g_param_spec_boolean ("enabled", "ENABLED",
+          "IPC enable", FALSE, G_PARAM_READWRITE));
 
   /* Initialize debug category with nice colors */
   debug_color = GST_DEBUG_FG_BLACK | GST_DEBUG_BOLD | GST_DEBUG_BG_WHITE;

@@ -203,7 +203,7 @@ gstd_pipeline_constructed (GObject * object)
   ret =
       gstd_pipeline_create (self, GSTD_OBJECT_NAME (self), 0,
       self->description);
-  if(GSTD_EOK != ret)
+  if (GSTD_EOK != ret)
     goto out;
 
   self->event_handler = gstd_event_handler_new (G_OBJECT (self->pipeline));
@@ -212,15 +212,16 @@ gstd_pipeline_constructed (GObject * object)
     goto out;
   }
 
-  self->pipeline_bus =  
-    gstd_pipeline_bus_new (gst_pipeline_get_bus(GST_PIPELINE (self->pipeline)));
+  self->pipeline_bus =
+      gstd_pipeline_bus_new (gst_pipeline_get_bus (GST_PIPELINE
+          (self->pipeline)));
 
   if (!self->pipeline_bus) {
     ret = ret | GSTD_BAD_VALUE;
     goto out;
   }
 
- out:
+out:
   // Capture any possible error
   gstd_object_set_code (GSTD_OBJECT (self), ret);
 }
@@ -234,7 +235,7 @@ gstd_pipeline_dispose (GObject * object)
 
   /* Stop the pipe if playing */
   if (self->pipeline) {
-  gstd_object_update (GSTD_OBJECT (self), "state", GSTD_PIPELINE_NULL, NULL);
+    gstd_object_update (GSTD_OBJECT (self), "state", GSTD_PIPELINE_NULL, NULL);
   }
 
   if (self->description) {
@@ -316,9 +317,9 @@ gstd_pipeline_get_property (GObject * object,
       GST_DEBUG_OBJECT (self, "Returning element list %p", self->elements);
       g_value_set_object (value, self->elements);
       break;
-    case  PROP_PIPELINE_BUS:
+    case PROP_PIPELINE_BUS:
       GST_DEBUG_OBJECT (self, "Returning pipeline bus %p", self->pipeline_bus);
-       g_value_set_object (value, self->pipeline_bus);
+      g_value_set_object (value, self->pipeline_bus);
       // g_value_set_object (value, self->elements);
       break;
     case PROP_STATE:

@@ -24,7 +24,7 @@
 
 
 /* Gstd Core debugging category */
-GST_DEBUG_CATEGORY_STATIC(gstd_json_builder_debug);
+GST_DEBUG_CATEGORY_STATIC (gstd_json_builder_debug);
 #define GST_CAT_DEFAULT gstd_json_builder_debug
 
 /* Sets the character to be used when indenting */
@@ -44,118 +44,117 @@ typedef struct _GstdJsonBuilderClass GstdJsonBuilderClass;
 struct _GstdJsonBuilder
 {
   GObject parent;
-  JsonBuilder * json_builder;
+  JsonBuilder *json_builder;
 };
 
 struct _GstdJsonBuilderClass
 {
   GObjectClass parent_class;
-};  
+};
 
 
-static void
-gstd_iformatter_interface_init (GstdIFormatterInterface *iface);
+static void gstd_iformatter_interface_init (GstdIFormatterInterface * iface);
 
-static void
-gstd_json_builder_finalize( GObject *object);
+static void gstd_json_builder_finalize (GObject * object);
 
 G_DEFINE_TYPE_WITH_CODE (GstdJsonBuilder, gstd_json_builder, G_TYPE_OBJECT,
-                         G_IMPLEMENT_INTERFACE (GSTD_TYPE_IFORMATTER,
-                                                gstd_iformatter_interface_init));
+    G_IMPLEMENT_INTERFACE (GSTD_TYPE_IFORMATTER,
+        gstd_iformatter_interface_init));
 
 static void
-gstd_json_builder_class_init (GstdJsonBuilderClass *klass)
+gstd_json_builder_class_init (GstdJsonBuilderClass * klass)
 {
-    GObjectClass *object_class = G_OBJECT_CLASS (klass);
+  GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
-    object_class->finalize = gstd_json_builder_finalize;
+  object_class->finalize = gstd_json_builder_finalize;
 }
 
 static void
-gstd_json_builder_init (GstdJsonBuilder *self)
+gstd_json_builder_init (GstdJsonBuilder * self)
 {
-  GST_INFO_OBJECT(self,"Initializing Json builder");
-  
+  GST_INFO_OBJECT (self, "Initializing Json builder");
+
   self->json_builder = json_builder_new ();
 }
 
 static void
-gstd_json_builder_begin_object (GstdIFormatter *iface)
+gstd_json_builder_begin_object (GstdIFormatter * iface)
 {
   GstdJsonBuilder *self;
 
   g_return_val_if_fail (GSTD_IS_JSON_BUILDER (iface), GSTD_NULL_ARGUMENT);
 
-  self = GSTD_JSON_BUILDER(iface);
+  self = GSTD_JSON_BUILDER (iface);
   json_builder_begin_object (self->json_builder);
 }
 
 static void
-gstd_json_builder_end_object (GstdIFormatter *iface)
+gstd_json_builder_end_object (GstdIFormatter * iface)
 {
   GstdJsonBuilder *self;
 
   g_return_val_if_fail (GSTD_IS_JSON_BUILDER (iface), GSTD_NULL_ARGUMENT);
 
-  self = GSTD_JSON_BUILDER(iface);
+  self = GSTD_JSON_BUILDER (iface);
   json_builder_end_object (self->json_builder);
 }
 
 static void
-gstd_json_builder_begin_array (GstdIFormatter *iface)
+gstd_json_builder_begin_array (GstdIFormatter * iface)
 {
   GstdJsonBuilder *self;
 
   g_return_val_if_fail (GSTD_IS_JSON_BUILDER (iface), GSTD_NULL_ARGUMENT);
 
-  self = GSTD_JSON_BUILDER(iface);
+  self = GSTD_JSON_BUILDER (iface);
   json_builder_begin_array (self->json_builder);
 }
 
-static void gstd_json_builder_end_array (GstdIFormatter *iface)
+static void
+gstd_json_builder_end_array (GstdIFormatter * iface)
 {
   GstdJsonBuilder *self;
 
   g_return_val_if_fail (GSTD_IS_JSON_BUILDER (iface), GSTD_NULL_ARGUMENT);
 
-  self = GSTD_JSON_BUILDER(iface);
+  self = GSTD_JSON_BUILDER (iface);
   json_builder_end_array (self->json_builder);
 }
 
 static void
-gstd_json_set_member_name (GstdIFormatter *iface, const gchar * name)
+gstd_json_set_member_name (GstdIFormatter * iface, const gchar * name)
 {
   GstdJsonBuilder *self;
 
   g_return_val_if_fail (GSTD_IS_JSON_BUILDER (iface), GSTD_NULL_ARGUMENT);
 
-  self = GSTD_JSON_BUILDER(iface);
+  self = GSTD_JSON_BUILDER (iface);
   json_builder_set_member_name (self->json_builder, name);
 }
 
 static void
-gstd_json_set_member_value (GstdIFormatter *iface, const gchar * value)
+gstd_json_set_member_value (GstdIFormatter * iface, const gchar * value)
 {
   GstdJsonBuilder *self;
 
   g_return_val_if_fail (GSTD_IS_JSON_BUILDER (iface), GSTD_NULL_ARGUMENT);
 
-  self = GSTD_JSON_BUILDER(iface);
+  self = GSTD_JSON_BUILDER (iface);
   json_builder_add_string_value (self->json_builder, value);
 }
 
 static void
-gstd_json_builder_generate (GstdIFormatter *iface, gchar **outstring)
+gstd_json_builder_generate (GstdIFormatter * iface, gchar ** outstring)
 {
   GstdJsonBuilder *self;
-  JsonNode * json_node;
-  JsonGenerator * json_generator;
-  gchar * json_stream;
+  JsonNode *json_node;
+  JsonGenerator *json_generator;
+  gchar *json_stream;
   gsize json_stream_length;
-  JsonBuilder * json_builder;
+  JsonBuilder *json_builder;
 
   g_return_val_if_fail (GSTD_IS_JSON_BUILDER (iface), GSTD_NULL_ARGUMENT);
-  self = GSTD_JSON_BUILDER(iface);
+  self = GSTD_JSON_BUILDER (iface);
 
   json_builder = self->json_builder;
 
@@ -165,12 +164,12 @@ gstd_json_builder_generate (GstdIFormatter *iface, gchar **outstring)
   json_generator_set_root (json_generator, json_node);
 
   /* Configure json format */
-  json_generator_set_indent_char (json_generator,JSON_INDENT_CHAR);
-  json_generator_set_indent (json_generator,JSON_INDENT_LEVEL);
-  json_generator_set_pretty (json_generator,JSON_SET_PRETTY);
+  json_generator_set_indent_char (json_generator, JSON_INDENT_CHAR);
+  json_generator_set_indent (json_generator, JSON_INDENT_LEVEL);
+  json_generator_set_pretty (json_generator, JSON_SET_PRETTY);
 
   /* Generates a JSON data stream from generator and returns it as a buffer */
-  json_stream = json_generator_to_data (json_generator,&json_stream_length);
+  json_stream = json_generator_to_data (json_generator, &json_stream_length);
 
   json_node_free (json_node);
   g_object_unref (json_generator);
@@ -181,7 +180,7 @@ gstd_json_builder_generate (GstdIFormatter *iface, gchar **outstring)
 }
 
 static void
-gstd_json_builder_finalize( GObject *object)
+gstd_json_builder_finalize (GObject * object)
 {
   GstdJsonBuilder *self = GSTD_JSON_BUILDER (object);
   GST_DEBUG_OBJECT (self, "finalize");
@@ -191,7 +190,7 @@ gstd_json_builder_finalize( GObject *object)
 }
 
 static void
-gstd_iformatter_interface_init (GstdIFormatterInterface *iface)
+gstd_iformatter_interface_init (GstdIFormatterInterface * iface)
 {
   iface->begin_object = gstd_json_builder_begin_object;
   iface->end_object = gstd_json_builder_end_object;

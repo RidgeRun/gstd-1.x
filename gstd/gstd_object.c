@@ -64,7 +64,7 @@ static GstdReturnCode
 gstd_object_delete_default (GstdObject * object, const gchar * name);
 static GstdReturnCode
 gstd_object_to_string_default (GstdObject * object, gchar ** outstring);
-void gstd_object_finalize( GObject *object);
+void gstd_object_finalize (GObject * object);
 
 GType
 gstd_object_flags_get_type (void)
@@ -130,9 +130,10 @@ gstd_object_init (GstdObject * self)
   g_mutex_init (&self->codelock);
 }
 
-void gstd_object_finalize( GObject *object)
+void
+gstd_object_finalize (GObject * object)
 {
-  GstdObject *self = GSTD_OBJECT(object);
+  GstdObject *self = GSTD_OBJECT (object);
   GST_DEBUG_OBJECT (self, "finalize");
 
   /* Free formatter */
@@ -255,8 +256,8 @@ gstd_object_read_default (GstdObject * self, const gchar * property, va_list va)
       ret |= GSTD_NO_READ;
       break;
     }
- 
-    if (!(G_TYPE_IS_DERIVED(pspec->value_type))) {
+
+    if (!(G_TYPE_IS_DERIVED (pspec->value_type))) {
       GST_ERROR_OBJECT (self, "The property %s is not readable", name);
       ret |= GSTD_NO_READ;
       break;
@@ -358,51 +359,52 @@ gstd_object_to_string_default (GstdObject * self, gchar ** outstring)
   gchar *sflags;
   guint n, i;
   const gchar *typename;
-  
+
   gstd_iformatter_begin_object (self->formatter);
-  gstd_iformatter_set_member_name (self->formatter,"properties");
+  gstd_iformatter_set_member_name (self->formatter, "properties");
   gstd_iformatter_begin_array (self->formatter);
-  
-  properties = g_object_class_list_properties(G_OBJECT_GET_CLASS(self), &n);
-  for (i=0; i<n; i++) {
+
+  properties = g_object_class_list_properties (G_OBJECT_GET_CLASS (self), &n);
+  for (i = 0; i < n; i++) {
     /* Describe each parameter using a structure */
     gstd_iformatter_begin_object (self->formatter);
 
-    gstd_iformatter_set_member_name (self->formatter,"name");
+    gstd_iformatter_set_member_name (self->formatter, "name");
 
     gstd_iformatter_set_member_value (self->formatter, properties[i]->name);
 
-    typename = g_type_name(properties[i]->value_type);
+    typename = g_type_name (properties[i]->value_type);
 
     g_value_init (&value, properties[i]->value_type);
-    g_object_get_property(G_OBJECT(self), properties[i]->name, &value);
-    svalue = g_strdup_value_contents(&value);
+    g_object_get_property (G_OBJECT (self), properties[i]->name, &value);
+    svalue = g_strdup_value_contents (&value);
 
-    gstd_iformatter_set_member_name (self->formatter,"value");
+    gstd_iformatter_set_member_name (self->formatter, "value");
     gstd_iformatter_set_member_value (self->formatter, svalue);
 
     gstd_iformatter_set_member_name (self->formatter, "param_spec");
     /* Describe the parameter specs using a structure */
     gstd_iformatter_begin_object (self->formatter);
 
-    g_value_unset(&value);
+    g_value_unset (&value);
 
     g_value_init (&flags, GSTD_TYPE_PARAM_FLAGS);
     g_value_set_flags (&flags, properties[i]->flags);
-    sflags = g_strdup_value_contents(&flags);
-    g_value_unset(&flags);
+    sflags = g_strdup_value_contents (&flags);
+    g_value_unset (&flags);
 
     gstd_iformatter_set_member_name (self->formatter, "blurb");
-    gstd_iformatter_set_member_value (self->formatter,properties[i]->_blurb);
+    gstd_iformatter_set_member_value (self->formatter, properties[i]->_blurb);
 
     gstd_iformatter_set_member_name (self->formatter, "type");
-    gstd_iformatter_set_member_value (self->formatter,typename);
+    gstd_iformatter_set_member_value (self->formatter, typename);
 
     gstd_iformatter_set_member_name (self->formatter, "access");
-    gstd_iformatter_set_member_value (self->formatter,sflags);
+    gstd_iformatter_set_member_value (self->formatter, sflags);
 
     gstd_iformatter_set_member_name (self->formatter, "construct");
-    gstd_iformatter_set_member_value (self->formatter,GSTD_PARAM_IS_DELETE(properties[i]->flags) ? "TRUE" : "FALSE");
+    gstd_iformatter_set_member_value (self->formatter,
+        GSTD_PARAM_IS_DELETE (properties[i]->flags) ? "TRUE" : "FALSE");
     /* Close parameter specs structure */
     gstd_iformatter_end_object (self->formatter);
 
@@ -413,7 +415,7 @@ gstd_object_to_string_default (GstdObject * self, gchar ** outstring)
   }
   g_free (properties);
 
-  gstd_iformatter_end_array (self->formatter); 
+  gstd_iformatter_end_array (self->formatter);
   gstd_iformatter_end_object (self->formatter);
 
   gstd_iformatter_generate (self->formatter, outstring);
