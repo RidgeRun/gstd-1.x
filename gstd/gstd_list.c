@@ -209,6 +209,7 @@ gstd_list_create (GstdObject * object, const gchar * name,
   GstdList *self;
   GstdObject *out;
   GList *found;
+  GstdReturnCode ret = GSTD_EOK;
 
   g_return_val_if_fail (GSTD_IS_OBJECT (object), GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (name, GSTD_NULL_ARGUMENT);
@@ -224,24 +225,35 @@ gstd_list_create (GstdObject * object, const gchar * name,
     goto exists;
 
   gstd_icreator_create (object->creator, name, description, &out);
-  self->count++;
+  ret = GSTD_OBJECT_CODE(out);
+  if(ret)
+    goto error;
 
+  self->count++;
 
   self->list = g_list_append (self->list, out);
   self->count = g_list_length (self->list);
   GST_INFO_OBJECT (self, "Appended %s to %s list", GSTD_OBJECT_NAME (out),
       GSTD_OBJECT_NAME (self));
 
-  return GSTD_EOK;
+  return ret;
 
 exists:
   {
     GST_ERROR_OBJECT (object, "The resource \"%s\" already exists in \"%s\"",
         name, GSTD_OBJECT_NAME (self));
-    return GSTD_EXISTING_RESOURCE;
+    ret = GSTD_EXISTING_RESOURCE;
+	 return ret;
+
   }
 
-  return GSTD_EOK;
+error:
+  {
+    g_object_unref(out);
+    GST_ERROR_OBJECT (object, "Could not create the resourse  \"%s\" on \"%s\"",
+		      name, GSTD_OBJECT_NAME (self));
+    return ret;
+  }
 }
 
 static GstdReturnCode

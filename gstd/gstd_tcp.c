@@ -37,7 +37,6 @@ GST_DEBUG_CATEGORY_STATIC (gstd_tcp_debug);
 #define GST_CAT_DEFAULT gstd_tcp_debug
 
 #define GSTD_DEBUG_DEFAULT_LEVEL GST_LEVEL_INFO
-#define GSTD_PIPELINE_ALLOWED_CHARACTERS "abcdefghijklmnopkrstuvwxyz'=!1234567890\\"
 
 struct _GstdTcp
 {
@@ -793,7 +792,6 @@ gstd_tcp_pipeline_create (GstdSession * session, gchar * action, gchar * args,
   g_return_val_if_fail (tokens[0], GSTD_BAD_COMMAND);
   g_return_val_if_fail (tokens[1], GSTD_BAD_COMMAND);
 
-  tokens[1] = g_strcanon (tokens[1], GSTD_PIPELINE_ALLOWED_CHARACTERS, ' ');
 
   uri =
       g_strdup_printf ("/pipelines name %s description %s", tokens[0],
