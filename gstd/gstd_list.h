@@ -69,7 +69,10 @@ struct _GstdListClass
 GType gstd_list_get_type ();
 
 void gstd_list_set_creator (GstdList * self, GstdICreator * creator);
+void gstd_list_set_reader (GstdList * self, GstdIReader * reader);
 void gstd_list_set_deleter (GstdList * self, GstdIDeleter * deleter);
+
+GstdObject * gstd_list_find_child (GstdList *self, const gchar * name);
 
 G_END_DECLS
 #endif // __GSTD_LIST_H__

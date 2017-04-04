@@ -55,6 +55,7 @@ gstd_list_create (GstdObject * object, const gchar * name,
 static GstdReturnCode
 gstd_list_delete (GstdObject * object, const gchar * name);
 static GstdReturnCode gstd_list_to_string (GstdObject *, gchar **);
+static gint compare_names (gconstpointer a, gconstpointer b);
 
 G_DEFINE_TYPE (GstdList, gstd_list, GSTD_TYPE_OBJECT);
 
@@ -338,6 +339,22 @@ gstd_list_set_creator (GstdList * self, GstdICreator * creator)
 }
 
 void
+gstd_list_set_reader (GstdList * self, GstdIReader * reader)
+{
+  GstdObject *object;
+
+  g_return_if_fail (self);
+
+  object = GSTD_OBJECT (self);
+
+  if (object->reader != NULL) {
+    g_object_unref (object->reader);
+  }
+
+  object->reader = reader;
+}
+
+void
 gstd_list_set_deleter (GstdList * self, GstdIDeleter * deleter)
 {
   GstdObject *object;
@@ -353,3 +370,25 @@ gstd_list_set_deleter (GstdList * self, GstdIDeleter * deleter)
 
   object->deleter = deleter;
 }
+
+GstdObject *
+gstd_list_find_child (GstdList *self, const gchar * name)
+{
+    GList * result;
+    GstdObject * child;
+
+    g_return_val_if_fail (self, NULL);
+    g_return_val_if_fail (name, NULL);
+
+    result = g_list_find_custom (self->list, name, gstd_list_find_node);
+
+
+    if (result) {
+	child = GSTD_OBJECT(result->data);
+    } else {
+	child = NULL;
+    }
+
+    return child;
+}
+

@@ -27,6 +27,7 @@
 #include "gstd_tcp.h"
 #include "gstd_pipeline_creator.h"
 #include "gstd_property_reader.h"
+#include "gstd_list_reader.h"
 #include "gstd_pipeline_deleter.h"
 
 /* Gstd Session debugging category */
@@ -139,6 +140,9 @@ gstd_session_init (GstdSession * self)
 
   gstd_list_set_creator (self->pipelines,
       g_object_new (GSTD_TYPE_PIPELINE_CREATOR, NULL));
+
+  gstd_list_set_reader (self->pipelines,
+      g_object_new (GSTD_TYPE_LIST_READER, NULL));
 
   gstd_list_set_deleter (self->pipelines,
       g_object_new (GSTD_TYPE_PIPELINE_DELETER, NULL));
