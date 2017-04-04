@@ -40,7 +40,8 @@ GST_DEBUG_CATEGORY_STATIC (gstd_tcp_debug);
 struct _GstdTcp
 {
   GstdIpc parent;
-  guint16 port;
+  guint16 base_port;
+  guint16 num_ports;
   GSocketService *service;
 };
 
@@ -62,7 +63,8 @@ G_DEFINE_TYPE (GstdTcp, gstd_tcp, GSTD_TYPE_IPC);
 
 enum
 {
-  PROP_PORT = 1,
+  PROP_BASE_PORT = 1,
+  PROP_NUM_PORTS = 2,
   N_PROPERTIES                  // NOT A PROPERTY
 };
 
@@ -148,13 +150,23 @@ gstd_tcp_class_init (GstdTcpClass * klass)
       GST_DEBUG_FUNCPTR (gstd_tcp_init_get_option_group);
   object_class->dispose = gstd_tcp_dispose;
 
-  properties[PROP_PORT] =
-      g_param_spec_uint ("port",
-      "Port",
+  properties[PROP_BASE_PORT] =
+      g_param_spec_uint ("base-port",
+      "Base Port",
       "The port to start listening to",
       0,
       G_MAXINT,
       GSTD_TCP_DEFAULT_PORT,
+      G_PARAM_READWRITE |
+      G_PARAM_CONSTRUCT_ONLY | G_PARAM_STATIC_STRINGS | GSTD_PARAM_READ);
+
+  properties[PROP_NUM_PORTS] =
+      g_param_spec_uint ("num-ports",
+      "Num Ports",
+      "The number of ports to open for the tcp session, starting at base-port",
+      0,
+      G_MAXINT,
+      GSTD_TCP_DEFAULT_NUM_PORTS,
       G_PARAM_READWRITE |
       G_PARAM_CONSTRUCT_ONLY | G_PARAM_STATIC_STRINGS | GSTD_PARAM_READ);
 
@@ -185,9 +197,13 @@ gstd_tcp_get_property (GObject * object,
   gstd_object_set_code (GSTD_OBJECT (self), GSTD_EOK);
 
   switch (property_id) {
-    case PROP_PORT:
-      GST_DEBUG_OBJECT (self, "Returning post %u", self->port);
-      g_value_set_uint (value, self->port);
+    case PROP_BASE_PORT:
+      GST_DEBUG_OBJECT (self, "Returning base-port %u", self->base_port);
+      g_value_set_uint (value, self->base_port);
+      break;
+    case PROP_NUM_PORTS:
+      GST_DEBUG_OBJECT (self, "Returning number-ports %u", self->num_ports);
+      g_value_set_uint (value, self->num_ports);
       break;
 
     default:
@@ -207,10 +223,15 @@ gstd_tcp_set_property (GObject * object,
   gstd_object_set_code (GSTD_OBJECT (self), GSTD_EOK);
 
   switch (property_id) {
-    case PROP_PORT:
-      GST_DEBUG_OBJECT (self, "Changing port to %u", self->port);
-      self->port = g_value_get_uint (value);
-      GST_DEBUG_OBJECT (self, "Value changed %u", self->port);
+    case PROP_BASE_PORT:
+      GST_DEBUG_OBJECT (self, "Changing base-port current value: %u", self->base_port);
+      self->base_port = g_value_get_uint (value);
+      GST_DEBUG_OBJECT (self, "Value changed %u", self->base_port);
+      break;
+    case PROP_NUM_PORTS:
+      GST_DEBUG_OBJECT (self, "Changing num-ports current value: %u", self->num_ports);
+      self->num_ports = g_value_get_uint (value);
+      GST_DEBUG_OBJECT (self, "Value changed %u", self->num_ports);
       break;
 
     default:
@@ -280,7 +301,7 @@ gstd_tcp_start (GstdIpc * base, GstdSession * session)
   GError *error = NULL;
   GstdTcp *self = GSTD_TCP (base);
   GSocketService **service = &self->service;
-  guint16 port = self->port;
+  guint16 port = self->base_port;
 
   if (!base->enabled) {
     GST_DEBUG_OBJECT (self, "TCP not enabled, skipping");
@@ -963,10 +984,13 @@ gstd_tcp_init_get_option_group (GstdIpc * base, GOptionGroup ** group)
   GST_DEBUG_OBJECT (self, "TCP init group callback ");
   GOptionEntry tcp_args[] = {
     {"enable-tcp-protocol", 't', 0, G_OPTION_ARG_NONE, &base->enabled,
-        "Enable attach the server through a given TCP port ", NULL}
+        "Enable attach the server through given TCP ports ", NULL}
     ,
-    {"port", 'p', 0, G_OPTION_ARG_INT, &self->port,
-        "Attach to the server through the given port (default 5000)", "port"}
+    {"base-port", 'p', 0, G_OPTION_ARG_INT, &self->base_port,
+        "Attach to the server starting through a given port (default 5000)", "base-port"}
+    ,
+    {"num-ports", 'n', 0, G_OPTION_ARG_INT, &self->num_ports,
+        "Number of ports to use starting at base-port (default 1)", "num-ports"}
     ,
     {NULL}
   };
