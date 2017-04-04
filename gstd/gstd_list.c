@@ -52,7 +52,6 @@ static gint gstd_list_find_node (gconstpointer, gconstpointer);
 static GstdReturnCode
 gstd_list_create (GstdObject * object, const gchar * name,
     const gchar * description);
-static GstdReturnCode gstd_list_read (GstdObject *, const gchar *, va_list);
 static GstdReturnCode
 gstd_list_delete (GstdObject * object, const gchar * name);
 static GstdReturnCode gstd_list_to_string (GstdObject *, gchar **);
@@ -101,7 +100,6 @@ gstd_list_class_init (GstdListClass * klass)
   g_object_class_install_properties (object_class, N_PROPERTIES, properties);
 
   gstd_object_class->create = gstd_list_create;
-  gstd_object_class->read = gstd_list_read;
   gstd_object_class->delete = gstd_list_delete;
   gstd_object_class->to_string = gstd_list_to_string;
 
@@ -244,63 +242,6 @@ exists:
   return GSTD_EOK;
 }
 
-static GstdReturnCode
-gstd_list_read (GstdObject * object, const gchar * property, va_list va)
-{
-  GstdList *self = GSTD_LIST (object);
-  GList *found;
-  const gchar *name;
-  GstdReturnCode ret;
-  GValue value = G_VALUE_INIT;
-  gchar *error = NULL;
-
-  g_return_val_if_fail (GSTD_IS_LIST (object), GSTD_NULL_ARGUMENT);
-
-  /* Can we create resources on it */
-  if (!GSTD_PARAM_IS_READ (self->flags))
-    goto noread;
-
-  ret = GSTD_EOK;
-  name = property;
-
-  while (name) {
-    found = g_list_find_custom (self->list, name, gstd_list_find_node);
-    if (!found)
-      goto noexist;
-
-    g_value_init (&value, self->node_type);
-    g_value_set_object (&value, G_OBJECT (found->data));
-
-    G_VALUE_LCOPY (&value, va, 0, &error);
-
-    if (error) {
-      GST_ERROR_OBJECT (self, "%s", error);
-      g_free (error);
-      g_value_unset (&value);
-      ret |= GSTD_NO_CREATE;
-    } else {
-      GST_INFO_OBJECT (self, "Read object %s from %s", property,
-          GSTD_OBJECT_NAME (self));
-    }
-
-    g_value_unset (&value);
-    name = va_arg (va, const gchar *);
-  }
-
-  return ret;
-
-noexist:
-  {
-    GST_ERROR_OBJECT (self, "The node %s does not exist in %s", property,
-        GSTD_OBJECT_NAME (self));
-    return GSTD_NO_CREATE;
-  }
-noread:
-  {
-    GST_ERROR_OBJECT (self, "Cannot read from %s", GSTD_OBJECT_NAME (self));
-    return GSTD_NO_CREATE;
-  }
-}
 
 static GstdReturnCode
 gstd_list_delete (GstdObject * object, const gchar * node)

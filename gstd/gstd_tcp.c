@@ -409,7 +409,7 @@ gstd_tcp_create (GstdSession * session, GstdObject * obj, gchar * args,
   if (ret)
     goto noobject;
 
-  gstd_object_read (obj, name, &new, NULL);
+  gstd_object_read (obj, name, &new);
   gstd_object_to_string (new, response);
   g_object_unref (new);
 
@@ -462,7 +462,7 @@ gstd_tcp_read (GstdSession * session, GstdObject * obj, gchar * args,
   /* If its a GstdElement element we need to parse the pspec from
      the internal element */
   if (GSTD_IS_ELEMENT (obj)) {
-    gstd_object_read (obj, "gstelement", &properties, NULL);
+    g_object_get (obj, "gstelement", &properties, NULL);
   } else
     properties = G_OBJECT (obj);
 
@@ -530,7 +530,7 @@ gstd_tcp_update_by_type (GstdSession * session, GstdObject * obj, gchar * args,
     /* If its a GstdElement element we need to parse the pspec from
        the internal element */
     if (GSTD_IS_ELEMENT (obj))
-      gstd_object_read (obj, "gstelement", &properties, NULL);
+      g_object_get (obj, "gstelement", &properties, NULL);
     else
       properties = G_OBJECT (obj);
 

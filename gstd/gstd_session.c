@@ -26,6 +26,7 @@
 #include "gstd_list.h"
 #include "gstd_tcp.h"
 #include "gstd_pipeline_creator.h"
+#include "gstd_property_reader.h"
 #include "gstd_pipeline_deleter.h"
 
 /* Gstd Session debugging category */
@@ -121,7 +122,11 @@ gstd_session_class_init (GstdSessionClass * klass)
 static void
 gstd_session_init (GstdSession * self)
 {
+  GstdObject * object;
   GST_INFO_OBJECT (self, "Initializing gstd session");
+
+  object = GSTD_OBJECT(self);
+  object->reader = g_object_new (GSTD_TYPE_PROPERTY_READER, NULL);
 
   self->pipelines =
       GSTD_LIST (g_object_new (GSTD_TYPE_LIST, "name", "pipelines", "node-type",
@@ -244,7 +249,7 @@ gstd_pipeline_create (GstdSession * gstd, const gchar * name,
   g_return_val_if_fail (name, GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (description, GSTD_NULL_ARGUMENT);
 
-  gstd_object_read (GSTD_OBJECT (gstd), "pipelines", &list, NULL);
+  gstd_object_read (GSTD_OBJECT (gstd), "pipelines", &list);
   ret = gstd_object_create (list, name, description);
   g_object_unref (list);
 
@@ -260,7 +265,7 @@ gstd_pipeline_destroy (GstdSession * gstd, const gchar * name)
   g_return_val_if_fail (GSTD_IS_SESSION (gstd), GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (name, GSTD_NULL_ARGUMENT);
 
-  gstd_object_read (GSTD_OBJECT (gstd), "pipelines", &list, NULL);
+  gstd_object_read (GSTD_OBJECT (gstd), "pipelines", &list);
   ret = gstd_object_delete (list, name);
   g_object_unref (list);
 
@@ -303,6 +308,7 @@ gstd_pipeline_get_state (GstdSession * gstd, const gchar * pipe,
   GstdObject *pipeline;
   gchar *uri;
   GstdReturnCode ret;
+  GstdObject *out;
 
   g_return_val_if_fail (GSTD_IS_SESSION (gstd), GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (pipe, GSTD_NULL_ARGUMENT);
@@ -310,9 +316,10 @@ gstd_pipeline_get_state (GstdSession * gstd, const gchar * pipe,
   uri = g_strdup_printf ("/pipelines/%s/", pipe);
   ret = gstd_get_by_uri (gstd, uri, &pipeline);
   if (ret)
-    goto noelement;
+      goto noelement;
 
-  ret = gstd_object_read (pipeline, "state", state, NULL);
+  out = GSTD_OBJECT(state);
+  ret = gstd_object_read (pipeline, "state", &out);
 
   g_object_unref (pipeline);
   g_free (uri);
@@ -420,7 +427,7 @@ gstd_get_by_uri (GstdSession * gstd, const gchar * uri, GstdObject ** node)
       continue;
     }
 
-    ret = gstd_object_read (parent, *it, &child, NULL);
+    ret = gstd_object_read (parent, *it, &child);
     g_object_unref (parent);
 
     if (ret)
