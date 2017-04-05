@@ -24,6 +24,7 @@
 #include "gstd_list_reader.h"
 #include "gstd_object.h"
 #include "gstd_list.h"
+#include "gstd_property_int.h"
 
 /* Gstd Core debugging category */
 GST_DEBUG_CATEGORY_STATIC (gstd_list_reader_debug);
@@ -118,11 +119,13 @@ static GstdObject *
 gstd_list_reader_read_count (GstdIReader * iface,
     GstdObject * object)
 {
+    GstdPropertyInt * count_value;
+
     g_return_val_if_fail (iface, NULL);
     g_return_val_if_fail (object, NULL);
 
-    //TODO
-    return NULL;
+    count_value = g_object_new(GSTD_TYPE_PROPERTY_INT, "name", "count", "target", object, NULL);
+    return count_value;
 }
 
 static GstdObject *

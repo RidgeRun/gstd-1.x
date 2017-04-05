@@ -55,7 +55,6 @@ gstd_list_create (GstdObject * object, const gchar * name,
 static GstdReturnCode
 gstd_list_delete (GstdObject * object, const gchar * name);
 static GstdReturnCode gstd_list_to_string (GstdObject *, gchar **);
-static gint compare_names (gconstpointer a, gconstpointer b);
 
 G_DEFINE_TYPE (GstdList, gstd_list, GSTD_TYPE_OBJECT);
 
