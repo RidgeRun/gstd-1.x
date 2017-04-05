@@ -30,12 +30,16 @@
 #include "gstd_tcp.h"
 #include "gstd_element.h"
 #include "gstd_event_handler.h"
+#include "gstd_pipeline_bus.h"
 
 /* Gstd TCP debugging category */
 GST_DEBUG_CATEGORY_STATIC (gstd_tcp_debug);
 #define GST_CAT_DEFAULT gstd_tcp_debug
 
 #define GSTD_DEBUG_DEFAULT_LEVEL GST_LEVEL_INFO
+
+#define check_argument(arg, code) \
+    if (NULL == (arg)) return (code)
 
 struct _GstdTcp
 {
@@ -287,7 +291,8 @@ gstd_tcp_callback (GSocketService * service,
 
   /* Prepend the code to the output */
   response =
-      g_strdup_printf ("{\n  code : %d\n  response : %s\n}", ret, output);
+      g_strdup_printf ("{\n  \"code\" : %d,\n  \"response\" : %s\n}", ret,
+      output);
   g_free (output);
 
   g_output_stream_write (ostream, response, size, NULL, NULL);
@@ -345,6 +350,7 @@ out:
 noconnection:
   {
     GST_ERROR_OBJECT (session, "%s", error->message);
+    g_printerr ("%s\n", error->message);
     g_error_free (error);
     return GSTD_NO_CONNECTION;
   }
@@ -480,20 +486,33 @@ gstd_tcp_read (GstdSession * session, GstdObject * obj, gchar * args,
   if (!args)
     return gstd_object_to_string (obj, response);
 
+
   tokens = g_strsplit (args, " ", -1);
+
 
   // Print the property
   /* If its a GstdElement element we need to parse the pspec from
      the internal element */
-  if (GSTD_IS_ELEMENT (obj))
+  if (GSTD_IS_ELEMENT (obj)) {
     gstd_object_read (obj, "gstelement", &properties, NULL);
-  else
+  } else
     properties = G_OBJECT (obj);
 
   pspec =
       g_object_class_find_property (G_OBJECT_GET_CLASS (properties), tokens[0]);
   if (!pspec)
     goto noprop;
+
+  /*Fix Me: Bus callback must be read differently */
+  if (strcmp (tokens[0], "bus") == 0) {
+    GstdPipelineBus *pipelinebus = NULL;
+    g_value_init (&value, pspec->value_type);
+    g_object_get_property (G_OBJECT (properties), tokens[0], &value);
+    pipelinebus = (GstdPipelineBus *) g_value_get_object (&value);
+    gstd_pipeline_bus_read_messages (pipelinebus, response);
+
+    return GSTD_EOK;
+  }
 
   /* Automagical type value serialization */
   g_value_init (&value, pspec->value_type);
@@ -794,8 +813,8 @@ gstd_tcp_pipeline_create (GstdSession * session, gchar * action, gchar * args,
   g_return_val_if_fail (args, GSTD_NULL_ARGUMENT);
 
   tokens = g_strsplit (args, " ", 2);
-  g_return_val_if_fail (tokens[0], GSTD_BAD_COMMAND);
-  g_return_val_if_fail (tokens[1], GSTD_BAD_COMMAND);
+  check_argument (tokens[0], GSTD_BAD_COMMAND);
+  check_argument (tokens[1], GSTD_BAD_COMMAND);
 
   uri =
       g_strdup_printf ("/pipelines name %s description %s", tokens[0],
@@ -889,10 +908,10 @@ gstd_tcp_element_set (GstdSession * session, gchar * action, gchar * args,
   g_return_val_if_fail (args, GSTD_NULL_ARGUMENT);
 
   tokens = g_strsplit (args, " ", 4);
-  g_return_val_if_fail (tokens[0], GSTD_BAD_COMMAND);
-  g_return_val_if_fail (tokens[1], GSTD_BAD_COMMAND);
-  g_return_val_if_fail (tokens[2], GSTD_BAD_COMMAND);
-  g_return_val_if_fail (tokens[3], GSTD_BAD_COMMAND);
+  check_argument (tokens[0], GSTD_BAD_COMMAND);
+  check_argument (tokens[1], GSTD_BAD_COMMAND);
+  check_argument (tokens[2], GSTD_BAD_COMMAND);
+  check_argument (tokens[3], GSTD_BAD_COMMAND);
 
   uri = g_strdup_printf ("/pipelines/%s/elements/%s %s %s",
       tokens[0], tokens[1], tokens[2], tokens[3]);
@@ -916,9 +935,9 @@ gstd_tcp_element_get (GstdSession * session, gchar * action, gchar * args,
   g_return_val_if_fail (args, GSTD_NULL_ARGUMENT);
 
   tokens = g_strsplit (args, " ", 3);
-  g_return_val_if_fail (tokens[0], GSTD_BAD_COMMAND);
-  g_return_val_if_fail (tokens[1], GSTD_BAD_COMMAND);
-  g_return_val_if_fail (tokens[2], GSTD_BAD_COMMAND);
+  check_argument (tokens[0], GSTD_BAD_COMMAND);
+  check_argument (tokens[1], GSTD_BAD_COMMAND);
+  check_argument (tokens[2], GSTD_BAD_COMMAND);
 
   uri = g_strdup_printf ("/pipelines/%s/elements/%s %s",
       tokens[0], tokens[1], tokens[2]);
@@ -975,8 +994,8 @@ gstd_tcp_list_properties (GstdSession * session, gchar * action, gchar * args,
   g_return_val_if_fail (args, GSTD_NULL_ARGUMENT);
 
   tokens = g_strsplit (args, " ", 2);
-  g_return_val_if_fail (tokens[0], GSTD_BAD_COMMAND);
-  g_return_val_if_fail (tokens[1], GSTD_BAD_COMMAND);
+  check_argument (tokens[0], GSTD_BAD_COMMAND);
+  check_argument (tokens[1], GSTD_BAD_COMMAND);
 
   uri = g_strdup_printf ("/pipelines/%s/elements/%s", tokens[0], tokens[1]);
   ret = gstd_tcp_parse_raw_cmd (session, "read", uri, response);

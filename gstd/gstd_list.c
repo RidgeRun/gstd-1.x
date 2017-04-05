@@ -366,14 +366,14 @@ gstd_list_to_string (GstdObject * object, gchar ** outstring)
   while (list) {
     separator = list->next ? "," : "";
     node =
-        g_strdup_printf ("%s{\n    name : %s\n  }%s", acc,
+        g_strdup_printf ("%s{\n    \"name\" : \"%s\"\n  }%s", acc,
         GSTD_OBJECT_NAME (list->data), separator);
     g_free (acc);
     acc = node;
     list = list->next;
   }
 
-  *outstring = g_strdup_printf ("%s,\n  nodes: [%s]\n}", props, acc);
+  *outstring = g_strdup_printf ("%s,\n  \"nodes\" : [%s]\n}", props, acc);
   g_free (props);
   g_free (acc);
 

@@ -142,7 +142,7 @@ static GstdClientCmd cmds[] = {
       "element_set <pipe> <element> <property>"},
 
   {"list_pipelines", gstd_client_cmd_tcp, "List the existing pipelines",
-      "list_pipeline"},
+      "list_pipelines"},
   {"list_elements", gstd_client_cmd_tcp,
         "List the elements in a given pipeline",
       "list_elements <pipe>"},
