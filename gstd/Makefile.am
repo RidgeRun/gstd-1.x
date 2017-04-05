@@ -26,7 +26,8 @@ libgstd_core_la_SOURCES = gstd_session.c		\
 			  gstd_no_reader.c		\
 			  gstd_list_reader.c		\
 			  gstd_property.c		\
-			  gstd_property_int.c
+			  gstd_property_int.c		\
+			  gstd_property_boolean.c
 
 libgstd_core_la_CFLAGS = $(GST_CFLAGS) $(GIO_CFLAGS) $(GJSON_CFLAGS)
 libgstd_core_la_LDFLAGS = $(GST_LIBS) $(GIO_LIBS) $(GJSON_LIBS)
@@ -63,6 +64,7 @@ gstdinclude_HEADERS = \
 		  gstd_no_reader.h		\
 		  gstd_list_reader.h		\
 		  gstd_property.h		\
-		  gstd_property_int.h
+		  gstd_property_int.h		\
+		  gstd_property_boolean.h
 
 noinst_HEADERS = 
