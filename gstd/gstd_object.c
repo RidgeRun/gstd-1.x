@@ -347,7 +347,7 @@ gstd_object_to_string_default (GstdObject * self, gchar ** outstring)
 {
   GParamSpec **properties;
   GValue value = G_VALUE_INIT;
-  gchar *svalue;
+  GValue bool_value = G_VALUE_INIT;
   GValue flags = G_VALUE_INIT;
   gchar *sflags;
   guint n, i;
@@ -364,16 +364,15 @@ gstd_object_to_string_default (GstdObject * self, gchar ** outstring)
 
     gstd_iformatter_set_member_name (self->formatter,"name");
 
-    gstd_iformatter_set_member_value (self->formatter, properties[i]->name);
+    gstd_iformatter_set_string_value (self->formatter, properties[i]->name);
 
     typename = g_type_name(properties[i]->value_type);
 
     g_value_init (&value, properties[i]->value_type);
     g_object_get_property(G_OBJECT(self), properties[i]->name, &value);
-    svalue = g_strdup_value_contents(&value);
 
     gstd_iformatter_set_member_name (self->formatter,"value");
-    gstd_iformatter_set_member_value (self->formatter, svalue);
+    gstd_iformatter_set_value (self->formatter, &value);
 
     gstd_iformatter_set_member_name (self->formatter, "param_spec");
     /* Describe the parameter specs using a structure */
@@ -387,21 +386,24 @@ gstd_object_to_string_default (GstdObject * self, gchar ** outstring)
     g_value_unset(&flags);
 
     gstd_iformatter_set_member_name (self->formatter, "blurb");
-    gstd_iformatter_set_member_value (self->formatter,properties[i]->_blurb);
+    gstd_iformatter_set_string_value (self->formatter,properties[i]->_blurb);
 
     gstd_iformatter_set_member_name (self->formatter, "type");
-    gstd_iformatter_set_member_value (self->formatter,typename);
+    gstd_iformatter_set_string_value (self->formatter,typename);
 
     gstd_iformatter_set_member_name (self->formatter, "access");
-    gstd_iformatter_set_member_value (self->formatter,sflags);
+    gstd_iformatter_set_string_value (self->formatter,sflags);
 
     gstd_iformatter_set_member_name (self->formatter, "construct");
-    gstd_iformatter_set_member_value (self->formatter,GSTD_PARAM_IS_DELETE(properties[i]->flags) ? "TRUE" : "FALSE");
+
+    g_value_init (&bool_value, G_TYPE_BOOLEAN);
+    g_value_set_boolean(&bool_value,GSTD_PARAM_IS_DELETE(properties[i]->flags));
+    gstd_iformatter_set_value (self->formatter, &bool_value);
+    g_value_unset(&bool_value);
     /* Close parameter specs structure */
     gstd_iformatter_end_object (self->formatter);
 
     g_free (sflags);
-    g_free (svalue);
     /* Close parameter structure */
     gstd_iformatter_end_object (self->formatter);
   }

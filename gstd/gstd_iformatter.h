@@ -50,8 +50,10 @@ struct _GstdIFormatterInterface
   void (*end_array) (GstdIFormatter *self);
 
   void (*set_member_name) (GstdIFormatter *self, const gchar * name);
-  
-  void (*set_member_value) (GstdIFormatter *self, const gchar * value);
+
+  void (*set_string_value) (GstdIFormatter *self, const gchar * value);
+
+  void (*set_value) (GstdIFormatter *self, GValue *value);
 
   void (*generate) (GstdIFormatter *self, gchar **outstring);
 };
@@ -66,7 +68,9 @@ void gstd_iformatter_end_array (GstdIFormatter *self);
 
 void gstd_iformatter_set_member_name (GstdIFormatter *self, const gchar * name);
 
-void gstd_iformatter_set_member_value (GstdIFormatter *self, const gchar * value);
+void gstd_iformatter_set_string_value (GstdIFormatter *self, const gchar * value);
+
+void gstd_iformatter_set_value (GstdIFormatter *self, GValue *value);
 
 void gstd_iformatter_generate (GstdIFormatter *self, gchar **outstring);
 
