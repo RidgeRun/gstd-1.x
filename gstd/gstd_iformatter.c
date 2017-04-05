@@ -58,10 +58,17 @@ gstd_iformatter_set_member_name (GstdIFormatter *self, const gchar * name)
 }
 
 void
-gstd_iformatter_set_member_value (GstdIFormatter *self, const gchar * value)
+gstd_iformatter_set_string_value (GstdIFormatter *self, const gchar * value)
 {
   g_return_if_fail (self);
-  GSTD_IFORMATTER_GET_INTERFACE (self)->set_member_value (self, value);
+  GSTD_IFORMATTER_GET_INTERFACE (self)->set_string_value (self, value);
+}
+
+void
+gstd_iformatter_set_value (GstdIFormatter *self, GValue *value)
+{
+  g_return_if_fail (self);
+  GSTD_IFORMATTER_GET_INTERFACE (self)->set_value (self, value);
 }
 
 void
