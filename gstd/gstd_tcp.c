@@ -229,12 +229,14 @@ gstd_tcp_set_property (GObject * object,
 
   switch (property_id) {
     case PROP_BASE_PORT:
-      GST_DEBUG_OBJECT (self, "Changing base-port current value: %u", self->base_port);
+      GST_DEBUG_OBJECT (self, "Changing base-port current value: %u",
+          self->base_port);
       self->base_port = g_value_get_uint (value);
       GST_DEBUG_OBJECT (self, "Value changed %u", self->base_port);
       break;
     case PROP_NUM_PORTS:
-      GST_DEBUG_OBJECT (self, "Changing num-ports current value: %u", self->num_ports);
+      GST_DEBUG_OBJECT (self, "Changing num-ports current value: %u",
+          self->num_ports);
       self->num_ports = g_value_get_uint (value);
       GST_DEBUG_OBJECT (self, "Value changed %u", self->num_ports);
       break;
@@ -325,20 +327,20 @@ gstd_tcp_start (GstdIpc * base, GstdSession * session)
   // Close any existing connection
   gstd_tcp_stop (base);
 
-  self->service = g_malloc( self->num_ports * sizeof(GSocketService *));
+  self->service = g_malloc (self->num_ports * sizeof (GSocketService *));
 
-  for( i = 0; i <  self->num_ports ; i++){
+  for (i = 0; i < self->num_ports; i++) {
     service = &self->service[i];
     *service = g_socket_service_new ();
     g_socket_listener_add_inet_port (G_SOCKET_LISTENER (*service),
-				     port + i, NULL /* G_OBJECT(session) */ , &error);
+        port + i, NULL /* G_OBJECT(session) */ , &error);
     if (error)
       goto noconnection;
-    
+
     /* listen to the 'incoming' signal */
     g_signal_connect (*service,
-		      "incoming", G_CALLBACK (gstd_tcp_callback), session);
-    
+        "incoming", G_CALLBACK (gstd_tcp_callback), session);
+
     /* start the socket service */
     g_socket_service_start (*service);
   }
@@ -362,27 +364,25 @@ gstd_tcp_stop (GstdIpc * base)
   GstdTcp *self = GSTD_TCP (base);
   GSocketService **service;
   GstdSession *session = base->session;
-
   guint i;
 
   g_return_val_if_fail (session, GSTD_NULL_ARGUMENT);
 
   GST_DEBUG_OBJECT (self, "Entering TCP stop ");
-  if (self->service){
-  for( i = 0; i <  self->num_ports ; i++){
-   service = &self->service[i];
-   GSocketListener *listener = G_SOCKET_LISTENER (*service);
-   if (*service) {
-     GST_INFO_OBJECT (session, "Closing TCP connection for %s",
-		      GSTD_OBJECT_NAME (session));
-     g_socket_listener_close (listener);
-     g_socket_service_stop (*service);
-     g_object_unref (*service);
-     *service = NULL;
-   }
- }
+  if (self->service) {
+    for (i = 0; i < self->num_ports; i++) {
+      service = &self->service[i];
+      GSocketListener *listener = G_SOCKET_LISTENER (*service);
+      if (*service) {
+        GST_INFO_OBJECT (session, "Closing TCP connection for %s",
+            GSTD_OBJECT_NAME (session));
+        g_socket_listener_close (listener);
+        g_socket_service_stop (*service);
+        g_object_unref (*service);
+        *service = NULL;
+      }
+    }
   }
- 
   return GSTD_EOK;
 }
 
@@ -1017,10 +1017,12 @@ gstd_tcp_init_get_option_group (GstdIpc * base, GOptionGroup ** group)
         "Enable attach the server through given TCP ports ", NULL}
     ,
     {"base-port", 'p', 0, G_OPTION_ARG_INT, &self->base_port,
-        "Attach to the server starting through a given port (default 5000)", "base-port"}
+          "Attach to the server starting through a given port (default 5000)",
+        "base-port"}
     ,
     {"num-ports", 'n', 0, G_OPTION_ARG_INT, &self->num_ports,
-        "Number of ports to use starting at base-port (default 1)", "num-ports"}
+          "Number of ports to use starting at base-port (default 1)",
+        "num-ports"}
     ,
     {NULL}
   };

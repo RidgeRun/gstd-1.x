@@ -117,23 +117,23 @@ gstd_pipeline_bus_set_property (GObject * object,
 }
 
 gboolean
-gstd_pipeline_bus_callback (GstBus * bus, GstMessage *message, gpointer data)
+gstd_pipeline_bus_callback (GstBus * bus, GstMessage * message, gpointer data)
 {
   guint64 currenttime;
-  GstdPipelineBus * self = GSTD_PIPELINE_BUS (data);
-  const GstStructure * st = gst_message_get_structure (message);
+  GstdPipelineBus *self = GSTD_PIPELINE_BUS (data);
+  const GstStructure *st = gst_message_get_structure (message);
   const gchar *typename = GST_MESSAGE_TYPE_NAME (message);
   const gchar *srcname = GST_MESSAGE_SRC_NAME (message);
-   GST_INFO_OBJECT (self, "New %s message from %s: %s", typename, srcname, 
-	   st ? gst_structure_get_name(st) : "(null)");
+  GST_INFO_OBJECT (self, "New %s message from %s: %s", typename, srcname,
+      st ? gst_structure_get_name (st) : "(null)");
 
-   g_queue_push_tail (self->messages, (gpointer) gst_message_ref (message));
-   currenttime = g_get_monotonic_time ();
-  
-   if(self->endtime > currenttime)
-     return FALSE;
-   else
-     return TRUE;
+  g_queue_push_tail (self->messages, (gpointer) gst_message_ref (message));
+  currenttime = g_get_monotonic_time ();
+
+  if (self->endtime > currenttime)
+    return FALSE;
+  else
+    return TRUE;
 }
 
 gboolean
@@ -152,13 +152,14 @@ gstd_pipeline_bus_read_messages (GstdPipelineBus * self, gchar ** messages)
   self->endtime = g_get_monotonic_time () + 10 * G_TIME_SPAN_SECOND;
   currenttime = g_get_monotonic_time ();
 
-  gst_bus_add_watch (GST_BUS(self->bus), gstd_pipeline_bus_callback, (gpointer) self);
+  gst_bus_add_watch (GST_BUS (self->bus), gstd_pipeline_bus_callback,
+      (gpointer) self);
 
   while (self->endtime > currenttime) {
-      sleep (1);
-      currenttime = g_get_monotonic_time ();
+    sleep (1);
+    currenttime = g_get_monotonic_time ();
   }
-  
+
   num_messages =
       g_strdup_printf ("{\n   \"messages\" : %d\n  }",
       g_queue_get_length (self->messages));
