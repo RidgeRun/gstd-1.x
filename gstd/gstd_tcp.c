@@ -270,7 +270,7 @@ gstd_tcp_callback (GSocketService * service,
   /* Prepend the code to the output */
   response =
       g_strdup_printf ("{\n  \"code\" : %d,\n  \"response\" : %s\n}", ret,
-      output);
+      output ? output : "null");
   g_free (output);
 
   g_output_stream_write (ostream, response, size, NULL, NULL);
