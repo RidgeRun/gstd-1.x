@@ -62,7 +62,7 @@ GstdReturnCode
 gstd_property_int_to_string (GstdObject * self, gchar ** outstring)
 {
   GParamSpec * property;
-  guint * value;
+  guint value;
   gchar * svalue;
   gchar *sflags;
   GValue flags = G_VALUE_INIT;
@@ -75,7 +75,7 @@ gstd_property_int_to_string (GstdObject * self, gchar ** outstring)
   g_warn_if_fail (!*outstring);
 
   property = g_object_class_find_property(G_OBJECT_GET_CLASS(prop->target), GSTD_OBJECT_NAME(self));
-  //gprint(GSTD_OBJECT_NAME(self));
+
   /* Describe each parameter using a structure */
   gstd_iformatter_begin_object (self->formatter);
 
@@ -84,13 +84,10 @@ gstd_property_int_to_string (GstdObject * self, gchar ** outstring)
   gstd_iformatter_set_member_value (self->formatter, property->name);
 
   g_object_get(G_OBJECT(prop->target), property->name, &value, NULL);
-  //svalue = g_strdup_value_contents(&value);
-  svalue = g_strdup_printf ("%d", value);
+  svalue = g_strdup_printf ("%u", value);
 
   gstd_iformatter_set_member_name (self->formatter,"value");
   gstd_iformatter_set_member_value (self->formatter, svalue);
-
-  //g_value_unset(&value);
 
   gstd_iformatter_set_member_name (self->formatter, "param_spec");
   /* Describe the parameter specs using a structure */
@@ -111,7 +108,9 @@ gstd_property_int_to_string (GstdObject * self, gchar ** outstring)
   gstd_iformatter_set_member_value (self->formatter,sflags);
 
   gstd_iformatter_set_member_name (self->formatter, "construct");
-  gstd_iformatter_set_member_value (self->formatter,GSTD_PARAM_IS_DELETE(property->flags) ? "TRUE" : "FALSE");
+  gstd_iformatter_set_member_value (self->formatter,
+      GSTD_PARAM_IS_DELETE(property->flags) ? "TRUE" : "FALSE");
+
   /* Close parameter specs structure */
   gstd_iformatter_end_object (self->formatter);
 
