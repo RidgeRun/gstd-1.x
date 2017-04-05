@@ -42,7 +42,7 @@ struct _GstdTcp
   GstdIpc parent;
   guint16 base_port;
   guint16 num_ports;
-  GSocketService *service;
+  GSocketService **service;
 };
 
 struct _GstdTcpClass
@@ -183,7 +183,8 @@ gstd_tcp_init (GstdTcp * self)
 {
   GST_INFO_OBJECT (self, "Initializing gstd Tcp");
   GstdIpc *base = GSTD_IPC (self);
-  self->port = GSTD_TCP_DEFAULT_PORT;
+  self->base_port = GSTD_TCP_DEFAULT_PORT;
+  self->num_ports = GSTD_TCP_DEFAULT_NUM_PORTS;
   self->service = NULL;
   base->enabled = FALSE;
 }
@@ -300,9 +301,9 @@ gstd_tcp_start (GstdIpc * base, GstdSession * session)
   guint debug_color;
   GError *error = NULL;
   GstdTcp *self = GSTD_TCP (base);
-  GSocketService **service = &self->service;
+  GSocketService **service;
   guint16 port = self->base_port;
-
+  guint i;
   if (!base->enabled) {
     GST_DEBUG_OBJECT (self, "TCP not enabled, skipping");
     goto out;
@@ -319,19 +320,24 @@ gstd_tcp_start (GstdIpc * base, GstdSession * session)
   // Close any existing connection
   gstd_tcp_stop (base);
 
-  *service = g_socket_service_new ();
+  self->service = g_malloc( self->num_ports * sizeof(GSocketService *));
 
-  g_socket_listener_add_inet_port (G_SOCKET_LISTENER (*service),
-      port, NULL /* G_OBJECT(session) */ , &error);
-  if (error)
-    goto noconnection;
+  for( i = 0; i <  self->num_ports ; i++){
+    service = &self->service[i];
+    *service = g_socket_service_new ();
+    g_socket_listener_add_inet_port (G_SOCKET_LISTENER (*service),
+				     port + i, NULL /* G_OBJECT(session) */ , &error);
+    if (error)
+      goto noconnection;
+    
+    /* listen to the 'incoming' signal */
+    g_signal_connect (*service,
+		      "incoming", G_CALLBACK (gstd_tcp_callback), session);
+    
+    /* start the socket service */
+    g_socket_service_start (*service);
+  }
 
-  /* listen to the 'incoming' signal */
-  g_signal_connect (*service,
-      "incoming", G_CALLBACK (gstd_tcp_callback), session);
-
-  /* start the socket service */
-  g_socket_service_start (*service);
 
 out:
   return GSTD_EOK;
@@ -348,24 +354,29 @@ GstdReturnCode
 gstd_tcp_stop (GstdIpc * base)
 {
   GstdTcp *self = GSTD_TCP (base);
-  GSocketService **service = &self->service;
+  GSocketService **service;
   GstdSession *session = base->session;
-  GSocketListener *listener = G_SOCKET_LISTENER (*service);
 
+  guint i;
 
   g_return_val_if_fail (session, GSTD_NULL_ARGUMENT);
 
   GST_DEBUG_OBJECT (self, "Entering TCP stop ");
-
-  if (*service) {
-    GST_INFO_OBJECT (session, "Closing TCP connection for %s",
-        GSTD_OBJECT_NAME (session));
-    g_socket_listener_close (listener);
-    g_socket_service_stop (*service);
-    g_object_unref (*service);
-    *service = NULL;
+  if (self->service){
+  for( i = 0; i <  self->num_ports ; i++){
+   service = &self->service[i];
+   GSocketListener *listener = G_SOCKET_LISTENER (*service);
+   if (*service) {
+     GST_INFO_OBJECT (session, "Closing TCP connection for %s",
+		      GSTD_OBJECT_NAME (session));
+     g_socket_listener_close (listener);
+     g_socket_service_stop (*service);
+     g_object_unref (*service);
+     *service = NULL;
+   }
+ }
   }
-
+ 
   return GSTD_EOK;
 }
 
