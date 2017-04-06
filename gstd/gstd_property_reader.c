@@ -22,6 +22,9 @@
 
 #include "gstd_property_reader.h"
 #include "gstd_object.h"
+#include "gstd_property_int.h"
+#include "gstd_property_string.h"
+#include "gstd_property_boolean.h"
 
 /* Gstd Core debugging category */
 GST_DEBUG_CATEGORY_STATIC (gstd_property_reader_debug);
@@ -31,6 +34,9 @@ GST_DEBUG_CATEGORY_STATIC (gstd_property_reader_debug);
 
 static GstdObject * gstd_property_reader_read (GstdIReader * iface,
     GstdObject * object, const gchar * name);
+
+static GstdObject *
+gstd_property_mask_type (GstdObject * object, const gchar * name);
 
 typedef struct _GstdPropertyReaderClass GstdPropertyReaderClass;
 
@@ -107,10 +113,56 @@ gstd_property_reader_read (GstdIReader * iface, GstdObject * object, const gchar
 
     /* We only support gstd objects */
     if (!GSTD_IS_OBJECT(resource)) {
-      GST_ERROR_OBJECT (iface, "%s is not a valid resource", name);
-      g_object_unref(resource);
-      return NULL;
+      return gstd_property_mask_type (object, name);
     }
 
     return resource;
+}
+
+static GstdObject *
+gstd_property_mask_type (GstdObject * object, const gchar * name)
+{
+    GObjectClass * klass;
+    GParamSpec * pspec;
+    
+    g_return_val_if_fail (object, NULL);
+    g_return_val_if_fail (name, NULL);
+    
+    klass = G_OBJECT_GET_CLASS(object);
+    pspec = g_object_class_find_property (klass, name);
+
+    switch (pspec->value_type) {
+      case G_TYPE_BOOLEAN:
+      {
+	GstdPropertyBoolean * boolean_val;
+	boolean_val = g_object_new(GSTD_TYPE_PROPERTY_BOOLEAN, "name", pspec->name,
+	    "target", object, NULL);
+	
+	return boolean_val;
+      }	
+      case G_TYPE_INT:
+      case G_TYPE_UINT:
+      case G_TYPE_UINT64:
+      case G_TYPE_INT64:
+      {
+        GstdPropertyInt * int_val;
+	int_val = g_object_new(GSTD_TYPE_PROPERTY_INT, "name", pspec->name, "target",
+	    object, NULL);
+	
+	return int_val;
+      }	  
+      case G_TYPE_STRING:
+      {
+        GstdPropertyString * string_val;
+	string_val = g_object_new(GSTD_TYPE_PROPERTY_INT, "name", pspec->name, "target",
+	    object, NULL);
+	
+	return string_val;
+      }
+      default:
+      {
+	GST_ERROR_OBJECT (object, "%s is not a valid resource", name);
+	return NULL;
+      }
+    }
 }
