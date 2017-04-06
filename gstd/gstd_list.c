@@ -224,7 +224,6 @@ gstd_list_create (GstdObject * object, const gchar * name,
   gstd_icreator_create (object->creator, name, description, &out);
   self->count++;
 
-
   self->list = g_list_append (self->list, out);
   self->count = g_list_length (self->list);
   GST_INFO_OBJECT (self, "Appended %s to %s list", GSTD_OBJECT_NAME (out),
@@ -319,55 +318,6 @@ gstd_list_to_string (GstdObject * object, gchar ** outstring)
   g_free (acc);
 
   return GSTD_EOK;
-}
-
-void
-gstd_list_set_creator (GstdList * self, GstdICreator * creator)
-{
-  GstdObject *object;
-
-  g_return_if_fail (self);
-
-  object = GSTD_OBJECT (self);
-
-  if (object->creator != NULL) {
-    g_object_unref (object->creator);
-  }
-
-  object->creator = creator;
-}
-
-void
-gstd_list_set_reader (GstdList * self, GstdIReader * reader)
-{
-  GstdObject *object;
-
-  g_return_if_fail (self);
-
-  object = GSTD_OBJECT (self);
-
-  if (object->reader != NULL) {
-    g_object_unref (object->reader);
-  }
-
-  object->reader = reader;
-}
-
-void
-gstd_list_set_deleter (GstdList * self, GstdIDeleter * deleter)
-{
-  GstdObject *object;
-
-  g_return_if_fail (self);
-  g_return_if_fail (deleter);
-
-  object = GSTD_OBJECT (self);
-
-  if (object->deleter != NULL) {
-    g_object_unref (object->deleter);
-  }
-
-  object->deleter = deleter;
 }
 
 GstdObject *

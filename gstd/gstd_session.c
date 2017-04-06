@@ -135,17 +135,17 @@ gstd_session_init (GstdSession * self)
           GSTD_PARAM_CREATE | GSTD_PARAM_READ | GSTD_PARAM_UPDATE |
           GSTD_PARAM_DELETE, NULL));
 
-  self->debug =
-      GSTD_DEBUG (g_object_new (GSTD_TYPE_DEBUG, "name", "Debug", NULL));
-
-  gstd_list_set_creator (self->pipelines,
+  gstd_object_set_creator (GSTD_OBJECT(self->pipelines),
       g_object_new (GSTD_TYPE_PIPELINE_CREATOR, NULL));
 
-  gstd_list_set_reader (self->pipelines,
+  gstd_object_set_reader (GSTD_OBJECT(self->pipelines),
       g_object_new (GSTD_TYPE_LIST_READER, NULL));
 
-  gstd_list_set_deleter (self->pipelines,
+  gstd_object_set_deleter (GSTD_OBJECT(self->pipelines),
       g_object_new (GSTD_TYPE_PIPELINE_DELETER, NULL));
+
+  self->debug =
+      GSTD_DEBUG (g_object_new (GSTD_TYPE_DEBUG, "name", "Debug", NULL));
 
   self->pid = (GPid) getpid ();
 }

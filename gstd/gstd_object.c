@@ -466,3 +466,52 @@ gstd_object_to_string (GstdObject * object, gchar ** outstring)
 
   return GSTD_OBJECT_GET_CLASS (object)->to_string (object, outstring);
 }
+
+void
+gstd_object_set_creator (GstdObject * self, GstdICreator * creator)
+{
+  GstdObject *object;
+
+  g_return_if_fail (self);
+
+  object = GSTD_OBJECT (self);
+
+  if (object->creator != NULL) {
+    g_object_unref (object->creator);
+  }
+
+  object->creator = creator;
+}
+
+void
+gstd_object_set_reader (GstdObject * self, GstdIReader * reader)
+{
+  GstdObject *object;
+
+  g_return_if_fail (self);
+
+  object = GSTD_OBJECT (self);
+
+  if (object->reader != NULL) {
+    g_object_unref (object->reader);
+  }
+
+  object->reader = reader;
+}
+
+void
+gstd_object_set_deleter (GstdObject * self, GstdIDeleter * deleter)
+{
+  GstdObject *object;
+
+  g_return_if_fail (self);
+  g_return_if_fail (deleter);
+
+  object = GSTD_OBJECT (self);
+
+  if (object->deleter != NULL) {
+    g_object_unref (object->deleter);
+  }
+
+  object->deleter = deleter;
+}

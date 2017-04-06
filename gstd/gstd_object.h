@@ -123,5 +123,9 @@ gstd_object_update (GstdObject * object, const gchar * property, ...);
 GstdReturnCode gstd_object_delete (GstdObject * object, const gchar * name);
 GstdReturnCode gstd_object_to_string (GstdObject * object, gchar ** outstring);
 
+void gstd_object_set_creator (GstdObject * self, GstdICreator * creator);
+void gstd_object_set_reader (GstdObject * self, GstdIReader * reader);
+void gstd_object_set_deleter (GstdObject * self, GstdIDeleter * deleter);
+
 G_END_DECLS
 #endif //__GSTD_OBJECT_H__
