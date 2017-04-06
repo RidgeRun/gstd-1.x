@@ -34,16 +34,17 @@ GST_DEBUG_CATEGORY_STATIC(gstd_property_int_debug);
 G_DEFINE_TYPE (GstdPropertyInt, gstd_property_int, GSTD_TYPE_PROPERTY)
 
 /* VTable */
-GstdReturnCode
-gstd_property_int_to_string (GstdObject * self, gchar ** outstring);
+static void
+gstd_property_int_add_value (GstdProperty * self, GstdIFormatter *formatter,
+    GValue * value);
 
 static void
 gstd_property_int_class_init (GstdPropertyIntClass *klass)
 {
   guint debug_color;
-  GstdObjectClass *gstd_object_class = GSTD_OBJECT_CLASS (klass);
+  GstdPropertyClass *pclass = GSTD_PROPERTY_CLASS (klass);
 
-  gstd_object_class->to_string = gstd_property_int_to_string;
+  pclass->add_value = GST_DEBUG_FUNCPTR(gstd_property_int_add_value);
 
   /* Initialize debug category with nice colors */
   debug_color = GST_DEBUG_FG_BLACK | GST_DEBUG_BOLD | GST_DEBUG_BG_WHITE;
@@ -58,68 +59,21 @@ gstd_property_int_init (GstdPropertyInt *self)
   GST_INFO_OBJECT(self, "Initializing property int");
 }
 
-GstdReturnCode
-gstd_property_int_to_string (GstdObject * self, gchar ** outstring)
+static void
+gstd_property_int_add_value (GstdProperty * self, GstdIFormatter *formatter,
+    GValue * value)
 {
-  GParamSpec * property;
-  guint value;
-  gchar * svalue;
-  gchar *sflags;
-  GValue flags = G_VALUE_INIT;
-  const gchar *typename;
+  gint vint;
+  gchar * sint;
 
-  GstdProperty * prop;
-  prop = GSTD_PROPERTY(self);
+  g_return_if_fail (self);
+  g_return_if_fail (formatter);
+  g_return_if_fail (value);
 
-  g_return_val_if_fail (GSTD_IS_OBJECT (self), GSTD_NULL_ARGUMENT);
-  g_warn_if_fail (!*outstring);
+  vint = g_value_get_int (value);
+  sint = g_strdup_printf ("%u", vint);
 
-  property = g_object_class_find_property(G_OBJECT_GET_CLASS(prop->target), GSTD_OBJECT_NAME(self));
+  gstd_iformatter_set_member_value (formatter, sint);
 
-  /* Describe each parameter using a structure */
-  gstd_iformatter_begin_object (self->formatter);
-
-  gstd_iformatter_set_member_name (self->formatter,"name");
-
-  gstd_iformatter_set_member_value (self->formatter, property->name);
-
-  g_object_get(G_OBJECT(prop->target), property->name, &value, NULL);
-  svalue = g_strdup_printf ("%u", value);
-
-  gstd_iformatter_set_member_name (self->formatter,"value");
-  gstd_iformatter_set_member_value (self->formatter, svalue);
-
-  gstd_iformatter_set_member_name (self->formatter, "param_spec");
-  /* Describe the parameter specs using a structure */
-  gstd_iformatter_begin_object (self->formatter);
-
-  g_value_init (&flags, GSTD_TYPE_PARAM_FLAGS);
-  g_value_set_flags (&flags, property->flags);
-  sflags = g_strdup_value_contents(&flags);
-  g_value_unset(&flags);
-
-  gstd_iformatter_set_member_name (self->formatter, "blurb");
-  gstd_iformatter_set_member_value (self->formatter,property->_blurb);
-
-  gstd_iformatter_set_member_name (self->formatter, "type");
-  gstd_iformatter_set_member_value (self->formatter,typename);
-
-  gstd_iformatter_set_member_name (self->formatter, "access");
-  gstd_iformatter_set_member_value (self->formatter,sflags);
-
-  gstd_iformatter_set_member_name (self->formatter, "construct");
-  gstd_iformatter_set_member_value (self->formatter,
-      GSTD_PARAM_IS_DELETE(property->flags) ? "TRUE" : "FALSE");
-
-  /* Close parameter specs structure */
-  gstd_iformatter_end_object (self->formatter);
-
-  g_free (sflags);
-  g_free (svalue);
-  /* Close parameter structure */
-  gstd_iformatter_end_object (self->formatter);
-
-  gstd_iformatter_generate (self->formatter, outstring);
-
-  return GSTD_EOK;
+  g_free (sint);
 }

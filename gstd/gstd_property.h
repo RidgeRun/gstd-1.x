@@ -57,6 +57,8 @@ struct _GstdProperty
 struct _GstdPropertyClass
 {
   GstdObjectClass parent_class;
+
+  void (* add_value) (GstdProperty * prop, GstdIFormatter * formatter, GValue * value);
 };
 
 G_END_DECLS
