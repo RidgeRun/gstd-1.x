@@ -33,6 +33,7 @@
 
 #include "gstd_iformatter.h"
 #include "gstd_json_builder.h"
+#include "gstd_property_reader.h"
 
 enum
 {
@@ -132,6 +133,9 @@ gstd_element_init (GstdElement * self)
   self->element = GSTD_ELEMENT_DEFAULT_GSTELEMENT;
   self->event_handler = NULL;
   self->formatter = g_object_new (GSTD_TYPE_JSON_BUILDER, NULL);
+
+  gstd_object_set_reader (GSTD_OBJECT(self),
+      g_object_new (GSTD_TYPE_PROPERTY_READER, NULL));
 }
 
 static void
