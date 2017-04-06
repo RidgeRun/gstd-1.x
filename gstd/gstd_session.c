@@ -358,57 +358,6 @@ gstd_pipeline_pause (GstdSession * gstd, const gchar * pipe)
   return gstd_pipeline_set_state (gstd, pipe, GSTD_PIPELINE_PAUSED);
 }
 
-typedef GstdReturnCode eaccess (GstdObject *, const gchar *, ...);
-GstdReturnCode
-gstd_element_generic (GstdSession * gstd, const gchar * pipe,
-    const gchar * name, const gchar * property, gpointer value, eaccess func)
-{
-  GstdObject *element;
-  gchar *uri;
-  GstdReturnCode ret;
-
-  g_return_val_if_fail (GSTD_IS_SESSION (gstd), GSTD_NULL_ARGUMENT);
-  g_return_val_if_fail (pipe, GSTD_NULL_ARGUMENT);
-  g_return_val_if_fail (name, GSTD_NULL_ARGUMENT);
-  g_return_val_if_fail (property, GSTD_NULL_ARGUMENT);
-  g_return_val_if_fail (value, GSTD_NULL_ARGUMENT);
-
-  element = NULL;
-  uri = g_strdup_printf ("/pipelines/%s/elements/%s/", pipe, name);
-  ret = gstd_get_by_uri (gstd, uri, &element);
-  g_free (uri);
-  if (ret)
-    goto baduri;
-
-  ret = func (element, property, value, NULL);
-  g_object_unref (element);
-
-  return ret;
-
-baduri:
-  {
-    if (element)
-      g_object_unref (element);
-    return ret;
-  }
-}
-
-GstdReturnCode
-gstd_element_set (GstdSession * gstd, const gchar * pipe, const gchar * name,
-    const gchar * property, gpointer value)
-{
-  return gstd_element_generic (gstd, pipe, name, property,
-      value, gstd_object_update);
-}
-
-GstdReturnCode
-gstd_element_get (GstdSession * gstd, const gchar * pipe, const gchar * name,
-    const gchar * property, gpointer value)
-{
-  return gstd_element_generic (gstd, pipe, name, property,
-      value, gstd_object_read);
-}
-
 GstdReturnCode
 gstd_get_by_uri (GstdSession * gstd, const gchar * uri, GstdObject ** node)
 {

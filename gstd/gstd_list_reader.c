@@ -128,7 +128,6 @@ gstd_list_reader_read_count (GstdIReader * iface,
     GstdObject * object, GstdObject ** out)
 {
     GstdPropertyInt * count_value;
-    GstdReturnCode ret;
 
     g_return_val_if_fail (iface, GSTD_NULL_ARGUMENT);
     g_return_val_if_fail (object, GSTD_NULL_ARGUMENT);
