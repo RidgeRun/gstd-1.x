@@ -63,17 +63,5 @@ static void
 gstd_property_int_add_value (GstdProperty * self, GstdIFormatter *formatter,
     GValue * value)
 {
-  gint vint;
-  gchar * sint;
-
-  g_return_if_fail (self);
-  g_return_if_fail (formatter);
-  g_return_if_fail (value);
-
-  vint = g_value_get_int (value);
-  sint = g_strdup_printf ("%u", vint);
-
-  gstd_iformatter_set_member_value (formatter, sint);
-
-  g_free (sint);
+  gstd_iformatter_set_value (formatter, value);
 }

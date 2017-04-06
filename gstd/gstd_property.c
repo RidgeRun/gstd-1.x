@@ -189,7 +189,7 @@ gstd_property_to_string (GstdObject * obj, gchar ** outstring)
   gstd_iformatter_begin_object (obj->formatter);
 
   gstd_iformatter_set_member_name (obj->formatter,"name");
-  gstd_iformatter_set_member_value (obj->formatter, property->name);
+  gstd_iformatter_set_string_value (obj->formatter, property->name);
 
   gstd_iformatter_set_member_name (obj->formatter,"value");
 
@@ -206,11 +206,11 @@ gstd_property_to_string (GstdObject * obj, gchar ** outstring)
   gstd_iformatter_begin_object (obj->formatter);
 
   gstd_iformatter_set_member_name (obj->formatter, "blurb");
-  gstd_iformatter_set_member_value (obj->formatter,property->_blurb);
+  gstd_iformatter_set_string_value (obj->formatter,property->_blurb);
 
   typename = g_type_name (property->value_type);
   gstd_iformatter_set_member_name (obj->formatter, "type");
-  gstd_iformatter_set_member_value (obj->formatter,typename);
+  gstd_iformatter_set_string_value (obj->formatter,typename);
 
   g_value_init (&value, GSTD_TYPE_PARAM_FLAGS);
   g_value_set_flags (&value, property->flags);
@@ -218,12 +218,12 @@ gstd_property_to_string (GstdObject * obj, gchar ** outstring)
   g_value_unset(&value);
 
   gstd_iformatter_set_member_name (obj->formatter, "access");
-  gstd_iformatter_set_member_value (obj->formatter,sflags);
+  gstd_iformatter_set_string_value (obj->formatter,sflags);
 
   g_free (sflags);
 
   gstd_iformatter_set_member_name (obj->formatter, "construct");
-  gstd_iformatter_set_member_value (obj->formatter,
+  gstd_iformatter_set_string_value (obj->formatter,
       GSTD_PARAM_IS_DELETE(property->flags) ? "TRUE" : "FALSE");
 
   /* Close parameter specs structure */
@@ -248,6 +248,6 @@ gstd_property_add_value_default (GstdProperty * self, GstdIFormatter * formatter
   g_return_if_fail (value);
 
   svalue = g_strdup_value_contents (value);
-  gstd_iformatter_set_member_value (formatter, svalue);
+  gstd_iformatter_set_string_value (formatter, svalue);
   g_free (svalue);
 }

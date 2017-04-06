@@ -63,13 +63,5 @@ static void
 gstd_property_string_add_value (GstdProperty * self, GstdIFormatter *formatter,
     GValue * value)
 {
-  const gchar * vstring;
-
-  g_return_if_fail (self);
-  g_return_if_fail (formatter);
-  g_return_if_fail (value);
-
-  vstring = g_value_get_string (value);
-
-  gstd_iformatter_set_member_value (formatter, vstring);
+  gstd_iformatter_set_value (formatter, value);
 }

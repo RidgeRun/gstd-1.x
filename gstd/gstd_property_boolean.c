@@ -64,13 +64,5 @@ static void
 gstd_property_boolean_add_value (GstdProperty * self, GstdIFormatter *formatter,
     GValue * value)
 {
-  gboolean vboolean;
-
-  g_return_if_fail (self);
-  g_return_if_fail (formatter);
-  g_return_if_fail (value);
-
-  vboolean = g_value_get_boolean (value);
-
-  gstd_iformatter_set_member_value (formatter, vboolean ? "TRUE" : "FALSE");
+  gstd_iformatter_set_value (formatter, value);
 }
