@@ -33,6 +33,7 @@
 #include "gstd_event_handler.h"
 #include "gstd_pipeline_bus.h"
 #include "gstd_list_reader.h"
+#include "gstd_property_reader.h"
 
 enum
 {
@@ -487,6 +488,8 @@ gstd_pipeline_fill_elements (GstdPipeline * self, GstElement * element)
 
         gstd_element = g_object_new (GSTD_TYPE_ELEMENT, "name",
             GST_OBJECT_NAME (gste), "gstelement", gste, NULL);
+	gstd_object_set_reader (GSTD_OBJECT(self->elements),
+            g_object_new (GSTD_TYPE_PROPERTY_READER, NULL));
         gstd_element_list_append (self->elements, gstd_element);
 
         g_value_reset (&item);
