@@ -37,6 +37,8 @@ static GstdReturnCode gstd_property_reader_read (GstdIReader * iface,
 
 static GstdReturnCode
 gstd_property_mask_type (GstdObject * object, const gchar * name, GstdObject ** out);
+static gboolean
+gstd_property_reader_is_gstd (GParamSpec * pspec, GstdObject * object);
 
 typedef struct _GstdPropertyReaderClass GstdPropertyReaderClass;
 
@@ -87,7 +89,7 @@ gstd_property_reader_read (GstdIReader * iface, GstdObject * object, const gchar
 {
     GObjectClass * klass;
     GParamSpec * pspec;
-    GstdObject * resource;
+    GstdReturnCode ret;
 
     g_return_val_if_fail (iface, GSTD_NULL_ARGUMENT);
     g_return_val_if_fail (object, GSTD_NULL_ARGUMENT);
@@ -108,18 +110,13 @@ gstd_property_reader_read (GstdIReader * iface, GstdObject * object, const gchar
       GST_ERROR_OBJECT (iface, "The resource %s is not readable", name);
       return GSTD_NO_READ;
     }
-
-    if (G_TYPE_IS_DERIVED (pspec->value_type)) {
-      g_object_get(object, name, &resource, NULL);
-      if (GSTD_IS_OBJECT (resource)) {
-	*out = GSTD_OBJECT(resource);
-	return GSTD_EOK;
-      } else {
-	return gstd_property_mask_type (object, name, &resource);
-      }
+    if (gstd_property_reader_is_gstd (pspec, object)) {
+      g_object_get(object, name, out, NULL);
+      ret = GSTD_EOK;
     } else {
-      return gstd_property_mask_type (object, name, &resource);
+      ret = gstd_property_mask_type (object, name, out);
     }
+    return ret;
 }
 
 static GstdReturnCode
@@ -163,4 +160,23 @@ gstd_property_mask_type (GstdObject * object, const gchar * name, GstdObject ** 
     *out = GSTD_OBJECT(g_object_new(type, "name", pspec->name, "target", object, NULL));
 
     return GSTD_EOK;
+}
+
+static gboolean
+gstd_property_reader_is_gstd (GParamSpec * pspec, GstdObject * object)
+{
+  gboolean ret = FALSE;
+  GObject * resource;
+
+  if (G_TYPE_IS_DERIVED (pspec->value_type) && !G_TYPE_IS_ENUM(pspec->value_type) &&
+      !G_TYPE_IS_FLAGS(pspec->value_type))
+  {
+    g_object_get(object, pspec->name, &resource, NULL);
+    if (GSTD_IS_OBJECT (resource)) {
+      ret = TRUE;
+    }
+    g_object_unref(resource);
+  }
+
+  return ret;
 }
