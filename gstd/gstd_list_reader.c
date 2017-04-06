@@ -125,7 +125,7 @@ gstd_list_reader_read_count (GstdIReader * iface,
     g_return_val_if_fail (object, NULL);
 
     count_value = g_object_new(GSTD_TYPE_PROPERTY_INT, "name", "count", "target", object, NULL);
-    return count_value;
+    return GSTD_OBJECT(count_value);
 }
 
 static GstdObject *
