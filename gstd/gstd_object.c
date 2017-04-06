@@ -256,6 +256,12 @@ gstd_object_read_default (GstdObject * self, const gchar * property, va_list va)
       break;
     }
 
+    if (!(G_TYPE_IS_DERIVED (pspec->value_type))) {
+      GST_ERROR_OBJECT (self, "The property %s is not readable", name);
+      ret |= GSTD_NO_READ;
+      break;
+    }
+
     g_value_init (&value, G_PARAM_SPEC_VALUE_TYPE (pspec));
     g_object_get_property (G_OBJECT (self), name, &value);
 
