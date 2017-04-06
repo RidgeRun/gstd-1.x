@@ -86,7 +86,7 @@ gstd_property_class_init (GstdPropertyClass *klass)
 
   gstdc->to_string = GST_DEBUG_FUNCPTR(gstd_property_to_string);
 
-  klass->add_value = NULL;
+  klass->add_value = GST_DEBUG_FUNCPTR(gstd_property_add_value_default);
 
   /* Initialize debug category with nice colors */
   debug_color = GST_DEBUG_FG_BLACK | GST_DEBUG_BOLD | GST_DEBUG_BG_WHITE;
@@ -196,11 +196,8 @@ gstd_property_to_string (GstdObject * obj, gchar ** outstring)
   g_value_init (&value, property->value_type);
   g_object_get_property (G_OBJECT(self->target), property->name, &value);
 
-  if (!klass->add_value) {
-    klass->add_value (self, obj->formatter, &value);
-  } else {
-    gstd_property_add_value_default (self, obj->formatter, &value);
-  }
+  g_assert (klass->add_value);
+  klass->add_value (self, obj->formatter, &value);
 
   g_value_unset (&value);
 
