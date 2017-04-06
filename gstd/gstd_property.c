@@ -211,6 +211,7 @@ gstd_property_to_string (GstdObject * obj, gchar ** outstring)
   gstd_iformatter_set_member_name (obj->formatter, "blurb");
   gstd_iformatter_set_member_value (obj->formatter,property->_blurb);
 
+  typename = g_type_name (property->value_type);
   gstd_iformatter_set_member_name (obj->formatter, "type");
   gstd_iformatter_set_member_value (obj->formatter,typename);
 
