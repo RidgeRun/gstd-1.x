@@ -123,6 +123,7 @@ static GstdObject *
 gstd_property_mask_type (GstdObject * object, const gchar * name)
 {
     GObjectClass * klass;
+    GType type;
     GParamSpec * pspec;
     
     g_return_val_if_fail (object, NULL);
@@ -134,35 +135,27 @@ gstd_property_mask_type (GstdObject * object, const gchar * name)
     switch (pspec->value_type) {
       case G_TYPE_BOOLEAN:
       {
-	GstdPropertyBoolean * boolean_val;
-	boolean_val = g_object_new(GSTD_TYPE_PROPERTY_BOOLEAN, "name", pspec->name,
-	    "target", object, NULL);
-	
-	return boolean_val;
+	type = GSTD_TYPE_PROPERTY_BOOLEAN;
+	break;
       }	
       case G_TYPE_INT:
       case G_TYPE_UINT:
       case G_TYPE_UINT64:
       case G_TYPE_INT64:
       {
-        GstdPropertyInt * int_val;
-	int_val = g_object_new(GSTD_TYPE_PROPERTY_INT, "name", pspec->name, "target",
-	    object, NULL);
-	
-	return int_val;
+	type = GSTD_TYPE_PROPERTY_INT;
+	break;
       }	  
       case G_TYPE_STRING:
       {
-        GstdPropertyString * string_val;
-	string_val = g_object_new(GSTD_TYPE_PROPERTY_INT, "name", pspec->name, "target",
-	    object, NULL);
-	
-	return string_val;
+	type = GSTD_TYPE_PROPERTY_STRING;
+	break;	
       }
       default:
       {
-	GST_ERROR_OBJECT (object, "%s is not a valid resource", name);
 	return NULL;
       }
     }
+
+    return GSTD_OBJECT(g_object_new(type, "name", pspec->name, "target", object, NULL));
 }
