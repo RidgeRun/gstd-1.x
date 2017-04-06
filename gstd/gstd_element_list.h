@@ -22,9 +22,7 @@
 #define __GSTD_ELEMENT_LIST_H__
 
 #include <glib.h>
-#include "gstd_object.h"
-#include "gstd_icreator.h"
-#include "gstd_ideleter.h"
+#include "gstd_return_codes.h"
 #include "gstd_element.h"
 
 G_BEGIN_DECLS
@@ -46,6 +44,7 @@ G_BEGIN_DECLS
 typedef struct _GstdElementList GstdElementList;
 typedef struct _GstdElementListClass GstdElementListClass;
 GType gstd_element_list_get_type ();
+
 GstdReturnCode gstd_element_list_append (GstdElementList *, GstdElement *);
 
 G_END_DECLS

@@ -20,8 +20,7 @@
 
 #include "gstd_element_list.h"
 #include "gstd_list.h"
-#include "gstd_no_creator.h"
-#include "gstd_no_deleter.h"
+#include "gstd_list_reader.h"
 
 /* Gstd Core debugging category */
 GST_DEBUG_CATEGORY_STATIC (gstd_element_list_debug);
@@ -30,11 +29,6 @@ GST_DEBUG_CATEGORY_STATIC (gstd_element_list_debug);
 #define GSTD_DEBUG_DEFAULT_LEVEL GST_LEVEL_INFO
 
 /* VTable */
-static GstdReturnCode
-gstd_element_list_create (GstdObject * object, const gchar * name,
-    const gchar * description);
-static GstdReturnCode gstd_element_list_delete (GstdObject * object,
-    const gchar * name);
 
 /**
  * GstdElementList:
@@ -47,7 +41,7 @@ struct _GstdElementList
 
 struct _GstdElementListClass
 {
-  GstdObjectClass parent_class;
+  GstdListClass parent_class;
 };
 
 G_DEFINE_TYPE (GstdElementList, gstd_element_list, GSTD_TYPE_LIST);
@@ -55,11 +49,7 @@ G_DEFINE_TYPE (GstdElementList, gstd_element_list, GSTD_TYPE_LIST);
 static void
 gstd_element_list_class_init (GstdElementListClass * klass)
 {
-  GstdObjectClass *gstd_object_class = GSTD_OBJECT_CLASS (klass);
   guint debug_color;
-
-  gstd_object_class->create = gstd_element_list_create;
-  gstd_object_class->delete = gstd_element_list_delete;
 
   /* Initialize debug category with nice colors */
   debug_color = GST_DEBUG_FG_BLACK | GST_DEBUG_BOLD | GST_DEBUG_BG_WHITE;
@@ -70,23 +60,8 @@ gstd_element_list_class_init (GstdElementListClass * klass)
 static void
 gstd_element_list_init (GstdElementList * self)
 {
-  GstdList *list;
-
-  list = GSTD_LIST (self);
-
-  gstd_list_set_creator (list, g_object_new (GSTD_TYPE_NO_CREATOR, NULL));
-  gstd_list_set_deleter (list, g_object_new (GSTD_TYPE_NO_DELETER, NULL));
-}
-
-static GstdReturnCode
-gstd_element_list_create (GstdObject * object, const gchar * name,
-    const gchar * description)
-{
-  g_return_val_if_fail (GSTD_IS_OBJECT (object), GSTD_NULL_ARGUMENT);
-
-  gstd_icreator_create (object->creator, name, description, NULL);
-
-  return GSTD_EOK;
+  gstd_object_set_reader (GSTD_OBJECT(self),
+      g_object_new (GSTD_TYPE_LIST_READER, NULL));
 }
 
 GstdReturnCode
@@ -101,16 +76,6 @@ gstd_element_list_append (GstdElementList * self, GstdElement * element)
 
   gstdlist->list = g_list_append (gstdlist->list, element);
   gstdlist->count++;
-
-  return GSTD_EOK;
-}
-
-static GstdReturnCode
-gstd_element_list_delete (GstdObject * object, const gchar * name)
-{
-  g_return_val_if_fail (GSTD_IS_OBJECT (object), GSTD_NULL_ARGUMENT);
-
-  gstd_ideleter_delete (object->deleter, NULL);
 
   return GSTD_EOK;
 }
