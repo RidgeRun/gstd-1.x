@@ -22,6 +22,7 @@
 #define __GSTD_IREADER_H__
 
 #include <gst/gst.h>
+#include "gstd_return_codes.h"
 
 G_BEGIN_DECLS
 #define GSTD_TYPE_IREADER                (gstd_ireader_get_type ())
@@ -38,12 +39,13 @@ struct _GstdIReaderInterface
 {
   GTypeInterface parent;
 
-  GstdObject * (*read) (GstdIReader * self, GstdObject * object, const gchar * name);
+  GstdReturnCode (*read) (GstdIReader * self, GstdObject * object, const gchar * name,
+      GstdObject ** out);
 };
 
 GType gstd_ireader_get_type (void);
 
-GstdObject * gstd_ireader_read (GstdIReader * self, GstdObject * object, const gchar * name);
+GstdReturnCode gstd_ireader_read (GstdIReader * self, GstdObject * object, const gchar * name, GstdObject **out);
 
 G_END_DECLS
 #endif // __GSTD_IREADER_H__

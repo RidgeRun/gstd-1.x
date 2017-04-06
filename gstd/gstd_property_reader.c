@@ -32,11 +32,11 @@ GST_DEBUG_CATEGORY_STATIC (gstd_property_reader_debug);
 
 #define GSTD_DEBUG_DEFAULT_LEVEL GST_LEVEL_INFO
 
-static GstdObject * gstd_property_reader_read (GstdIReader * iface,
-    GstdObject * object, const gchar * name);
+static GstdReturnCode gstd_property_reader_read (GstdIReader * iface,
+    GstdObject * object, const gchar * name, GstdObject ** out);
 
-static GstdObject *
-gstd_property_mask_type (GstdObject * object, const gchar * name);
+static GstdReturnCode
+gstd_property_mask_type (GstdObject * object, const gchar * name, GstdObject ** out);
 
 typedef struct _GstdPropertyReaderClass GstdPropertyReaderClass;
 
@@ -82,16 +82,16 @@ gstd_property_reader_init (GstdPropertyReader * self)
   GST_INFO_OBJECT (self, "Initializing property reader");
 }
 
-static GstdObject *
-gstd_property_reader_read (GstdIReader * iface, GstdObject * object, const gchar * name)
+static GstdReturnCode
+gstd_property_reader_read (GstdIReader * iface, GstdObject * object, const gchar * name, GstdObject ** out)
 {
     GObjectClass * klass;
     GParamSpec * pspec;
-    GObject * resource;
+    GstdObject * resource;
 
-    g_return_val_if_fail (iface, NULL);
-    g_return_val_if_fail (object, NULL);
-    g_return_val_if_fail (name, NULL);
+    g_return_val_if_fail (iface, GSTD_NULL_ARGUMENT);
+    g_return_val_if_fail (object, GSTD_NULL_ARGUMENT);
+    g_return_val_if_fail (name, GSTD_NULL_ARGUMENT);
 
     klass = G_OBJECT_GET_CLASS(object);
     pspec = g_object_class_find_property (klass, name);
@@ -100,36 +100,37 @@ gstd_property_reader_read (GstdIReader * iface, GstdObject * object, const gchar
     if (!pspec) {
       GST_ERROR_OBJECT (iface, "No %s resource in %s",
           name, GSTD_OBJECT_NAME (object));
-      return NULL;
+      return GSTD_NO_RESOURCE;
     }
 
     /* Property is not readable */
     if (!GSTD_PARAM_IS_READ (pspec->flags) || !(pspec->flags & G_PARAM_READABLE)) {
       GST_ERROR_OBJECT (iface, "The resource %s is not readable", name);
-      return NULL;
+      return GSTD_NO_READ;
     }
 
     if (G_TYPE_IS_DERIVED (pspec->value_type)) {
       g_object_get(object, name, &resource, NULL);
       if (GSTD_IS_OBJECT (resource)) {
-	return GSTD_OBJECT(resource);
+	*out = GSTD_OBJECT(resource);
+	return GSTD_EOK;
       } else {
-	return gstd_property_mask_type (object, name);
+	return gstd_property_mask_type (object, name, &resource);
       }
     } else {
-      return gstd_property_mask_type (object, name);
+      return gstd_property_mask_type (object, name, &resource);
     }
 }
 
-static GstdObject *
-gstd_property_mask_type (GstdObject * object, const gchar * name)
+static GstdReturnCode
+gstd_property_mask_type (GstdObject * object, const gchar * name, GstdObject ** out)
 {
     GObjectClass * klass;
     GType type;
     GParamSpec * pspec;
     
-    g_return_val_if_fail (object, NULL);
-    g_return_val_if_fail (name, NULL);
+    g_return_val_if_fail (object, GSTD_NULL_ARGUMENT);
+    g_return_val_if_fail (name, GSTD_NULL_ARGUMENT);
     
     klass = G_OBJECT_GET_CLASS(object);
     pspec = g_object_class_find_property (klass, name);
@@ -159,5 +160,7 @@ gstd_property_mask_type (GstdObject * object, const gchar * name)
       }
     }
 
-    return GSTD_OBJECT(g_object_new(type, "name", pspec->name, "target", object, NULL));
+    *out = GSTD_OBJECT(g_object_new(type, "name", pspec->name, "target", object, NULL));
+
+    return GSTD_EOK;
 }

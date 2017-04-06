@@ -26,7 +26,7 @@ GST_DEBUG_CATEGORY_STATIC (gstd_no_reader_debug);
 
 #define GSTD_DEBUG_DEFAULT_LEVEL GST_LEVEL_INFO
 
-static GstdObject * gstd_no_reader_read (GstdIReader * iface, GstdObject * object, const gchar * name);
+static GstdReturnCode gstd_no_reader_read (GstdIReader * iface, GstdObject * object, const gchar * name, GstdObject ** out);
 
 typedef struct _GstdNoReaderClass GstdNoReaderClass;
 
@@ -70,9 +70,9 @@ gstd_no_reader_init (GstdNoReader * self)
   GST_INFO_OBJECT (self, "Initializing no reader");
 }
 
-static GstdObject *
-gstd_no_reader_read (GstdIReader * iface, GstdObject * object, const gchar * name)
+static GstdReturnCode
+gstd_no_reader_read (GstdIReader * iface, GstdObject * object, const gchar * name, GstdObject ** out)
 {
   GST_ERROR_OBJECT (iface, "Unable to read from this resource");
-  return NULL;
+  return GSTD_NO_READ;
 }

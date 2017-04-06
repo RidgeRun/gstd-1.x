@@ -327,7 +327,7 @@ gstd_list_find_child (GstdList *self, const gchar * name)
 gboolean
 gstd_list_append_child (GstdList * self, GstdObject * child)
 {
-  GstdList * found;
+  GList * found;
   
   g_return_val_if_fail (self, GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (child, GSTD_NULL_ARGUMENT);
