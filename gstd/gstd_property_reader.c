@@ -87,7 +87,7 @@ gstd_property_reader_read (GstdIReader * iface, GstdObject * object, const gchar
 {
     GObjectClass * klass;
     GParamSpec * pspec;
-    GstdObject * resource;
+    GObject * resource;
 
     g_return_val_if_fail (iface, NULL);
     g_return_val_if_fail (object, NULL);
@@ -109,14 +109,16 @@ gstd_property_reader_read (GstdIReader * iface, GstdObject * object, const gchar
       return NULL;
     }
 
-    g_object_get(object, name, &resource, NULL);
-
-    /* We only support gstd objects */
-    if (!GSTD_IS_OBJECT(resource)) {
+    if (G_TYPE_IS_DERIVED (pspec->value_type)) {
+      g_object_get(object, name, &resource, NULL);
+      if (GSTD_IS_OBJECT (resource)) {
+	return GSTD_OBJECT(resource);
+      } else {
+	return gstd_property_mask_type (object, name);
+      }
+    } else {
       return gstd_property_mask_type (object, name);
     }
-
-    return resource;
 }
 
 static GstdObject *
@@ -153,7 +155,7 @@ gstd_property_mask_type (GstdObject * object, const gchar * name)
       }
       default:
       {
-	return NULL;
+	type = GSTD_TYPE_PROPERTY;
       }
     }
 
