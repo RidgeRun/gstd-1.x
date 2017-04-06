@@ -239,7 +239,7 @@ gstd_object_read_default (GstdObject * self, const gchar * name, GstdObject ** r
 
   *resource =  gstd_ireader_read (self->reader, self, name);
 
-  if (NULL == resource) {
+  if (NULL == *resource) {
     return GSTD_NO_READ;
   }
 
