@@ -32,6 +32,7 @@
 #include "gstd_element_list.h"
 #include "gstd_event_handler.h"
 #include "gstd_pipeline_bus.h"
+#include "gstd_list_reader.h"
 
 enum
 {
@@ -190,8 +191,12 @@ gstd_pipeline_init (GstdPipeline * self)
   self->pipeline = NULL;
   self->event_handler = NULL;
   self->pipeline_bus = NULL;
+
   self->elements = g_object_new (GSTD_TYPE_ELEMENT_LIST, "name", "elements",
       "node-type", GSTD_TYPE_ELEMENT, "flags", GSTD_PARAM_READ, NULL);
+
+  gstd_object_set_reader (GSTD_OBJECT(self->elements),
+      g_object_new (GSTD_TYPE_LIST_READER, NULL));
 }
 
 static void
