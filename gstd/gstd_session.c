@@ -127,6 +127,10 @@ gstd_session_init (GstdSession * self)
   GST_INFO_OBJECT (self, "Initializing gstd session");
 
   object = GSTD_OBJECT(self);
+
+  gstd_object_set_reader (GSTD_OBJECT(self),
+      g_object_new (GSTD_TYPE_PROPERTY_READER, NULL));
+
   object->reader = g_object_new (GSTD_TYPE_PROPERTY_READER, NULL);
 
   self->pipelines =
