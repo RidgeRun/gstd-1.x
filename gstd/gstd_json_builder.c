@@ -134,14 +134,71 @@ gstd_json_set_member_name (GstdIFormatter *iface, const gchar * name)
 }
 
 static void
-gstd_json_set_member_value (GstdIFormatter *iface, const gchar * value)
+gstd_json_set_string_value (GstdIFormatter *iface, const gchar * value)
 {
   GstdJsonBuilder *self;
 
-  g_return_val_if_fail (GSTD_IS_JSON_BUILDER (iface), GSTD_NULL_ARGUMENT);
+  g_return_if_fail (GSTD_IS_JSON_BUILDER (iface));
+  g_return_if_fail (value);
 
   self = GSTD_JSON_BUILDER(iface);
   json_builder_add_string_value (self->json_builder, value);
+}
+
+static void
+gstd_json_set_value (GstdIFormatter *iface, GValue * value)
+{
+  GstdJsonBuilder *self;
+  gint64 int64_value;
+  guint64 uint64_value;
+  gdouble double_value;
+  gchar *str_value;
+
+  g_return_if_fail (GSTD_IS_JSON_BUILDER (iface));
+  g_return_if_fail (value);
+
+  self = GSTD_JSON_BUILDER(iface);
+
+  switch(G_VALUE_TYPE(value))
+  {
+    /* Since Json format only supports string, boolean, integer and
+     * double, only related gtypes are cast to this formats
+     */
+    case G_TYPE_BOOLEAN:
+      json_builder_add_boolean_value (self->json_builder, g_value_get_boolean(value));
+      break;
+    case G_TYPE_INT:
+      int64_value = g_value_get_int (value);
+      json_builder_add_int_value (self->json_builder,int64_value);
+      break;
+    case G_TYPE_UINT:
+      uint64_value = g_value_get_uint (value);
+      json_builder_add_int_value (self->json_builder,uint64_value);
+      break;
+    case G_TYPE_INT64:
+      int64_value = g_value_get_int64 (value);
+      json_builder_add_int_value (self->json_builder,int64_value);
+      break;
+    case G_TYPE_UINT64:
+      uint64_value = g_value_get_uint64 (value);
+      json_builder_add_int_value (self->json_builder,uint64_value);
+      break;
+    case G_TYPE_FLOAT:
+      double_value = g_value_get_float(value);
+      json_builder_add_double_value (self->json_builder,double_value);
+      break;
+    case G_TYPE_DOUBLE:
+      double_value = g_value_get_double(value);
+      json_builder_add_double_value (self->json_builder,double_value);
+      break;
+    default:
+    /* if the gvalue is not a boolean, integer or float point value, then
+     * gvalue is converted to string
+     */
+      str_value = g_strdup_value_contents(value);
+      json_builder_add_string_value (self->json_builder, str_value);
+      g_free (str_value);
+  }
 }
 
 static void
@@ -198,6 +255,7 @@ gstd_iformatter_interface_init (GstdIFormatterInterface *iface)
   iface->begin_array = gstd_json_builder_begin_array;
   iface->end_array = gstd_json_builder_end_array;
   iface->set_member_name = gstd_json_set_member_name;
-  iface->set_member_value = gstd_json_set_member_value;
+  iface->set_string_value = gstd_json_set_string_value;
+  iface->set_value = gstd_json_set_value;
   iface->generate = gstd_json_builder_generate;
 }
