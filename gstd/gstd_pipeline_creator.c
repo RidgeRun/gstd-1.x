@@ -20,6 +20,7 @@
 
 #include "gstd_pipeline_creator.h"
 #include "gstd_pipeline.h"
+#include "gstd_property_reader.h"
 
 /* Gstd Core debugging category */
 GST_DEBUG_CATEGORY_STATIC (gstd_pipeline_creator_debug);
@@ -86,10 +87,12 @@ gstd_pipeline_creator_create (GstdICreator * iface, const gchar * name,
 
   pipeline = g_object_new (GSTD_TYPE_PIPELINE, "name", name, "description",
       description, NULL);
+  *out = GSTD_OBJECT(pipeline);
 
-  if (pipeline) {
-    *out = GSTD_OBJECT (pipeline);
-  } else {
-    *out = NULL;
+  if (!pipeline) {
+    return;
   }
+
+  gstd_object_set_reader (GSTD_OBJECT(pipeline),
+      g_object_new (GSTD_TYPE_PROPERTY_READER, NULL));
 }
