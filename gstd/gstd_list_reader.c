@@ -103,6 +103,7 @@ gstd_list_reader_read (GstdIReader * iface, GstdObject * object, const gchar * n
 
     if (!resource) {
 	GST_ERROR_OBJECT (iface, "No resource %s in %s", name, GST_OBJECT_NAME(object));
+	goto out;
     }
 
     if (!GSTD_IS_OBJECT(resource)) {
@@ -110,7 +111,8 @@ gstd_list_reader_read (GstdIReader * iface, GstdObject * object, const gchar * n
 	g_object_unref (resource);
 	resource = NULL;
     }
-    
+
+ out:
     return resource;
 }
 
@@ -132,9 +134,16 @@ static GstdObject *
 gstd_list_reader_read_child (GstdIReader * iface,
     GstdObject * object, const gchar * name)
 {
+    gpointer found = NULL;
+    GstdObject * ret = NULL;
+
     g_return_val_if_fail (iface, NULL);
     g_return_val_if_fail (object, NULL);
     g_return_val_if_fail (name, NULL);
 
-    return gstd_list_find_child (GSTD_LIST(object), name);
+    found = gstd_list_find_child (GSTD_LIST(object), name);
+    if (found) {
+      ret = GSTD_OBJECT(g_object_ref (found));
+    }
+    return ret;
 }
