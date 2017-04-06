@@ -206,7 +206,6 @@ gstd_list_create (GstdObject * object, const gchar * name,
 {
   GstdList *self;
   GstdObject *out;
-  GList *found;
 
   g_return_val_if_fail (GSTD_IS_OBJECT (object), GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (name, GSTD_NULL_ARGUMENT);
@@ -215,26 +214,10 @@ gstd_list_create (GstdObject * object, const gchar * name,
   self = GSTD_LIST (object);
 
   g_return_val_if_fail (object->creator, GSTD_MISSING_INITIALIZATION);
-
-  /* Test if the resource to create already exists */
-  found = g_list_find_custom (self->list, name, gstd_list_find_node);
-  if (found)
-    goto exists;
-
   gstd_icreator_create (object->creator, name, description, &out);
-  self->count++;
 
-  self->list = g_list_append (self->list, out);
-  self->count = g_list_length (self->list);
-  GST_INFO_OBJECT (self, "Appended %s to %s list", GSTD_OBJECT_NAME (out),
-      GSTD_OBJECT_NAME (self));
-
-  return GSTD_EOK;
-
-exists:
-  {
-    GST_ERROR_OBJECT (object, "The resource \"%s\" already exists in \"%s\"",
-        name, GSTD_OBJECT_NAME (self));
+  if (!gstd_list_append_child (self, out)) {
+    g_object_unref (out);
     return GSTD_EXISTING_RESOURCE;
   }
 
@@ -341,3 +324,30 @@ gstd_list_find_child (GstdList *self, const gchar * name)
     return child;
 }
 
+gboolean
+gstd_list_append_child (GstdList * self, GstdObject * child)
+{
+  GstdList * found;
+  
+  g_return_val_if_fail (self, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (child, GSTD_NULL_ARGUMENT);
+
+  /* Test if the resource to create already exists */
+  found = g_list_find_custom (self->list, GSTD_OBJECT_NAME(child), gstd_list_find_node);
+  if (found)
+    goto exists;
+
+  self->list = g_list_append (self->list, child);
+  self->count = g_list_length (self->list);
+  GST_INFO_OBJECT (self, "Appended %s to %s list", GSTD_OBJECT_NAME (child),
+      GSTD_OBJECT_NAME (self));
+
+  return TRUE;
+
+exists:
+  {
+    GST_ERROR_OBJECT (self, "The resource \"%s\" already exists in \"%s\"",
+        GSTD_OBJECT_NAME(child), GSTD_OBJECT_NAME (self));
+    return FALSE;
+  }
+}

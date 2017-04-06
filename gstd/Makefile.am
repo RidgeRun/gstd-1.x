@@ -13,7 +13,6 @@ libgstd_core_la_SOURCES = gstd_session.c		\
 			  gstd_pipeline_creator.c	\
 			  gstd_no_creator.c		\
 			  gstd_json_builder.c		\
-			  gstd_element_list.c		\
 			  gstd_ideleter.c		\
 			  gstd_pipeline_deleter.c	\
 			  gstd_no_deleter.c		\
@@ -56,7 +55,6 @@ gstdinclude_HEADERS = \
 		  gstd_pipeline_creator.h	\
 		  gstd_json_builder.h		\
 		  gstd_no_creator.h		\
-		  gstd_element_list.h		\
 		  gstd_ideleter.h		\
 		  gstd_pipeline_deleter.h	\
 		  gstd_no_deleter.h		\
