@@ -617,7 +617,7 @@ gstd_tcp_pipeline_play (GstdSession * session, gchar * action, gchar * args,
   g_return_val_if_fail (GSTD_IS_SESSION (session), GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (args, GSTD_NULL_ARGUMENT);
 
-  uri = g_strdup_printf ("/pipelines/%s state playing", args);
+  uri = g_strdup_printf ("/pipelines/%s/state playing", args);
   ret = gstd_tcp_parse_raw_cmd (session, "update", uri, response);
   g_free (uri);
 
@@ -634,7 +634,7 @@ gstd_tcp_pipeline_pause (GstdSession * session, gchar * action, gchar * args,
   g_return_val_if_fail (GSTD_IS_SESSION (session), GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (args, GSTD_NULL_ARGUMENT);
 
-  uri = g_strdup_printf ("/pipelines/%s state paused", args);
+  uri = g_strdup_printf ("/pipelines/%s/state paused", args);
   ret = gstd_tcp_parse_raw_cmd (session, "update", uri, response);
   g_free (uri);
 
@@ -651,7 +651,7 @@ gstd_tcp_pipeline_stop (GstdSession * session, gchar * action, gchar * args,
   g_return_val_if_fail (GSTD_IS_SESSION (session), GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (args, GSTD_NULL_ARGUMENT);
 
-  uri = g_strdup_printf ("/pipelines/%s state null", args);
+  uri = g_strdup_printf ("/pipelines/%s/state null", args);
   ret = gstd_tcp_parse_raw_cmd (session, "update", uri, response);
   g_free (uri);
 
@@ -675,7 +675,7 @@ gstd_tcp_element_set (GstdSession * session, gchar * action, gchar * args,
   check_argument (tokens[2], GSTD_BAD_COMMAND);
   check_argument (tokens[3], GSTD_BAD_COMMAND);
 
-  uri = g_strdup_printf ("/pipelines/%s/elements/%s %s %s",
+  uri = g_strdup_printf ("/pipelines/%s/elements/%s/properties/%s %s",
       tokens[0], tokens[1], tokens[2], tokens[3]);
   ret = gstd_tcp_parse_raw_cmd (session, "update", uri, response);
 
@@ -701,7 +701,7 @@ gstd_tcp_element_get (GstdSession * session, gchar * action, gchar * args,
   check_argument (tokens[1], GSTD_BAD_COMMAND);
   check_argument (tokens[2], GSTD_BAD_COMMAND);
 
-  uri = g_strdup_printf ("/pipelines/%s/elements/%s %s",
+  uri = g_strdup_printf ("/pipelines/%s/elements/%s/properties/%s",
       tokens[0], tokens[1], tokens[2]);
   ret = gstd_tcp_parse_raw_cmd (session, "read", uri, response);
 
@@ -759,7 +759,7 @@ gstd_tcp_list_properties (GstdSession * session, gchar * action, gchar * args,
   check_argument (tokens[0], GSTD_BAD_COMMAND);
   check_argument (tokens[1], GSTD_BAD_COMMAND);
 
-  uri = g_strdup_printf ("/pipelines/%s/elements/%s", tokens[0], tokens[1]);
+  uri = g_strdup_printf ("/pipelines/%s/elements/%s/properties", tokens[0], tokens[1]);
   ret = gstd_tcp_parse_raw_cmd (session, "read", uri, response);
 
   g_free (uri);
