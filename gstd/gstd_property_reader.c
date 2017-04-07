@@ -25,6 +25,7 @@
 #include "gstd_property_int.h"
 #include "gstd_property_string.h"
 #include "gstd_property_boolean.h"
+#include "gstd_property_enum.h"
 
 /* Gstd Core debugging category */
 GST_DEBUG_CATEGORY_STATIC (gstd_property_reader_debug);
@@ -153,7 +154,11 @@ gstd_property_mask_type (GstdObject * object, const gchar * name, GstdObject ** 
       }
       default:
       {
-	type = GSTD_TYPE_PROPERTY;
+	if (G_TYPE_IS_ENUM(pspec->value_type)) {
+	  type = GSTD_TYPE_PROPERTY_ENUM;
+	} else {
+	  type = GSTD_TYPE_PROPERTY;
+	}
       }
     }
 

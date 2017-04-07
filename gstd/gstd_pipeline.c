@@ -237,12 +237,15 @@ static void
 gstd_pipeline_dispose (GObject * object)
 {
   GstdPipeline *self = GSTD_PIPELINE (object);
+  GstdObject *state;
 
   GST_INFO_OBJECT (self, "Disposing %s pipeline", GSTD_OBJECT_NAME (self));
 
   /* Stop the pipe if playing */
   if (self->pipeline) {
-    gstd_object_update (GSTD_OBJECT (self), "state", GSTD_PIPELINE_NULL, NULL);
+    gstd_object_read (GSTD_OBJECT(self), "state", &state);
+    gstd_object_update (state, "NULL");
+    g_object_unref (state);
   }
 
   if (self->description) {

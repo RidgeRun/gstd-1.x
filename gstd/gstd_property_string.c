@@ -37,13 +37,17 @@ G_DEFINE_TYPE (GstdPropertyString, gstd_property_string, GSTD_TYPE_PROPERTY)
 static void
 gstd_property_string_add_value (GstdProperty * self, GstdIFormatter *formatter,
     GValue * value);
+static GstdReturnCode
+gstd_property_string_update (GstdObject * object, const gchar * arg);
 
 static void
 gstd_property_string_class_init (GstdPropertyStringClass *klass)
 {
   guint debug_color;
   GstdPropertyClass *pclass = GSTD_PROPERTY_CLASS (klass);
+  GstdObjectClass *oclass = GSTD_OBJECT_CLASS (klass);
 
+  oclass->update = GST_DEBUG_FUNCPTR(gstd_property_string_update);
   pclass->add_value = GST_DEBUG_FUNCPTR(gstd_property_string_add_value);
 
   /* Initialize debug category with nice colors */
@@ -64,4 +68,19 @@ gstd_property_string_add_value (GstdProperty * self, GstdIFormatter *formatter,
     GValue * value)
 {
   gstd_iformatter_set_value (formatter, value);
+}
+
+static GstdReturnCode
+gstd_property_string_update (GstdObject * object, const gchar * value)
+{
+  GstdProperty * prop;
+
+  g_return_val_if_fail (object, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (value, GSTD_NULL_ARGUMENT);
+
+  prop = GSTD_PROPERTY (object);
+
+  g_object_set (prop->target, GSTD_OBJECT_NAME(prop), value, NULL);
+
+  return GSTD_EOK;
 }

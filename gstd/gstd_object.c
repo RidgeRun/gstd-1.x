@@ -31,6 +31,7 @@
 #include "gstd_object.h"
 #include "gstd_no_creator.h"
 #include "gstd_no_reader.h"
+#include "gstd_no_updater.h"
 #include "gstd_no_deleter.h"
 
 #include "gstd_json_builder.h"
@@ -60,7 +61,7 @@ gstd_object_create_default (GstdObject * object, const gchar * name,
 static GstdReturnCode
 gstd_object_read_default (GstdObject *, const gchar *, GstdObject **);
 static GstdReturnCode
-gstd_object_update_default (GstdObject *, const gchar *, va_list);
+gstd_object_update_default (GstdObject *, const gchar *);
 static GstdReturnCode
 gstd_object_delete_default (GstdObject * object, const gchar * name);
 static GstdReturnCode
@@ -127,6 +128,7 @@ gstd_object_init (GstdObject * self)
   self->code = GSTD_EOK;
   self->creator = g_object_new (GSTD_TYPE_NO_CREATOR, NULL);
   self->reader = g_object_new (GSTD_TYPE_NO_READER, NULL);
+  self->updater = g_object_new (GSTD_TYPE_NO_UPDATER, NULL);
   self->deleter = g_object_new (GSTD_TYPE_NO_DELETER, NULL);
   self->formatter = g_object_new (GSTD_TYPE_JSON_BUILDER, NULL);
   g_mutex_init (&self->codelock);
@@ -241,53 +243,14 @@ gstd_object_read_default (GstdObject * self, const gchar * name, GstdObject ** r
 }
 
 static GstdReturnCode
-gstd_object_update_default (GstdObject * self, const gchar * property,
-    va_list va)
+gstd_object_update_default (GstdObject * self, const gchar * value)
 {
-  GParamSpec *pspec;
-  const gchar *name;
-  GstdReturnCode ret;
-  GValue value = G_VALUE_INIT;
-  gchar *error = NULL;
+  g_return_val_if_fail (GSTD_IS_OBJECT(self), GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (value, GSTD_NULL_ARGUMENT);
 
-  g_return_val_if_fail (GSTD_IS_OBJECT (self), GSTD_NULL_ARGUMENT);
-  g_return_val_if_fail (property, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (self->updater, GSTD_MISSING_INITIALIZATION);
 
-  name = property;
-  ret = GSTD_EOK;
-
-  while (name) {
-    pspec = g_object_class_find_property (G_OBJECT_GET_CLASS (self), name);
-    if (!pspec) {
-      GST_ERROR_OBJECT (self, "The property %s is not a property in %s",
-          name, GSTD_OBJECT_NAME (self));
-      ret |= GSTD_NO_UPDATE;
-      break;
-    }
-
-    if (pspec->flags & G_PARAM_WRITABLE & !G_PARAM_CONSTRUCT_ONLY) {
-      GST_ERROR_OBJECT (self, "The property %s is not writable", name);
-      ret |= GSTD_NO_UPDATE;
-      break;
-    }
-
-    g_value_init (&value, G_PARAM_SPEC_VALUE_TYPE (pspec));
-    G_VALUE_COLLECT (&value, va, 0, &error);
-    if (error) {
-      GST_ERROR_OBJECT (self, "%s", error);
-      g_free (error);
-      ret |= GSTD_NO_CREATE;
-    } else {
-      g_object_set_property (G_OBJECT (self), name, &value);
-      GST_INFO_OBJECT (self, "Wrote object %s from %s", property,
-          GSTD_OBJECT_NAME (self));
-    }
-
-    g_value_unset (&value);
-    name = va_arg (va, const gchar *);
-  }
-
-  return ret;
+  return gstd_iupdater_update (self->updater, self, value);
 }
 
 
@@ -430,19 +393,12 @@ gstd_object_read (GstdObject * object, const gchar * property, GstdObject ** res
 }
 
 GstdReturnCode
-gstd_object_update (GstdObject * object, const gchar * property, ...)
+gstd_object_update (GstdObject * object, const gchar * value)
 {
-  va_list va;
-  GstdReturnCode ret;
-
   g_return_val_if_fail (GSTD_IS_OBJECT (object), GSTD_NULL_ARGUMENT);
-  g_return_val_if_fail (property, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (value, GSTD_NULL_ARGUMENT);
 
-  va_start (va, property);
-  ret = GSTD_OBJECT_GET_CLASS (object)->update (object, property, va);
-  va_end (va);
-
-  return ret;
+  return GSTD_OBJECT_GET_CLASS (object)->update (object, value);
 }
 
 GstdReturnCode
@@ -493,6 +449,22 @@ gstd_object_set_reader (GstdObject * self, GstdIReader * reader)
   }
 
   object->reader = reader;
+}
+
+void
+gstd_object_set_updater (GstdObject * self, GstdIUpdater * updater)
+{
+  GstdObject *object;
+
+  g_return_if_fail (self);
+
+  object = GSTD_OBJECT (self);
+
+  if (object->updater != NULL) {
+    g_object_unref (object->updater);
+  }
+
+  object->updater = updater;
 }
 
 void

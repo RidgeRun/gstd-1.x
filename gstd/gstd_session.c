@@ -296,7 +296,7 @@ gstd_pipeline_set_state (GstdSession * gstd, const gchar * pipe,
   if (ret)
     goto noelement;
 
-  ret = gstd_object_update (pipeline, "state", state, NULL);
+  ret = gstd_object_update (pipeline, NULL);
 
   g_object_unref (pipeline);
   g_free (uri);
