@@ -89,7 +89,7 @@ gstd_pipeline_deleter_delete (GstdIDeleter * iface, GstdObject * object)
   g_return_if_fail (iface);
 
   /* Stop the pipe if playing */
-  gstd_object_update (GSTD_OBJECT (object), "state", GSTD_PIPELINE_NULL, NULL);
+  gstd_object_update (GSTD_OBJECT (object), NULL);
 
   g_object_unref (object);
 }

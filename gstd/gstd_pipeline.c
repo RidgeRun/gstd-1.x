@@ -242,7 +242,7 @@ gstd_pipeline_dispose (GObject * object)
 
   /* Stop the pipe if playing */
   if (self->pipeline) {
-    gstd_object_update (GSTD_OBJECT (self), "state", GSTD_PIPELINE_NULL, NULL);
+    gstd_object_update (GSTD_OBJECT (self), NULL);
   }
 
   if (self->description) {

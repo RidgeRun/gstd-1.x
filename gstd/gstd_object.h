@@ -25,6 +25,7 @@
 
 #include "gstd_icreator.h"
 #include "gstd_ireader.h"
+#include "gstd_iupdater.h"
 #include "gstd_ideleter.h"
 #include "gstd_iformatter.h"
 
@@ -68,6 +69,7 @@ struct _GstdObject
   /* CRUD behaviour */
   GstdICreator *creator;
   GstdIReader *reader;
+  GstdIUpdater *updater;
   GstdIDeleter *deleter;
 
   GstdIFormatter * formatter;
@@ -89,8 +91,7 @@ struct _GstdObjectClass
       const gchar * description);
     GstdReturnCode (*read) (GstdObject * object, const gchar * name,
       GstdObject ** resource);
-    GstdReturnCode (*update) (GstdObject * object, const gchar * property,
-      va_list va);
+    GstdReturnCode (*update) (GstdObject * object, const gchar * value);
     GstdReturnCode (*delete) (GstdObject * object, const gchar * name);
 
     GstdReturnCode (*to_string) (GstdObject * object, gchar ** outstring);
@@ -119,12 +120,13 @@ gstd_object_create (GstdObject * object, const gchar * name,
 GstdReturnCode
 gstd_object_read (GstdObject * object, const gchar * name, GstdObject ** resource);
 GstdReturnCode
-gstd_object_update (GstdObject * object, const gchar * property, ...);
+gstd_object_update (GstdObject * object, const gchar *value);
 GstdReturnCode gstd_object_delete (GstdObject * object, const gchar * name);
 GstdReturnCode gstd_object_to_string (GstdObject * object, gchar ** outstring);
 
 void gstd_object_set_creator (GstdObject * self, GstdICreator * creator);
 void gstd_object_set_reader (GstdObject * self, GstdIReader * reader);
+void gstd_object_set_updater (GstdObject * self, GstdIUpdater * updater);
 void gstd_object_set_deleter (GstdObject * self, GstdIDeleter * deleter);
 
 G_END_DECLS
