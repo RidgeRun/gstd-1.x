@@ -412,7 +412,7 @@ gstd_element_fill_properties (GstdElement *self)
   GstdObject *element_property;
   GType type;
   GObjectClass * g_class;
-
+  guint i;
   g_class = G_OBJECT_GET_CLASS(self->element);
 
   g_return_val_if_fail (GSTD_IS_ELEMENT(self), GSTD_NULL_ARGUMENT);
@@ -421,7 +421,7 @@ gstd_element_fill_properties (GstdElement *self)
 
   properties_array = g_object_class_list_properties(g_class, &n_properties);
 
-  for (int i = 0; i < n_properties; ++i){
+  for (i = 0; i < n_properties; ++i){
     type = gstd_element_property_get_type(properties_array[i]->value_type);
     element_property = g_object_new(type, "name",
         properties_array[i]->name, "target", self->element, NULL);
