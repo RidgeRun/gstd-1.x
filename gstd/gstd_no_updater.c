@@ -73,6 +73,6 @@ gstd_no_updater_init (GstdNoUpdater * self)
 static GstdReturnCode
 gstd_no_updater_update (GstdIUpdater * iface, GstdObject * object, const gchar * value)
 {
-  GST_ERROR_OBJECT (iface, "Unable to update from this resource");
+  GST_ERROR_OBJECT (iface, "This resource is not writable");
   return GSTD_NO_UPDATE;
 }
