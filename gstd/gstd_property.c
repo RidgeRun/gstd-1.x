@@ -215,16 +215,18 @@ gstd_property_to_string (GstdObject * obj, gchar ** outstring)
   g_value_init (&value, GSTD_TYPE_PARAM_FLAGS);
   g_value_set_flags (&value, property->flags);
   sflags = g_strdup_value_contents(&value);
-  g_value_unset(&value);
+  g_value_unset (&value);
 
   gstd_iformatter_set_member_name (obj->formatter, "access");
-  gstd_iformatter_set_string_value (obj->formatter,sflags);
+  gstd_iformatter_set_string_value (obj->formatter, sflags);
 
   g_free (sflags);
 
   gstd_iformatter_set_member_name (obj->formatter, "construct");
-  gstd_iformatter_set_string_value (obj->formatter,
-      GSTD_PARAM_IS_DELETE(property->flags) ? "TRUE" : "FALSE");
+  g_value_init (&value, G_TYPE_BOOLEAN);
+  g_value_set_boolean (&value, GSTD_PARAM_IS_DELETE(property->flags));
+  gstd_iformatter_set_value (obj->formatter, &value);
+  g_value_unset (&value);
 
   /* Close parameter specs structure */
   gstd_iformatter_end_object (obj->formatter);
