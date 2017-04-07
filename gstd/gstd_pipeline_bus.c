@@ -39,7 +39,6 @@ struct _GstdPipelineBus
 
   GQueue *messages;
 
-  guint64 endtime;
 };
 
 struct _GstdPipelineBusClass
@@ -116,25 +115,6 @@ gstd_pipeline_bus_set_property (GObject * object,
   }
 }
 
-gboolean
-gstd_pipeline_bus_callback (GstBus * bus, GstMessage * message, gpointer data)
-{
-  guint64 currenttime;
-  GstdPipelineBus *self = GSTD_PIPELINE_BUS (data);
-  const GstStructure *st = gst_message_get_structure (message);
-  const gchar *typename = GST_MESSAGE_TYPE_NAME (message);
-  const gchar *srcname = GST_MESSAGE_SRC_NAME (message);
-  GST_INFO_OBJECT (self, "New %s message from %s: %s", typename, srcname,
-      st ? gst_structure_get_name (st) : "(null)");
-
-  g_queue_push_tail (self->messages, (gpointer) gst_message_ref (message));
-  currenttime = g_get_monotonic_time ();
-
-  if (self->endtime > currenttime)
-    return FALSE;
-  else
-    return TRUE;
-}
 
 gboolean
 gstd_pipeline_bus_read_messages (GstdPipelineBus * self, gchar ** messages)
@@ -146,18 +126,23 @@ gstd_pipeline_bus_read_messages (GstdPipelineBus * self, gchar ** messages)
   GError *error;
   gchar *parsed_txt;
   guint64 currenttime;
+  guint64 endtime;
 
   GST_INFO_OBJECT (self, "Reading pipeline messages ");
 
-  self->endtime = g_get_monotonic_time () + 10 * G_TIME_SPAN_SECOND;
   currenttime = g_get_monotonic_time ();
+  endtime = g_get_monotonic_time () + 10 * G_TIME_SPAN_SECOND;
+  
 
-  gst_bus_add_watch (GST_BUS (self->bus), gstd_pipeline_bus_callback,
-      (gpointer) self);
-
-  while (self->endtime > currenttime) {
-    sleep (1);
-    currenttime = g_get_monotonic_time ();
+  while (endtime > currenttime) {
+      if(!(msg = gst_bus_timed_pop(GST_BUS(self->bus), 5*GST_SECOND))){
+	 GST_INFO_OBJECT (self, "Timeout wating for messages");
+      }
+      
+      if (msg != NULL){
+	g_queue_push_tail (self->messages, (gpointer) msg);
+      }    
+      currenttime = g_get_monotonic_time ();
   }
 
   num_messages =
