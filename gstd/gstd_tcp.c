@@ -446,8 +446,12 @@ gstd_tcp_update (GstdSession * session, GstdObject * obj, gchar * args,
 
   g_return_val_if_fail (GSTD_IS_SESSION (session), GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (GSTD_IS_OBJECT (obj), GSTD_NULL_ARGUMENT);
-  g_return_val_if_fail (args, GSTD_NULL_ARGUMENT);
 
+  if (!args) {
+    GST_ERROR_OBJECT (obj, "No argument provided for update");
+    ret = GSTD_BAD_VALUE;
+    goto out;
+  }
   *response = NULL;
 
   ret = gstd_object_update (obj, args);
