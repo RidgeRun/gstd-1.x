@@ -471,16 +471,13 @@ static GstdReturnCode
 gstd_tcp_delete (GstdSession * session, GstdObject * obj, gchar * args,
     gchar ** response)
 {
-  gchar **tokens;
-
   g_return_val_if_fail (GSTD_IS_SESSION (session), GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (GSTD_IS_OBJECT (obj), GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (args, GSTD_NULL_ARGUMENT);
 
   *response = NULL;
 
-  tokens = g_strsplit (args, " ", -1);
-  return gstd_object_delete (obj, tokens[0]);
+  return gstd_object_delete (obj, args);
 }
 
 static GstdReturnCode

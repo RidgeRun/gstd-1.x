@@ -86,10 +86,15 @@ gstd_pipeline_deleter_init (GstdPipelineDeleter * self)
 static void
 gstd_pipeline_deleter_delete (GstdIDeleter * iface, GstdObject * object)
 {
+  GstdObject *state;
+
   g_return_if_fail (iface);
+  g_return_if_fail (object);
 
   /* Stop the pipe if playing */
-  gstd_object_update (GSTD_OBJECT (object), NULL);
+  gstd_object_read (object, "state", &state);
+  gstd_object_update (state, "NULL");
+  g_object_unref (state);
 
   g_object_unref (object);
 }
