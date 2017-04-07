@@ -29,9 +29,10 @@
 #include "gstd_object.h"
 #include "gstd_list.h"
 #include "gstd_element.h"
-#include "gstd_element_list.h"
 #include "gstd_event_handler.h"
 #include "gstd_pipeline_bus.h"
+#include "gstd_list_reader.h"
+#include "gstd_property_reader.h"
 
 enum
 {
@@ -103,7 +104,7 @@ struct _GstdPipeline
   /**
    * The list of GstdElement held by the pipeline
    */
-  GstdElementList *elements;
+  GstdList *elements;
 };
 
 struct _GstdPipelineClass
@@ -151,7 +152,7 @@ gstd_pipeline_class_init (GstdPipelineClass * klass)
       g_param_spec_object ("elements",
       "Elements",
       "The elements in the pipeline",
-      GSTD_TYPE_ELEMENT_LIST,
+      GSTD_TYPE_LIST,
       G_PARAM_READABLE | G_PARAM_STATIC_STRINGS | GSTD_PARAM_READ);
 
   properties[PROP_PIPELINE_BUS] =
@@ -190,8 +191,14 @@ gstd_pipeline_init (GstdPipeline * self)
   self->pipeline = NULL;
   self->event_handler = NULL;
   self->pipeline_bus = NULL;
-  self->elements = g_object_new (GSTD_TYPE_ELEMENT_LIST, "name", "elements",
+
+  self->elements = g_object_new (GSTD_TYPE_LIST, "name", "elements",
       "node-type", GSTD_TYPE_ELEMENT, "flags", GSTD_PARAM_READ, NULL);
+
+  gstd_object_set_reader (GSTD_OBJECT(self->elements),
+      g_object_new (GSTD_TYPE_LIST_READER, NULL));
+  gstd_object_set_reader (GSTD_OBJECT(self),
+      g_object_new (GSTD_TYPE_PROPERTY_READER, NULL));
 }
 
 static void
@@ -203,20 +210,25 @@ gstd_pipeline_constructed (GObject * object)
   ret =
       gstd_pipeline_create (self, GSTD_OBJECT_NAME (self), 0,
       self->description);
+  if (GSTD_EOK != ret)
+    goto out;
 
   self->event_handler = gstd_event_handler_new (G_OBJECT (self->pipeline));
   if (!self->event_handler) {
     ret = ret | GSTD_BAD_VALUE;
+    goto out;
   }
 
-  self->pipeline_bus =  
-    gstd_pipeline_bus_new (gst_pipeline_get_bus(GST_PIPELINE (self->pipeline)));
+  self->pipeline_bus =
+      gstd_pipeline_bus_new (gst_pipeline_get_bus (GST_PIPELINE
+          (self->pipeline)));
 
   if (!self->pipeline_bus) {
     ret = ret | GSTD_BAD_VALUE;
+    goto out;
   }
 
-
+out:
   // Capture any possible error
   gstd_object_set_code (GSTD_OBJECT (self), ret);
 }
@@ -229,7 +241,9 @@ gstd_pipeline_dispose (GObject * object)
   GST_INFO_OBJECT (self, "Disposing %s pipeline", GSTD_OBJECT_NAME (self));
 
   /* Stop the pipe if playing */
-  gstd_object_update (GSTD_OBJECT (self), "state", GSTD_PIPELINE_NULL, NULL);
+  if (self->pipeline) {
+    gstd_object_update (GSTD_OBJECT (self), "state", GSTD_PIPELINE_NULL, NULL);
+  }
 
   if (self->description) {
     g_free (self->description);
@@ -310,9 +324,9 @@ gstd_pipeline_get_property (GObject * object,
       GST_DEBUG_OBJECT (self, "Returning element list %p", self->elements);
       g_value_set_object (value, self->elements);
       break;
-    case  PROP_PIPELINE_BUS:
+    case PROP_PIPELINE_BUS:
       GST_DEBUG_OBJECT (self, "Returning pipeline bus %p", self->pipeline_bus);
-       g_value_set_object (value, self->pipeline_bus);
+      g_value_set_object (value, self->pipeline_bus);
       // g_value_set_object (value, self->elements);
       break;
     case PROP_STATE:
@@ -482,7 +496,7 @@ gstd_pipeline_fill_elements (GstdPipeline * self, GstElement * element)
 
         gstd_element = g_object_new (GSTD_TYPE_ELEMENT, "name",
             GST_OBJECT_NAME (gste), "gstelement", gste, NULL);
-        gstd_element_list_append (self->elements, gstd_element);
+        gstd_list_append_child (self->elements, GSTD_OBJECT(gstd_element));
 
         g_value_reset (&item);
         break;

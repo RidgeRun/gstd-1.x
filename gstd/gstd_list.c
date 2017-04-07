@@ -52,7 +52,6 @@ static gint gstd_list_find_node (gconstpointer, gconstpointer);
 static GstdReturnCode
 gstd_list_create (GstdObject * object, const gchar * name,
     const gchar * description);
-static GstdReturnCode gstd_list_read (GstdObject *, const gchar *, va_list);
 static GstdReturnCode
 gstd_list_delete (GstdObject * object, const gchar * name);
 static GstdReturnCode gstd_list_to_string (GstdObject *, gchar **);
@@ -101,7 +100,6 @@ gstd_list_class_init (GstdListClass * klass)
   g_object_class_install_properties (object_class, N_PROPERTIES, properties);
 
   gstd_object_class->create = gstd_list_create;
-  gstd_object_class->read = gstd_list_read;
   gstd_object_class->delete = gstd_list_delete;
   gstd_object_class->to_string = gstd_list_to_string;
 
@@ -208,7 +206,6 @@ gstd_list_create (GstdObject * object, const gchar * name,
 {
   GstdList *self;
   GstdObject *out;
-  GList *found;
 
   g_return_val_if_fail (GSTD_IS_OBJECT (object), GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (name, GSTD_NULL_ARGUMENT);
@@ -217,90 +214,16 @@ gstd_list_create (GstdObject * object, const gchar * name,
   self = GSTD_LIST (object);
 
   g_return_val_if_fail (object->creator, GSTD_MISSING_INITIALIZATION);
-
-  /* Test if the resource to create already exists */
-  found = g_list_find_custom (self->list, name, gstd_list_find_node);
-  if (found)
-    goto exists;
-
   gstd_icreator_create (object->creator, name, description, &out);
-  self->count++;
 
-
-  self->list = g_list_append (self->list, out);
-  self->count = g_list_length (self->list);
-  GST_INFO_OBJECT (self, "Appended %s to %s list", GSTD_OBJECT_NAME (out),
-      GSTD_OBJECT_NAME (self));
-
-  return GSTD_EOK;
-
-exists:
-  {
-    GST_ERROR_OBJECT (object, "The resource \"%s\" already exists in \"%s\"",
-        name, GSTD_OBJECT_NAME (self));
+  if (!gstd_list_append_child (self, out)) {
+    g_object_unref (out);
     return GSTD_EXISTING_RESOURCE;
   }
 
   return GSTD_EOK;
 }
 
-static GstdReturnCode
-gstd_list_read (GstdObject * object, const gchar * property, va_list va)
-{
-  GstdList *self = GSTD_LIST (object);
-  GList *found;
-  const gchar *name;
-  GstdReturnCode ret;
-  GValue value = G_VALUE_INIT;
-  gchar *error = NULL;
-
-  g_return_val_if_fail (GSTD_IS_LIST (object), GSTD_NULL_ARGUMENT);
-
-  /* Can we create resources on it */
-  if (!GSTD_PARAM_IS_READ (self->flags))
-    goto noread;
-
-  ret = GSTD_EOK;
-  name = property;
-
-  while (name) {
-    found = g_list_find_custom (self->list, name, gstd_list_find_node);
-    if (!found)
-      goto noexist;
-
-    g_value_init (&value, self->node_type);
-    g_value_set_object (&value, G_OBJECT (found->data));
-
-    G_VALUE_LCOPY (&value, va, 0, &error);
-
-    if (error) {
-      GST_ERROR_OBJECT (self, "%s", error);
-      g_free (error);
-      g_value_unset (&value);
-      ret |= GSTD_NO_CREATE;
-    } else {
-      GST_INFO_OBJECT (self, "Read object %s from %s", property,
-          GSTD_OBJECT_NAME (self));
-    }
-
-    g_value_unset (&value);
-    name = va_arg (va, const gchar *);
-  }
-
-  return ret;
-
-noexist:
-  {
-    GST_ERROR_OBJECT (self, "The node %s does not exist in %s", property,
-        GSTD_OBJECT_NAME (self));
-    return GSTD_NO_CREATE;
-  }
-noread:
-  {
-    GST_ERROR_OBJECT (self, "Cannot read from %s", GSTD_OBJECT_NAME (self));
-    return GSTD_NO_CREATE;
-  }
-}
 
 static GstdReturnCode
 gstd_list_delete (GstdObject * object, const gchar * node)
@@ -380,35 +303,51 @@ gstd_list_to_string (GstdObject * object, gchar ** outstring)
   return GSTD_EOK;
 }
 
-void
-gstd_list_set_creator (GstdList * self, GstdICreator * creator)
+GstdObject *
+gstd_list_find_child (GstdList *self, const gchar * name)
 {
-  GstdObject *object;
+    GList * result;
+    GstdObject * child;
 
-  g_return_if_fail (self);
+    g_return_val_if_fail (self, NULL);
+    g_return_val_if_fail (name, NULL);
 
-  object = GSTD_OBJECT (self);
+    result = g_list_find_custom (self->list, name, gstd_list_find_node);
 
-  if (object->creator != NULL) {
-    g_object_unref (object->creator);
-  }
 
-  object->creator = creator;
+    if (result) {
+	child = GSTD_OBJECT(result->data);
+    } else {
+	child = NULL;
+    }
+
+    return child;
 }
 
-void
-gstd_list_set_deleter (GstdList * self, GstdIDeleter * deleter)
+gboolean
+gstd_list_append_child (GstdList * self, GstdObject * child)
 {
-  GstdObject *object;
+  GList * found;
+  
+  g_return_val_if_fail (self, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (child, GSTD_NULL_ARGUMENT);
 
-  g_return_if_fail (self);
-  g_return_if_fail (deleter);
+  /* Test if the resource to create already exists */
+  found = g_list_find_custom (self->list, GSTD_OBJECT_NAME(child), gstd_list_find_node);
+  if (found)
+    goto exists;
 
-  object = GSTD_OBJECT (self);
+  self->list = g_list_append (self->list, child);
+  self->count = g_list_length (self->list);
+  GST_INFO_OBJECT (self, "Appended %s to %s list", GSTD_OBJECT_NAME (child),
+      GSTD_OBJECT_NAME (self));
 
-  if (object->deleter != NULL) {
-    g_object_unref (object->deleter);
+  return TRUE;
+
+exists:
+  {
+    GST_ERROR_OBJECT (self, "The resource \"%s\" already exists in \"%s\"",
+        GSTD_OBJECT_NAME(child), GSTD_OBJECT_NAME (self));
+    return FALSE;
   }
-
-  object->deleter = deleter;
 }

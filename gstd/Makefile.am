@@ -12,15 +12,22 @@ libgstd_core_la_SOURCES = gstd_session.c		\
 			  gstd_iformatter.c		\
 			  gstd_pipeline_creator.c	\
 			  gstd_no_creator.c		\
-			  gstd_json_builder.c   \
-			  gstd_element_list.c		\
+			  gstd_json_builder.c		\
 			  gstd_ideleter.c		\
 			  gstd_pipeline_deleter.c	\
 			  gstd_no_deleter.c		\
 			  gstd_debug.c			\
 			  gstd_event_handler.c		\
 			  gstd_event_factory.c		\
-			  gstd_pipeline_bus.c
+			  gstd_pipeline_bus.c		\
+			  gstd_ireader.c		\
+			  gstd_property_reader.c	\
+			  gstd_no_reader.c		\
+			  gstd_list_reader.c		\
+			  gstd_property.c		\
+			  gstd_property_int.c		\
+			  gstd_property_string.c	\
+			  gstd_property_boolean.c
 
 libgstd_core_la_CFLAGS = $(GST_CFLAGS) $(GIO_CFLAGS) $(GJSON_CFLAGS)
 libgstd_core_la_LDFLAGS = $(GST_LIBS) $(GIO_LIBS) $(GJSON_LIBS)
@@ -46,11 +53,18 @@ gstdinclude_HEADERS = \
 		  gstd_icreator.h		\
 		  gstd_iformatter.h		\
 		  gstd_pipeline_creator.h	\
-		  gstd_json_builder.h   \
+		  gstd_json_builder.h		\
 		  gstd_no_creator.h		\
-		  gstd_element_list.h		\
 		  gstd_ideleter.h		\
 		  gstd_pipeline_deleter.h	\
-		  gstd_no_deleter.h		
+		  gstd_no_deleter.h		\
+		  gstd_ireader.h		\
+		  gstd_property_reader.h	\
+		  gstd_no_reader.h		\
+		  gstd_list_reader.h		\
+		  gstd_property.h		\
+		  gstd_property_int.h		\
+		  gstd_property_string.h	\
+		  gstd_property_boolean.h
 
 noinst_HEADERS = 

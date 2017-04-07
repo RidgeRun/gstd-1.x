@@ -85,16 +85,19 @@ gstd_event_handler_init (GstdEventHandler * self)
   self->receiver = NULL;
 }
 
-gboolean
-gstd_event_handler_send_event (GstdEventHandler * self, const gchar * event_type,
-    const gchar * description)
+GstdReturnCode
+gstd_event_handler_send_event (GstdEventHandler * self,
+    const gchar * event_type, const gchar * description)
 {
   GST_INFO_OBJECT (self, "Event Handler sending event %s", event_type);
   GstEvent *event = gstd_event_factory_make (event_type, description);
-  if (event){
-    return gst_element_send_event (GST_ELEMENT (self->receiver), event);
+  if (event) {
+    if (gst_element_send_event (GST_ELEMENT (self->receiver), event))
+      return GSTD_EOK;
+    else
+      return GSTD_BAD_COMMAND;
   }
-  return FALSE;
+  return GSTD_BAD_VALUE;
 }
 
 
