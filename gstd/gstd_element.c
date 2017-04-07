@@ -27,17 +27,24 @@
 #include <gobject/gvaluecollector.h>
 #include <json-glib/json-glib.h>
 
+#include "gstd_list.h"
 #include "gstd_element.h"
 #include "gstd_object.h"
 #include "gstd_event_handler.h"
 
 #include "gstd_iformatter.h"
 #include "gstd_json_builder.h"
+#include "gstd_property_reader.h"
+#include "gstd_property_boolean.h"
+#include "gstd_property_string.h"
+#include "gstd_property_int.h"
+#include "gstd_list_reader.h"
 
 enum
 {
   PROP_GSTELEMENT = 1,
   PROP_EVENT,
+  PROP_PROPERTIES,
   N_PROPERTIES                  // NOT A PROPERTY
 };
 
@@ -67,6 +74,12 @@ struct _GstdElement
    * The gstd event handler for this element
    */
   GstdEventHandler *event_handler;
+
+  /*
+   * The properties held by the element
+   */
+  GstdList * element_properties;
+
 };
 
 struct _GstdElementClass
@@ -83,12 +96,14 @@ gstd_element_get_property (GObject *, guint, GValue *, GParamSpec *);
 static void
 gstd_element_set_property (GObject *, guint, const GValue *, GParamSpec *);
 static void gstd_element_dispose (GObject *);
-static GstdReturnCode gstd_element_read (GstdObject *, const gchar *, va_list);
 static GstdReturnCode
 gstd_element_update (GstdObject *, const gchar *, va_list);
 static GstdReturnCode gstd_element_to_string (GstdObject *, gchar **);
 void gstd_element_internal_to_string (GstdElement *, gchar **);
-
+static GstdReturnCode
+gstd_element_fill_properties (GstdElement * self);
+static GType
+gstd_element_property_get_type (GType g_type);
 static void
 gstd_element_class_init (GstdElementClass * klass)
 {
@@ -114,9 +129,15 @@ gstd_element_class_init (GstdElementClass * klass)
       "The event handler of the element",
       GSTD_TYPE_EVENT_HANDLER, G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
+  properties[PROP_PROPERTIES] =
+      g_param_spec_object ("properties",
+      "Properties",
+      "The properties of the element",
+      GSTD_TYPE_LIST,
+      G_PARAM_READABLE | G_PARAM_STATIC_STRINGS | GSTD_PARAM_READ);
+
   g_object_class_install_properties (object_class, N_PROPERTIES, properties);
 
-  gstd_object_class->read = gstd_element_read;
   gstd_object_class->update = gstd_element_update;
   gstd_object_class->to_string = gstd_element_to_string;
 
@@ -134,6 +155,14 @@ gstd_element_init (GstdElement * self)
   self->element = GSTD_ELEMENT_DEFAULT_GSTELEMENT;
   self->event_handler = NULL;
   self->formatter = g_object_new (GSTD_TYPE_JSON_BUILDER, NULL);
+
+  gstd_object_set_reader (GSTD_OBJECT(self),
+      g_object_new (GSTD_TYPE_PROPERTY_READER, NULL));
+
+  self->element_properties = GSTD_LIST(g_object_new (GSTD_TYPE_LIST, "name", "element_properties", "node-type", GSTD_TYPE_PROPERTY, "flags", GSTD_PARAM_READ, NULL));
+
+  gstd_object_set_reader (GSTD_OBJECT(self->element_properties),
+      g_object_new(GSTD_TYPE_LIST_READER, NULL));
 }
 
 static void
@@ -178,6 +207,11 @@ gstd_element_get_property (GObject * object,
           self->event_handler);
       g_value_set_object (value, self->event_handler);
       break;
+    case PROP_PROPERTIES:
+      GST_DEBUG_OBJECT (self, "Returning properties %p",
+          self->element_properties);
+      g_value_set_object (value, self->element_properties);
+      break;
     default:
       /* We don't have any other property... */
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -205,6 +239,8 @@ gstd_element_set_property (GObject * object,
 
       GST_DEBUG_OBJECT (self, "Setting element %p (%s)", self->element,
           GST_OBJECT_NAME (self->element));
+
+      gstd_element_fill_properties(self);
       break;
     default:
       /* We don't have any other property... */
@@ -212,68 +248,6 @@ gstd_element_set_property (GObject * object,
       gstd_object_set_code (GSTD_OBJECT (self), GSTD_NO_RESOURCE);
       break;
   }
-}
-
-static GstdReturnCode
-gstd_element_read (GstdObject * object, const gchar * property, va_list va)
-{
-  GstdElement *self = GSTD_ELEMENT (object);
-  GParamSpec *pspec;
-  const gchar *name;
-  GstdReturnCode ret;
-  GValue value = G_VALUE_INIT;
-  gchar *error = NULL;
-  GObject *toset;
-
-  g_return_val_if_fail (GSTD_IS_ELEMENT (object), GSTD_NULL_ARGUMENT);
-  g_return_val_if_fail (property, GSTD_NULL_ARGUMENT);
-
-  name = property;
-  ret = GSTD_EOK;
-
-  while (name) {
-    // First look for the property in the container
-    toset = G_OBJECT (self);
-    pspec = g_object_class_find_property (G_OBJECT_GET_CLASS (self), name);
-    if (!pspec) {
-      pspec = g_object_class_find_property (G_OBJECT_GET_CLASS (self->element),
-          name);
-      toset = G_OBJECT (self->element);
-    }
-
-    if (!pspec) {
-      GST_ERROR_OBJECT (self, "The property %s is not a property in %s",
-          name, GSTD_OBJECT_NAME (self));
-      ret |= GSTD_NO_CREATE;
-      break;
-    }
-
-    if (!GSTD_PARAM_IS_READ (pspec->flags)) {
-      GST_ERROR_OBJECT (self, "The property %s is not readable", name);
-      ret |= GSTD_NO_READ;
-      break;
-    }
-
-    g_value_init (&value, G_PARAM_SPEC_VALUE_TYPE (pspec));
-    g_object_get_property (toset, name, &value);
-
-    G_VALUE_LCOPY (&value, va, 0, &error);
-
-    if (error) {
-      GST_ERROR_OBJECT (self, "%s", error);
-      g_free (error);
-      g_value_unset (&value);
-      ret |= GSTD_NO_CREATE;
-    } else {
-      GST_INFO_OBJECT (self, "Read object %s from %s", property,
-          GSTD_OBJECT_NAME (self));
-    }
-
-    g_value_unset (&value);
-    name = va_arg (va, const gchar *);
-  }
-
-  return ret;
 }
 
 static GstdReturnCode
@@ -365,7 +339,7 @@ gstd_element_internal_to_string (GstdElement * self, gchar ** outstring)
   guint n, i;
   const gchar *typename;
 
-  g_return_val_if_fail (GSTD_IS_OBJECT(self), GSTD_NULL_ARGUMENT);
+  g_return_if_fail (GSTD_IS_OBJECT(self));
 
   gstd_iformatter_begin_object (self->formatter);
   gstd_iformatter_set_member_name (self->formatter,"element_properties");
@@ -428,4 +402,58 @@ gstd_element_internal_to_string (GstdElement * self, gchar ** outstring)
   gstd_iformatter_end_object (self->formatter);
 
   gstd_iformatter_generate (self->formatter, outstring);
+}
+
+static GstdReturnCode
+gstd_element_fill_properties (GstdElement *self)
+{
+  GParamSpec **properties_array;
+  guint n_properties;
+  GstdObject *element_property;
+  GType type;
+  GObjectClass * g_class;
+
+  g_class = G_OBJECT_GET_CLASS(self->element);
+
+  g_return_val_if_fail (GSTD_IS_ELEMENT(self), GSTD_NULL_ARGUMENT);
+
+  GST_DEBUG_OBJECT(self, "Gathering \"%s\" properties", GST_OBJECT_NAME(self));
+
+  properties_array = g_object_class_list_properties(g_class, &n_properties);
+
+  for (int i = 0; i < n_properties; ++i){
+    type = gstd_element_property_get_type(properties_array[i]->value_type);
+    element_property = g_object_new(type, "name",
+        properties_array[i]->name, "target", self->element, NULL);
+
+    gstd_list_append_child (self->element_properties, element_property);
+  }
+
+  return GSTD_EOK;
+}
+
+static GType
+gstd_element_property_get_type (GType g_type) {
+
+  switch (g_type) {
+    case G_TYPE_BOOLEAN:
+    {
+      return GSTD_TYPE_PROPERTY_BOOLEAN;
+    }
+    case G_TYPE_INT:
+    case G_TYPE_UINT:
+    case G_TYPE_UINT64:
+    case G_TYPE_INT64:
+    {
+      return GSTD_TYPE_PROPERTY_INT;
+    }
+    case G_TYPE_STRING:
+    {
+	return  GSTD_TYPE_PROPERTY_STRING;
+    }
+    default:
+    {
+      return GSTD_TYPE_PROPERTY;
+    }
+  }
 }

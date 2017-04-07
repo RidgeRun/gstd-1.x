@@ -26,6 +26,7 @@
 
 #include "gstd/gstd_debug.h"
 #include "gstd/gstd_object.h"
+#include "gstd/gstd_property_reader.h"
 
 GST_DEBUG_CATEGORY_STATIC (gstd_debug_cat);
 
@@ -133,6 +134,9 @@ gstd_debug_init (GstdDebug * self)
   self->enable = gst_debug_is_active ();
   self->color = gst_debug_is_colored ();
   self->threshold = debug_obtain_default_level ();
+
+  gstd_object_set_reader (GSTD_OBJECT(self),
+      g_object_new (GSTD_TYPE_PROPERTY_READER, NULL));
 }
 
 static void

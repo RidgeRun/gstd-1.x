@@ -264,64 +264,6 @@ gstd_pipeline_create (GstdSession * gstd, const gchar * name,
 GstdReturnCode gstd_pipeline_delete (GstdSession * gstd, const gchar * name);
 
 /**
- * gstd_element_get:
- * @gstd: The #GstdSession to apply the operation to
- * @pipe: The name of the pipeline containing the element
- * @name: The name of the element whose property is to be read
- * @property: The name of the property to read
- * @value: (transfer full) (out): A pointer to a variable to hold
- * the property value.
- *
- * Queries the value of a property of an element, contained 
- * in a pipeline of a given session. If applicable, the returned value
- * should be freed.
- * |[<!-- language="C" -->
- * char *name = NULL;
- * GstdReturnCode ret;
- *
- * ret = gstd_element_get (gstd, "pipe0", "camera", "name", (gpointer)&name);
- * if (GSTD_EOK != ret) {
- *   g_printerr ("Error querying property: %d", ret);
- * } else {
- *   g_print ("The camera name is \"%s\"", name);
- *   g_free (name);
- * }
- * ]|
- *
- * Returns: A #GstdReturnCode describing the result of the operation.
- */
-GstdReturnCode
-gstd_element_get (GstdSession * gstd, const gchar * pipe, const gchar * name,
-    const gchar * property, gpointer value);
-
-/**
- * gstd_element_set:
- * @gstd: The #GstdSession to apply the operation to
- * @pipe: The name of the pipeline containing the element
- * @name: The name of the element whose property is to be modified
- * @property: The name of the property to modify
- * @value: A variable holding the value to set in the property.
- *
- * Sets a value to a property of an element, contained 
- * in a pipeline of a given session. If applicable, the returned value
- * should be freed.
- * |[<!-- language="C" -->
- * char *name = "camera0";
- * GstdReturnCode ret;
- *
- * ret = gstd_element_get (gstd, "pipe0", "camera", "name", (gpointer)name);
- * if (GSTD_EOK != ret) {
- *   g_printerr ("Error setting property: %d", ret);
- * }
- * ]|
- *
- * Returns: A #GstdReturnCode describing the result of the operation.
- */
-GstdReturnCode
-gstd_element_set (GstdSession * gstd, const gchar * pipe, const gchar * name,
-    const gchar * property, gpointer value);
-
-/**
  * gstd_pipeline_play:
  * @gstd: The #GstdSession to apply the operation to
  * @pipe: The name of the pipeline to set to playing

@@ -84,7 +84,7 @@ gstd_json_builder_begin_object (GstdIFormatter *iface)
 {
   GstdJsonBuilder *self;
 
-  g_return_val_if_fail (GSTD_IS_JSON_BUILDER (iface), GSTD_NULL_ARGUMENT);
+  g_return_if_fail (GSTD_IS_JSON_BUILDER (iface));
 
   self = GSTD_JSON_BUILDER(iface);
   json_builder_begin_object (self->json_builder);
@@ -95,7 +95,7 @@ gstd_json_builder_end_object (GstdIFormatter *iface)
 {
   GstdJsonBuilder *self;
 
-  g_return_val_if_fail (GSTD_IS_JSON_BUILDER (iface), GSTD_NULL_ARGUMENT);
+  g_return_if_fail (GSTD_IS_JSON_BUILDER (iface));
 
   self = GSTD_JSON_BUILDER(iface);
   json_builder_end_object (self->json_builder);
@@ -106,7 +106,7 @@ gstd_json_builder_begin_array (GstdIFormatter *iface)
 {
   GstdJsonBuilder *self;
 
-  g_return_val_if_fail (GSTD_IS_JSON_BUILDER (iface), GSTD_NULL_ARGUMENT);
+  g_return_if_fail (GSTD_IS_JSON_BUILDER (iface));
 
   self = GSTD_JSON_BUILDER(iface);
   json_builder_begin_array (self->json_builder);
@@ -116,7 +116,7 @@ static void gstd_json_builder_end_array (GstdIFormatter *iface)
 {
   GstdJsonBuilder *self;
 
-  g_return_val_if_fail (GSTD_IS_JSON_BUILDER (iface), GSTD_NULL_ARGUMENT);
+  g_return_if_fail (GSTD_IS_JSON_BUILDER (iface));
 
   self = GSTD_JSON_BUILDER(iface);
   json_builder_end_array (self->json_builder);
@@ -127,7 +127,7 @@ gstd_json_set_member_name (GstdIFormatter *iface, const gchar * name)
 {
   GstdJsonBuilder *self;
 
-  g_return_val_if_fail (GSTD_IS_JSON_BUILDER (iface), GSTD_NULL_ARGUMENT);
+  g_return_if_fail (GSTD_IS_JSON_BUILDER (iface));
 
   self = GSTD_JSON_BUILDER(iface);
   json_builder_set_member_name (self->json_builder, name);
@@ -211,7 +211,7 @@ gstd_json_builder_generate (GstdIFormatter *iface, gchar **outstring)
   gsize json_stream_length;
   JsonBuilder * json_builder;
 
-  g_return_val_if_fail (GSTD_IS_JSON_BUILDER (iface), GSTD_NULL_ARGUMENT);
+  g_return_if_fail (GSTD_IS_JSON_BUILDER (iface));
   self = GSTD_JSON_BUILDER(iface);
 
   json_builder = self->json_builder;

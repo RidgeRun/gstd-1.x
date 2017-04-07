@@ -26,6 +26,8 @@
 #include "gstd_list.h"
 #include "gstd_tcp.h"
 #include "gstd_pipeline_creator.h"
+#include "gstd_property_reader.h"
+#include "gstd_list_reader.h"
 #include "gstd_pipeline_deleter.h"
 
 /* Gstd Session debugging category */
@@ -121,7 +123,15 @@ gstd_session_class_init (GstdSessionClass * klass)
 static void
 gstd_session_init (GstdSession * self)
 {
+  GstdObject * object;
   GST_INFO_OBJECT (self, "Initializing gstd session");
+
+  object = GSTD_OBJECT(self);
+
+  gstd_object_set_reader (GSTD_OBJECT(self),
+      g_object_new (GSTD_TYPE_PROPERTY_READER, NULL));
+
+  object->reader = g_object_new (GSTD_TYPE_PROPERTY_READER, NULL);
 
   self->pipelines =
       GSTD_LIST (g_object_new (GSTD_TYPE_LIST, "name", "pipelines", "node-type",
@@ -129,14 +139,17 @@ gstd_session_init (GstdSession * self)
           GSTD_PARAM_CREATE | GSTD_PARAM_READ | GSTD_PARAM_UPDATE |
           GSTD_PARAM_DELETE, NULL));
 
-  self->debug =
-      GSTD_DEBUG (g_object_new (GSTD_TYPE_DEBUG, "name", "Debug", NULL));
-
-  gstd_list_set_creator (self->pipelines,
+  gstd_object_set_creator (GSTD_OBJECT(self->pipelines),
       g_object_new (GSTD_TYPE_PIPELINE_CREATOR, NULL));
 
-  gstd_list_set_deleter (self->pipelines,
+  gstd_object_set_reader (GSTD_OBJECT(self->pipelines),
+      g_object_new (GSTD_TYPE_LIST_READER, NULL));
+
+  gstd_object_set_deleter (GSTD_OBJECT(self->pipelines),
       g_object_new (GSTD_TYPE_PIPELINE_DELETER, NULL));
+
+  self->debug =
+      GSTD_DEBUG (g_object_new (GSTD_TYPE_DEBUG, "name", "Debug", NULL));
 
   self->pid = (GPid) getpid ();
 }
@@ -244,7 +257,7 @@ gstd_pipeline_create (GstdSession * gstd, const gchar * name,
   g_return_val_if_fail (name, GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (description, GSTD_NULL_ARGUMENT);
 
-  gstd_object_read (GSTD_OBJECT (gstd), "pipelines", &list, NULL);
+  gstd_object_read (GSTD_OBJECT (gstd), "pipelines", &list);
   ret = gstd_object_create (list, name, description);
   g_object_unref (list);
 
@@ -260,7 +273,7 @@ gstd_pipeline_destroy (GstdSession * gstd, const gchar * name)
   g_return_val_if_fail (GSTD_IS_SESSION (gstd), GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (name, GSTD_NULL_ARGUMENT);
 
-  gstd_object_read (GSTD_OBJECT (gstd), "pipelines", &list, NULL);
+  gstd_object_read (GSTD_OBJECT (gstd), "pipelines", &list);
   ret = gstd_object_delete (list, name);
   g_object_unref (list);
 
@@ -303,6 +316,7 @@ gstd_pipeline_get_state (GstdSession * gstd, const gchar * pipe,
   GstdObject *pipeline;
   gchar *uri;
   GstdReturnCode ret;
+  GstdObject *out;
 
   g_return_val_if_fail (GSTD_IS_SESSION (gstd), GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (pipe, GSTD_NULL_ARGUMENT);
@@ -310,9 +324,10 @@ gstd_pipeline_get_state (GstdSession * gstd, const gchar * pipe,
   uri = g_strdup_printf ("/pipelines/%s/", pipe);
   ret = gstd_get_by_uri (gstd, uri, &pipeline);
   if (ret)
-    goto noelement;
+      goto noelement;
 
-  ret = gstd_object_read (pipeline, "state", state, NULL);
+  out = GSTD_OBJECT(state);
+  ret = gstd_object_read (pipeline, "state", &out);
 
   g_object_unref (pipeline);
   g_free (uri);
@@ -343,57 +358,6 @@ gstd_pipeline_pause (GstdSession * gstd, const gchar * pipe)
   return gstd_pipeline_set_state (gstd, pipe, GSTD_PIPELINE_PAUSED);
 }
 
-typedef GstdReturnCode eaccess (GstdObject *, const gchar *, ...);
-GstdReturnCode
-gstd_element_generic (GstdSession * gstd, const gchar * pipe,
-    const gchar * name, const gchar * property, gpointer value, eaccess func)
-{
-  GstdObject *element;
-  gchar *uri;
-  GstdReturnCode ret;
-
-  g_return_val_if_fail (GSTD_IS_SESSION (gstd), GSTD_NULL_ARGUMENT);
-  g_return_val_if_fail (pipe, GSTD_NULL_ARGUMENT);
-  g_return_val_if_fail (name, GSTD_NULL_ARGUMENT);
-  g_return_val_if_fail (property, GSTD_NULL_ARGUMENT);
-  g_return_val_if_fail (value, GSTD_NULL_ARGUMENT);
-
-  element = NULL;
-  uri = g_strdup_printf ("/pipelines/%s/elements/%s/", pipe, name);
-  ret = gstd_get_by_uri (gstd, uri, &element);
-  g_free (uri);
-  if (ret)
-    goto baduri;
-
-  ret = func (element, property, value, NULL);
-  g_object_unref (element);
-
-  return ret;
-
-baduri:
-  {
-    if (element)
-      g_object_unref (element);
-    return ret;
-  }
-}
-
-GstdReturnCode
-gstd_element_set (GstdSession * gstd, const gchar * pipe, const gchar * name,
-    const gchar * property, gpointer value)
-{
-  return gstd_element_generic (gstd, pipe, name, property,
-      value, gstd_object_update);
-}
-
-GstdReturnCode
-gstd_element_get (GstdSession * gstd, const gchar * pipe, const gchar * name,
-    const gchar * property, gpointer value)
-{
-  return gstd_element_generic (gstd, pipe, name, property,
-      value, gstd_object_read);
-}
-
 GstdReturnCode
 gstd_get_by_uri (GstdSession * gstd, const gchar * uri, GstdObject ** node)
 {
@@ -420,7 +384,7 @@ gstd_get_by_uri (GstdSession * gstd, const gchar * uri, GstdObject ** node)
       continue;
     }
 
-    ret = gstd_object_read (parent, *it, &child, NULL);
+    ret = gstd_object_read (parent, *it, &child);
     g_object_unref (parent);
 
     if (ret)
