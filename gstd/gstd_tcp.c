@@ -46,7 +46,7 @@ struct _GstdTcp
   GstdIpc parent;
   guint16 base_port;
   guint16 num_ports;
-  GSocketService **service;
+  GSocketService *service;
 };
 
 struct _GstdTcpClass
@@ -327,11 +327,11 @@ gstd_tcp_start (GstdIpc * base, GstdSession * session)
   // Close any existing connection
   gstd_tcp_stop (base);
 
-  self->service = g_malloc (self->num_ports * sizeof (GSocketService *));
+  service = &self->service;
+  *service = g_threaded_socket_service_new (self->num_ports);
 
   for (i = 0; i < self->num_ports; i++) {
-    service = &self->service[i];
-    *service = g_socket_service_new ();
+
     g_socket_listener_add_inet_port (G_SOCKET_LISTENER (*service),
         port + i, NULL /* G_OBJECT(session) */ , &error);
     if (error)
@@ -339,11 +339,11 @@ gstd_tcp_start (GstdIpc * base, GstdSession * session)
 
     /* listen to the 'incoming' signal */
     g_signal_connect (*service,
-        "incoming", G_CALLBACK (gstd_tcp_callback), session);
+        "run", G_CALLBACK (gstd_tcp_callback), session);
 
+  }
     /* start the socket service */
     g_socket_service_start (*service);
-  }
 
 
 out:
@@ -364,23 +364,20 @@ gstd_tcp_stop (GstdIpc * base)
   GstdTcp *self = GSTD_TCP (base);
   GSocketService **service;
   GstdSession *session = base->session;
-  guint i;
 
   g_return_val_if_fail (session, GSTD_NULL_ARGUMENT);
 
   GST_DEBUG_OBJECT (self, "Entering TCP stop ");
   if (self->service) {
-    for (i = 0; i < self->num_ports; i++) {
-      service = &self->service[i];
-      GSocketListener *listener = G_SOCKET_LISTENER (*service);
-      if (*service) {
-        GST_INFO_OBJECT (session, "Closing TCP connection for %s",
-            GSTD_OBJECT_NAME (session));
-        g_socket_listener_close (listener);
-        g_socket_service_stop (*service);
-        g_object_unref (*service);
-        *service = NULL;
-      }
+    service = &self->service;
+    GSocketListener *listener = G_SOCKET_LISTENER (*service);
+    if (*service) {
+      GST_INFO_OBJECT (session, "Closing TCP connection for %s",
+		       GSTD_OBJECT_NAME (session));
+      g_socket_listener_close (listener);
+      g_socket_service_stop (*service);
+      g_object_unref (*service);
+      *service = NULL;      
     }
   }
   return GSTD_EOK;
