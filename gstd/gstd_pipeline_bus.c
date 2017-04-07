@@ -132,17 +132,17 @@ gstd_pipeline_bus_read_messages (GstdPipelineBus * self, gchar ** messages)
 
   currenttime = g_get_monotonic_time ();
   endtime = g_get_monotonic_time () + 10 * G_TIME_SPAN_SECOND;
-  
+
 
   while (endtime > currenttime) {
-      if(!(msg = gst_bus_timed_pop(GST_BUS(self->bus), 5*GST_SECOND))){
-	 GST_INFO_OBJECT (self, "Timeout wating for messages");
-      }
-      
-      if (msg != NULL){
-	g_queue_push_tail (self->messages, (gpointer) msg);
-      }    
-      currenttime = g_get_monotonic_time ();
+    if (!(msg = gst_bus_timed_pop (GST_BUS (self->bus), 5 * GST_SECOND))) {
+      GST_INFO_OBJECT (self, "Timeout wating for messages");
+    }
+
+    if (msg != NULL) {
+      g_queue_push_tail (self->messages, (gpointer) msg);
+    }
+    currenttime = g_get_monotonic_time ();
   }
 
   num_messages =

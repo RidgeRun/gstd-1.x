@@ -338,12 +338,11 @@ gstd_tcp_start (GstdIpc * base, GstdSession * session)
       goto noconnection;
 
     /* listen to the 'incoming' signal */
-    g_signal_connect (*service,
-        "run", G_CALLBACK (gstd_tcp_callback), session);
+    g_signal_connect (*service, "run", G_CALLBACK (gstd_tcp_callback), session);
 
   }
-    /* start the socket service */
-    g_socket_service_start (*service);
+  /* start the socket service */
+  g_socket_service_start (*service);
 
 
 out:
@@ -373,11 +372,11 @@ gstd_tcp_stop (GstdIpc * base)
     GSocketListener *listener = G_SOCKET_LISTENER (*service);
     if (*service) {
       GST_INFO_OBJECT (session, "Closing TCP connection for %s",
-		       GSTD_OBJECT_NAME (session));
+          GSTD_OBJECT_NAME (session));
       g_socket_listener_close (listener);
       g_socket_service_stop (*service);
       g_object_unref (*service);
-      *service = NULL;      
+      *service = NULL;
     }
   }
   return GSTD_EOK;
