@@ -411,9 +411,8 @@ gstd_object_create (GstdObject * object, const gchar * name,
   g_return_val_if_fail (name, GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (description, GSTD_NULL_ARGUMENT);
 
-  GSTD_OBJECT_GET_CLASS (object)->create (object, name, description);
+  return GSTD_OBJECT_GET_CLASS (object)->create (object, name, description);
 
-  return GSTD_EOK;
 }
 
 GstdReturnCode
