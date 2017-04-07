@@ -56,6 +56,8 @@ gstd_property_to_string (GstdObject * obj, gchar ** outstring);
 static void
 gstd_property_add_value_default (GstdProperty * self, GstdIFormatter * formatter,
     GValue * value);
+static GstdReturnCode
+gstd_property_update_default (GstdObject * object, const gchar * arg);
 
 static void
 gstd_property_class_init (GstdPropertyClass *klass)
@@ -85,6 +87,7 @@ gstd_property_class_init (GstdPropertyClass *klass)
                                      properties);
 
   gstdc->to_string = GST_DEBUG_FUNCPTR(gstd_property_to_string);
+  gstdc->update = GST_DEBUG_FUNCPTR(gstd_property_update_default);
 
   klass->add_value = GST_DEBUG_FUNCPTR(gstd_property_add_value_default);
 
@@ -252,4 +255,24 @@ gstd_property_add_value_default (GstdProperty * self, GstdIFormatter * formatter
   svalue = g_strdup_value_contents (value);
   gstd_iformatter_set_string_value (formatter, svalue);
   g_free (svalue);
+}
+
+static GstdReturnCode
+gstd_property_update_default (GstdObject * object, const gchar * value)
+{
+  GParamSpec *pspec;
+  GstdProperty *prop;
+
+  g_return_val_if_fail (object, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (value, GSTD_NULL_ARGUMENT);
+
+  prop = GSTD_PROPERTY (object);
+
+  pspec = g_object_class_find_property (G_OBJECT_GET_CLASS(prop->target),
+      GSTD_OBJECT_NAME(prop));
+  
+  GST_ERROR_OBJECT (object, "I don't know how to parse \"%s\" types",
+      g_type_name (pspec->value_type));
+
+  return GSTD_UNKNOWN_TYPE;
 }
