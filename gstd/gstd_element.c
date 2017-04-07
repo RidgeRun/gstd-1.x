@@ -38,6 +38,7 @@
 #include "gstd_property_boolean.h"
 #include "gstd_property_string.h"
 #include "gstd_property_int.h"
+#include "gstd_property_enum.h"
 #include "gstd_list_reader.h"
 
 enum
@@ -398,7 +399,11 @@ gstd_element_property_get_type (GType g_type) {
     }
     default:
     {
-      return GSTD_TYPE_PROPERTY;
+      if (G_TYPE_IS_ENUM(g_type)) {
+	return GSTD_TYPE_PROPERTY_ENUM;
+      } else  {
+	return GSTD_TYPE_PROPERTY;
+      }
     }
   }
 }
