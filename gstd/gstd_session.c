@@ -194,11 +194,11 @@ gstd_session_set_property (GObject * object,
 
   switch (property_id) {
     case PROP_PIPELINES:
-      self->pipelines = g_value_get_object (value);
+      self->pipelines = g_value_dup_object (value);
       GST_INFO_OBJECT (self, "Changed pipeline list to %p", self->pipelines);
       break;
     case PROP_DEBUG:
-      self->debug = g_value_get_object (value);
+      self->debug = g_value_dup_object (value);
       GST_DEBUG_OBJECT (self, "Changing debug object to %p", self->debug);
       break;
 

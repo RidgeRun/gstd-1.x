@@ -17,7 +17,7 @@ libgstd_core_la_SOURCES = gstd_session.c		\
 			  gstd_pipeline_deleter.c	\
 			  gstd_no_deleter.c		\
 			  gstd_debug.c			\
-			  gstd_event_handler.c		\
+			  gstd_event_creator.c		\
 			  gstd_event_factory.c		\
 			  gstd_pipeline_bus.c		\
 			  gstd_ireader.c		\
@@ -30,7 +30,8 @@ libgstd_core_la_SOURCES = gstd_session.c		\
 			  gstd_property_boolean.c	\
 			  gstd_iupdater.c		\
 			  gstd_no_updater.c		\
-			  gstd_property_enum.c
+			  gstd_property_enum.c		\
+			  gstd_event_handler.c
 
 libgstd_core_la_CFLAGS = $(GST_CFLAGS) $(GIO_CFLAGS) $(GJSON_CFLAGS)
 libgstd_core_la_LDFLAGS = $(GST_LIBS) $(GIO_LIBS) $(GJSON_LIBS)
@@ -71,6 +72,8 @@ gstdinclude_HEADERS = \
 		  gstd_property_boolean.h	\
 		  gstd_iupdater.h		\
 		  gstd_no_updater.h		\
-		  gstd_property_enum.h
+		  gstd_property_enum.h		\
+		  gstd_event_handler.h		\
+		  gstd_event_creator.h
 
 noinst_HEADERS = 

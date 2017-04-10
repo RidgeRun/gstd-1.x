@@ -23,8 +23,7 @@
 #endif
 
 #include "gstd_event_handler.h"
-#include "gstd_event_factory.h"
-
+#include "gstd_event_creator.h"
 
 enum
 {
@@ -34,24 +33,25 @@ enum
 
 struct _GstdEventHandler
 {
-  GObject parent;
-
-  GParamFlags flags;
+  GstdObject parent;
 
   GObject *receiver;
 };
 
 struct _GstdEventHandlerClass
 {
-  GObjectClass parent_class;
+  GstdObjectClass parent_class;
 };
 
 static void
 gstd_event_handler_set_property (GObject *,
     guint, const GValue *, GParamSpec *);
-G_DEFINE_TYPE (GstdEventHandler, gstd_event_handler, G_TYPE_OBJECT);
+static void
+gstd_event_handler_dispose (GObject *);
 
-/* Gstd Event debugging category */
+G_DEFINE_TYPE (GstdEventHandler, gstd_event_handler, GSTD_TYPE_OBJECT)
+
+/* Gstd EventHandler debugging category */
 GST_DEBUG_CATEGORY_STATIC (gstd_event_handler_debug);
 #define GST_CAT_DEFAULT gstd_event_handler_debug
 #define GSTD_DEBUG_DEFAULT_LEVEL GST_LEVEL_INFO
@@ -61,12 +61,14 @@ gstd_event_handler_class_init (GstdEventHandlerClass * klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
   GParamSpec *properties[N_PROPERTIES] = { NULL, };
+
   object_class->set_property = gstd_event_handler_set_property;
+  object_class->dispose = gstd_event_handler_dispose;
 
   properties[PROP_RECEIVER] =
       g_param_spec_object ("receiver",
       "Receiver",
-      "The object that will receive the event",
+      "The object that will receive the event_handler",
       G_TYPE_OBJECT,
       G_PARAM_CONSTRUCT_ONLY | G_PARAM_WRITABLE | G_PARAM_STATIC_STRINGS);
 
@@ -74,38 +76,15 @@ gstd_event_handler_class_init (GstdEventHandlerClass * klass)
 
   /* Initialize debug category with nice colors */
   guint debug_color = GST_DEBUG_FG_BLACK | GST_DEBUG_BOLD | GST_DEBUG_BG_WHITE;
-  GST_DEBUG_CATEGORY_INIT (gstd_event_handler_debug, "gstdeventhandler",
-      debug_color, "Gstd Event Handler category");
+  GST_DEBUG_CATEGORY_INIT (gstd_event_handler_debug, "gstdevent_handlerhandler",
+      debug_color, "Gstd EventHandler  category");
 }
 
 static void
 gstd_event_handler_init (GstdEventHandler * self)
 {
-  GST_INFO_OBJECT (self, "Initializing gstd event handler");
+  GST_INFO_OBJECT (self, "Initializing gstd event_handler resource");
   self->receiver = NULL;
-}
-
-GstdReturnCode
-gstd_event_handler_send_event (GstdEventHandler * self,
-    const gchar * event_type, const gchar * description)
-{
-  GST_INFO_OBJECT (self, "Event Handler sending event %s", event_type);
-  GstEvent *event = gstd_event_factory_make (event_type, description);
-  if (event) {
-    if (gst_element_send_event (GST_ELEMENT (self->receiver), event))
-      return GSTD_EOK;
-    else
-      return GSTD_BAD_COMMAND;
-  }
-  return GSTD_BAD_VALUE;
-}
-
-
-GstdEventHandler *
-gstd_event_handler_new (GObject * receiver)
-{
-  return GSTD_EVENT_HANDLER (g_object_new (GSTD_TYPE_EVENT_HANDLER, "receiver",
-          receiver, NULL));
 }
 
 static void
@@ -116,12 +95,38 @@ gstd_event_handler_set_property (GObject * object,
 
   switch (property_id) {
     case PROP_RECEIVER:
-      self->receiver = g_value_get_object (value);
-      GST_INFO_OBJECT (self, "Changed receiver to %p", self->receiver);
-      break;
+      {
+	GstdICreator * creator;
+	
+	self->receiver = g_value_dup_object (value);
+	GST_INFO_OBJECT (self, "Changed receiver to %p", self->receiver);
+
+	creator = GSTD_ICREATOR(g_object_new (GSTD_TYPE_EVENT_CREATOR,
+            "receiver", self->receiver, NULL));
+	gstd_object_set_creator (GSTD_OBJECT(self), creator);
+	break;
+      }
     default:
       /* We don't have any other property... */
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
       break;
   }
+}
+
+static void
+gstd_event_handler_dispose (GObject * object)
+{
+  GstdEventHandler *self = GSTD_EVENT_HANDLER (object);
+
+  if (self->receiver) {
+    g_object_unref (self->receiver);
+    self->receiver = NULL;
+  }
+}
+
+GstdEventHandler *
+gstd_event_handler_new (GObject * receiver)
+{
+  return GSTD_EVENT_HANDLER (g_object_new (GSTD_TYPE_EVENT_HANDLER, "receiver",
+      receiver, "name", "event_handler", NULL));
 }
