@@ -172,9 +172,16 @@ gstd_event_factory_make_seek_event (const gchar * description)
   //Assume all 7 properties come with at most one value
   gchar **tokens = g_strsplit (description, " ", 7);
 
-  
+  if (NULL == tokens[0]) {
+    goto out;
+  }
+
   if (!gstd_ascii_to_double(tokens[0], &rate)){
     return GSTD_EVENT_ERROR;
+  }
+
+  if (NULL == tokens[1]) {
+    goto out;
   }
 
   gint64 temp_format;
@@ -183,6 +190,9 @@ gstd_event_factory_make_seek_event (const gchar * description)
   }
   format = (GstFormat)temp_format;
 
+  if (NULL == tokens[2]) {
+    goto out;
+  }
 
   gint64 temp_flags;
   if (!gstd_ascii_to_gint64(tokens[2], &temp_flags)){
@@ -190,14 +200,26 @@ gstd_event_factory_make_seek_event (const gchar * description)
   }
   flags = (GstSeekFlags)temp_flags;
 
+  if (NULL == tokens[3]) {
+    goto out;
+  }
+
   gint64 temp_start_type;
   if (!gstd_ascii_to_gint64(tokens[3], &temp_start_type)){
     return GSTD_EVENT_ERROR;
   }
   start_type = (GstSeekType)temp_start_type;
 
+  if (NULL == tokens[4]) {
+    goto out;
+  }
+
   if (!gstd_ascii_to_gint64(tokens[4], &start)){
     return GSTD_EVENT_ERROR;
+  }
+
+  if (NULL == tokens[5]) {
+    goto out;
   }
 
   gint64 temp_stop_type;
@@ -206,10 +228,15 @@ gstd_event_factory_make_seek_event (const gchar * description)
   }
   stop_type = (GstSeekType)temp_stop_type;
 
+  if (NULL == tokens[6]) {
+    goto out;
+  }
+
   if (!gstd_ascii_to_gint64(tokens[6], &stop)){
     return GSTD_EVENT_ERROR;
   }
 
+ out:
   return gst_event_new_seek (rate, format, flags, start_type, start, stop_type,
       stop);
 }
