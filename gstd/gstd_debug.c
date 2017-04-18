@@ -124,6 +124,8 @@ gstd_debug_class_init (GstdDebugClass * klass)
   guint debug_color = GST_DEBUG_FG_BLACK | GST_DEBUG_BOLD | GST_DEBUG_BG_WHITE;
   GST_DEBUG_CATEGORY_INIT (gstd_debug_cat, "gstddebug", debug_color,
       "Gstd debug category");
+  
+  g_free (temp_threshold);
 }
 
 static void

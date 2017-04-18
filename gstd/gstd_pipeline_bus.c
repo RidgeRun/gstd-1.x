@@ -21,7 +21,7 @@
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
-
+#include <unistd.h>
 #include "gstd_pipeline_bus.h"
 
 
@@ -119,20 +119,22 @@ gstd_pipeline_bus_set_property (GObject * object,
 gboolean
 gstd_pipeline_bus_read_messages (GstdPipelineBus * self, gchar ** messages)
 {
-  GST_INFO_OBJECT (self, "Reading pipeline messages ");
-  guint64 endtime;
-  guint64 currenttime;
   GstMessage *msg = NULL;
   char *num_messages = NULL;
   char *iter_message = NULL;
   char *iter_tmp_message = NULL;
   GError *error;
   gchar *parsed_txt;
-  endtime = g_get_monotonic_time () + 10 * G_TIME_SPAN_SECOND;
+  guint64 currenttime;
+  guint64 endtime;
+
+  GST_INFO_OBJECT (self, "Reading pipeline messages ");
+
   currenttime = g_get_monotonic_time ();
+  endtime = g_get_monotonic_time () + 10 * G_TIME_SPAN_SECOND;
+
 
   while (endtime > currenttime) {
-
     if (!(msg = gst_bus_timed_pop (GST_BUS (self->bus), 5 * GST_SECOND))) {
       GST_INFO_OBJECT (self, "Timeout wating for messages");
     }
@@ -141,16 +143,14 @@ gstd_pipeline_bus_read_messages (GstdPipelineBus * self, gchar ** messages)
       g_queue_push_tail (self->messages, (gpointer) msg);
     }
     currenttime = g_get_monotonic_time ();
-
   }
 
   num_messages =
-      g_strdup_printf ("{\n messages : %d\n  }",
+      g_strdup_printf ("{\n   \"messages\" : %d\n  }",
       g_queue_get_length (self->messages));
 
   while (0 < g_queue_get_length (self->messages)) {
     msg = (GstMessage *) g_queue_pop_head (self->messages);
-
     switch (GST_MESSAGE_TYPE (msg)) {
       case GST_MESSAGE_ERROR:{
         gst_message_parse_error (msg, &error, &parsed_txt);
@@ -166,13 +166,12 @@ gstd_pipeline_bus_read_messages (GstdPipelineBus * self, gchar ** messages)
         break;
     }
   }
-
   *messages =
       g_strdup_printf ("{\n    %s : %s\n  }", num_messages, iter_message);
   g_free (num_messages);
 
   if (iter_message)
-    g_free (num_messages);
+    g_free (iter_message);
 
   return TRUE;
 }

@@ -206,6 +206,7 @@ gstd_list_create (GstdObject * object, const gchar * name,
 {
   GstdList *self;
   GstdObject *out;
+  GstdReturnCode ret = GSTD_EOK;
 
   g_return_val_if_fail (GSTD_IS_OBJECT (object), GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (name, GSTD_NULL_ARGUMENT);
@@ -215,13 +216,26 @@ gstd_list_create (GstdObject * object, const gchar * name,
 
   g_return_val_if_fail (object->creator, GSTD_MISSING_INITIALIZATION);
   gstd_icreator_create (object->creator, name, description, &out);
+  ret = GSTD_OBJECT_CODE(out);
+  if(ret)
+    goto error;
+ 
+  self->count++;
 
   if (!gstd_list_append_child (self, out)) {
     g_object_unref (out);
-    return GSTD_EXISTING_RESOURCE;
+    ret = GSTD_EXISTING_RESOURCE;
+    return ret;
   }
 
-  return GSTD_EOK;
+  return ret;
+ error:
+  {
+    g_object_unref(out);
+    GST_ERROR_OBJECT (object, "Could not create the resource  \"%s\" on \"%s\"",
+                     name, GSTD_OBJECT_NAME (self));
+    return ret;
+  }
 }
 
 
