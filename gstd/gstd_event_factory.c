@@ -158,7 +158,6 @@ static gboolean gstd_ascii_to_boolean(const gchar *full_string, gboolean *out_va
 static GstEvent *
 gstd_event_factory_make_seek_event (const gchar * description)
 {
-
   gdouble rate = GSTD_EVENT_FACTORY_SEEK_RATE_DEFAULT;
   GstFormat format = GSTD_EVENT_FACTORY_SEEK_FORMAT_DEFAULT;
   GstSeekFlags flags = GSTD_EVENT_FACTORY_SEEK_FLAGS_DEFAULT;
@@ -166,6 +165,7 @@ gstd_event_factory_make_seek_event (const gchar * description)
   gint64 start = GSTD_EVENT_FACTORY_SEEK_START_DEFAULT;
   GstSeekType stop_type = GSTD_EVENT_FACTORY_SEEK_STOP_TYPE_DEFAULT;
   gint64 stop = GSTD_EVENT_FACTORY_SEEK_STOP_DEFAULT;
+  GstEvent *event = GSTD_EVENT_ERROR;
 
   g_return_val_if_fail (description, GSTD_EVENT_ERROR);
 
@@ -173,72 +173,79 @@ gstd_event_factory_make_seek_event (const gchar * description)
   gchar **tokens = g_strsplit (description, " ", 7);
 
   if (NULL == tokens[0]) {
-    goto out;
+    goto fallback;
   }
 
   if (!gstd_ascii_to_double(tokens[0], &rate)){
-    return GSTD_EVENT_ERROR;
+    goto out;
   }
 
   if (NULL == tokens[1]) {
-    goto out;
+    goto fallback;
   }
 
   gint64 temp_format;
   if (!gstd_ascii_to_gint64(tokens[1], &temp_format)){
-    return GSTD_EVENT_ERROR;
+    goto out;
   }
   format = (GstFormat)temp_format;
 
   if (NULL == tokens[2]) {
-    goto out;
+    goto fallback;
   }
 
   gint64 temp_flags;
   if (!gstd_ascii_to_gint64(tokens[2], &temp_flags)){
-    return GSTD_EVENT_ERROR;
+    goto out;
   }
   flags = (GstSeekFlags)temp_flags;
 
   if (NULL == tokens[3]) {
-    goto out;
+    goto fallback;
   }
 
   gint64 temp_start_type;
   if (!gstd_ascii_to_gint64(tokens[3], &temp_start_type)){
-    return GSTD_EVENT_ERROR;
+    goto out;
   }
   start_type = (GstSeekType)temp_start_type;
 
   if (NULL == tokens[4]) {
-    goto out;
+    goto fallback;
   }
 
   if (!gstd_ascii_to_gint64(tokens[4], &start)){
-    return GSTD_EVENT_ERROR;
+    goto out;
   }
 
   if (NULL == tokens[5]) {
-    goto out;
+    goto fallback;
   }
 
   gint64 temp_stop_type;
   if (!gstd_ascii_to_gint64(tokens[5], &temp_stop_type)){
-    return GSTD_EVENT_ERROR;
+    goto out;
   }
   stop_type = (GstSeekType)temp_stop_type;
 
   if (NULL == tokens[6]) {
-    goto out;
+    goto fallback;
   }
 
   if (!gstd_ascii_to_gint64(tokens[6], &stop)){
-    return GSTD_EVENT_ERROR;
+    goto out;
   }
 
+ fallback:
+  {
+    event = gst_event_new_seek (rate, format, flags, start_type, start, stop_type,
+        stop);
+  }
  out:
-  return gst_event_new_seek (rate, format, flags, start_type, start, stop_type,
-      stop);
+  {
+    g_strfreev (tokens);
+    return event;
+  }
 }
 
 static GstEvent *
