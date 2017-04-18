@@ -22,7 +22,6 @@
 #define __GSTD_EVENT_HANDLER_H__
 
 #include <gst/gst.h>
-#include <gstd_object.h>
 
 G_BEGIN_DECLS
 #define GSTD_TYPE_EVENT_HANDLER \
@@ -37,13 +36,14 @@ G_BEGIN_DECLS
   (G_TYPE_CHECK_CLASS_TYPE((klass),GSTD_TYPE_EVENT_HANDLER))
 #define GSTD_EVENT_HANDLER_GET_CLASS(obj) \
   (G_TYPE_INSTANCE_GET_CLASS ((obj), GSTD_TYPE_EVENT_HANDLER, GstdEventHandlerClass))
+
 typedef struct _GstdEventHandler GstdEventHandler;
 typedef struct _GstdEventHandlerClass GstdEventHandlerClass;
+
 GType gstd_event_handler_get_type ();
 
-
 /**
- * gstd_event_new: (constructor)
+ * gstd_event_handler_new: (constructor)
  * @receiver: The object that will receive the event.
  *
  * Creates a new object that sends events.
@@ -53,18 +53,6 @@ GType gstd_event_handler_get_type ();
  */
 GstdEventHandler *gstd_event_handler_new (GObject * receiver);
 
-/**
- * gstd_event_send_event:
- * @gstd_event: The member of the corresponding element that will send a gst event.
- * @event_type: Event type that will be sent. 
- * @description: (nullable) Parameters of the event_type.
- * 
- * Sends the specified event to the receiver object.
- *
- * Returns: TRUE if the event is sent succesfully to the receiver. FALSE otherwise.
- */
-GstdReturnCode gstd_event_handler_send_event (GstdEventHandler * gstd_event_handler,
-    const gchar * event_type, const gchar * description);
-
 G_END_DECLS
+
 #endif // __GSTD_EVENT_HANDLER_H__

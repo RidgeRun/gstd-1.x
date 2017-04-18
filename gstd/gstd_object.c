@@ -225,7 +225,8 @@ gstd_object_create_default (GstdObject * object, const gchar * name,
 
   gstd_icreator_create (object->creator, name, description, &out);
 
-  g_object_unref (out);
+  if (out)
+    g_object_unref (out);
 
   return GSTD_EOK;
 }

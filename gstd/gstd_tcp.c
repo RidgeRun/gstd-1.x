@@ -29,8 +29,8 @@
 #include "gstd_ipc.h"
 #include "gstd_tcp.h"
 #include "gstd_element.h"
-#include "gstd_event_handler.h"
 #include "gstd_pipeline_bus.h"
+#include "gstd_event_handler.h"
 
 /* Gstd TCP debugging category */
 GST_DEBUG_CATEGORY_STATIC (gstd_tcp_debug);
@@ -378,14 +378,6 @@ gstd_tcp_create (GstdSession * session, GstdObject * obj, gchar * args,
   // Tokens has the form {'name', <name>, 'description', <description>}
   tokens = g_strsplit (args, " ", 4);
 
-  if (strcmp (tokens[0], "event") == 0) {
-    tokens = g_strsplit (args, " ", 3);
-    ret =
-        gstd_event_handler_send_event (GSTD_EVENT_HANDLER (obj), tokens[1],
-        tokens[2]);
-    return GSTD_EOK;
-  }
-
   name = tokens[1];
   description = tokens[3];
 
@@ -399,9 +391,11 @@ gstd_tcp_create (GstdSession * session, GstdObject * obj, gchar * args,
   if (ret)
     goto noobject;
 
-  gstd_object_read (obj, name, &new);
-  gstd_object_to_string (new, response);
-  g_object_unref (new);
+  if (!GSTD_IS_EVENT_HANDLER(obj)) {
+    gstd_object_read (obj, name, &new);
+    gstd_object_to_string (new, response);
+    g_object_unref (new);
+  }
 
   return ret;
 

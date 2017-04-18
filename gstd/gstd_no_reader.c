@@ -74,5 +74,8 @@ static GstdReturnCode
 gstd_no_reader_read (GstdIReader * iface, GstdObject * object, const gchar * name, GstdObject ** out)
 {
   GST_ERROR_OBJECT (iface, "Unable to read from this resource");
+
+  *out = NULL;
+
   return GSTD_NO_READ;
 }
