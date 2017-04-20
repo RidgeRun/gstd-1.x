@@ -22,6 +22,7 @@
 #define __GSTD_IDELETER_H__
 
 #include <gst/gst.h>
+#include <gstd_return_codes.h>
 
 G_BEGIN_DECLS
 #define GSTD_TYPE_IDELETER                (gstd_ideleter_get_type ())
@@ -38,12 +39,12 @@ struct _GstdIDeleterInterface
 {
   GTypeInterface parent;
 
-  void (*delete) (GstdIDeleter * self, GstdObject * object);
+  GstdReturnCode (*delete) (GstdIDeleter * self, GstdObject * object);
 };
 
 GType gstd_ideleter_get_type (void);
 
-void gstd_ideleter_delete (GstdIDeleter * self, GstdObject * object);
+GstdReturnCode gstd_ideleter_delete (GstdIDeleter * self, GstdObject * object);
 
 G_END_DECLS
 #endif // __GSTD_IDELETER_H__
