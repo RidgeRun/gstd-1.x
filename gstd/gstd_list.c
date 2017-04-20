@@ -245,6 +245,7 @@ gstd_list_delete (GstdObject * object, const gchar * node)
   GstdList *self;
   GstdObject *todelete;
   GList *found;
+  GstdReturnCode ret;
 
   g_return_val_if_fail (GSTD_IS_OBJECT (object), GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (node, GSTD_NULL_ARGUMENT);
@@ -264,18 +265,21 @@ gstd_list_delete (GstdObject * object, const gchar * node)
   GST_INFO_OBJECT (self, "Deleting %s from %s list", GSTD_OBJECT_NAME (self),
       GSTD_OBJECT_NAME (self));
 
-  gstd_ideleter_delete (object->deleter, todelete);
+  ret = gstd_ideleter_delete (object->deleter, todelete);
+  if (ret)
+    return ret;
+
   self->count--;
 
   self->list = g_list_delete_link (self->list, found);
 
-  return GSTD_EOK;
+  return ret;
 
 unexisting:
   {
     GST_ERROR_OBJECT (object, "The resource \"%s\" doesn't exists in \"%s\"",
         node, GSTD_OBJECT_NAME (self));
-    return GSTD_EXISTING_RESOURCE;
+    return GSTD_NO_RESOURCE;
   }
 }
 
