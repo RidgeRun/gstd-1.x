@@ -407,43 +407,29 @@ gstd_tcp_create (GstdSession * session, GstdObject * obj, gchar * args,
       "Currently hardcoded to create pipelines and events, we must be "
       "generic enough to create any type of object");
 
-  // Tokens has the form {'name', <name>, 'description', <description>}
-  tokens = g_strsplit (args, " ", 4);
+  // Tokens has the form {<name>, <description>}
+  tokens = g_strsplit (args, " ", 2);
 
-  name = tokens[1];
-  description = tokens[3];
+  name = tokens[0];
+  description = tokens[1];
 
-  if (!name || name[0] == '\0')
-    goto noname;
-
-  if (!description || description[0] == '\0')
-    goto nodescription;
+  if (NULL == name) {
+    /* No name provided, hence no desciption either, but it may contain garbage */
+    description = NULL;
+  }
 
   ret = gstd_object_create (obj, name, description);
   if (ret)
-    goto noobject;
+    goto out;
 
-  if (!GSTD_IS_EVENT_HANDLER(obj)) {
-    gstd_object_read (obj, name, &new);
+  gstd_object_read (obj, name, &new);
+
+  if (NULL != new) {
     gstd_object_to_string (new, response);
     g_object_unref (new);
   }
 
-  return ret;
-
-noname:
-  {
-    GST_ERROR_OBJECT (session, "Missing name for the new pipeline");
-    g_strfreev (tokens);
-    return GSTD_NULL_ARGUMENT;
-  }
-nodescription:
-  {
-    GST_ERROR_OBJECT (session, "Missing description for pipeline \"%s\"", name);
-    g_strfreev (tokens);
-    return GSTD_NULL_ARGUMENT;
-  }
-noobject:
+out:
   {
     g_strfreev (tokens);
     return ret;
