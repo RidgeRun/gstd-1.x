@@ -28,10 +28,11 @@ gstd_ideleter_default_init (GstdIDeleterInterface * iface)
 
 }
 
-void
+GstdReturnCode
 gstd_ideleter_delete (GstdIDeleter * self, GstdObject * object)
 {
-  g_return_if_fail (self);
+  g_return_val_if_fail (self, GSTD_NULL_ARGUMENT);
 
-  GSTD_IDELETER_GET_INTERFACE (self)->delete (self, object);
+  return GSTD_IDELETER_GET_INTERFACE (self)->delete (self, object);
+
 }
