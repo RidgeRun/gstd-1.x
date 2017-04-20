@@ -28,7 +28,7 @@ GST_DEBUG_CATEGORY_STATIC (gstd_pipeline_creator_debug);
 
 #define GSTD_DEBUG_DEFAULT_LEVEL GST_LEVEL_INFO
 
-static void gstd_pipeline_creator_create (GstdICreator * iface,
+static GstdReturnCode gstd_pipeline_creator_create (GstdICreator * iface,
     const gchar * name, const gchar * description, GstdObject ** out);
 
 typedef struct _GstdPipelineCreatorClass GstdPipelineCreatorClass;
@@ -75,17 +75,19 @@ gstd_pipeline_creator_init (GstdPipelineCreator * self)
   GST_INFO_OBJECT (self, "Initializing pipeline creator");
 }
 
-static void
+static GstdReturnCode
 gstd_pipeline_creator_create (GstdICreator * iface, const gchar * name,
     const gchar * description, GstdObject ** out)
 {
   GstdPipeline *pipeline;
 
-  g_return_if_fail (iface);
-  g_return_if_fail (name);
-  g_return_if_fail (description);
+  g_return_val_if_fail (iface, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (name, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (description, GSTD_NULL_ARGUMENT);
 
   pipeline = g_object_new (GSTD_TYPE_PIPELINE, "name", name, "description",
       description, NULL);
   *out = GSTD_OBJECT(pipeline);
+
+  return gstd_pipeline_build(G_OBJECT(pipeline));
 }

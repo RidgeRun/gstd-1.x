@@ -215,8 +215,7 @@ gstd_list_create (GstdObject * object, const gchar * name,
   self = GSTD_LIST (object);
 
   g_return_val_if_fail (object->creator, GSTD_MISSING_INITIALIZATION);
-  gstd_icreator_create (object->creator, name, description, &out);
-  ret = GSTD_OBJECT_CODE(out);
+  ret = gstd_icreator_create (object->creator, name, description, &out);
   if(ret)
     goto error;
  

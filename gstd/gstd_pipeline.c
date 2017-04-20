@@ -119,7 +119,6 @@ static void
 gstd_pipeline_get_property (GObject *, guint, GValue *, GParamSpec *);
 static void
 gstd_pipeline_set_property (GObject *, guint, const GValue *, GParamSpec *);
-static void gstd_pipeline_constructed (GObject *);
 static void gstd_pipeline_dispose (GObject *);
 static GstdReturnCode
 gstd_pipeline_create (GstdPipeline *, const gchar *, gint, const gchar *);
@@ -138,7 +137,6 @@ gstd_pipeline_class_init (GstdPipelineClass * klass)
   object_class->set_property = gstd_pipeline_set_property;
   object_class->get_property = gstd_pipeline_get_property;
   object_class->dispose = gstd_pipeline_dispose;
-  object_class->constructed = gstd_pipeline_constructed;
 
   properties[PROP_DESCRIPTION] =
       g_param_spec_string ("description",
@@ -201,8 +199,8 @@ gstd_pipeline_init (GstdPipeline * self)
       g_object_new (GSTD_TYPE_PROPERTY_READER, NULL));
 }
 
-static void
-gstd_pipeline_constructed (GObject * object)
+GstdReturnCode
+gstd_pipeline_build (GObject * object)
 {
   GstdPipeline *self = GSTD_PIPELINE (object);
   GstdReturnCode ret;
@@ -216,7 +214,7 @@ gstd_pipeline_constructed (GObject * object)
   self->event_handler = gstd_event_handler_new (G_OBJECT (self->pipeline));
   if (!self->event_handler) {
     ret = ret | GSTD_BAD_VALUE;
-    goto out;
+    goto out1;
   }
 
   self->pipeline_bus =
@@ -225,12 +223,26 @@ gstd_pipeline_constructed (GObject * object)
 
   if (!self->pipeline_bus) {
     ret = ret | GSTD_BAD_VALUE;
-    goto out;
+    goto out2;
   }
+
+  goto out;
+
+out2:
+  g_object_unref (self->event_handler);
+  self->event_handler = NULL;
+
+out1:
+  g_object_unref (self->elements);
+  self->elements = NULL;
+  g_object_unref (self->pipeline);
+  self->pipeline = NULL;
 
 out:
   // Capture any possible error
   gstd_object_set_code (GSTD_OBJECT (self), ret);
+
+  return ret;
 }
 
 static void

@@ -216,6 +216,7 @@ gstd_object_create_default (GstdObject * object, const gchar * name,
     const gchar * description)
 {
   GstdObject *out;
+  GstdReturnCode ret;
 
   g_return_val_if_fail (GSTD_IS_OBJECT (object), GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (name, GSTD_NULL_ARGUMENT);
@@ -223,12 +224,12 @@ gstd_object_create_default (GstdObject * object, const gchar * name,
 
   g_return_val_if_fail (object->creator, GSTD_MISSING_INITIALIZATION);
 
-  gstd_icreator_create (object->creator, name, description, &out);
+  ret = gstd_icreator_create (object->creator, name, description, &out);
 
   if (out)
     g_object_unref (out);
 
-  return GSTD_EOK;
+  return ret;
 }
 
 static GstdReturnCode
