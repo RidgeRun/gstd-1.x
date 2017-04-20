@@ -110,8 +110,11 @@ static GstdReturnCode
 gstd_event_creator_send_event (GstdEventCreator * self,
     const gchar * event_type, const gchar * description)
 {
+  GstEvent *event;
+
   GST_INFO_OBJECT (self, "Event Creator sending event %s", event_type);
-  GstEvent *event = gstd_event_factory_make (event_type, description);
+
+  event = gstd_event_factory_make (event_type, description);
   if (event) {
     if (gst_element_send_event (GST_ELEMENT (self->receiver), event))
       return GSTD_EOK;
@@ -146,14 +149,16 @@ gstd_event_creator_create (GstdICreator * iface, const gchar * name,
   GstdEventCreator *self;
   
   g_return_if_fail (iface);
-  g_return_if_fail (name);
-  g_return_if_fail (description);
   g_return_if_fail (out);
 
   self = GSTD_EVENT_CREATOR(iface);
   
   /* We don't return the newly created event */
   *out = NULL;
-  
-  gstd_event_creator_send_event (self, name, description);
+
+  if (NULL == name) {
+    GST_ERROR_OBJECT (self, "No event name provided");
+  } else {
+    gstd_event_creator_send_event (self, name, description);
+  }
 }

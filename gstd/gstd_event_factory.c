@@ -36,6 +36,7 @@
 #define GSTD_EVENT_FACTORY_SEEK_START_DEFAULT 0
 #define GSTD_EVENT_FACTORY_SEEK_STOP_TYPE_DEFAULT GST_SEEK_TYPE_SET
 #define GSTD_EVENT_FACTORY_SEEK_STOP_DEFAULT GST_CLOCK_TIME_NONE
+#define GSTD_EVENT_FACTORY_FLUSH_STOP_RESET_DEFAULT TRUE
 #define GSTD_EVENT_ERROR NULL
 
 
@@ -166,13 +167,13 @@ gstd_event_factory_make_seek_event (const gchar * description)
   GstSeekType stop_type = GSTD_EVENT_FACTORY_SEEK_STOP_TYPE_DEFAULT;
   gint64 stop = GSTD_EVENT_FACTORY_SEEK_STOP_DEFAULT;
   GstEvent *event = GSTD_EVENT_ERROR;
+  gchar **tokens = NULL;
 
-  g_return_val_if_fail (description, GSTD_EVENT_ERROR);
+  if (NULL != description) {
+    tokens = g_strsplit (description, " ", 7);
+  }
 
-  //Assume all 7 properties come with at most one value
-  gchar **tokens = g_strsplit (description, " ", 7);
-
-  if (NULL == tokens[0]) {
+  if (NULL == tokens || NULL == tokens[0]) {
     goto fallback;
   }
 
@@ -251,9 +252,12 @@ gstd_event_factory_make_seek_event (const gchar * description)
 static GstEvent *
 gstd_event_factory_make_flush_stop_event (const gchar * description)
 {
-  gboolean reset_time;
-  if (!gstd_ascii_to_boolean(description, &reset_time)){
-    return GSTD_EVENT_ERROR;
+  gboolean reset_time = GSTD_EVENT_FACTORY_FLUSH_STOP_RESET_DEFAULT;
+
+  if (NULL != description) {
+    if (!gstd_ascii_to_boolean(description, &reset_time)){
+      return GSTD_EVENT_ERROR;
+    }
   }
 
   return gst_event_new_flush_stop (reset_time);
