@@ -218,9 +218,6 @@ gstd_object_create_default (GstdObject * object, const gchar * name,
   GstdObject *out;
 
   g_return_val_if_fail (GSTD_IS_OBJECT (object), GSTD_NULL_ARGUMENT);
-  g_return_val_if_fail (name, GSTD_NULL_ARGUMENT);
-  g_return_val_if_fail (description, GSTD_NULL_ARGUMENT);
-
   g_return_val_if_fail (object->creator, GSTD_MISSING_INITIALIZATION);
 
   gstd_icreator_create (object->creator, name, description, &out);
@@ -235,7 +232,6 @@ static GstdReturnCode
 gstd_object_read_default (GstdObject * self, const gchar * name, GstdObject ** resource)
 {
   g_return_val_if_fail (GSTD_IS_OBJECT(self), GSTD_NULL_ARGUMENT);
-  g_return_val_if_fail (name, GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (resource, GSTD_NULL_ARGUMENT);
 
   g_return_val_if_fail (self->reader, GSTD_MISSING_INITIALIZATION);
@@ -372,8 +368,6 @@ gstd_object_create (GstdObject * object, const gchar * name,
     const gchar * description)
 {
   g_return_val_if_fail (GSTD_IS_OBJECT (object), GSTD_NULL_ARGUMENT);
-  g_return_val_if_fail (name, GSTD_NULL_ARGUMENT);
-  g_return_val_if_fail (description, GSTD_NULL_ARGUMENT);
 
   return GSTD_OBJECT_GET_CLASS (object)->create (object, name, description);
 
@@ -385,7 +379,6 @@ gstd_object_read (GstdObject * object, const gchar * property, GstdObject ** res
   GstdReturnCode ret;
 
   g_return_val_if_fail (GSTD_IS_OBJECT (object), GSTD_NULL_ARGUMENT);
-  g_return_val_if_fail (property, GSTD_NULL_ARGUMENT);
 
   ret = GSTD_OBJECT_GET_CLASS (object)->read (object, property, resource);
 

@@ -390,7 +390,7 @@ static GstdReturnCode
 gstd_tcp_create (GstdSession * session, GstdObject * obj, gchar * args,
     gchar ** response)
 {
-  gchar **tokens;
+  gchar **tokens = NULL;
   gchar *name;
   gchar *description;
   GstdObject *new;
@@ -398,7 +398,6 @@ gstd_tcp_create (GstdSession * session, GstdObject * obj, gchar * args,
 
   g_return_val_if_fail (GSTD_IS_SESSION (session), GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (G_IS_OBJECT (obj), GSTD_NULL_ARGUMENT);
-  g_return_val_if_fail (args, GSTD_NULL_ARGUMENT);
 
   // This may mean a potential leak
   g_warn_if_fail (!*response);
@@ -408,10 +407,14 @@ gstd_tcp_create (GstdSession * session, GstdObject * obj, gchar * args,
       "generic enough to create any type of object");
 
   // Tokens has the form {<name>, <description>}
-  tokens = g_strsplit (args, " ", 2);
-
-  name = tokens[0];
-  description = tokens[1];
+  if (NULL == args) {
+    name = NULL;
+    description = NULL;
+  } else {
+    tokens = g_strsplit (args, " ", 2);
+    name = tokens[0];
+    description = tokens[1];
+  }
 
   if (NULL == name) {
     /* No name provided, hence no desciption either, but it may contain garbage */
@@ -431,7 +434,8 @@ gstd_tcp_create (GstdSession * session, GstdObject * obj, gchar * args,
 
 out:
   {
-    g_strfreev (tokens);
+    if (tokens)
+      g_strfreev (tokens);
     return ret;
   }
 }

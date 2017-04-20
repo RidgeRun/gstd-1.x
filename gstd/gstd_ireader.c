@@ -33,7 +33,6 @@ gstd_ireader_read (GstdIReader * self, GstdObject * object, const gchar * name, 
 {
   g_return_val_if_fail (self, GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (object, GSTD_NULL_ARGUMENT);
-  g_return_val_if_fail (name, GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (out, GSTD_NULL_ARGUMENT);
 
   return GSTD_IREADER_GET_INTERFACE (self)->read (self, object, name, out);

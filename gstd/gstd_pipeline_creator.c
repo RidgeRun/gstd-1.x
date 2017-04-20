@@ -82,8 +82,16 @@ gstd_pipeline_creator_create (GstdICreator * iface, const gchar * name,
   GstdPipeline *pipeline;
 
   g_return_if_fail (iface);
-  g_return_if_fail (name);
-  g_return_if_fail (description);
+
+  if (NULL == name) {
+    GST_ERROR_OBJECT (iface, "Pipeline name not provided");
+    return;
+  }
+
+  if (NULL == description) {
+    GST_ERROR_OBJECT (iface, "Pipeline description not provided");
+    return;
+  }
 
   pipeline = g_object_new (GSTD_TYPE_PIPELINE, "name", name, "description",
       description, NULL);
