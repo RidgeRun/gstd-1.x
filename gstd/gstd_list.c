@@ -279,7 +279,7 @@ unexisting:
   {
     GST_ERROR_OBJECT (object, "The resource \"%s\" doesn't exists in \"%s\"",
         node, GSTD_OBJECT_NAME (self));
-    return GSTD_EXISTING_RESOURCE;
+    return GSTD_NO_RESOURCE;
   }
 }
 
