@@ -581,24 +581,14 @@ gstd_tcp_pipeline_create (GstdSession * session, gchar * action, gchar * args,
 {
   GstdReturnCode ret;
   gchar *uri;
-  gchar **tokens;
 
   g_return_val_if_fail (GSTD_IS_SESSION (session), GSTD_NULL_ARGUMENT);
-  g_return_val_if_fail (args, GSTD_NULL_ARGUMENT);
 
-  tokens = g_strsplit (args, " ", 2);
-  check_argument (tokens[0], GSTD_BAD_COMMAND);
-  check_argument (tokens[1], GSTD_BAD_COMMAND);
-
-
-  uri =
-      g_strdup_printf ("/pipelines name %s description %s", tokens[0],
-      tokens[1]);
+  uri = g_strdup_printf ("/pipelines %s", args ? args : "");
 
   ret = gstd_tcp_parse_raw_cmd (session, "create", uri, response);
 
   g_free (uri);
-  g_strfreev (tokens);
 
   return ret;
 }
