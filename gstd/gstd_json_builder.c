@@ -67,8 +67,14 @@ static void
 gstd_json_builder_class_init (GstdJsonBuilderClass *klass)
 {
     GObjectClass *object_class = G_OBJECT_CLASS (klass);
+    guint debug_color;
 
     object_class->finalize = gstd_json_builder_finalize;
+
+    /* Initialize debug category with nice colors */
+    debug_color = GST_DEBUG_FG_BLACK | GST_DEBUG_BOLD | GST_DEBUG_BG_WHITE;
+    GST_DEBUG_CATEGORY_INIT (gstd_json_builder_debug, "gstdjsonbuilder", debug_color,
+        "Gstd JSON builder category");
 }
 
 static void
