@@ -275,10 +275,10 @@ gstd_tcp_callback (GSocketService * service,
   GInputStream *istream;
   GOutputStream *ostream;
   gint read;
-  const guint size = 1024 * 1024;
+  const guint size = 1024;
   gchar *output = NULL;
   gchar *response;
-  gchar message[size];
+  gchar *message;
   GstdReturnCode ret;
 
   g_return_val_if_fail (session, TRUE);
@@ -286,10 +286,13 @@ gstd_tcp_callback (GSocketService * service,
   istream = g_io_stream_get_input_stream (G_IO_STREAM (connection));
   ostream = g_io_stream_get_output_stream (G_IO_STREAM (connection));
 
+  message = g_malloc (size);
+
   read = g_input_stream_read (istream, message, size, NULL, NULL);
   message[read] = '\0';
 
   ret = gstd_tcp_parse_cmd (session, message, &output);
+  g_free (message);
 
   /* Prepend the code to the output */
   response =
@@ -297,8 +300,9 @@ gstd_tcp_callback (GSocketService * service,
       output ? output : "null");
   g_free (output);
 
-  g_output_stream_write (ostream, response, size, NULL, NULL);
+  g_output_stream_write (ostream, response, strlen(response), NULL, NULL);
   g_free (response);
+
   return FALSE;
 }
 
