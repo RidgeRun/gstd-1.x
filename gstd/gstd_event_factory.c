@@ -275,9 +275,9 @@ gstd_event_factory_parse_event (const gchar * name)
     ret = GSTD_EVENT_EOS;
   } else if (!strcmp (name, "seek")) {
     ret = GSTD_EVENT_SEEK;
-  } else if (!strcmp (name, "flush-start")) {
+  } else if (!strcmp (name, "flush-start") || !strcmp (name, "flush_start")) {
     ret = GSTD_EVENT_FLUSH_START;
-  } else if (!strcmp (name, "flush-stop")) {
+  } else if (!strcmp (name, "flush-stop") || !strcmp (name, "flush_stop")) {
     ret = GSTD_EVENT_FLUSH_STOP;
   }
   return ret;
