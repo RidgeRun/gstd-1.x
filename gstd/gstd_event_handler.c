@@ -98,7 +98,7 @@ gstd_event_handler_set_property (GObject * object,
       {
 	GstdICreator * creator;
 	
-	self->receiver = g_value_dup_object (value);
+	self->receiver = g_value_get_object (value);
 	GST_INFO_OBJECT (self, "Changed receiver to %p", self->receiver);
 
 	creator = GSTD_ICREATOR(g_object_new (GSTD_TYPE_EVENT_CREATOR,
@@ -122,6 +122,8 @@ gstd_event_handler_dispose (GObject * object)
     g_object_unref (self->receiver);
     self->receiver = NULL;
   }
+
+  G_OBJECT_CLASS (gstd_event_handler_parent_class)->dispose (object);
 }
 
 GstdEventHandler *

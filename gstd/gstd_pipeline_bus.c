@@ -189,5 +189,6 @@ gstd_pipeline_bus_dispose (GObject * object)
     self->messages = NULL;
   }
 
+  g_clear_object(&self->bus);
   G_OBJECT_CLASS (gstd_pipeline_bus_parent_class)->dispose (object);
 }

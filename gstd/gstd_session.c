@@ -73,9 +73,11 @@ gstd_session_constructor (GType type,
         G_OBJECT_CLASS (gstd_session_parent_class)->constructor (type,
         n_construct_params, construct_params);
     the_session = object;
+  } else {
+    object = g_object_ref (G_OBJECT (the_session));
   }
   g_mutex_unlock (&singleton_mutex);
-  object = g_object_ref (G_OBJECT (the_session));
+
   return object;
 }
 
@@ -130,8 +132,6 @@ gstd_session_init (GstdSession * self)
 
   gstd_object_set_reader (GSTD_OBJECT(self),
       g_object_new (GSTD_TYPE_PROPERTY_READER, NULL));
-
-  object->reader = g_object_new (GSTD_TYPE_PROPERTY_READER, NULL);
 
   self->pipelines =
       GSTD_LIST (g_object_new (GSTD_TYPE_LIST, "name", "pipelines", "node-type",
@@ -394,6 +394,7 @@ gstd_get_by_uri (GstdSession * gstd, const gchar * uri, GstdObject ** node)
     ++it;
   }
 
+  g_strfreev(nodes);
   *node = parent;
   return GSTD_EOK;
 

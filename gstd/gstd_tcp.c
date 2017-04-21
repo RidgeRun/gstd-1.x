@@ -429,6 +429,7 @@ gstd_tcp_create (GstdSession * session, GstdObject * obj, gchar * args,
     g_object_unref (new);
   }
 
+  g_strfreev (tokens);
   return ret;
 
 noname:
@@ -562,6 +563,7 @@ gstd_tcp_parse_cmd (GstdSession * session, const gchar * cmd, gchar ** response)
   gchar **tokens;
   gchar *action, *args;
   GstdTCPCmd *cb;
+  GstdReturnCode ret = GSTD_BAD_COMMAND;
 
   g_return_val_if_fail (GSTD_IS_SESSION (session), GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (cmd, GSTD_NULL_ARGUMENT);
@@ -574,15 +576,17 @@ gstd_tcp_parse_cmd (GstdSession * session, const gchar * cmd, gchar ** response)
   cb = cmds;
   while (cb) {
     if (!g_ascii_strcasecmp (cb->cmd, action)) {
-      return cb->callback (session, action, args, response);
+      ret = cb->callback (session, action, args, response);
+      break;
     }
     cb++;
   }
 
-  GST_ERROR_OBJECT (session, "Unknown command \"%s\"", action);
+  if (ret == GSTD_BAD_COMMAND)
+    GST_ERROR_OBJECT (session, "Unknown command \"%s\"", action);
   g_strfreev (tokens);
 
-  return GSTD_BAD_COMMAND;
+  return ret;
 }
 
 static GstdReturnCode

@@ -253,8 +253,18 @@ gstd_pipeline_dispose (GObject * object)
     self->description = NULL;
   }
 
+  if (self->pipeline_bus) {
+    g_object_unref (self->pipeline_bus);
+    self->pipeline_bus = NULL;
+  }
+
+  if (self->event_handler) {
+    g_object_unref (self->event_handler);
+    self->event_handler = NULL;
+  }
+
   if (self->pipeline) {
-    g_object_unref (self->pipeline);
+    gst_object_unref (self->pipeline);
     self->pipeline = NULL;
   }
 
@@ -263,15 +273,6 @@ gstd_pipeline_dispose (GObject * object)
     self->elements = NULL;
   }
 
-  if (self->pipeline_bus) {
-    g_object_unref (self->pipeline_bus);
-    self->pipeline = NULL;
-  }
-
-  if (self->event_handler) {
-    g_object_unref (self->event_handler);
-    self->event_handler = NULL;
-  }
 
   G_OBJECT_CLASS (gstd_pipeline_parent_class)->dispose (object);
 }

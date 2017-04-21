@@ -203,8 +203,10 @@ gstd_object_dispose (GObject * object)
     self->name = NULL;
   }
 
-  g_object_unref (self->creator);
-  g_object_unref (self->deleter);
+  g_clear_object (&self->creator);
+  g_clear_object (&self->deleter);
+  g_clear_object (&self->updater);
+  g_clear_object (&self->reader);
 
   G_OBJECT_CLASS (gstd_object_parent_class)->dispose (object);
 }

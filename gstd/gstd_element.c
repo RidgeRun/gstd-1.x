@@ -182,6 +182,7 @@ gstd_element_dispose (GObject * object)
 
   /* Free formatter */
   g_object_unref (self->formatter);
+  g_object_unref (self->element_properties);
 
   G_OBJECT_CLASS (gstd_element_parent_class)->dispose (object);
 }
@@ -374,6 +375,8 @@ gstd_element_fill_properties (GstdElement *self)
 
     gstd_list_append_child (self->element_properties, element_property);
   }
+
+  g_free (properties_array);
 
   return GSTD_EOK;
 }
