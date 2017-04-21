@@ -199,8 +199,10 @@ gstd_client_execute (gchar * line, GstdClientData * data)
   /* Find and execute the respective command */
   cmd = cmds;
   while (cmd->name) {
-    if (!strcmp (cmd->name, name))
+    if (!strcmp (cmd->name, name)) {
+      g_strfreev (tokens);
       return cmd->func (name, arg, data);
+    }
     cmd++;
   }
   g_printerr ("No such command `%s'\n", name);
@@ -284,6 +286,7 @@ main (gint argc, gchar * argv[])
     g_printerr ("%s\n", error->message);
     return EXIT_FAILURE;
   }
+  g_option_context_free (context);
 
   if (!address)
     address = g_strdup (GSTD_CLIENT_DEFAULT_ADDRESS);
@@ -344,8 +347,10 @@ main (gint argc, gchar * argv[])
     g_strstrip (line);
 
     /* Skip empty lines */
-    if (*line == '\0')
+    if (*line == '\0') {
+      g_free (line);
       continue;
+    }
 
     add_history (line);
     gstd_client_execute (line, data);
