@@ -22,6 +22,7 @@
 #define __GSTD_ICREATOR_H__
 
 #include <gst/gst.h>
+#include <gstd_return_codes.h>
 
 G_BEGIN_DECLS
 #define GSTD_TYPE_ICREATOR                (gstd_icreator_get_type ())
@@ -38,13 +39,13 @@ struct _GstdICreatorInterface
 {
   GTypeInterface parent;
 
-  void (*create) (GstdICreator * self, const gchar * name,
+  GstdReturnCode (*create) (GstdICreator * self, const gchar * name,
       const gchar * description, GstdObject ** out);
 };
 
 GType gstd_icreator_get_type (void);
 
-void gstd_icreator_create (GstdICreator * self, const gchar * name,
+GstdReturnCode gstd_icreator_create (GstdICreator * self, const gchar * name,
     const gchar * description, GstdObject ** out);
 
 G_END_DECLS

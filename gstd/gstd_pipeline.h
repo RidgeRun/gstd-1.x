@@ -45,6 +45,8 @@ typedef struct _GstdPipeline GstdPipeline;
 typedef struct _GstdPipelineClass GstdPipelineClass;
 GType gstd_pipeline_get_type ();
 
+GstdReturnCode gstd_pipeline_build (GstdPipeline * object);
+
 typedef enum
 {
   GSTD_PIPELINE_NULL,

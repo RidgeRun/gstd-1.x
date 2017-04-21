@@ -46,7 +46,7 @@ struct _GstdEventCreatorClass
 static void
 gstd_event_creator_set_property (GObject *,
     guint, const GValue *, GParamSpec *);
-static void gstd_event_creator_create (GstdICreator * iface,
+static GstdReturnCode gstd_event_creator_create (GstdICreator * iface,
     const gchar * name, const gchar * description, GstdObject ** out);
 
 /**
@@ -142,14 +142,14 @@ gstd_event_creator_set_property (GObject * object,
   }
 }
 
-static void
+static GstdReturnCode
 gstd_event_creator_create (GstdICreator * iface, const gchar * name,
     const gchar * description, GstdObject ** out)
 {
   GstdEventCreator *self;
   
-  g_return_if_fail (iface);
-  g_return_if_fail (out);
+  g_return_val_if_fail (iface, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (out, GSTD_NULL_ARGUMENT);
 
   self = GSTD_EVENT_CREATOR(iface);
   
@@ -158,7 +158,8 @@ gstd_event_creator_create (GstdICreator * iface, const gchar * name,
 
   if (NULL == name) {
     GST_ERROR_OBJECT (self, "No event name provided");
+    return GSTD_NULL_ARGUMENT;
   } else {
-    gstd_event_creator_send_event (self, name, description);
+    return gstd_event_creator_send_event (self, name, description);
   }
 }

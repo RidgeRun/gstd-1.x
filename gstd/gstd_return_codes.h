@@ -42,6 +42,11 @@ enum _GstdReturnCode
    */
   GSTD_NULL_ARGUMENT = 1 << 0,
 
+  GSTD_MISSING_ARGUMENT = 1 << 16,
+
+  GSTD_MISSING_NAME = 1 << 17,
+
+
   /**
    * A bad pipeline description was provided
    */

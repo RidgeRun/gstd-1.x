@@ -26,7 +26,7 @@ GST_DEBUG_CATEGORY_STATIC (gstd_no_creator_debug);
 
 #define GSTD_DEBUG_DEFAULT_LEVEL GST_LEVEL_INFO
 
-static void gstd_no_creator_create (GstdICreator * iface,
+static GstdReturnCode gstd_no_creator_create (GstdICreator * iface,
     const gchar * name, const gchar * description, GstdObject ** out);
 
 typedef struct _GstdNoCreatorClass GstdNoCreatorClass;
@@ -72,10 +72,12 @@ gstd_no_creator_init (GstdNoCreator * self)
   GST_INFO_OBJECT (self, "Initializing no creator");
 }
 
-static void
+static GstdReturnCode
 gstd_no_creator_create (GstdICreator * iface, const gchar * name,
     const gchar * description, GstdObject ** out)
 {
   GST_ERROR_OBJECT (iface, "Unable to create on this resource");
   *out = NULL;
+
+  return GSTD_NO_CREATE;
 }

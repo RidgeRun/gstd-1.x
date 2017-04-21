@@ -213,15 +213,14 @@ gstd_list_create (GstdObject * object, const gchar * name,
   self = GSTD_LIST (object);
 
   g_return_val_if_fail (object->creator, GSTD_MISSING_INITIALIZATION);
-  gstd_icreator_create (object->creator, name, description, &out);
+  ret = gstd_icreator_create (object->creator, name, description, &out);
+  if (ret) {
+    goto error;
+  }
   if (NULL == out) {
     ret = GSTD_BAD_COMMAND;
     goto error;
   }
-
-  ret = GSTD_OBJECT_CODE(out);
-  if(ret)
-    goto error;
  
   self->count++;
 
