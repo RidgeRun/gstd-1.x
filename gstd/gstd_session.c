@@ -406,6 +406,7 @@ badcommand:
 nonode:
   {
     GST_ERROR_OBJECT (gstd, "Invalid node %s", *it);
+    g_strfreev(nodes);
     return GSTD_BAD_COMMAND;
   }
 }
