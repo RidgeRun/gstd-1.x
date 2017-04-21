@@ -217,6 +217,7 @@ main (gint argc, gchar * argv[])
   GOptionContext *context;
   gchar *prompt = "gstd> ";
   const gchar *history = ".gstc_history";
+  const gchar *history_env = "GSTC_HISTORY";
   gchar *history_full = NULL;
   GstdClientData *data;
 
@@ -269,8 +270,13 @@ main (gint argc, gchar * argv[])
   address = NULL;
   quiet = FALSE;
 
-  // Read home location from environment
-  history_full = g_strdup_printf ("%s/%s", g_getenv ("HOME"), history);
+  //Did the user pass in a custom history?
+  if (g_getenv (history_env)) {
+    history_full = g_strdup (g_getenv(history_env));
+  } else {
+    // Read home location from environment
+    history_full = g_strdup_printf ("%s/%s", g_getenv ("HOME"), history);
+  }
 
   context = g_option_context_new ("[COMMANDS...] - gst-launch under steroids");
   g_option_context_add_main_entries (context, entries, NULL);
