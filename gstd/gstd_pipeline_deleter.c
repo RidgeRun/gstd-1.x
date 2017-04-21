@@ -36,7 +36,7 @@ GST_DEBUG_CATEGORY_STATIC (gstd_pipeline_deleter_debug);
 
 #define GSTD_DEBUG_DEFAULT_LEVEL GST_LEVEL_INFO
 
-static void gstd_pipeline_deleter_delete (GstdIDeleter * iface,
+static GstdReturnCode gstd_pipeline_deleter_delete (GstdIDeleter * iface,
     GstdObject * object);
 
 typedef struct _GstdPipelineDeleterClass GstdPipelineDeleterClass;
@@ -83,18 +83,26 @@ gstd_pipeline_deleter_init (GstdPipelineDeleter * self)
   GST_INFO_OBJECT (self, "Initializing pipeline deleter");
 }
 
-static void
+static GstdReturnCode
 gstd_pipeline_deleter_delete (GstdIDeleter * iface, GstdObject * object)
 {
   GstdObject *state;
+  GstdReturnCode ret;
 
-  g_return_if_fail (iface);
-  g_return_if_fail (object);
+  g_return_val_if_fail (iface, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (object, GSTD_NULL_ARGUMENT);
 
   /* Stop the pipe if playing */
-  gstd_object_read (object, "state", &state);
-  gstd_object_update (state, "NULL");
-  g_object_unref (state);
+  ret = gstd_object_read (object, "state", &state);
+  if (ret)
+    return ret;
 
+  ret = gstd_object_update (state, "NULL");
+  if (ret)
+    return ret;
+
+  g_object_unref (state);
   g_object_unref (object);
+
+  return ret;
 }

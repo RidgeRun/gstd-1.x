@@ -390,7 +390,7 @@ static GstdReturnCode
 gstd_tcp_create (GstdSession * session, GstdObject * obj, gchar * args,
     gchar ** response)
 {
-  gchar **tokens;
+  gchar **tokens = NULL;
   gchar *name;
   gchar *description;
   GstdObject *new;
@@ -398,7 +398,6 @@ gstd_tcp_create (GstdSession * session, GstdObject * obj, gchar * args,
 
   g_return_val_if_fail (GSTD_IS_SESSION (session), GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (G_IS_OBJECT (obj), GSTD_NULL_ARGUMENT);
-  g_return_val_if_fail (args, GSTD_NULL_ARGUMENT);
 
   // This may mean a potential leak
   g_warn_if_fail (!*response);
@@ -407,46 +406,36 @@ gstd_tcp_create (GstdSession * session, GstdObject * obj, gchar * args,
       "Currently hardcoded to create pipelines and events, we must be "
       "generic enough to create any type of object");
 
-  // Tokens has the form {'name', <name>, 'description', <description>}
-  tokens = g_strsplit (args, " ", 4);
+  // Tokens has the form {<name>, <description>}
+  if (NULL == args) {
+    name = NULL;
+    description = NULL;
+  } else {
+    tokens = g_strsplit (args, " ", 2);
+    name = tokens[0];
+    description = tokens[1];
+  }
 
-  name = tokens[1];
-  description = tokens[3];
-
-  if (!name || name[0] == '\0')
-    goto noname;
-
-  if (!description || description[0] == '\0')
-    goto nodescription;
+  if (NULL == name) {
+    /* No name provided, hence no desciption either, but it may contain garbage */
+    description = NULL;
+  }
 
   ret = gstd_object_create (obj, name, description);
   if (ret)
-    goto noobject;
+    goto out;
 
-  if (!GSTD_IS_EVENT_HANDLER(obj)) {
-    gstd_object_read (obj, name, &new);
+  gstd_object_read (obj, name, &new);
+
+  if (NULL != new) {
     gstd_object_to_string (new, response);
     g_object_unref (new);
   }
 
-  g_strfreev (tokens);
-  return ret;
-
-noname:
+out:
   {
-    GST_ERROR_OBJECT (session, "Missing name for the new pipeline");
-    g_strfreev (tokens);
-    return GSTD_NULL_ARGUMENT;
-  }
-nodescription:
-  {
-    GST_ERROR_OBJECT (session, "Missing description for pipeline \"%s\"", name);
-    g_strfreev (tokens);
-    return GSTD_NULL_ARGUMENT;
-  }
-noobject:
-  {
-    g_strfreev (tokens);
+    if (tokens)
+      g_strfreev (tokens);
     return ret;
   }
 }
@@ -595,24 +584,14 @@ gstd_tcp_pipeline_create (GstdSession * session, gchar * action, gchar * args,
 {
   GstdReturnCode ret;
   gchar *uri;
-  gchar **tokens;
 
   g_return_val_if_fail (GSTD_IS_SESSION (session), GSTD_NULL_ARGUMENT);
-  g_return_val_if_fail (args, GSTD_NULL_ARGUMENT);
 
-  tokens = g_strsplit (args, " ", 2);
-  check_argument (tokens[0], GSTD_BAD_COMMAND);
-  check_argument (tokens[1], GSTD_BAD_COMMAND);
-
-
-  uri =
-      g_strdup_printf ("/pipelines name %s description %s", tokens[0],
-      tokens[1]);
+  uri = g_strdup_printf ("/pipelines %s", args ? args : "");
 
   ret = gstd_tcp_parse_raw_cmd (session, "create", uri, response);
 
   g_free (uri);
-  g_strfreev (tokens);
 
   return ret;
 }

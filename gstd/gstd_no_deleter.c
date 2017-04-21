@@ -26,7 +26,7 @@ GST_DEBUG_CATEGORY_STATIC (gstd_no_deleter_debug);
 
 #define GSTD_DEBUG_DEFAULT_LEVEL GST_LEVEL_INFO
 
-static void gstd_no_deleter_delete (GstdIDeleter * iface, GstdObject * object);
+static GstdReturnCode gstd_no_deleter_delete (GstdIDeleter * iface, GstdObject * object);
 
 typedef struct _GstdNoDeleterClass GstdNoDeleterClass;
 
@@ -70,8 +70,10 @@ gstd_no_deleter_init (GstdNoDeleter * self)
   GST_INFO_OBJECT (self, "Initializing no deleter");
 }
 
-static void
+static GstdReturnCode
 gstd_no_deleter_delete (GstdIDeleter * iface, GstdObject * object)
 {
   GST_ERROR_OBJECT (iface, "Unable to delete on this resource");
+
+  return GSTD_EOK;
 }

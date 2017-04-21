@@ -209,16 +209,18 @@ gstd_list_create (GstdObject * object, const gchar * name,
   GstdReturnCode ret = GSTD_EOK;
 
   g_return_val_if_fail (GSTD_IS_OBJECT (object), GSTD_NULL_ARGUMENT);
-  g_return_val_if_fail (name, GSTD_NULL_ARGUMENT);
-  g_return_val_if_fail (description, GSTD_NULL_ARGUMENT);
 
   self = GSTD_LIST (object);
 
   g_return_val_if_fail (object->creator, GSTD_MISSING_INITIALIZATION);
-  gstd_icreator_create (object->creator, name, description, &out);
-  ret = GSTD_OBJECT_CODE(out);
-  if(ret)
+  ret = gstd_icreator_create (object->creator, name, description, &out);
+  if (ret) {
     goto error;
+  }
+  if (NULL == out) {
+    ret = GSTD_BAD_COMMAND;
+    goto error;
+  }
  
   self->count++;
 
@@ -231,7 +233,9 @@ gstd_list_create (GstdObject * object, const gchar * name,
   return ret;
  error:
   {
-    g_object_unref(out);
+    if (out)
+      g_object_unref(out);
+
     GST_ERROR_OBJECT (object, "Could not create the resource  \"%s\" on \"%s\"",
                      name, GSTD_OBJECT_NAME (self));
     return ret;
@@ -245,6 +249,7 @@ gstd_list_delete (GstdObject * object, const gchar * node)
   GstdList *self;
   GstdObject *todelete;
   GList *found;
+  GstdReturnCode ret;
 
   g_return_val_if_fail (GSTD_IS_OBJECT (object), GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (node, GSTD_NULL_ARGUMENT);
@@ -264,18 +269,21 @@ gstd_list_delete (GstdObject * object, const gchar * node)
   GST_INFO_OBJECT (self, "Deleting %s from %s list", GSTD_OBJECT_NAME (self),
       GSTD_OBJECT_NAME (self));
 
-  gstd_ideleter_delete (object->deleter, todelete);
+  ret = gstd_ideleter_delete (object->deleter, todelete);
+  if (ret)
+    return ret;
+
   self->count--;
 
   self->list = g_list_delete_link (self->list, found);
 
-  return GSTD_EOK;
+  return ret;
 
 unexisting:
   {
     GST_ERROR_OBJECT (object, "The resource \"%s\" doesn't exists in \"%s\"",
         node, GSTD_OBJECT_NAME (self));
-    return GSTD_EXISTING_RESOURCE;
+    return GSTD_NO_RESOURCE;
   }
 }
 
