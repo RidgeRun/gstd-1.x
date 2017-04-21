@@ -80,6 +80,7 @@ gstd_pipeline_creator_create (GstdICreator * iface, const gchar * name,
     const gchar * description, GstdObject ** out)
 {
   GstdPipeline *pipeline;
+  *out = NULL;
 
   g_return_val_if_fail (iface, GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (name, GSTD_NULL_ARGUMENT);
