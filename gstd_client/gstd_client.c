@@ -216,7 +216,8 @@ main (gint argc, gchar * argv[])
   GError *error = NULL;
   GOptionContext *context;
   gchar *prompt = "gstd> ";
-  gchar *history = "~/.gstc_history";
+  const gchar *history = ".gstc_history";
+  gchar *history_full = NULL;
   GstdClientData *data;
 
   /* Cmdline options */
@@ -268,6 +269,9 @@ main (gint argc, gchar * argv[])
   address = NULL;
   quiet = FALSE;
 
+  // Read home location from environment
+  history_full = g_strdup_printf ("%s/%s", g_getenv ("HOME"), history);
+
   context = g_option_context_new ("[COMMANDS...] - gst-launch under steroids");
   g_option_context_add_main_entries (context, entries, NULL);
   if (!g_option_context_parse (context, &argc, &argv, &error)) {
@@ -291,7 +295,7 @@ main (gint argc, gchar * argv[])
 
   signal (SIGINT, sig_handler);
   init_readline ();
-  read_history (history);
+  read_history (history_full);
 
   data = (GstdClientData *) g_malloc (sizeof (GstdClientData));
   data->quiet = quiet;
@@ -350,7 +354,8 @@ main (gint argc, gchar * argv[])
     g_object_unref (data->con);
   g_free (data);
 
-  write_history (history);
+  write_history (history_full);
+  g_free (history_full);
 
   return EXIT_SUCCESS;
 }
