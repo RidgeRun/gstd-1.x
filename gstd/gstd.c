@@ -113,6 +113,8 @@ main (gint argc, gchar * argv[])
     return EXIT_FAILURE;
   }
 
+  g_option_context_free (context);
+
   /* Print the version and exit */
   if (version) {
     g_print ("" PACKAGE_STRING "\n");
