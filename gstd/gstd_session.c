@@ -125,10 +125,7 @@ gstd_session_class_init (GstdSessionClass * klass)
 static void
 gstd_session_init (GstdSession * self)
 {
-  GstdObject * object;
   GST_INFO_OBJECT (self, "Initializing gstd session");
-
-  object = GSTD_OBJECT(self);
 
   gstd_object_set_reader (GSTD_OBJECT(self),
       g_object_new (GSTD_TYPE_PROPERTY_READER, NULL));
@@ -160,8 +157,6 @@ gstd_session_get_property (GObject * object,
 {
   GstdSession *self = GSTD_SESSION (object);
 
-  gstd_object_set_code (GSTD_OBJECT (self), GSTD_EOK);
-
   switch (property_id) {
     case PROP_PIPELINES:
       GST_DEBUG_OBJECT (self, "Returning pipeline list %p", self->pipelines);
@@ -179,7 +174,6 @@ gstd_session_get_property (GObject * object,
     default:
       /* We don't have any other property... */
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
-      gstd_object_set_code (GSTD_OBJECT (self), GSTD_NO_RESOURCE);
       break;
   }
 }
@@ -189,8 +183,6 @@ gstd_session_set_property (GObject * object,
     guint property_id, const GValue * value, GParamSpec * pspec)
 {
   GstdSession *self = GSTD_SESSION (object);
-
-  gstd_object_set_code (GSTD_OBJECT (self), GSTD_EOK);
 
   switch (property_id) {
     case PROP_PIPELINES:
@@ -205,7 +197,6 @@ gstd_session_set_property (GObject * object,
     default:
       /* We don't have any other property... */
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
-      gstd_object_set_code (GSTD_OBJECT (self), GSTD_NO_RESOURCE);
       break;
   }
 }

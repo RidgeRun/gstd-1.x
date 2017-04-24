@@ -147,8 +147,6 @@ gstd_debug_get_property (GObject * object,
 {
   GstdDebug *self = GSTD_DEBUG (object);
 
-  gstd_object_set_code (GSTD_OBJECT (self), GSTD_EOK);
-
   switch (property_id) {
 
     case PROP_ENABLE:
@@ -175,7 +173,6 @@ gstd_debug_get_property (GObject * object,
     default:
       /* We don't have any other property... */
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
-      gstd_object_set_code (GSTD_OBJECT (self), GSTD_NO_RESOURCE);
       break;
   }
 }
@@ -185,8 +182,6 @@ gstd_debug_set_property (GObject * object,
     guint property_id, const GValue * value, GParamSpec * pspec)
 {
   GstdDebug *self = GSTD_DEBUG (object);
-
-  gstd_object_set_code (GSTD_OBJECT (self), GSTD_EOK);
 
   switch (property_id) {
 
@@ -213,7 +208,6 @@ gstd_debug_set_property (GObject * object,
     default:
       /* We don't have any other property... */
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
-      gstd_object_set_code (GSTD_OBJECT (self), GSTD_NO_RESOURCE);
       break;
   }
 }

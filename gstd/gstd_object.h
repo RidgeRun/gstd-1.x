@@ -78,11 +78,6 @@ struct _GstdObject
 #define GSTD_OBJECT_NAME(obj) (GSTD_OBJECT(obj)->name)
 #define GSTD_OBJECT_CODE(obj) (GSTD_OBJECT(obj)->code)
 
-void gstd_object_set_code (GstdObject * self, GstdReturnCode code);
-
-GstdReturnCode gstd_object_get_code (GstdObject * self);
-
-
 struct _GstdObjectClass
 {
   GObjectClass parent_class;

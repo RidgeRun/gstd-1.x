@@ -139,8 +139,6 @@ gstd_list_get_property (GObject * object,
 {
   GstdList *self = GSTD_LIST (object);
 
-  gstd_object_set_code (GSTD_OBJECT (self), GSTD_EOK);
-
   switch (property_id) {
     case PROP_COUNT:
       GST_DEBUG_OBJECT (self, "Returning count of %u", self->count);
@@ -158,7 +156,6 @@ gstd_list_get_property (GObject * object,
     default:
       /* We don't have any other property... */
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
-      gstd_object_set_code (GSTD_OBJECT (self), GSTD_NO_RESOURCE);
       break;
   }
 }
@@ -168,8 +165,6 @@ gstd_list_set_property (GObject * object,
     guint property_id, const GValue * value, GParamSpec * pspec)
 {
   GstdList *self = GSTD_LIST (object);
-
-  gstd_object_set_code (GSTD_OBJECT (self), GSTD_EOK);
 
   switch (property_id) {
     case PROP_NODE_TYPE:
@@ -184,7 +179,6 @@ gstd_list_set_property (GObject * object,
     default:
       /* We don't have any other property... */
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
-      gstd_object_set_code (GSTD_OBJECT (self), GSTD_NO_RESOURCE);
       break;
   }
 }

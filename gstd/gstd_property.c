@@ -128,8 +128,6 @@ gstd_property_get_property (GObject        *object,
 {
   GstdProperty *self = GSTD_PROPERTY(object);
 
-  gstd_object_set_code (GSTD_OBJECT(self), GSTD_EOK);
-
   switch (property_id) {
   case PROP_TARGET:
     GST_DEBUG_OBJECT(self, "Returning property owner %p (%s)", self->target, GST_OBJECT_NAME(self->target));
@@ -138,7 +136,6 @@ gstd_property_get_property (GObject        *object,
   default:
     /* We don't have any other property... */
     G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
-    gstd_object_set_code (GSTD_OBJECT(self), GSTD_NO_RESOURCE);
     break;
   }
 }
@@ -151,8 +148,6 @@ gstd_property_set_property (GObject      *object,
 {
   GstdProperty *self = GSTD_PROPERTY (object);
 
-  gstd_object_set_code (GSTD_OBJECT(self), GSTD_EOK);
-
   switch (property_id) {
   case PROP_TARGET:
     if (self->target)
@@ -164,7 +159,6 @@ gstd_property_set_property (GObject      *object,
   default:
     /* We don't have any other property... */
     G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
-    gstd_object_set_code (GSTD_OBJECT(self), GSTD_NO_RESOURCE);
     break;
   }
 }

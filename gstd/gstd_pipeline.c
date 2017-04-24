@@ -239,9 +239,6 @@ out1:
   self->pipeline = NULL;
 
 out:
-  // Capture any possible error
-  gstd_object_set_code (GSTD_OBJECT (self), ret);
-
   return ret;
 }
 
@@ -328,8 +325,6 @@ gstd_pipeline_get_property (GObject * object,
   GEnumValue *evalue;
   GEnumClass *eclass;
 
-  gstd_object_set_code (GSTD_OBJECT (self), GSTD_EOK);
-
   switch (property_id) {
     case PROP_DESCRIPTION:
       GST_DEBUG_OBJECT (self, "Returning description of \"%s\"",
@@ -362,7 +357,6 @@ gstd_pipeline_get_property (GObject * object,
     default:
       /* We don't have any other property... */
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
-      gstd_object_set_code (GSTD_OBJECT (self), GSTD_NO_RESOURCE);
       break;
   }
 }
@@ -376,8 +370,6 @@ gstd_pipeline_set_property (GObject * object,
   GEnumValue *evalue;
   GEnumClass *eclass;
   GstStateChangeReturn stateret;
-
-  gstd_object_set_code (GSTD_OBJECT (self), GSTD_EOK);
 
   switch (property_id) {
     case PROP_DESCRIPTION:
@@ -396,7 +388,6 @@ gstd_pipeline_set_property (GObject * object,
       if (GST_STATE_CHANGE_FAILURE == stateret) {
         GST_ERROR_OBJECT (self, "Failed to change %s to %s",
             GSTD_OBJECT_NAME (self), evalue->value_name);
-        gstd_object_set_code (GSTD_OBJECT (self), GSTD_STATE_ERROR);
       } else {
         GST_INFO_OBJECT (self, "Changed state to %d (%s)", state,
             evalue->value_name);
@@ -406,7 +397,6 @@ gstd_pipeline_set_property (GObject * object,
     default:
       /* We don't have any other property... */
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
-      gstd_object_set_code (GSTD_OBJECT (self), GSTD_NO_RESOURCE);
       break;
   }
 }

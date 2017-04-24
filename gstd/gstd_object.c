@@ -125,13 +125,11 @@ gstd_object_init (GstdObject * self)
   GST_DEBUG_OBJECT (self, "Initializing gstd object");
 
   self->name = g_strdup (GSTD_OBJECT_DEFAULT_NAME);
-  self->code = GSTD_EOK;
   self->creator = g_object_new (GSTD_TYPE_NO_CREATOR, NULL);
   self->reader = g_object_new (GSTD_TYPE_NO_READER, NULL);
   self->updater = g_object_new (GSTD_TYPE_NO_UPDATER, NULL);
   self->deleter = g_object_new (GSTD_TYPE_NO_DELETER, NULL);
   self->formatter = g_object_new (GSTD_TYPE_JSON_BUILDER, NULL);
-  g_mutex_init (&self->codelock);
 }
 
 void gstd_object_finalize( GObject *object)
@@ -159,11 +157,8 @@ gstd_object_get_property (GObject * object,
     default:
       /* We don't have any other property... */
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
-      gstd_object_set_code (GSTD_OBJECT (self), GSTD_NO_RESOURCE);
       return;
   }
-
-  gstd_object_set_code (GSTD_OBJECT (self), GSTD_EOK);
 }
 
 static void
@@ -183,11 +178,8 @@ gstd_object_set_property (GObject * object,
     default:
       /* We don't have any other property... */
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
-      gstd_object_set_code (GSTD_OBJECT (self), GSTD_NO_RESOURCE);
       return;
   }
-
-  gstd_object_set_code (GSTD_OBJECT (self), GSTD_EOK);
 }
 
 static void
@@ -341,29 +333,6 @@ gstd_object_to_string_default (GstdObject * self, gchar ** outstring)
   gstd_iformatter_generate (self->formatter, outstring);
 
   return GSTD_EOK;
-}
-
-void
-gstd_object_set_code (GstdObject * self, GstdReturnCode code)
-{
-  GST_LOG_OBJECT (self, "Setting return code to %d", code);
-
-  g_mutex_lock (&self->codelock);
-  self->code = code;
-  g_mutex_unlock (&self->codelock);
-}
-
-GstdReturnCode
-gstd_object_get_code (GstdObject * self)
-{
-  GstdReturnCode code;
-
-  g_mutex_lock (&self->codelock);
-  code = self->code;
-  g_mutex_unlock (&self->codelock);
-
-  GST_LOG_OBJECT (self, "Returning code %d", code);
-  return code;
 }
 
 GstdReturnCode

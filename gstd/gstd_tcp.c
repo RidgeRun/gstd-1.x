@@ -199,8 +199,6 @@ gstd_tcp_get_property (GObject * object,
 {
   GstdTcp *self = GSTD_TCP (object);
 
-  gstd_object_set_code (GSTD_OBJECT (self), GSTD_EOK);
-
   switch (property_id) {
     case PROP_BASE_PORT:
       GST_DEBUG_OBJECT (self, "Returning base-port %u", self->base_port);
@@ -214,7 +212,6 @@ gstd_tcp_get_property (GObject * object,
     default:
       /* We don't have any other property... */
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
-      gstd_object_set_code (GSTD_OBJECT (self), GSTD_NO_RESOURCE);
       break;
   }
 }
@@ -224,8 +221,6 @@ gstd_tcp_set_property (GObject * object,
     guint property_id, const GValue * value, GParamSpec * pspec)
 {
   GstdTcp *self = GSTD_TCP (object);
-
-  gstd_object_set_code (GSTD_OBJECT (self), GSTD_EOK);
 
   switch (property_id) {
     case PROP_BASE_PORT:
@@ -244,7 +239,6 @@ gstd_tcp_set_property (GObject * object,
     default:
       /* We don't have any other property... */
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
-      gstd_object_set_code (GSTD_OBJECT (self), GSTD_NO_RESOURCE);
       break;
   }
 }
