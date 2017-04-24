@@ -92,8 +92,6 @@ gstd_ipc_get_property (GObject * object,
 {
   GstdIpc *self = GSTD_IPC (object);
 
-  gstd_object_set_code (GSTD_OBJECT (self), GSTD_EOK);
-
   switch (property_id) {
     case PROP_ENABLED:
       g_value_set_boolean (value, self->enabled);
@@ -101,7 +99,6 @@ gstd_ipc_get_property (GObject * object,
     default:
       /* We don't have any other property... */
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
-      gstd_object_set_code (GSTD_OBJECT (self), GSTD_NO_RESOURCE);
       break;
   }
 }
@@ -112,8 +109,6 @@ gstd_ipc_set_property (GObject * object,
 {
   GstdIpc *self = GSTD_IPC (object);
 
-  gstd_object_set_code (GSTD_OBJECT (self), GSTD_EOK);
-
   switch (property_id) {
     case PROP_ENABLED:
       self->enabled = g_value_get_boolean (value);
@@ -121,7 +116,6 @@ gstd_ipc_set_property (GObject * object,
     default:
       /* We don't have any other property... */
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
-      gstd_object_set_code (GSTD_OBJECT (self), GSTD_NO_RESOURCE);
       break;
   }
 }
