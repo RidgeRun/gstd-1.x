@@ -183,6 +183,7 @@ gstd_client_execute (gchar * line, GstdClientData * data)
   gchar *name;
   gchar *arg;
   GstdClientCmd *cmd;
+  gint ret;
 
   g_return_val_if_fail (line, -1);
   g_return_val_if_fail (data, -1);
@@ -200,8 +201,9 @@ gstd_client_execute (gchar * line, GstdClientData * data)
   cmd = cmds;
   while (cmd->name) {
     if (!strcmp (cmd->name, name)) {
+      ret = cmd->func (name, arg, data);
       g_strfreev (tokens);
-      return cmd->func (name, arg, data);
+      return ret;
     }
     cmd++;
   }
