@@ -57,6 +57,9 @@ struct _GstdBusMsg
 struct _GstdBusMsgClass
 {
   GstdObjectClass parent_class;
+
+  GstdReturnCode (* to_string) (GstdBusMsg *msg, GstdIFormatter * formatter,
+      GstMessage * target);
 };
 
 GstdBusMsg *

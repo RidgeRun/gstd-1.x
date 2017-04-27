@@ -32,7 +32,8 @@ GST_DEBUG_CATEGORY_STATIC(gstd_bus_msg_info_debug);
 #define GSTD_DEBUG_DEFAULT_LEVEL GST_LEVEL_INFO
 
 static GstdReturnCode
-gstd_bus_msg_info_to_string (GstdObject * self, gchar ** outstring);
+gstd_bus_msg_info_to_string (GstdBusMsg * msg, GstdIFormatter * formatter,
+    GstMessage * target);
 
 struct _GstdBusMsgInfo
 {
@@ -49,12 +50,12 @@ G_DEFINE_TYPE (GstdBusMsgInfo, gstd_bus_msg_info, GSTD_TYPE_BUS_MSG)
 static void
 gstd_bus_msg_info_class_init (GstdBusMsgInfoClass *klass)
 {
-  GstdObjectClass * oclass;
+  GstdBusMsgClass * bmclass;
   guint debug_color;
 
-  oclass = GSTD_OBJECT_CLASS (klass);
+  bmclass = GSTD_BUS_MSG_CLASS (klass);
 
-  oclass->to_string = gstd_bus_msg_info_to_string;
+  bmclass->to_string = GST_DEBUG_FUNCPTR(gstd_bus_msg_info_to_string);
 
   /* Initialize debug category with nice colors */
   debug_color = GST_DEBUG_FG_BLACK | GST_DEBUG_BOLD | GST_DEBUG_BG_WHITE;
@@ -70,56 +71,30 @@ gstd_bus_msg_info_init (GstdBusMsgInfo *self)
 }
 
 static GstdReturnCode
-gstd_bus_msg_info_to_string (GstdObject * object, gchar ** outstring)
+gstd_bus_msg_info_to_string (GstdBusMsg * msg, GstdIFormatter * formatter,
+    GstMessage * target)
 {
-  GstdBusMsg * msg;
-  GstMessage * target;
-  gchar * ts;
-  GValue value = G_VALUE_INIT;
   GError * error;
   gchar * debug;
 
-  g_return_val_if_fail (object, GSTD_NULL_ARGUMENT);
-  g_return_val_if_fail (outstring, GSTD_NULL_ARGUMENT);
-
-  msg = GSTD_BUS_MSG (object);
-
-  g_return_val_if_fail (msg->target, GSTD_MISSING_INITIALIZATION);
-  target = msg->target;
-
-  gstd_iformatter_begin_object (object->formatter);
-  gstd_iformatter_set_member_name (object->formatter,"type");
-  gstd_iformatter_set_string_value (object->formatter, GST_MESSAGE_TYPE_NAME(target));
-
-  gstd_iformatter_set_member_name (object->formatter,"source");
-  gstd_iformatter_set_string_value (object->formatter, GST_MESSAGE_SRC_NAME(target));
-
-  ts = g_strdup_printf ("%" GST_TIME_FORMAT, GST_TIME_ARGS(target->timestamp));
-  gstd_iformatter_set_member_name (object->formatter,"timestamp");
-  gstd_iformatter_set_string_value (object->formatter, ts);
-  g_free (ts);
-
-  g_value_init (&value, G_TYPE_INT);
-  g_value_set_int (&value, target->seqnum);
-  gstd_iformatter_set_member_name (object->formatter,"seqnum");
-  gstd_iformatter_set_value (object->formatter, &value);
-  g_value_unset (&value);
+  g_return_val_if_fail (msg, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (formatter, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (target, GSTD_NULL_ARGUMENT);
 
   error = NULL;
   gst_message_parse_error (target, &error, &debug);
 
-  gstd_iformatter_set_member_name (object->formatter, "message");
-  gstd_iformatter_set_string_value (object->formatter, error->message);
+  gstd_iformatter_set_member_name (formatter, "message");
+  gstd_iformatter_set_string_value (formatter, error->message);
 
-  gstd_iformatter_set_member_name (object->formatter, "debug");
-  gstd_iformatter_set_string_value (object->formatter, debug);
+  gstd_iformatter_set_member_name (formatter, "debug");
+  gstd_iformatter_set_string_value (formatter, debug);
 
   g_error_free (error);
-  g_free (debug);
 
-  gstd_iformatter_end_object (object->formatter);
-
-  gstd_iformatter_generate (object->formatter, outstring);
+  if (debug) {
+    g_free (debug);
+  }
 
   return GSTD_EOK;
 }
