@@ -334,11 +334,11 @@ gstd_tcp_start (GstdIpc * base, GstdSession * session)
         port + i, NULL /* G_OBJECT(session) */ , &error);
     if (error)
       goto noconnection;
-
-    /* listen to the 'incoming' signal */
-    g_signal_connect (*service, "run", G_CALLBACK (gstd_tcp_callback), session);
-
   }
+
+  /* listen to the 'incoming' signal */
+  g_signal_connect (*service, "run", G_CALLBACK (gstd_tcp_callback), session);
+
   /* start the socket service */
   g_socket_service_start (*service);
 
