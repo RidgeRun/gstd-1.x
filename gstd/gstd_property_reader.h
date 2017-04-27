@@ -45,5 +45,21 @@ typedef struct _GstdPropertyReader GstdPropertyReader;
 
 GType gstd_property_reader_get_type ();
 
+typedef struct _GstdPropertyReaderClass GstdPropertyReaderClass;
+
+/**
+ * GstdPropertyReader:
+ * A wrapper for the conventional property_reader
+ */
+struct _GstdPropertyReader
+{
+  GObject parent;
+};
+
+struct _GstdPropertyReaderClass
+{
+  GObjectClass parent_class;
+};
+
 G_END_DECLS
 #endif // __GSTD_PROPERTY_READER_H__

@@ -22,6 +22,7 @@
 #include "config.h"
 #endif
 #include "gstd_pipeline_bus.h"
+#include "gstd_msg_reader.h"
 
 enum
 {
@@ -103,6 +104,9 @@ gstd_pipeline_bus_init (GstdPipelineBus * self)
   GST_INFO_OBJECT (self, "Initializing gstd pipeline bus handler");
 
   self->timeout = GSTD_PIPELINE_BUS_TIMEOUT_DEFAULT;
+
+  gstd_object_set_reader (GSTD_OBJECT(self),
+      g_object_new (GSTD_TYPE_MSG_READER, NULL));
 }
 
 
