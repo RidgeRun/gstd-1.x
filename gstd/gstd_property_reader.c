@@ -41,23 +41,6 @@ gstd_property_mask_type (GstdObject * object, const gchar * name, GstdObject ** 
 static gboolean
 gstd_property_reader_is_gstd (GParamSpec * pspec, GstdObject * object);
 
-typedef struct _GstdPropertyReaderClass GstdPropertyReaderClass;
-
-/**
- * GstdPropertyReader:
- * A wrapper for the conventional property_reader
- */
-struct _GstdPropertyReader
-{
-  GObject parent;
-};
-
-struct _GstdPropertyReaderClass
-{
-  GObjectClass parent_class;
-};
-
-
 static void
 gstd_ireader_interface_init (GstdIReaderInterface * iface)
 {
