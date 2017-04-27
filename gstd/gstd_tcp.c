@@ -514,8 +514,8 @@ gstd_tcp_parse_raw_cmd (GstdSession * session, gchar * action, gchar * args,
     uri = "/";
 
   ret = gstd_get_by_uri (session, uri, &node);
-  if (ret) {
-    goto baduri;
+  if (ret || NULL == node) {
+    goto out;
   }
 
   if (!g_ascii_strcasecmp ("CREATE", action)) {
@@ -533,7 +533,7 @@ gstd_tcp_parse_raw_cmd (GstdSession * session, gchar * action, gchar * args,
 
   g_object_unref (node);
 
-baduri:
+out:
   {
     g_strfreev (tokens);
     return ret;
