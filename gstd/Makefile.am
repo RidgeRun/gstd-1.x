@@ -33,6 +33,7 @@ libgstd_core_la_SOURCES = gstd_session.c		\
 			  gstd_property_enum.c		\
 			  gstd_event_handler.c		\
 			  gstd_bus_msg.c		\
+			  gstd_bus_msg_info.c		\
 			  gstd_msg_reader.c
 
 libgstd_core_la_CFLAGS = $(GST_CFLAGS) $(GIO_CFLAGS) $(GJSON_CFLAGS)
@@ -78,6 +79,7 @@ gstdinclude_HEADERS = \
 		  gstd_event_handler.h		\
 		  gstd_event_creator.h		\
 		  gstd_bus_msg.h		\
+		  gstd_bus_msg_info.h		\
 		  gstd_msg_reader.h
 
 noinst_HEADERS = 
