@@ -23,6 +23,7 @@
 #include "gstd_msg_reader.h"
 #include "gstd_property_reader.h"
 #include "gstd_pipeline_bus.h"
+#include "gstd_bus_msg.h"
 
 /* Gstd Core debugging category */
 GST_DEBUG_CATEGORY_STATIC (gstd_msg_reader_debug);
@@ -128,11 +129,11 @@ gstd_msg_reader_read_message (GstdIReader * iface,
     g_object_get (gstdbus, "timeout", &timeout, NULL);
     
     msg = gst_bus_timed_pop_filtered (bus, timeout, GST_MESSAGE_ERROR);
-    gst_message_unref (msg);
 
-    //TODO
-    *out = NULL;
-    
+    if (msg) {
+      *out = GSTD_OBJECT(gstd_bus_msg_factory_make (msg));
+    }
+
     gst_object_unref (bus);
     
     return ret;
