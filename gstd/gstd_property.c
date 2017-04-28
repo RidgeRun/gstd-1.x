@@ -246,27 +246,35 @@ gstd_property_add_value_default (GstdProperty * self, GstdIFormatter * formatter
   g_return_if_fail (formatter);
   g_return_if_fail (value);
 
-  svalue = g_strdup_value_contents (value);
+  svalue = gst_value_serialize (value);
   gstd_iformatter_set_string_value (formatter, svalue);
   g_free (svalue);
 }
 
 static GstdReturnCode
-gstd_property_update_default (GstdObject * object, const gchar * value)
+gstd_property_update_default (GstdObject * object, const gchar * svalue)
 {
+  GstdReturnCode ret;
   GParamSpec *pspec;
   GstdProperty *prop;
+  GValue value = G_VALUE_INIT;
 
   g_return_val_if_fail (object, GSTD_NULL_ARGUMENT);
-  g_return_val_if_fail (value, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (svalue, GSTD_NULL_ARGUMENT);
 
   prop = GSTD_PROPERTY (object);
 
   pspec = g_object_class_find_property (G_OBJECT_GET_CLASS(prop->target),
       GSTD_OBJECT_NAME(prop));
-  
-  GST_ERROR_OBJECT (object, "I don't know how to parse \"%s\" types",
-      g_type_name (pspec->value_type));
 
-  return GSTD_UNKNOWN_TYPE;
+  g_value_init(&value, pspec->value_type);
+
+  if (!gst_value_deserialize (&value, svalue)) {
+    ret = GSTD_BAD_VALUE;
+  } else {
+    g_object_set_property (prop->target, pspec->name, &value);
+    ret = GSTD_EOK;
+  }
+
+  return ret;
 }
