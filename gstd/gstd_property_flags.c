@@ -60,17 +60,16 @@ gstd_property_flags_init (GstdPropertyFlags *self)
 }
 
 static GstdReturnCode
-gstd_property_flags_update (GstdObject * object, const gchar * value)
+gstd_property_flags_update (GstdObject * object, const gchar * svalue)
 {
   GstdReturnCode ret = GSTD_EOK;
   GstdPropertyFlags * self;
   GstdProperty * prop;
   GParamSpec *pspec;
-  GValue flags = G_VALUE_INIT;
-  guint types;
+  GValue value = G_VALUE_INIT;
 
   g_return_val_if_fail (object, GSTD_NULL_ARGUMENT);
-  g_return_val_if_fail (value, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (svalue, GSTD_NULL_ARGUMENT);
 
   self = GSTD_PROPERTY_FLAGS (object);
   prop = GSTD_PROPERTY (object);
@@ -80,15 +79,12 @@ gstd_property_flags_update (GstdObject * object, const gchar * value)
   pspec = g_object_class_find_property (G_OBJECT_GET_CLASS(prop->target),
       GSTD_OBJECT_NAME(prop));
 
-  g_value_init(&flags, pspec->value_type);
+  g_value_init(&value, pspec->value_type);
 
-  gst_value_deserialize (&flags, value);
-
-  types = g_value_get_flags (&flags);
-  if (GST_MESSAGE_UNKNOWN == types) {
+  if (!gst_value_deserialize (&value, svalue)) {
     ret = GSTD_BAD_VALUE;
   } else {
-    g_object_set (prop->target, pspec->name, types, NULL);
+    g_object_set_property (prop->target, pspec->name, &value);
     ret = GSTD_EOK;
   }
 
