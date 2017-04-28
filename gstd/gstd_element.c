@@ -378,6 +378,15 @@ gstd_element_fill_properties (GstdElement *self)
 static GType
 gstd_element_property_get_type (GType g_type) {
 
+  //FIXME:
+  //I just found a way to handle all types in a generic way, hence,
+  //the base property class can handle them all. I don't want to remove
+  //specific type sublasses because the to_string method may require to
+  //add details. For example, int properties can display their max and min
+  //values, flags and enums could display the options, etc... Similar to
+  //what gst-inspect does
+  return GSTD_TYPE_PROPERTY;
+
   switch (g_type) {
     case G_TYPE_BOOLEAN:
     {
