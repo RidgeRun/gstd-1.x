@@ -26,6 +26,7 @@
 #include "gstd_property_string.h"
 #include "gstd_property_boolean.h"
 #include "gstd_property_enum.h"
+#include "gstd_property_flags.h"
 
 /* Gstd Core debugging category */
 GST_DEBUG_CATEGORY_STATIC (gstd_property_reader_debug);
@@ -73,7 +74,7 @@ gstd_property_reader_read (GstdIReader * iface, GstdObject * object, const gchar
 {
     GObjectClass * klass;
     GParamSpec * pspec;
-    GstdReturnCode ret;
+    GstdReturnCode ret = GSTD_EOK;
 
     g_return_val_if_fail (iface, GSTD_NULL_ARGUMENT);
     g_return_val_if_fail (object, GSTD_NULL_ARGUMENT);
@@ -96,7 +97,6 @@ gstd_property_reader_read (GstdIReader * iface, GstdObject * object, const gchar
     }
     if (gstd_property_reader_is_gstd (pspec, object)) {
       g_object_get(object, name, out, NULL);
-      ret = GSTD_EOK;
     } else {
       ret = gstd_property_mask_type (object, name, out);
     }
@@ -139,11 +139,22 @@ gstd_property_mask_type (GstdObject * object, const gchar * name, GstdObject ** 
       {
 	if (G_TYPE_IS_ENUM(pspec->value_type)) {
 	  type = GSTD_TYPE_PROPERTY_ENUM;
+	} else if (G_TYPE_IS_FLAGS(pspec->value_type)) {
+	  type = GSTD_TYPE_PROPERTY_FLAGS;
 	} else {
 	  type = GSTD_TYPE_PROPERTY;
 	}
       }
     }
+
+    //FIXME:
+    //I just found a way to handle all types in a generic way, hence,
+    //the base property class can handle them all. I don't want to remove
+    //specific type sublasses because the to_string method may require to
+    //add details. For example, int properties can display their max and min
+    //values, flags and enums could display the options, etc... Similar to
+    //what gst-inspect does
+    type = GSTD_TYPE_PROPERTY;
 
     *out = GSTD_OBJECT(g_object_new(type, "name", pspec->name, "target", object, NULL));
 

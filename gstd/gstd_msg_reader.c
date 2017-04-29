@@ -117,6 +117,7 @@ gstd_msg_reader_read_message (GstdIReader * iface,
     GstdPipelineBus *gstdbus;
     GstBus * bus;
     gint64 timeout;
+    gint types;
     GstMessage * msg;
   
     g_return_val_if_fail (iface, GSTD_NULL_ARGUMENT);
@@ -127,8 +128,9 @@ gstd_msg_reader_read_message (GstdIReader * iface,
 
     bus = gstd_pipeline_bus_get_bus (gstdbus);
     g_object_get (gstdbus, "timeout", &timeout, NULL);
+    g_object_get (gstdbus, "types", &types, NULL);
     
-    msg = gst_bus_timed_pop_filtered (bus, timeout, GST_MESSAGE_ERROR);
+    msg = gst_bus_timed_pop_filtered (bus, timeout, types);
 
     if (msg) {
       *out = GSTD_OBJECT(gstd_bus_msg_factory_make (msg));

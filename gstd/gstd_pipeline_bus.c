@@ -23,11 +23,13 @@
 #endif
 #include "gstd_pipeline_bus.h"
 #include "gstd_msg_reader.h"
+#include "gstd_msg_type.h"
 
 enum
 {
   PROP_MESSAGE = 1,
   PROP_TIMEOUT,
+  PROP_TYPES,
   N_PROPERTIES                  // NOT A PROPERTY
 };
 
@@ -38,6 +40,7 @@ struct _GstdPipelineBus
 
   GObject *bus;
   gint64 timeout;
+  gint types;
 
 };
 
@@ -62,6 +65,7 @@ GST_DEBUG_CATEGORY_STATIC (gstd_pipeline_bus_debug);
 #define GSTD_PIPELINE_BUS_TIMEOUT_DEFAULT -1
 #define GSTD_PIPELINE_BUS_TIMEOUT_MIN -1
 #define GSTD_PIPELINE_BUS_TIMEOUT_MAX G_MAXINT64
+#define GSTD_PIPELINE_BUS_TYPES_DEFAULT (GST_MESSAGE_ERROR | GST_MESSAGE_WARNING | GST_MESSAGE_INFO)
 
 static void
 gstd_pipeline_bus_class_init (GstdPipelineBusClass * klass)
@@ -89,6 +93,14 @@ gstd_pipeline_bus_class_init (GstdPipelineBusClass * klass)
       GSTD_PIPELINE_BUS_TIMEOUT_DEFAULT,
       G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
+    properties[PROP_TYPES] =
+    g_param_spec_flags ("types",
+      "Types",
+      "The types of messages to read from the bus",
+      GSTD_TYPE_MSG_TYPE,
+      GSTD_PIPELINE_BUS_TYPES_DEFAULT,
+      G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
   g_object_class_install_properties (object_class, N_PROPERTIES, properties);
 
   /* Initialize debug category with nice colors */
@@ -103,6 +115,7 @@ gstd_pipeline_bus_init (GstdPipelineBus * self)
   GST_INFO_OBJECT (self, "Initializing gstd pipeline bus handler");
 
   self->timeout = GSTD_PIPELINE_BUS_TIMEOUT_DEFAULT;
+  self->types = GSTD_PIPELINE_BUS_TYPES_DEFAULT;
 
   gstd_object_set_reader (GSTD_OBJECT(self),
       g_object_new (GSTD_TYPE_MSG_READER, NULL));
@@ -129,9 +142,13 @@ gstd_pipeline_bus_set_property (GObject * object,
   GstdPipelineBus *self = GSTD_PIPELINE_BUS (object);
 
   switch (property_id) {
-  case PROP_TIMEOUT:
+    case PROP_TIMEOUT:
       self->timeout = g_value_get_int64 (value);
       GST_INFO_OBJECT (self, "Timeout changed to: %li", self->timeout);
+      break;
+    case PROP_TYPES:
+      self->types = g_value_get_flags (value);
+      GST_INFO_OBJECT (self, "Types changed to: 0x%x", self->types);
       break;
     default:
       /* We don't have any other property... */
@@ -155,6 +172,10 @@ gstd_pipeline_bus_get_property (GObject * object,
     case PROP_TIMEOUT:
       GST_DEBUG_OBJECT (self, "Returning timeout %" GST_TIME_FORMAT, GST_TIME_ARGS(self->timeout));
       g_value_set_int64 (value, self->timeout);
+      break;
+    case PROP_TYPES:
+      GST_DEBUG_OBJECT (self, "Returning types 0x%x", self->types);
+      g_value_set_flags (value, self->types);
       break;
     default:
       /* We don't have any other property... */
