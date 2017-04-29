@@ -94,7 +94,7 @@ gstd_bus_msg_factory_make (GstMessage * target)
     msg = g_object_new (GSTD_TYPE_BUS_MSG_INFO, NULL);
     break;
   default:
-    g_return_val_if_reached (NULL);
+    msg = g_object_new (GSTD_TYPE_BUS_MSG, NULL);
     break;
   }
 
