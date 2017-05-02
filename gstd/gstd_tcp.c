@@ -118,6 +118,14 @@ static GstdReturnCode gstd_tcp_bus_filter (GstdSession*, gchar *, gchar *,
     gchar **);
 static GstdReturnCode gstd_tcp_bus_timeout (GstdSession*, gchar *, gchar *,
     gchar **);
+static GstdReturnCode gstd_tcp_event_eos (GstdSession*, gchar *, gchar *,
+    gchar **);
+static GstdReturnCode gstd_tcp_event_seek (GstdSession*, gchar *, gchar *,
+    gchar **);
+static GstdReturnCode gstd_tcp_event_flush_start (GstdSession*, gchar *, gchar *,
+    gchar **);
+static GstdReturnCode gstd_tcp_event_flush_stop (GstdSession*, gchar *, gchar *,
+    gchar **);
 static void gstd_tcp_set_property (GObject *, guint, const GValue *,
     GParamSpec *);
 static void gstd_tcp_get_property (GObject *, guint, GValue *, GParamSpec *);
@@ -146,6 +154,11 @@ static GstdTCPCmd cmds[] = {
   {"bus_read", gstd_tcp_bus_read},
   {"bus_filter", gstd_tcp_bus_filter},
   {"bus_timeout", gstd_tcp_bus_timeout},
+
+  {"event_eos", gstd_tcp_event_eos},
+  {"event_seek", gstd_tcp_event_seek},
+  {"event_flush_start", gstd_tcp_event_flush_start},
+  {"event_flush_stop", gstd_tcp_event_flush_stop},
   {NULL}
 };
 
@@ -840,6 +853,94 @@ gstd_tcp_bus_timeout (GstdSession *session, gchar *action, gchar *args,
 
   uri = g_strdup_printf ("/pipelines/%s/bus/timeout %s", tokens[0], tokens[1]);
   ret = gstd_tcp_parse_raw_cmd (session, "update", uri, response);
+
+  g_free (uri);
+  g_strfreev (tokens);
+
+  return ret;
+}
+
+static GstdReturnCode
+gstd_tcp_event_eos (GstdSession *session, gchar *action, gchar *pipeline,
+    gchar **response)
+{
+  GstdReturnCode ret;
+  gchar *uri;
+
+  g_return_val_if_fail (GSTD_IS_SESSION (session), GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (pipeline, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (response, GSTD_NULL_ARGUMENT);
+
+  uri = g_strdup_printf ("/pipelines/%s/event eos", pipeline);
+  ret = gstd_tcp_parse_raw_cmd (session, "create", uri, response);
+
+  g_free (uri);
+
+  return ret;
+}
+
+static GstdReturnCode
+gstd_tcp_event_seek (GstdSession *session, gchar *action, gchar *args,
+    gchar **response)
+{
+  GstdReturnCode ret;
+  gchar *uri;
+  gchar **tokens;
+
+  g_return_val_if_fail (GSTD_IS_SESSION (session), GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (args, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (response, GSTD_NULL_ARGUMENT);
+
+  tokens = g_strsplit (args, " ", 2);
+  check_argument (tokens[0], GSTD_BAD_COMMAND);
+  // We don't check for the second token since we want to allow defaults
+
+  uri = g_strdup_printf ("/pipelines/%s/event seek %s", tokens[0], tokens[1]);
+  ret = gstd_tcp_parse_raw_cmd (session, "create", uri, response);
+
+  g_free (uri);
+  g_strfreev (tokens);
+
+  return ret;
+}
+
+static GstdReturnCode
+gstd_tcp_event_flush_start (GstdSession *session, gchar *action, gchar *pipeline,
+    gchar **response)
+{
+  GstdReturnCode ret;
+  gchar *uri;
+
+  g_return_val_if_fail (GSTD_IS_SESSION (session), GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (pipeline, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (response, GSTD_NULL_ARGUMENT);
+
+  uri = g_strdup_printf ("/pipelines/%s/event flush_start", pipeline);
+  ret = gstd_tcp_parse_raw_cmd (session, "create", uri, response);
+
+  g_free (uri);
+
+  return ret;
+}
+
+static GstdReturnCode
+gstd_tcp_event_flush_stop (GstdSession *session, gchar *action, gchar *args,
+    gchar **response)
+{
+  GstdReturnCode ret;
+  gchar *uri;
+  gchar **tokens;
+
+  g_return_val_if_fail (GSTD_IS_SESSION (session), GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (args, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (response, GSTD_NULL_ARGUMENT);
+
+  tokens = g_strsplit (args, " ", 2);
+  check_argument (tokens[0], GSTD_BAD_COMMAND);
+  // We don't check for the second token since we want to allow defaults
+
+  uri = g_strdup_printf ("/pipelines/%s/event flush_stop %s", tokens[0], tokens[1]);
+  ret = gstd_tcp_parse_raw_cmd (session, "create", uri, response);
 
   g_free (uri);
   g_strfreev (tokens);

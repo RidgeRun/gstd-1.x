@@ -161,6 +161,18 @@ static GstdClientCmd cmds[] = {
       "n: wait n nanoseconds",
       "bus_timeout <pipe> <timeout>"},
 
+  {"event_eos", gstd_client_cmd_tcp, "Send an end-of-stream event",
+      "event_eos <pipe>"},
+  {"event_seek", gstd_client_cmd_tcp,
+      "Perform a seek in the given pipeline",
+      "event_seek <pipe> <rate=1.0> <format=3> <flags=1> <start-type=1> <start=0> <end-type=1> <end=-1>"},
+  {"event_flush_start", gstd_client_cmd_tcp,
+      "Put the pipeline in flushing mode",
+      "event_flush_start <pipe>"},
+  {"event_flush_stop", gstd_client_cmd_tcp,
+      "Take the pipeline out from flushing mode",
+      "event_flush_stop <pipe> <reset=true>"},
+
   {NULL}
 };
 
