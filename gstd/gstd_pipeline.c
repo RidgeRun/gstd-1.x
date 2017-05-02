@@ -424,21 +424,25 @@ gstd_pipeline_create (GstdPipeline * self, const gchar * name,
   GError *error;
   const gchar *fbname = "pipeline%d";
   gchar *pipename;
+  GstParseFlags flags;
 
   g_return_val_if_fail (self, GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (index != -1, GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (description, GSTD_NULL_ARGUMENT);
 
   error = NULL;
-  self->pipeline = gst_parse_launch (description, &error);
+  flags = GST_PARSE_FLAG_FATAL_ERRORS | GST_PARSE_FLAG_NO_SINGLE_ELEMENT_BINS;
+  self->pipeline = gst_parse_launch_full (description, NULL, flags, &error);
   if (!self->pipeline)
     goto wrong_pipeline;
 
-  /* Still check if error is set because a recoverable
-   * error might have occured */
-  if (error) {
-    GST_WARNING_OBJECT (self, "Recoverable error: %s", error->message);
-    g_error_free (error);
+  /* Single element descriptions (i.e.: playbin) aren't returned in a
+     pipeline. This is a problem for us since we concepts like the bus
+     which are directly related to a GstPipeline */
+  if (!GST_IS_PIPELINE(self->pipeline)) {
+    GstElement * element = self->pipeline;
+    self->pipeline = gst_pipeline_new (GST_OBJECT_NAME(element));
+    gst_bin_add (GST_BIN(self->pipeline), element);
   }
 
   /* If the user didn't provide a name or provided an empty name
