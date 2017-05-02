@@ -119,7 +119,7 @@ gstd_event_creator_send_event (GstdEventCreator * self,
     if (gst_element_send_event (GST_ELEMENT (self->receiver), event))
       return GSTD_EOK;
     else
-      return GSTD_BAD_COMMAND;
+      return GSTD_EVENT_ERROR;
   }
   return GSTD_BAD_VALUE;
 }

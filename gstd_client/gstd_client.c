@@ -150,6 +150,39 @@ static GstdClientCmd cmds[] = {
         "List the properties of an element in a given pipeline",
       "list_properties <pipe> <elemement>"},
 
+  {"bus_read", gstd_client_cmd_tcp, "List the existing pipelines",
+      "bus_read <pipe>"},
+  {"bus_filter", gstd_client_cmd_tcp,
+      "Select the types of message to be read from the bus. Separate with "
+      "a '+', i.e.: eos+warning+error",
+      "bus_read <pipe> <filter>"},
+  {"bus_timeout", gstd_client_cmd_tcp,
+      "Apply a timeout for the bus polling. -1: forever, 0: return immediately, "
+      "n: wait n nanoseconds",
+      "bus_timeout <pipe> <timeout>"},
+
+  {"event_eos", gstd_client_cmd_tcp, "Send an end-of-stream event",
+      "event_eos <pipe>"},
+  {"event_seek", gstd_client_cmd_tcp,
+      "Perform a seek in the given pipeline",
+      "event_seek <pipe> <rate=1.0> <format=3> <flags=1> <start-type=1> <start=0> <end-type=1> <end=-1>"},
+  {"event_flush_start", gstd_client_cmd_tcp,
+      "Put the pipeline in flushing mode",
+      "event_flush_start <pipe>"},
+  {"event_flush_stop", gstd_client_cmd_tcp,
+      "Take the pipeline out from flushing mode",
+      "event_flush_stop <pipe> <reset=true>"},
+
+  {"debug_enable", gstd_client_cmd_tcp,
+      "Enable/Disable GStreamer debug",
+      "debug_enable <enable>"},
+  {"debug_threshold", gstd_client_cmd_tcp,
+      "The debug filter to apply (as you would use with gst-launch)",
+      "debug_threshold <threshold>"},
+  {"debug_color", gstd_client_cmd_tcp,
+      "Enable/Disable colors in the debug logging",
+      "debug_color <colors>"},
+
   {NULL}
 };
 
