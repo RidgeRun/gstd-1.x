@@ -150,6 +150,17 @@ static GstdClientCmd cmds[] = {
         "List the properties of an element in a given pipeline",
       "list_properties <pipe> <elemement>"},
 
+  {"bus_read", gstd_client_cmd_tcp, "List the existing pipelines",
+      "bus_read <pipe>"},
+  {"bus_filter", gstd_client_cmd_tcp,
+      "Select the types of message to be read from the bus. Separate with "
+      "a '+', i.e.: eos+warning+error",
+      "bus_read <pipe> <filter>"},
+  {"bus_timeout", gstd_client_cmd_tcp,
+      "Apply a timeout for the bus polling. -1: forever, 0: return immediately, "
+      "n: wait n nanoseconds",
+      "bus_timeout <pipe> <timeout>"},
+
   {NULL}
 };
 
