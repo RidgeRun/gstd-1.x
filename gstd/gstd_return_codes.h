@@ -99,7 +99,9 @@ enum _GstdReturnCode
 
   GSTD_IPC_ERROR = 1 << 14,
 
-  GSTD_UNKNOWN_TYPE = 1 << 15
+  GSTD_UNKNOWN_TYPE = 1 << 15,
+
+  GSTD_EVENT_ERROR = 1 << 18,
 };
 
 
