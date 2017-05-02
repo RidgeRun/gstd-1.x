@@ -126,6 +126,14 @@ static GstdReturnCode gstd_tcp_event_flush_start (GstdSession*, gchar *, gchar *
     gchar **);
 static GstdReturnCode gstd_tcp_event_flush_stop (GstdSession*, gchar *, gchar *,
     gchar **);
+
+static GstdReturnCode gstd_tcp_debug_enable (GstdSession*, gchar *, gchar *,
+    gchar **);
+static GstdReturnCode gstd_tcp_debug_threshold (GstdSession*, gchar *, gchar *,
+    gchar **);
+static GstdReturnCode gstd_tcp_debug_color (GstdSession*, gchar *, gchar *,
+    gchar **);
+
 static void gstd_tcp_set_property (GObject *, guint, const GValue *,
     GParamSpec *);
 static void gstd_tcp_get_property (GObject *, guint, GValue *, GParamSpec *);
@@ -159,6 +167,11 @@ static GstdTCPCmd cmds[] = {
   {"event_seek", gstd_tcp_event_seek},
   {"event_flush_start", gstd_tcp_event_flush_start},
   {"event_flush_stop", gstd_tcp_event_flush_stop},
+
+  {"debug_enable", gstd_tcp_debug_enable},
+  {"debug_threshold", gstd_tcp_debug_threshold},
+  {"debug_color", gstd_tcp_debug_color},
+
   {NULL}
 };
 
@@ -944,6 +957,66 @@ gstd_tcp_event_flush_stop (GstdSession *session, gchar *action, gchar *args,
 
   g_free (uri);
   g_strfreev (tokens);
+
+  return ret;
+}
+
+static GstdReturnCode
+gstd_tcp_debug_enable (GstdSession *session, gchar *action, gchar *enabled,
+    gchar **response)
+{
+  GstdReturnCode ret;
+  gchar *uri;
+
+  g_return_val_if_fail (GSTD_IS_SESSION (session), GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (response, GSTD_NULL_ARGUMENT);
+
+  check_argument (enabled, GSTD_BAD_COMMAND);
+
+  uri = g_strdup_printf ("/debug/enable %s", enabled);
+  ret = gstd_tcp_parse_raw_cmd (session, "update", uri, response);
+
+  g_free (uri);
+
+  return ret;
+}
+
+static GstdReturnCode
+gstd_tcp_debug_threshold (GstdSession *session, gchar *action, gchar *threshold,
+    gchar **response)
+{
+  GstdReturnCode ret;
+  gchar *uri;
+
+  g_return_val_if_fail (GSTD_IS_SESSION (session), GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (response, GSTD_NULL_ARGUMENT);
+
+  check_argument (threshold, GSTD_BAD_COMMAND);
+
+  uri = g_strdup_printf ("/debug/threshold %s", threshold);
+  ret = gstd_tcp_parse_raw_cmd (session, "update", uri, response);
+
+  g_free (uri);
+
+  return ret;
+}
+
+static GstdReturnCode
+gstd_tcp_debug_color (GstdSession *session, gchar *action, gchar *colored,
+    gchar **response)
+{
+  GstdReturnCode ret;
+  gchar *uri;
+
+  g_return_val_if_fail (GSTD_IS_SESSION (session), GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (response, GSTD_NULL_ARGUMENT);
+
+  check_argument (colored, GSTD_BAD_COMMAND);
+
+  uri = g_strdup_printf ("/debug/color %s", colored);
+  ret = gstd_tcp_parse_raw_cmd (session, "update", uri, response);
+
+  g_free (uri);
 
   return ret;
 }

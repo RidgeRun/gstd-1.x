@@ -173,6 +173,16 @@ static GstdClientCmd cmds[] = {
       "Take the pipeline out from flushing mode",
       "event_flush_stop <pipe> <reset=true>"},
 
+  {"debug_enable", gstd_client_cmd_tcp,
+      "Enable/Disable GStreamer debug",
+      "debug_enable <enable>"},
+  {"debug_threshold", gstd_client_cmd_tcp,
+      "The debug filter to apply (as you would use with gst-launch)",
+      "debug_threshold <threshold>"},
+  {"debug_color", gstd_client_cmd_tcp,
+      "Enable/Disable colors in the debug logging",
+      "debug_color <colors>"},
+
   {NULL}
 };
 
