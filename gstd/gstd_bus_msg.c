@@ -24,6 +24,7 @@
 
 #include "gstd_bus_msg.h"
 #include "gstd_bus_msg_info.h"
+#include "gstd_bus_msg_qos.h"
 
 /* Gstd Bus Msg debugging category */
 GST_DEBUG_CATEGORY_STATIC(gstd_bus_msg_debug);
@@ -92,6 +93,9 @@ gstd_bus_msg_factory_make (GstMessage * target)
   case (GST_MESSAGE_WARNING):
   case (GST_MESSAGE_INFO):
     msg = g_object_new (GSTD_TYPE_BUS_MSG_INFO, NULL);
+    break;
+  case (GST_MESSAGE_QOS):
+    msg = g_object_new (GSTD_TYPE_BUS_MSG_QOS, NULL);
     break;
   default:
     msg = g_object_new (GSTD_TYPE_BUS_MSG, NULL);
