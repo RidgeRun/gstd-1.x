@@ -28,7 +28,10 @@
  * Gstreamer Daemon return codes
  */
 
+#include <glib.h>
+
 typedef enum _GstdReturnCode GstdReturnCode;
+const gchar *gstd_return_code_to_string (GstdReturnCode code);
 
 enum _GstdReturnCode
 {
