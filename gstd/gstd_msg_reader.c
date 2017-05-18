@@ -129,8 +129,20 @@ gstd_msg_reader_read_message (GstdIReader * iface,
     bus = gstd_pipeline_bus_get_bus (gstdbus);
     g_object_get (gstdbus, "timeout", &timeout, NULL);
     g_object_get (gstdbus, "types", &types, NULL);
-    
-    msg = gst_bus_timed_pop_filtered (bus, timeout, types);
+
+    /* The unknown or none message type is not a valid polling filter,
+     * instead we interpret it as a flushing request. As such we flush
+     * the bus for "timeout" nanoseconds
+     */
+    if (GST_MESSAGE_UNKNOWN == types) {
+      GST_INFO_OBJECT (gstdbus, "Flushing the bus for %" GST_TIME_FORMAT, GST_TIME_ARGS(timeout));
+      gst_bus_set_flushing (bus, TRUE);
+      g_usleep (GST_TIME_AS_USECONDS(timeout));
+      gst_bus_set_flushing (bus, FALSE);
+      msg = NULL;
+    } else {
+      msg = gst_bus_timed_pop_filtered (bus, timeout, types);
+    }
 
     if (msg) {
       *out = GSTD_OBJECT(gstd_bus_msg_factory_make (msg));

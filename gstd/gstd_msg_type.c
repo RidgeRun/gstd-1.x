@@ -31,6 +31,7 @@ gstd_msg_type_get_type (void)
   static volatile gsize gstd_msg_type_type = 0;
   static const GFlagsValue gstd_msg_type[] = {
     {GST_MESSAGE_UNKNOWN, "GST_MESSAGE_UNKNOWN", "unknown"},
+    {GST_MESSAGE_UNKNOWN, "GST_MESSAGE_UNKNOWN", "none"},
     {GST_MESSAGE_EOS, "GST_MESSAGE_EOS", "eos"},
     {GST_MESSAGE_ERROR, "GST_MESSAGE_ERROR", "error"},
     {GST_MESSAGE_WARNING, "GST_MESSAGE_WARNING", "warning"},
