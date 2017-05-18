@@ -330,7 +330,7 @@ gstd_tcp_callback (GSocketService * service,
       output ? output : "null");
   g_free (output);
 
-  g_output_stream_write (ostream, response, strlen(response), NULL, NULL);
+  g_output_stream_write (ostream, response, strlen(response)+1, NULL, NULL);
   g_free (response);
 
   return FALSE;
