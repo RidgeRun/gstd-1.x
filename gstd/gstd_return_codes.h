@@ -28,80 +28,87 @@
  * Gstreamer Daemon return codes
  */
 
+#include <glib.h>
+
 typedef enum _GstdReturnCode GstdReturnCode;
+const gchar *gstd_return_code_to_string (GstdReturnCode code);
 
 enum _GstdReturnCode
 {
   /**
    * Everything went OK 
    */
-  GSTD_EOK = 0,
+  GSTD_EOK,
 
   /**
    * A mandatory argument was passed NULL
    */
-  GSTD_NULL_ARGUMENT = 1 << 0,
-
-  GSTD_MISSING_ARGUMENT = 1 << 16,
-
-  GSTD_MISSING_NAME = 1 << 17,
+  GSTD_NULL_ARGUMENT,
 
 
   /**
    * A bad pipeline description was provided
    */
-  GSTD_BAD_DESCRIPTION = 1 << 1,
+  GSTD_BAD_DESCRIPTION,
 
   /**
    * The name trying to be used already exist
    */
-  GSTD_EXISTING_NAME = 1 << 2,
+  GSTD_EXISTING_NAME,
 
   /**
    * Missing initialization
    */
-  GSTD_MISSING_INITIALIZATION = 1 << 3,
+  GSTD_MISSING_INITIALIZATION,
 
   /**
    * The requested pipeline was not found
    */
-  GSTD_NO_PIPELINE = 1 << 4,
+  GSTD_NO_PIPELINE,
 
   /**
    * The requested resource was not found
    */
-  GSTD_NO_RESOURCE = 1 << 5,
+  GSTD_NO_RESOURCE,
 
   /**
    * Cannot create a resource in the given property
    */
-  GSTD_NO_CREATE = 1 << 6,
+  GSTD_NO_CREATE,
 
   /**
    * The resource to create already exists
    */
-  GSTD_EXISTING_RESOURCE = 1 << 7,
+  GSTD_EXISTING_RESOURCE,
 
   /**
    * Cannot update the given property
    */
-  GSTD_NO_UPDATE = 1 << 8,
+  GSTD_NO_UPDATE,
 
-  GSTD_BAD_COMMAND = 1 << 9,
+  GSTD_BAD_COMMAND,
 
-  GSTD_NO_READ = 1 << 10,
+  GSTD_NO_READ,
 
-  GSTD_NO_CONNECTION = 1 << 11,
+  GSTD_NO_CONNECTION,
 
-  GSTD_BAD_VALUE = 1 << 12,
+  GSTD_BAD_VALUE,
 
-  GSTD_STATE_ERROR = 1 << 13,
+  GSTD_STATE_ERROR,
 
-  GSTD_IPC_ERROR = 1 << 14,
+  GSTD_IPC_ERROR,
 
-  GSTD_UNKNOWN_TYPE = 1 << 15,
+  GSTD_UNKNOWN_TYPE,
 
-  GSTD_EVENT_ERROR = 1 << 18,
+  GSTD_EVENT_ERROR,
+
+  /**
+   * Incomplete arguments in user input
+   */
+  GSTD_MISSING_ARGUMENT,
+
+  GSTD_MISSING_NAME,
+
 };
 
 

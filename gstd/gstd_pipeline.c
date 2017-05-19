@@ -213,7 +213,7 @@ gstd_pipeline_build (GstdPipeline * object)
 
   self->event_handler = gstd_event_handler_new (G_OBJECT (self->pipeline));
   if (!self->event_handler) {
-    ret = ret | GSTD_BAD_VALUE;
+    ret = GSTD_BAD_VALUE;
     goto out1;
   }
 
@@ -222,7 +222,7 @@ gstd_pipeline_build (GstdPipeline * object)
           (self->pipeline)));
 
   if (!self->pipeline_bus) {
-    ret = ret | GSTD_BAD_VALUE;
+    ret = GSTD_BAD_VALUE;
     goto out2;
   }
 

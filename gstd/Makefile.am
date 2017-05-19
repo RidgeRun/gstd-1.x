@@ -37,7 +37,8 @@ libgstd_core_la_SOURCES = gstd_session.c		\
 			  gstd_bus_msg_info.c		\
 			  gstd_msg_reader.c		\
 			  gstd_msg_type.c		\
-			  gstd_bus_msg_qos.c
+			  gstd_bus_msg_qos.c		\
+			  gstd_return_codes.c
 
 libgstd_core_la_CFLAGS = $(GST_CFLAGS) $(GIO_CFLAGS) $(GJSON_CFLAGS)
 libgstd_core_la_LDFLAGS = $(GST_LIBS) $(GIO_LIBS) $(GJSON_LIBS)
