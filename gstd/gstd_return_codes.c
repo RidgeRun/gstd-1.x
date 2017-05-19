@@ -31,26 +31,26 @@ const gchar *
 gstd_return_code_to_string (GstdReturnCode code)
 {
   static const gchar *code_description[] = {
-    "GSTD_EOK",
-    "GSTD_NULL_ARGUMENT",
-    "GSTD_BAD_DESCRIPTION",
-    "GSTD_EXISTING_NAME",
-    "GSTD_MISSING_INITIALIZATION",
-    "GSTD_NO_PIPELINE",
-    "GSTD_NO_RESOURCE",
-    "GSTD_NO_CREATE",
-    "GSTD_EXISTING_RESOURCE",
-    "GSTD_NO_UPDATE",
-    "GSTD_BAD_COMMAND",
-    "GSTD_NO_READ",
-    "GSTD_NO_CONNECTION",
-    "GSTD_BAD_VALUE",
-    "GSTD_STATE_ERROR",
-    "GSTD_IPC_ERROR",
-    "GSTD_UNKNOWN_TYPE",
-    "GSTD_EVENT_ERROR",
-    "GSTD_MISSING_ARGUMENT",
-    "GSTD_MISSING_NAME"
+    "Success",
+    "Required argument is NULL",
+    "Bad pipeline description",
+    "Name already exists",
+    "Missing initialization",
+    "Pipeline requested doesn't exist",
+    "Resource requested doesn't exist",
+    "Cannot create in this resource",
+    "Resource already exist",
+    "Cannot update this resource",
+    "Bad command",
+    "Resource not readable",
+    "Cannot connect",
+    "Bad value",
+    "State error",
+    "IPC error",
+    "Unknown type",
+    "Event error",
+    "One or more arguments are missing",
+    "Name is missing"
   };
 
   const gint size = sizeof (code_description)/sizeof(gchar *);
