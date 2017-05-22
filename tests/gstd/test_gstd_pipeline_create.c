@@ -7,7 +7,7 @@
 #include "gstd_session.h"
 
 
-GST_START_TEST (test_create_successful)
+GST_START_TEST (test_pipeline_create_successful)
 {
   GstdObject *node;
   GstdReturnCode ret;
@@ -26,7 +26,7 @@ GST_START_TEST (test_create_successful)
 GST_END_TEST;
 
 
-GST_START_TEST (test_create_no_name)
+GST_START_TEST (test_pipeline_create_no_name)
 {
   GstdObject *node;
   GstdReturnCode ret;
@@ -45,7 +45,7 @@ GST_START_TEST (test_create_no_name)
 GST_END_TEST;
 
 
-GST_START_TEST (test_create_no_description)
+GST_START_TEST (test_pipeline_create_no_description)
 {
   GstdObject *node;
   GstdReturnCode ret;
@@ -64,7 +64,7 @@ GST_START_TEST (test_create_no_description)
 GST_END_TEST;
 
 
-GST_START_TEST (test_create_erroneous_description)
+GST_START_TEST (test_pipeline_create_erroneous_description)
 {
   GstdObject *node;
   GstdReturnCode ret;
@@ -84,18 +84,18 @@ GST_END_TEST;
 
 
 static Suite *
-gstd_create_suite (void)
+gstd_pipeline_create_suite (void)
 {
-  Suite *suite = suite_create ("gstd_create");
+  Suite *suite = suite_create ("gstd_pipeline_create");
   TCase *tc = tcase_create ("general");
 
   suite_add_tcase (suite, tc);
-  tcase_add_test (tc, test_create_successful);
-  tcase_add_test (tc, test_create_no_name);
-  tcase_add_test (tc, test_create_no_description);
-  tcase_add_test (tc, test_create_erroneous_description);
+  tcase_add_test (tc, test_pipeline_create_successful);
+  tcase_add_test (tc, test_pipeline_create_no_name);
+  tcase_add_test (tc, test_pipeline_create_no_description);
+  tcase_add_test (tc, test_pipeline_create_erroneous_description);
 
   return suite;
 }
 
-GST_CHECK_MAIN (gstd_create);
+GST_CHECK_MAIN (gstd_pipeline_create);
