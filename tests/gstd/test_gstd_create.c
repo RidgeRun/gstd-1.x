@@ -7,7 +7,7 @@
 #include "gstd_session.h"
 
 
-GST_START_TEST (test_successful_create)
+GST_START_TEST (test_create_successful)
 {
   GstdObject *node;
   GstdReturnCode ret;
@@ -90,7 +90,7 @@ gstd_create_suite (void)
   TCase *tc = tcase_create ("general");
 
   suite_add_tcase (suite, tc);
-  tcase_add_test (tc, test_successful_create);
+  tcase_add_test (tc, test_create_successful);
   tcase_add_test (tc, test_create_no_name);
   tcase_add_test (tc, test_create_no_description);
   tcase_add_test (tc, test_create_erroneous_description);
