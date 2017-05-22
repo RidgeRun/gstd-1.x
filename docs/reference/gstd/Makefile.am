@@ -70,11 +70,11 @@ include $(top_srcdir)/docs/gtk-doc.make
 
 # Comment this out if you want 'make check' to test you doc status
 # and run some sanity checks
-if ENABLE_GTK_DOC
-TESTS_ENVIRONMENT = \
-  DOC_MODULE=$(DOC_MODULE) DOC_MAIN_SGML_FILE=$(DOC_MAIN_SGML_FILE) \
-  SRCDIR=$(abs_srcdir) BUILDDIR=$(abs_builddir)
-TESTS = $(GTKDOC_CHECK)
-endif
+#if ENABLE_GTK_DOC
+#TESTS_ENVIRONMENT = \
+#  DOC_MODULE=$(DOC_MODULE) DOC_MAIN_SGML_FILE=$(DOC_MAIN_SGML_FILE) \
+#  SRCDIR=$(abs_srcdir) BUILDDIR=$(abs_builddir)
+#TESTS = $(GTKDOC_CHECK)
+#endif
 
 -include $(top_srcdir)/git.mk
