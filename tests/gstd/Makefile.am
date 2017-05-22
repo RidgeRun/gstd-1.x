@@ -1,5 +1,6 @@
-TESTS = test_gstd_session \
-	test_gstd_pipeline_create \
+TESTS = test_gstd_session 	  	\
+	test_gstd_pipeline_create 	\
+	test_gstd_no_create 		\
 	test_gstd_state
 
 check_PROGRAMS = $(TESTS)
