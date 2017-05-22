@@ -184,11 +184,16 @@ gstd_debug_set_property (GObject * object,
   GstdDebug *self = GSTD_DEBUG (object);
 
   switch (property_id) {
-
     case PROP_ENABLE:
       self->enable = g_value_get_boolean (value);
       GST_DEBUG_OBJECT (self, "Changing debug enabled to %d", self->enable);
       gst_debug_set_active (self->enable);
+      /* if debug was enabled and threshold value was previously set, then
+       * set threshold value
+       */
+      if ((self->enable) && (self->threshold)) {
+        gst_debug_set_threshold_from_string (self->threshold, TRUE);
+      }
       break;
     case PROP_COLOR:
       self->color = g_value_get_boolean (value);
@@ -202,9 +207,14 @@ gstd_debug_set_property (GObject * object,
       self->threshold = g_value_dup_string (value);
       GST_DEBUG_OBJECT (self, "Changing debug threshold to %s",
           self->threshold);
-      gst_debug_set_threshold_from_string (self->threshold, TRUE);
+      /* Since debug is actived when the threshold is set, then set the threshold
+       * value if debug is active
+       */
+      if (TRUE == gst_debug_is_active ())
+      {
+        gst_debug_set_threshold_from_string (self->threshold, TRUE);
+      }
       break;
-
     default:
       /* We don't have any other property... */
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
