@@ -6,8 +6,6 @@
 
 #include "gstd_session.h"
 
-#define P0_DESCRIPTION "videotestsrc ! autovideosink"
-#define P0_NAME "p0"
 
 GST_START_TEST (test_successful_create)
 {
@@ -19,8 +17,8 @@ GST_START_TEST (test_successful_create)
   fail_if (ret);
   fail_if (NULL == node);
 
-  ret = gstd_object_create (node, P0_NAME, P0_DESCRIPTION);
-  fail_if (0 != ret);
+  ret = gstd_object_create (node, "p0", "fakesrc ! fakesink");
+  fail_if (GSTD_EOK != ret);
 
   gst_object_unref(node);
   gst_object_unref(test_session);
