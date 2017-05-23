@@ -328,7 +328,7 @@ gstd_tcp_callback (GSocketService * service,
   /* Prepend the code to the output */
   description = gstd_return_code_to_string(ret);
   response =
-      g_strdup_printf ("{\n  \"code\" : %d,\n  \"description\" : \"%s\",\n \"response\" : %s\n}", ret, description,
+      g_strdup_printf ("{\n  \"code\" : %d,\n  \"description\" : \"%s\",\n  \"response\" : %s\n}", ret, description,
       output ? output : "null");
   g_free (output);
 
