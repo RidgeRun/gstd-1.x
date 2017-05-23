@@ -73,6 +73,10 @@ gstd_session_constructor (GType type,
         G_OBJECT_CLASS (gstd_session_parent_class)->constructor (type,
         n_construct_params, construct_params);
     the_session = object;
+
+    /* NULL out the_session when no references remain, to ensure a new
+       session is created in the next constuctor */
+    g_object_add_weak_pointer (the_session, (gpointer) &the_session);
   } else {
     object = g_object_ref (G_OBJECT (the_session));
   }
