@@ -2,7 +2,7 @@ dnl required version of autoconf
 AC_PREREQ([2.53])
 
 dnl Gstreamer's daemon package name and version
-AC_INIT([gstd],[0.3.0])
+AC_INIT([gstd],[0.6.0])
 
 dnl required version of gstreamer and gst-plugins-base
 GST_REQUIRED=1.0.0
@@ -38,6 +38,7 @@ AC_CHECK_PROG(HAVE_PKGCONFIG, pkg-config, [ ], [
 PKG_CHECK_MODULES(GST, [
     gstreamer-1.0              >= $GST_REQUIRED
     gstreamer-base-1.0         >= $GST_REQUIRED
+    gstreamer-check-1.0        >= $GST_REQUIRED
   ], [
     AC_SUBST(GST_CFLAGS)
     AC_SUBST(GST_LIBS)

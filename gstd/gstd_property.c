@@ -1,21 +1,20 @@
 /*
- * Gstreamer Daemon - Gst Launch under steroids
- * Copyright (C) 2017 RidgeRun Engineering <support@ridgerun.com>
- *
- * This file is part of Gstd.
- *
- * Gstd is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Gstd is distributed in the hope that it will be useful,
+ * GStreamer Daemon - Gst Launch under steroids
+ * Copyright (c) 2015-2017 Ridgerun, LLC (http://www.ridgerun.com)
+ * 
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with Gstd.  If not, see <http://www.gnu.org/licenses/>.
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA
  */
 
 #ifdef HAVE_CONFIG_H
@@ -56,6 +55,8 @@ gstd_property_to_string (GstdObject * obj, gchar ** outstring);
 static void
 gstd_property_add_value_default (GstdProperty * self, GstdIFormatter * formatter,
     GValue * value);
+static GstdReturnCode
+gstd_property_update_default (GstdObject * object, const gchar * arg);
 
 static void
 gstd_property_class_init (GstdPropertyClass *klass)
@@ -85,6 +86,7 @@ gstd_property_class_init (GstdPropertyClass *klass)
                                      properties);
 
   gstdc->to_string = GST_DEBUG_FUNCPTR(gstd_property_to_string);
+  gstdc->update = GST_DEBUG_FUNCPTR(gstd_property_update_default);
 
   klass->add_value = GST_DEBUG_FUNCPTR(gstd_property_add_value_default);
 
@@ -125,8 +127,6 @@ gstd_property_get_property (GObject        *object,
 {
   GstdProperty *self = GSTD_PROPERTY(object);
 
-  gstd_object_set_code (GSTD_OBJECT(self), GSTD_EOK);
-
   switch (property_id) {
   case PROP_TARGET:
     GST_DEBUG_OBJECT(self, "Returning property owner %p (%s)", self->target, GST_OBJECT_NAME(self->target));
@@ -135,7 +135,6 @@ gstd_property_get_property (GObject        *object,
   default:
     /* We don't have any other property... */
     G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
-    gstd_object_set_code (GSTD_OBJECT(self), GSTD_NO_RESOURCE);
     break;
   }
 }
@@ -148,8 +147,6 @@ gstd_property_set_property (GObject      *object,
 {
   GstdProperty *self = GSTD_PROPERTY (object);
 
-  gstd_object_set_code (GSTD_OBJECT(self), GSTD_EOK);
-
   switch (property_id) {
   case PROP_TARGET:
     if (self->target)
@@ -161,7 +158,6 @@ gstd_property_set_property (GObject      *object,
   default:
     /* We don't have any other property... */
     G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
-    gstd_object_set_code (GSTD_OBJECT(self), GSTD_NO_RESOURCE);
     break;
   }
 }
@@ -249,7 +245,35 @@ gstd_property_add_value_default (GstdProperty * self, GstdIFormatter * formatter
   g_return_if_fail (formatter);
   g_return_if_fail (value);
 
-  svalue = g_strdup_value_contents (value);
+  svalue = gst_value_serialize (value);
   gstd_iformatter_set_string_value (formatter, svalue);
   g_free (svalue);
+}
+
+static GstdReturnCode
+gstd_property_update_default (GstdObject * object, const gchar * svalue)
+{
+  GstdReturnCode ret;
+  GParamSpec *pspec;
+  GstdProperty *prop;
+  GValue value = G_VALUE_INIT;
+
+  g_return_val_if_fail (object, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (svalue, GSTD_NULL_ARGUMENT);
+
+  prop = GSTD_PROPERTY (object);
+
+  pspec = g_object_class_find_property (G_OBJECT_GET_CLASS(prop->target),
+      GSTD_OBJECT_NAME(prop));
+
+  g_value_init(&value, pspec->value_type);
+
+  if (!gst_value_deserialize (&value, svalue)) {
+    ret = GSTD_BAD_VALUE;
+  } else {
+    g_object_set_property (prop->target, pspec->name, &value);
+    ret = GSTD_EOK;
+  }
+
+  return ret;
 }

@@ -1,22 +1,21 @@
 
 /*
- * Gstreamer Daemon - Gst Launch under steroids
- * Copyright (C) 2015 RidgeRun Engineering <support@ridgerun.com>
- *
- * This file is part of Gstd.
- *
- * Gstd is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Gstd is distributed in the hope that it will be useful,
+ * GStreamer Daemon - Gst Launch under steroids
+ * Copyright (c) 2015-2017 Ridgerun, LLC (http://www.ridgerun.com)
+ * 
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with Gstd.  If not, see <http://www.gnu.org/licenses/>.
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA
  */
 
 #ifndef __GSTD_RETURN_CODES_H__
@@ -28,71 +27,87 @@
  * Gstreamer Daemon return codes
  */
 
+#include <glib.h>
+
 typedef enum _GstdReturnCode GstdReturnCode;
+const gchar *gstd_return_code_to_string (GstdReturnCode code);
 
 enum _GstdReturnCode
 {
   /**
    * Everything went OK 
    */
-  GSTD_EOK = 0,
+  GSTD_EOK,
 
   /**
    * A mandatory argument was passed NULL
    */
-  GSTD_NULL_ARGUMENT = 1 << 0,
+  GSTD_NULL_ARGUMENT,
+
 
   /**
    * A bad pipeline description was provided
    */
-  GSTD_BAD_DESCRIPTION = 1 << 1,
+  GSTD_BAD_DESCRIPTION,
 
   /**
    * The name trying to be used already exist
    */
-  GSTD_EXISTING_NAME = 1 << 2,
+  GSTD_EXISTING_NAME,
 
   /**
    * Missing initialization
    */
-  GSTD_MISSING_INITIALIZATION = 1 << 3,
+  GSTD_MISSING_INITIALIZATION,
 
   /**
    * The requested pipeline was not found
    */
-  GSTD_NO_PIPELINE = 1 << 4,
+  GSTD_NO_PIPELINE,
 
   /**
    * The requested resource was not found
    */
-  GSTD_NO_RESOURCE = 1 << 5,
+  GSTD_NO_RESOURCE,
 
   /**
    * Cannot create a resource in the given property
    */
-  GSTD_NO_CREATE = 1 << 6,
+  GSTD_NO_CREATE,
 
   /**
    * The resource to create already exists
    */
-  GSTD_EXISTING_RESOURCE = 1 << 7,
+  GSTD_EXISTING_RESOURCE,
 
   /**
    * Cannot update the given property
    */
-  GSTD_NO_UPDATE = 1 << 8,
+  GSTD_NO_UPDATE,
 
-  GSTD_BAD_COMMAND = 1 << 9,
+  GSTD_BAD_COMMAND,
 
-  GSTD_NO_READ = 1 << 10,
+  GSTD_NO_READ,
 
-  GSTD_NO_CONNECTION = 1 << 11,
+  GSTD_NO_CONNECTION,
 
-  GSTD_BAD_VALUE = 1 << 12,
+  GSTD_BAD_VALUE,
 
-  GSTD_STATE_ERROR = 1 << 13,
+  GSTD_STATE_ERROR,
 
-  GSTD_IPC_ERROR = 1 << 14
+  GSTD_IPC_ERROR,
+
+  GSTD_UNKNOWN_TYPE,
+
+  GSTD_EVENT_ERROR,
+
+  /**
+   * Incomplete arguments in user input
+   */
+  GSTD_MISSING_ARGUMENT,
+
+  GSTD_MISSING_NAME,
+
 };
 
 

@@ -1,21 +1,20 @@
 /*
- * Gstreamer Daemon - Gst Launch under steroids
- * Copyright (C) 2015-2017 RidgeRun Engineering <support@ridgerun.com>
- *
- * This file is part of Gstd.
- *
- * Gstd is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Gstd is distributed in the hope that it will be useful,
+ * GStreamer Daemon - Gst Launch under steroids
+ * Copyright (c) 2015-2017 Ridgerun, LLC (http://www.ridgerun.com)
+ * 
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with Gstd.  If not, see <http://www.gnu.org/licenses/>.
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA
  */
 
 #ifdef HAVE_CONFIG_H
@@ -29,8 +28,8 @@
 #include "gstd_ipc.h"
 #include "gstd_tcp.h"
 #include "gstd_element.h"
-#include "gstd_event_handler.h"
 #include "gstd_pipeline_bus.h"
+#include "gstd_event_handler.h"
 
 /* Gstd TCP debugging category */
 GST_DEBUG_CATEGORY_STATIC (gstd_tcp_debug);
@@ -88,7 +87,7 @@ static GstdReturnCode gstd_tcp_create (GstdSession * session,
     GstdObject * obj, gchar * args, gchar ** response);
 static GstdReturnCode gstd_tcp_read (GstdSession * session,
     GstdObject * obj, gchar * args, gchar ** reponse);
-static GstdReturnCode gstd_tcp_update_by_type (GstdSession * session,
+static GstdReturnCode gstd_tcp_update (GstdSession * session,
     GstdObject * obj, gchar * args, gchar ** response);
 static GstdReturnCode gstd_tcp_delete (GstdSession * session,
     GstdObject * obj, gchar * args, gchar ** response);
@@ -112,6 +111,28 @@ static GstdReturnCode gstd_tcp_list_elements (GstdSession *, gchar *,
     gchar *, gchar **);
 static GstdReturnCode gstd_tcp_list_properties (GstdSession *, gchar *,
     gchar *, gchar **);
+static GstdReturnCode gstd_tcp_bus_read (GstdSession*, gchar *, gchar *,
+    gchar **);
+static GstdReturnCode gstd_tcp_bus_filter (GstdSession*, gchar *, gchar *,
+    gchar **);
+static GstdReturnCode gstd_tcp_bus_timeout (GstdSession*, gchar *, gchar *,
+    gchar **);
+static GstdReturnCode gstd_tcp_event_eos (GstdSession*, gchar *, gchar *,
+    gchar **);
+static GstdReturnCode gstd_tcp_event_seek (GstdSession*, gchar *, gchar *,
+    gchar **);
+static GstdReturnCode gstd_tcp_event_flush_start (GstdSession*, gchar *, gchar *,
+    gchar **);
+static GstdReturnCode gstd_tcp_event_flush_stop (GstdSession*, gchar *, gchar *,
+    gchar **);
+
+static GstdReturnCode gstd_tcp_debug_enable (GstdSession*, gchar *, gchar *,
+    gchar **);
+static GstdReturnCode gstd_tcp_debug_threshold (GstdSession*, gchar *, gchar *,
+    gchar **);
+static GstdReturnCode gstd_tcp_debug_color (GstdSession*, gchar *, gchar *,
+    gchar **);
+
 static void gstd_tcp_set_property (GObject *, guint, const GValue *,
     GParamSpec *);
 static void gstd_tcp_get_property (GObject *, guint, GValue *, GParamSpec *);
@@ -136,6 +157,20 @@ static GstdTCPCmd cmds[] = {
   {"list_pipelines", gstd_tcp_list_pipelines},
   {"list_elements", gstd_tcp_list_elements},
   {"list_properties", gstd_tcp_list_properties},
+
+  {"bus_read", gstd_tcp_bus_read},
+  {"bus_filter", gstd_tcp_bus_filter},
+  {"bus_timeout", gstd_tcp_bus_timeout},
+
+  {"event_eos", gstd_tcp_event_eos},
+  {"event_seek", gstd_tcp_event_seek},
+  {"event_flush_start", gstd_tcp_event_flush_start},
+  {"event_flush_stop", gstd_tcp_event_flush_stop},
+
+  {"debug_enable", gstd_tcp_debug_enable},
+  {"debug_threshold", gstd_tcp_debug_threshold},
+  {"debug_color", gstd_tcp_debug_color},
+
   {NULL}
 };
 
@@ -199,8 +234,6 @@ gstd_tcp_get_property (GObject * object,
 {
   GstdTcp *self = GSTD_TCP (object);
 
-  gstd_object_set_code (GSTD_OBJECT (self), GSTD_EOK);
-
   switch (property_id) {
     case PROP_BASE_PORT:
       GST_DEBUG_OBJECT (self, "Returning base-port %u", self->base_port);
@@ -214,7 +247,6 @@ gstd_tcp_get_property (GObject * object,
     default:
       /* We don't have any other property... */
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
-      gstd_object_set_code (GSTD_OBJECT (self), GSTD_NO_RESOURCE);
       break;
   }
 }
@@ -224,8 +256,6 @@ gstd_tcp_set_property (GObject * object,
     guint property_id, const GValue * value, GParamSpec * pspec)
 {
   GstdTcp *self = GSTD_TCP (object);
-
-  gstd_object_set_code (GSTD_OBJECT (self), GSTD_EOK);
 
   switch (property_id) {
     case PROP_BASE_PORT:
@@ -244,7 +274,6 @@ gstd_tcp_set_property (GObject * object,
     default:
       /* We don't have any other property... */
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
-      gstd_object_set_code (GSTD_OBJECT (self), GSTD_NO_RESOURCE);
       break;
   }
 }
@@ -275,30 +304,36 @@ gstd_tcp_callback (GSocketService * service,
   GInputStream *istream;
   GOutputStream *ostream;
   gint read;
-  const guint size = 1024 * 1024;
+  const guint size = 1024;
   gchar *output = NULL;
   gchar *response;
-  gchar message[size];
+  gchar *message;
   GstdReturnCode ret;
+  const gchar *description = NULL;
 
   g_return_val_if_fail (session, TRUE);
 
   istream = g_io_stream_get_input_stream (G_IO_STREAM (connection));
   ostream = g_io_stream_get_output_stream (G_IO_STREAM (connection));
 
+  message = g_malloc (size);
+
   read = g_input_stream_read (istream, message, size, NULL, NULL);
   message[read] = '\0';
 
   ret = gstd_tcp_parse_cmd (session, message, &output);
+  g_free (message);
 
   /* Prepend the code to the output */
+  description = gstd_return_code_to_string(ret);
   response =
-      g_strdup_printf ("{\n  \"code\" : %d,\n  \"response\" : %s\n}", ret,
+      g_strdup_printf ("{\n  \"code\" : %d,\n  \"description\" : \"%s\",\n  \"response\" : %s\n}", ret, description,
       output ? output : "null");
   g_free (output);
 
-  g_output_stream_write (ostream, response, size, NULL, NULL);
+  g_output_stream_write (ostream, response, strlen(response)+1, NULL, NULL);
   g_free (response);
+
   return FALSE;
 }
 
@@ -336,11 +371,11 @@ gstd_tcp_start (GstdIpc * base, GstdSession * session)
         port + i, NULL /* G_OBJECT(session) */ , &error);
     if (error)
       goto noconnection;
-
-    /* listen to the 'incoming' signal */
-    g_signal_connect (*service, "run", G_CALLBACK (gstd_tcp_callback), session);
-
   }
+
+  /* listen to the 'incoming' signal */
+  g_signal_connect (*service, "run", G_CALLBACK (gstd_tcp_callback), session);
+
   /* start the socket service */
   g_socket_service_start (*service);
 
@@ -382,21 +417,11 @@ gstd_tcp_stop (GstdIpc * base)
   return GSTD_EOK;
 }
 
-static gboolean
-gstd_tcp_is_num (const gchar * str)
-{
-  for (; *str != '\0'; str++) {
-    if (!g_ascii_isdigit (*str))
-      return FALSE;
-  }
-  return TRUE;
-}
-
 static GstdReturnCode
 gstd_tcp_create (GstdSession * session, GstdObject * obj, gchar * args,
     gchar ** response)
 {
-  gchar **tokens;
+  gchar **tokens = NULL;
   gchar *name;
   gchar *description;
   GstdObject *new;
@@ -404,7 +429,6 @@ gstd_tcp_create (GstdSession * session, GstdObject * obj, gchar * args,
 
   g_return_val_if_fail (GSTD_IS_SESSION (session), GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (G_IS_OBJECT (obj), GSTD_NULL_ARGUMENT);
-  g_return_val_if_fail (args, GSTD_NULL_ARGUMENT);
 
   // This may mean a potential leak
   g_warn_if_fail (!*response);
@@ -413,51 +437,36 @@ gstd_tcp_create (GstdSession * session, GstdObject * obj, gchar * args,
       "Currently hardcoded to create pipelines and events, we must be "
       "generic enough to create any type of object");
 
-  // Tokens has the form {'name', <name>, 'description', <description>}
-  tokens = g_strsplit (args, " ", 4);
-
-  if (strcmp (tokens[0], "event") == 0) {
-    tokens = g_strsplit (args, " ", 3);
-    ret =
-        gstd_event_handler_send_event (GSTD_EVENT_HANDLER (obj), tokens[1],
-        tokens[2]);
-    return GSTD_EOK;
+  // Tokens has the form {<name>, <description>}
+  if (NULL == args) {
+    name = NULL;
+    description = NULL;
+  } else {
+    tokens = g_strsplit (args, " ", 2);
+    name = tokens[0];
+    description = tokens[1];
   }
 
-  name = tokens[1];
-  description = tokens[3];
-
-  if (!name || name[0] == '\0')
-    goto noname;
-
-  if (!description || description[0] == '\0')
-    goto nodescription;
+  if (NULL == name) {
+    /* No name provided, hence no desciption either, but it may contain garbage */
+    description = NULL;
+  }
 
   ret = gstd_object_create (obj, name, description);
   if (ret)
-    goto noobject;
+    goto out;
 
   gstd_object_read (obj, name, &new);
-  gstd_object_to_string (new, response);
-  g_object_unref (new);
 
-  return ret;
+  if (NULL != new) {
+    gstd_object_to_string (new, response);
+    g_object_unref (new);
+  }
 
-noname:
+out:
   {
-    GST_ERROR_OBJECT (session, "Missing name for the new pipeline");
-    g_strfreev (tokens);
-    return GSTD_NULL_ARGUMENT;
-  }
-nodescription:
-  {
-    GST_ERROR_OBJECT (session, "Missing description for pipeline \"%s\"", name);
-    g_strfreev (tokens);
-    return GSTD_NULL_ARGUMENT;
-  }
-noobject:
-  {
-    g_strfreev (tokens);
+    if (tokens)
+      g_strfreev (tokens);
     return ret;
   }
 }
@@ -466,12 +475,6 @@ static GstdReturnCode
 gstd_tcp_read (GstdSession * session, GstdObject * obj, gchar * args,
     gchar ** response)
 {
-  gchar **tokens;
-  GParamSpec *pspec;
-  GObject *properties;
-  GValue value = G_VALUE_INIT;
-  gchar *svalue;
-
   g_return_val_if_fail (GSTD_IS_SESSION (session), GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (GSTD_IS_OBJECT (obj), GSTD_NULL_ARGUMENT);
 
@@ -479,229 +482,35 @@ gstd_tcp_read (GstdSession * session, GstdObject * obj, gchar * args,
   g_warn_if_fail (!*response);
 
   // Print the raw object
-  if (!args)
-    return gstd_object_to_string (obj, response);
-
-
-  tokens = g_strsplit (args, " ", -1);
-
-
-  // Print the property
-  /* If its a GstdElement element we need to parse the pspec from
-     the internal element */
-  if (GSTD_IS_ELEMENT (obj)) {
-    g_object_get (obj, "gstelement", &properties, NULL);
-  } else
-    properties = G_OBJECT (obj);
-
-  pspec =
-      g_object_class_find_property (G_OBJECT_GET_CLASS (properties), tokens[0]);
-  if (!pspec)
-    goto noprop;
-
-  /*Fix Me: Bus callback must be read differently */
-  if (strcmp (tokens[0], "bus") == 0) {
-    GstdPipelineBus *pipelinebus = NULL;
-    g_value_init (&value, pspec->value_type);
-    g_object_get_property (G_OBJECT (properties), tokens[0], &value);
-    pipelinebus = (GstdPipelineBus *) g_value_get_object (&value);
-    gstd_pipeline_bus_read_messages (pipelinebus, response);
-
-    return GSTD_EOK;
-  }
-
-  /* Automagical type value serialization */
-  g_value_init (&value, pspec->value_type);
-  g_object_get_property (G_OBJECT (properties), tokens[0], &value);
-  svalue = g_strdup_value_contents (&value);
-  g_value_unset (&value);
-
-  *response = g_strdup_printf ("{\n    %s : %s\n  }", tokens[0], svalue);
-  g_free (svalue);
-
-  return GSTD_EOK;
-
-noprop:
-  {
-    GST_ERROR_OBJECT (session, "Unexisting property \"%s\" in %s",
-        tokens[0], GSTD_OBJECT_NAME (obj));
-    return GSTD_BAD_COMMAND;
-  }
+  return gstd_object_to_string (obj, response);
 }
 
 static GstdReturnCode
-gstd_tcp_update_by_type (GstdSession * session, GstdObject * obj, gchar * args,
+gstd_tcp_update (GstdSession * session, GstdObject * obj, gchar * args,
     gchar ** response)
 {
-  gchar **tokens;
-  gchar **property;
-  gchar *prop;
-  gchar *svalue;
-  GParamSpec *pspec;
-  GObject *properties;
+  GstdReturnCode ret;
 
   g_return_val_if_fail (GSTD_IS_SESSION (session), GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (GSTD_IS_OBJECT (obj), GSTD_NULL_ARGUMENT);
-  g_return_val_if_fail (args, GSTD_NULL_ARGUMENT);
 
+  if (!args) {
+    GST_ERROR_OBJECT (obj, "No argument provided for update");
+    ret = GSTD_BAD_VALUE;
+    goto out;
+  }
   *response = NULL;
 
-  tokens = g_strsplit (args, " ", -1);
-  property = tokens;
-  if (!property)
-    goto novalue;
-
-
-
-  while (*property) {
-    prop = *property++;
-    svalue = *property++;
-
-
-    if (!svalue)
-      goto novalue;
-
-    if (!*svalue)
-      goto novalue;
-
-    /* If its a GstdElement element we need to parse the pspec from
-       the internal element */
-    if (GSTD_IS_ELEMENT (obj))
-      g_object_get (obj, "gstelement", &properties, NULL);
-    else
-      properties = G_OBJECT (obj);
-
-    pspec =
-        g_object_class_find_property (G_OBJECT_GET_CLASS (properties), prop);
-    if (!pspec)
-      goto noprop;
-
-    if (G_TYPE_CHAR == pspec->value_type ||
-        G_TYPE_UCHAR == pspec->value_type ||
-        G_TYPE_STRING == pspec->value_type) {
-      return gstd_object_update (obj, prop, svalue, NULL);
-    }
-
-    if (G_TYPE_INT == pspec->value_type) {
-      gint d;
-      sscanf (svalue, "%d", &d);
-      return gstd_object_update (obj, prop, d, NULL);
-    }
-
-    if (G_TYPE_UINT == pspec->value_type) {
-      guint u;
-      sscanf (svalue, "%u", &u);
-      return gstd_object_update (obj, prop, u, NULL);
-    }
-
-    if (G_TYPE_FLOAT == pspec->value_type) {
-      gfloat f;
-      sscanf (svalue, "%f", &f);
-      return gstd_object_update (obj, prop, f, NULL);
-    }
-
-    if (G_TYPE_DOUBLE == pspec->value_type) {
-      gdouble lf;
-      sscanf (svalue, "%lf", &lf);
-      return gstd_object_update (obj, prop, lf, NULL);
-    }
-
-    if (G_TYPE_BOOLEAN == pspec->value_type) {
-      gboolean b;
-      if (!g_ascii_strcasecmp (svalue, "true"))
-        b = TRUE;
-      else if (!g_ascii_strcasecmp (svalue, "false"))
-        b = FALSE;
-      else
-        goto badboolean;
-
-      return gstd_object_update (obj, prop, b, NULL);
-    }
-
-    /* Complex types so  we can refer to the enum value as
-       their names rather than ugly numbers */
-    if (G_TYPE_IS_ENUM (pspec->value_type)) {
-      GEnumClass *c = g_type_class_ref (pspec->value_type);
-      GEnumValue *e;
-      gint d;
-
-      /* Try by name */
-      e = g_enum_get_value_by_name (c, svalue);
-      if (e)
-        return gstd_object_update (obj, prop, e->value, NULL);
-
-      /* Try by nick */
-      e = g_enum_get_value_by_nick (c, svalue);
-      if (e)
-        return gstd_object_update (obj, prop, e->value, NULL);
-
-      /* Try by integer */
-      if (gstd_tcp_is_num (svalue)) {
-        sscanf (svalue, "%d", &d);
-        return gstd_object_update (obj, prop, d, NULL);
-      }
-
-      /* Unknown! */
-      goto unknown;
-    }
-
-    /* Complex types so  we can refer to the flag value as
-       their names rather than ugly numbers */
-    if (G_TYPE_IS_FLAGS (pspec->value_type)) {
-      GFlagsClass *c = g_type_class_ref (pspec->value_type);
-      GFlagsValue *e;
-      gint d;
-
-      /* Try by name */
-      e = g_flags_get_value_by_name (c, svalue);
-      if (e)
-        return gstd_object_update (obj, prop, e->value, NULL);
-
-      /* Try by nick */
-      e = g_flags_get_value_by_nick (c, svalue);
-      if (e)
-        return gstd_object_update (obj, prop, e->value, NULL);
-
-      /* Try by integer */
-      if (gstd_tcp_is_num (svalue)) {
-        sscanf (svalue, "%d", &d);
-        return gstd_object_update (obj, prop, d, NULL);
-      }
-
-      /* Unknown! */
-      goto unknown;
-    }
-
-    GST_ERROR_OBJECT (session, "Unable to handle \"%s\" types",
-        g_type_name (pspec->value_type));
-    g_strfreev (tokens);
-    return GSTD_BAD_COMMAND;
+  ret = gstd_object_update (obj, args);
+  if (ret) {
+    goto out;
   }
 
-novalue:
+  /* Serialize the updated object */
+  gstd_object_to_string (obj, response);
+ out:
   {
-    GST_ERROR_OBJECT (session, "Missing value for property");
-    g_strfreev (tokens);
-    return GSTD_BAD_COMMAND;
-  }
-noprop:
-  {
-    GST_ERROR_OBJECT (session, "Unexisting property \"%s\" in %s",
-        prop, GSTD_OBJECT_NAME (obj));
-    g_strfreev (tokens);
-    return GSTD_BAD_COMMAND;
-  }
-unknown:
-  {
-    GST_ERROR_OBJECT (session, "Invalid enum/flags value \"%s\"", svalue);
-    g_strfreev (tokens);
-    return GSTD_BAD_VALUE;
-  }
-badboolean:
-  {
-    GST_ERROR_OBJECT (session, "Invalid boolean value \"%s\"", svalue);
-    g_strfreev (tokens);
-    return GSTD_BAD_VALUE;
+    return ret;
   }
 }
 
@@ -709,16 +518,13 @@ static GstdReturnCode
 gstd_tcp_delete (GstdSession * session, GstdObject * obj, gchar * args,
     gchar ** response)
 {
-  gchar **tokens;
-
   g_return_val_if_fail (GSTD_IS_SESSION (session), GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (GSTD_IS_OBJECT (obj), GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (args, GSTD_NULL_ARGUMENT);
 
   *response = NULL;
 
-  tokens = g_strsplit (args, " ", -1);
-  return gstd_object_delete (obj, tokens[0]);
+  return gstd_object_delete (obj, args);
 }
 
 static GstdReturnCode
@@ -744,38 +550,30 @@ gstd_tcp_parse_raw_cmd (GstdSession * session, gchar * action, gchar * args,
   if (!uri)
     uri = "/";
 
-  if (gstd_get_by_uri (session, uri, &node))
-    goto nonode;
+  ret = gstd_get_by_uri (session, uri, &node);
+  if (ret || NULL == node) {
+    goto out;
+  }
 
   if (!g_ascii_strcasecmp ("CREATE", action)) {
     ret = gstd_tcp_create (session, node, rest, response);
   } else if (!g_ascii_strcasecmp ("READ", action)) {
     ret = gstd_tcp_read (session, node, rest, response);
   } else if (!g_ascii_strcasecmp ("UPDATE", action)) {
-    ret = gstd_tcp_update_by_type (session, node, rest, response);
-    if (ret)
-      goto nonode;
-    ret = gstd_tcp_read (session, node, rest, response);
+    ret = gstd_tcp_update (session, node, rest, response);
   } else if (!g_ascii_strcasecmp ("DELETE", action)) {
     ret = gstd_tcp_delete (session, node, rest, response);
-  } else
-    goto badcommand;
+  } else {
+    GST_ERROR_OBJECT (session, "Unknown command \"%s\"", action);
+    ret = GSTD_BAD_COMMAND;
+  }
 
   g_object_unref (node);
-  return ret;
 
-nonode:
+out:
   {
-    GST_ERROR_OBJECT (session, "Malformed URI \"%s\"", uri);
     g_strfreev (tokens);
-    return GSTD_NO_RESOURCE;
-  }
-badcommand:
-  {
-    GST_ERROR_OBJECT (session, "Unknown command \"%s\"", action);
-    g_strfreev (tokens);
-    g_object_unref (node);
-    return GSTD_BAD_COMMAND;
+    return ret;
   }
 }
 
@@ -785,6 +583,7 @@ gstd_tcp_parse_cmd (GstdSession * session, const gchar * cmd, gchar ** response)
   gchar **tokens;
   gchar *action, *args;
   GstdTCPCmd *cb;
+  GstdReturnCode ret = GSTD_BAD_COMMAND;
 
   g_return_val_if_fail (GSTD_IS_SESSION (session), GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (cmd, GSTD_NULL_ARGUMENT);
@@ -797,15 +596,17 @@ gstd_tcp_parse_cmd (GstdSession * session, const gchar * cmd, gchar ** response)
   cb = cmds;
   while (cb) {
     if (!g_ascii_strcasecmp (cb->cmd, action)) {
-      return cb->callback (session, action, args, response);
+      ret = cb->callback (session, action, args, response);
+      break;
     }
     cb++;
   }
 
-  GST_ERROR_OBJECT (session, "Unknown command \"%s\"", action);
+  if (ret == GSTD_BAD_COMMAND)
+    GST_ERROR_OBJECT (session, "Unknown command \"%s\"", action);
   g_strfreev (tokens);
 
-  return GSTD_BAD_COMMAND;
+  return ret;
 }
 
 static GstdReturnCode
@@ -814,24 +615,14 @@ gstd_tcp_pipeline_create (GstdSession * session, gchar * action, gchar * args,
 {
   GstdReturnCode ret;
   gchar *uri;
-  gchar **tokens;
 
   g_return_val_if_fail (GSTD_IS_SESSION (session), GSTD_NULL_ARGUMENT);
-  g_return_val_if_fail (args, GSTD_NULL_ARGUMENT);
 
-  tokens = g_strsplit (args, " ", 2);
-  check_argument (tokens[0], GSTD_BAD_COMMAND);
-  check_argument (tokens[1], GSTD_BAD_COMMAND);
-
-
-  uri =
-      g_strdup_printf ("/pipelines name %s description %s", tokens[0],
-      tokens[1]);
+  uri = g_strdup_printf ("/pipelines %s", args ? args : "");
 
   ret = gstd_tcp_parse_raw_cmd (session, "create", uri, response);
 
   g_free (uri);
-  g_strfreev (tokens);
 
   return ret;
 }
@@ -863,7 +654,7 @@ gstd_tcp_pipeline_play (GstdSession * session, gchar * action, gchar * args,
   g_return_val_if_fail (GSTD_IS_SESSION (session), GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (args, GSTD_NULL_ARGUMENT);
 
-  uri = g_strdup_printf ("/pipelines/%s state playing", args);
+  uri = g_strdup_printf ("/pipelines/%s/state playing", args);
   ret = gstd_tcp_parse_raw_cmd (session, "update", uri, response);
   g_free (uri);
 
@@ -880,7 +671,7 @@ gstd_tcp_pipeline_pause (GstdSession * session, gchar * action, gchar * args,
   g_return_val_if_fail (GSTD_IS_SESSION (session), GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (args, GSTD_NULL_ARGUMENT);
 
-  uri = g_strdup_printf ("/pipelines/%s state paused", args);
+  uri = g_strdup_printf ("/pipelines/%s/state paused", args);
   ret = gstd_tcp_parse_raw_cmd (session, "update", uri, response);
   g_free (uri);
 
@@ -897,7 +688,7 @@ gstd_tcp_pipeline_stop (GstdSession * session, gchar * action, gchar * args,
   g_return_val_if_fail (GSTD_IS_SESSION (session), GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (args, GSTD_NULL_ARGUMENT);
 
-  uri = g_strdup_printf ("/pipelines/%s state null", args);
+  uri = g_strdup_printf ("/pipelines/%s/state null", args);
   ret = gstd_tcp_parse_raw_cmd (session, "update", uri, response);
   g_free (uri);
 
@@ -921,7 +712,7 @@ gstd_tcp_element_set (GstdSession * session, gchar * action, gchar * args,
   check_argument (tokens[2], GSTD_BAD_COMMAND);
   check_argument (tokens[3], GSTD_BAD_COMMAND);
 
-  uri = g_strdup_printf ("/pipelines/%s/elements/%s %s %s",
+  uri = g_strdup_printf ("/pipelines/%s/elements/%s/properties/%s %s",
       tokens[0], tokens[1], tokens[2], tokens[3]);
   ret = gstd_tcp_parse_raw_cmd (session, "update", uri, response);
 
@@ -947,7 +738,7 @@ gstd_tcp_element_get (GstdSession * session, gchar * action, gchar * args,
   check_argument (tokens[1], GSTD_BAD_COMMAND);
   check_argument (tokens[2], GSTD_BAD_COMMAND);
 
-  uri = g_strdup_printf ("/pipelines/%s/elements/%s %s",
+  uri = g_strdup_printf ("/pipelines/%s/elements/%s/properties/%s",
       tokens[0], tokens[1], tokens[2]);
   ret = gstd_tcp_parse_raw_cmd (session, "read", uri, response);
 
@@ -1005,7 +796,7 @@ gstd_tcp_list_properties (GstdSession * session, gchar * action, gchar * args,
   check_argument (tokens[0], GSTD_BAD_COMMAND);
   check_argument (tokens[1], GSTD_BAD_COMMAND);
 
-  uri = g_strdup_printf ("/pipelines/%s/elements/%s", tokens[0], tokens[1]);
+  uri = g_strdup_printf ("/pipelines/%s/elements/%s/properties", tokens[0], tokens[1]);
   ret = gstd_tcp_parse_raw_cmd (session, "read", uri, response);
 
   g_free (uri);
@@ -1014,6 +805,222 @@ gstd_tcp_list_properties (GstdSession * session, gchar * action, gchar * args,
   return ret;
 }
 
+static GstdReturnCode
+gstd_tcp_bus_read (GstdSession *session, gchar * action,
+    gchar *pipeline, gchar **response)
+{
+  GstdReturnCode ret;
+  gchar *uri;
+
+  g_return_val_if_fail (GSTD_IS_SESSION (session), GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (pipeline, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (response, GSTD_NULL_ARGUMENT);
+
+  uri = g_strdup_printf ("/pipelines/%s/bus/message", pipeline);
+  ret = gstd_tcp_parse_raw_cmd (session, "read", uri, response);
+
+  g_free (uri);
+
+  return ret;
+}
+
+static GstdReturnCode
+gstd_tcp_bus_filter (GstdSession *session, gchar *action,
+    gchar *args, gchar **response)
+{
+  GstdReturnCode ret;
+  gchar *uri;
+  gchar **tokens;
+
+  g_return_val_if_fail (GSTD_IS_SESSION (session), GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (args, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (response, GSTD_NULL_ARGUMENT);
+
+  tokens = g_strsplit (args, " ", 2);
+  check_argument (tokens[0], GSTD_BAD_COMMAND);
+  check_argument (tokens[1], GSTD_BAD_COMMAND);
+
+  uri = g_strdup_printf ("/pipelines/%s/bus/types %s", tokens[0], tokens[1]);
+  ret = gstd_tcp_parse_raw_cmd (session, "update", uri, response);
+
+  g_free (uri);
+  g_strfreev (tokens);
+
+  return ret;
+}
+
+static GstdReturnCode
+gstd_tcp_bus_timeout (GstdSession *session, gchar *action, gchar *args,
+    gchar **response)
+{
+  GstdReturnCode ret;
+  gchar *uri;
+  gchar **tokens;
+
+  g_return_val_if_fail (GSTD_IS_SESSION (session), GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (args, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (response, GSTD_NULL_ARGUMENT);
+
+  tokens = g_strsplit (args, " ", 2);
+  check_argument (tokens[0], GSTD_BAD_COMMAND);
+  check_argument (tokens[1], GSTD_BAD_COMMAND);
+
+  uri = g_strdup_printf ("/pipelines/%s/bus/timeout %s", tokens[0], tokens[1]);
+  ret = gstd_tcp_parse_raw_cmd (session, "update", uri, response);
+
+  g_free (uri);
+  g_strfreev (tokens);
+
+  return ret;
+}
+
+static GstdReturnCode
+gstd_tcp_event_eos (GstdSession *session, gchar *action, gchar *pipeline,
+    gchar **response)
+{
+  GstdReturnCode ret;
+  gchar *uri;
+
+  g_return_val_if_fail (GSTD_IS_SESSION (session), GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (pipeline, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (response, GSTD_NULL_ARGUMENT);
+
+  uri = g_strdup_printf ("/pipelines/%s/event eos", pipeline);
+  ret = gstd_tcp_parse_raw_cmd (session, "create", uri, response);
+
+  g_free (uri);
+
+  return ret;
+}
+
+static GstdReturnCode
+gstd_tcp_event_seek (GstdSession *session, gchar *action, gchar *args,
+    gchar **response)
+{
+  GstdReturnCode ret;
+  gchar *uri;
+  gchar **tokens;
+
+  g_return_val_if_fail (GSTD_IS_SESSION (session), GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (args, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (response, GSTD_NULL_ARGUMENT);
+
+  tokens = g_strsplit (args, " ", 2);
+  check_argument (tokens[0], GSTD_BAD_COMMAND);
+  // We don't check for the second token since we want to allow defaults
+
+  uri = g_strdup_printf ("/pipelines/%s/event seek %s", tokens[0], tokens[1]);
+  ret = gstd_tcp_parse_raw_cmd (session, "create", uri, response);
+
+  g_free (uri);
+  g_strfreev (tokens);
+
+  return ret;
+}
+
+static GstdReturnCode
+gstd_tcp_event_flush_start (GstdSession *session, gchar *action, gchar *pipeline,
+    gchar **response)
+{
+  GstdReturnCode ret;
+  gchar *uri;
+
+  g_return_val_if_fail (GSTD_IS_SESSION (session), GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (pipeline, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (response, GSTD_NULL_ARGUMENT);
+
+  uri = g_strdup_printf ("/pipelines/%s/event flush_start", pipeline);
+  ret = gstd_tcp_parse_raw_cmd (session, "create", uri, response);
+
+  g_free (uri);
+
+  return ret;
+}
+
+static GstdReturnCode
+gstd_tcp_event_flush_stop (GstdSession *session, gchar *action, gchar *args,
+    gchar **response)
+{
+  GstdReturnCode ret;
+  gchar *uri;
+  gchar **tokens;
+
+  g_return_val_if_fail (GSTD_IS_SESSION (session), GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (args, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (response, GSTD_NULL_ARGUMENT);
+
+  tokens = g_strsplit (args, " ", 2);
+  check_argument (tokens[0], GSTD_BAD_COMMAND);
+  // We don't check for the second token since we want to allow defaults
+
+  uri = g_strdup_printf ("/pipelines/%s/event flush_stop %s", tokens[0], tokens[1]);
+  ret = gstd_tcp_parse_raw_cmd (session, "create", uri, response);
+
+  g_free (uri);
+  g_strfreev (tokens);
+
+  return ret;
+}
+
+static GstdReturnCode
+gstd_tcp_debug_enable (GstdSession *session, gchar *action, gchar *enabled,
+    gchar **response)
+{
+  GstdReturnCode ret;
+  gchar *uri;
+
+  g_return_val_if_fail (GSTD_IS_SESSION (session), GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (response, GSTD_NULL_ARGUMENT);
+
+  check_argument (enabled, GSTD_BAD_COMMAND);
+
+  uri = g_strdup_printf ("/debug/enable %s", enabled);
+  ret = gstd_tcp_parse_raw_cmd (session, "update", uri, response);
+
+  g_free (uri);
+
+  return ret;
+}
+
+static GstdReturnCode
+gstd_tcp_debug_threshold (GstdSession *session, gchar *action, gchar *threshold,
+    gchar **response)
+{
+  GstdReturnCode ret;
+  gchar *uri;
+
+  g_return_val_if_fail (GSTD_IS_SESSION (session), GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (response, GSTD_NULL_ARGUMENT);
+
+  check_argument (threshold, GSTD_BAD_COMMAND);
+
+  uri = g_strdup_printf ("/debug/threshold %s", threshold);
+  ret = gstd_tcp_parse_raw_cmd (session, "update", uri, response);
+
+  g_free (uri);
+
+  return ret;
+}
+
+static GstdReturnCode
+gstd_tcp_debug_color (GstdSession *session, gchar *action, gchar *colored,
+    gchar **response)
+{
+  GstdReturnCode ret;
+  gchar *uri;
+
+  g_return_val_if_fail (GSTD_IS_SESSION (session), GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (response, GSTD_NULL_ARGUMENT);
+
+  check_argument (colored, GSTD_BAD_COMMAND);
+
+  uri = g_strdup_printf ("/debug/color %s", colored);
+  ret = gstd_tcp_parse_raw_cmd (session, "update", uri, response);
+
+  g_free (uri);
+
+  return ret;
+}
 
 gboolean
 gstd_tcp_init_get_option_group (GstdIpc * base, GOptionGroup ** group)

@@ -1,21 +1,20 @@
 /*
- * Gstreamer Daemon - Gst Launch under steroids
- * Copyright (C) 2015 RidgeRun Engineering <support@ridgerun.com>
- *
- * This file is part of Gstd.
- *
- * Gstd is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Gstd is distributed in the hope that it will be useful,
+ * GStreamer Daemon - Gst Launch under steroids
+ * Copyright (c) 2015-2017 Ridgerun, LLC (http://www.ridgerun.com)
+ * 
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with Gstd.  If not, see <http://www.gnu.org/licenses/>.
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA
  */
 
 #include "gstd_no_deleter.h"
@@ -26,7 +25,7 @@ GST_DEBUG_CATEGORY_STATIC (gstd_no_deleter_debug);
 
 #define GSTD_DEBUG_DEFAULT_LEVEL GST_LEVEL_INFO
 
-static void gstd_no_deleter_delete (GstdIDeleter * iface, GstdObject * object);
+static GstdReturnCode gstd_no_deleter_delete (GstdIDeleter * iface, GstdObject * object);
 
 typedef struct _GstdNoDeleterClass GstdNoDeleterClass;
 
@@ -70,8 +69,10 @@ gstd_no_deleter_init (GstdNoDeleter * self)
   GST_INFO_OBJECT (self, "Initializing no deleter");
 }
 
-static void
+static GstdReturnCode
 gstd_no_deleter_delete (GstdIDeleter * iface, GstdObject * object)
 {
   GST_ERROR_OBJECT (iface, "Unable to delete on this resource");
+
+  return GSTD_EOK;
 }

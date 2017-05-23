@@ -1,21 +1,20 @@
 /*
- * Gstreamer Daemon - Gst Launch under steroids
- * Copyright (C) 2015 RidgeRun Engineering <support@ridgerun.com>
- *
- * This file is part of Gstd.
- *
- * Gstd is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Gstd is distributed in the hope that it will be useful,
+ * GStreamer Daemon - Gst Launch under steroids
+ * Copyright (c) 2015-2017 Ridgerun, LLC (http://www.ridgerun.com)
+ * 
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with Gstd.  If not, see <http://www.gnu.org/licenses/>.
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -150,6 +149,39 @@ static GstdClientCmd cmds[] = {
         "List the properties of an element in a given pipeline",
       "list_properties <pipe> <elemement>"},
 
+  {"bus_read", gstd_client_cmd_tcp, "List the existing pipelines",
+      "bus_read <pipe>"},
+  {"bus_filter", gstd_client_cmd_tcp,
+      "Select the types of message to be read from the bus. Separate with "
+      "a '+', i.e.: eos+warning+error",
+      "bus_read <pipe> <filter>"},
+  {"bus_timeout", gstd_client_cmd_tcp,
+      "Apply a timeout for the bus polling. -1: forever, 0: return immediately, "
+      "n: wait n nanoseconds",
+      "bus_timeout <pipe> <timeout>"},
+
+  {"event_eos", gstd_client_cmd_tcp, "Send an end-of-stream event",
+      "event_eos <pipe>"},
+  {"event_seek", gstd_client_cmd_tcp,
+      "Perform a seek in the given pipeline",
+      "event_seek <pipe> <rate=1.0> <format=3> <flags=1> <start-type=1> <start=0> <end-type=1> <end=-1>"},
+  {"event_flush_start", gstd_client_cmd_tcp,
+      "Put the pipeline in flushing mode",
+      "event_flush_start <pipe>"},
+  {"event_flush_stop", gstd_client_cmd_tcp,
+      "Take the pipeline out from flushing mode",
+      "event_flush_stop <pipe> <reset=true>"},
+
+  {"debug_enable", gstd_client_cmd_tcp,
+      "Enable/Disable GStreamer debug",
+      "debug_enable <enable>"},
+  {"debug_threshold", gstd_client_cmd_tcp,
+      "The debug filter to apply (as you would use with gst-launch)",
+      "debug_threshold <threshold>"},
+  {"debug_color", gstd_client_cmd_tcp,
+      "Enable/Disable colors in the debug logging",
+      "debug_color <colors>"},
+
   {NULL}
 };
 
@@ -183,6 +215,7 @@ gstd_client_execute (gchar * line, GstdClientData * data)
   gchar *name;
   gchar *arg;
   GstdClientCmd *cmd;
+  gint ret;
 
   g_return_val_if_fail (line, -1);
   g_return_val_if_fail (data, -1);
@@ -199,8 +232,11 @@ gstd_client_execute (gchar * line, GstdClientData * data)
   /* Find and execute the respective command */
   cmd = cmds;
   while (cmd->name) {
-    if (!strcmp (cmd->name, name))
-      return cmd->func (name, arg, data);
+    if (!strcmp (cmd->name, name)) {
+      ret = cmd->func (name, arg, data);
+      g_strfreev (tokens);
+      return ret;
+    }
     cmd++;
   }
   g_printerr ("No such command `%s'\n", name);
@@ -216,7 +252,9 @@ main (gint argc, gchar * argv[])
   GError *error = NULL;
   GOptionContext *context;
   gchar *prompt = "gstd> ";
-  gchar *history = "~/.gstc_history";
+  const gchar *history = ".gstc_history";
+  const gchar *history_env = "GSTC_HISTORY";
+  gchar *history_full = NULL;
   GstdClientData *data;
 
   /* Cmdline options */
@@ -268,12 +306,21 @@ main (gint argc, gchar * argv[])
   address = NULL;
   quiet = FALSE;
 
+  //Did the user pass in a custom history?
+  if (g_getenv (history_env)) {
+    history_full = g_strdup (g_getenv(history_env));
+  } else {
+    // Read home location from environment
+    history_full = g_strdup_printf ("%s/%s", g_getenv ("HOME"), history);
+  }
+
   context = g_option_context_new ("[COMMANDS...] - gst-launch under steroids");
   g_option_context_add_main_entries (context, entries, NULL);
   if (!g_option_context_parse (context, &argc, &argv, &error)) {
     g_printerr ("%s\n", error->message);
     return EXIT_FAILURE;
   }
+  g_option_context_free (context);
 
   if (!address)
     address = g_strdup (GSTD_CLIENT_DEFAULT_ADDRESS);
@@ -291,7 +338,7 @@ main (gint argc, gchar * argv[])
 
   signal (SIGINT, sig_handler);
   init_readline ();
-  read_history (history);
+  read_history (history_full);
 
   data = (GstdClientData *) g_malloc (sizeof (GstdClientData));
   data->quiet = quiet;
@@ -334,8 +381,10 @@ main (gint argc, gchar * argv[])
     g_strstrip (line);
 
     /* Skip empty lines */
-    if (*line == '\0')
+    if (*line == '\0') {
+      g_free (line);
       continue;
+    }
 
     add_history (line);
     gstd_client_execute (line, data);
@@ -350,7 +399,8 @@ main (gint argc, gchar * argv[])
     g_object_unref (data->con);
   g_free (data);
 
-  write_history (history);
+  write_history (history_full);
+  g_free (history_full);
 
   return EXIT_SUCCESS;
 }
@@ -386,7 +436,7 @@ gstd_client_completer (const gchar * text, gint state)
 static void
 gstd_client_header (gboolean quiet)
 {
-  const gchar *header = "Gstd-1.0  Copyright (C) 2015 RidgeRun Engineering\n"
+  const gchar *header = "GStreamer Daemon  Copyright (C) 2015-2017 Ridgerun, LLC (http://www.ridgerun.com)\n"
       "This program comes with ABSOLUTELY NO WARRANTY; for details type `warranty'.\n"
       "This is free software, and you are welcome to redistribute it\n"
       "under certain conditions; read the license for more details.\n";
@@ -398,13 +448,13 @@ gstd_client_header (gboolean quiet)
 static gint
 gstd_client_cmd_warranty (gchar * name, gchar * arg, GstdClientData * data)
 {
-  const gchar *warranty = "Gstd-1.0 - gst-launch under steroids\n"
-      "Copyright (C) 2015 RidgeRun Engineering\n"
+  const gchar *warranty = "GStreamer Daemon - Gst Launch under steroids\n"
+      "Copyright (c) 2015-2017 Ridgerun, LLC (http://www.ridgerun.com)\n"
       "\n"
-      "This program is free software: you can redistribute it and/or modify\n"
-      "it under the terms of the GNU General Public License as published by\n"
-      "the Free Software Foundation, either version 3 of the License, or\n"
-      "(at your option) any later version.\n"
+      "This program is free software: you can redistribute it and/or\n"
+      "modify it under the terms of the GNU General Public License\n"
+      " as published by the Free Software Foundation, either version 2\n"
+      " of the License, or (at your option) any later version.\n"
       "\n"
       "This program is distributed in the hope that it will be useful,\n"
       "but WITHOUT ANY WARRANTY; without even the implied warranty of\n"
@@ -412,7 +462,8 @@ gstd_client_cmd_warranty (gchar * name, gchar * arg, GstdClientData * data)
       "GNU General Public License for more details.\n"
       "\n"
       "You should have received a copy of the GNU General Public License\n"
-      "along with this program.  If not, see <http://www.gnu.org/licenses/>.\n";
+      "along with this program; if not, write to the Free Software\n"
+      "Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA\n";
   g_print ("%s", warranty);
   return 0;
 }

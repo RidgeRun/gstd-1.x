@@ -1,21 +1,20 @@
 /*
- * Gstreamer Daemon - Gst Launch under steroids
- * Copyright (C) 2015 RidgeRun Engineering <support@ridgerun.com>
- *
- * This file is part of Gstd.
- *
- * Gstd is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Gstd is distributed in the hope that it will be useful,
+ * GStreamer Daemon - Gst Launch under steroids
+ * Copyright (c) 2015-2017 Ridgerun, LLC (http://www.ridgerun.com)
+ * 
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with Gstd.  If not, see <http://www.gnu.org/licenses/>.
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA
  */
 
 #ifdef HAVE_CONFIG_H
@@ -73,9 +72,15 @@ gstd_session_constructor (GType type,
         G_OBJECT_CLASS (gstd_session_parent_class)->constructor (type,
         n_construct_params, construct_params);
     the_session = object;
+
+    /* NULL out the_session when no references remain, to ensure a new
+       session is created in the next constuctor */
+    g_object_add_weak_pointer (the_session, (gpointer) &the_session);
+  } else {
+    object = g_object_ref (G_OBJECT (the_session));
   }
   g_mutex_unlock (&singleton_mutex);
-  object = g_object_ref (G_OBJECT (the_session));
+
   return object;
 }
 
@@ -123,15 +128,10 @@ gstd_session_class_init (GstdSessionClass * klass)
 static void
 gstd_session_init (GstdSession * self)
 {
-  GstdObject * object;
   GST_INFO_OBJECT (self, "Initializing gstd session");
-
-  object = GSTD_OBJECT(self);
 
   gstd_object_set_reader (GSTD_OBJECT(self),
       g_object_new (GSTD_TYPE_PROPERTY_READER, NULL));
-
-  object->reader = g_object_new (GSTD_TYPE_PROPERTY_READER, NULL);
 
   self->pipelines =
       GSTD_LIST (g_object_new (GSTD_TYPE_LIST, "name", "pipelines", "node-type",
@@ -160,8 +160,6 @@ gstd_session_get_property (GObject * object,
 {
   GstdSession *self = GSTD_SESSION (object);
 
-  gstd_object_set_code (GSTD_OBJECT (self), GSTD_EOK);
-
   switch (property_id) {
     case PROP_PIPELINES:
       GST_DEBUG_OBJECT (self, "Returning pipeline list %p", self->pipelines);
@@ -179,7 +177,6 @@ gstd_session_get_property (GObject * object,
     default:
       /* We don't have any other property... */
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
-      gstd_object_set_code (GSTD_OBJECT (self), GSTD_NO_RESOURCE);
       break;
   }
 }
@@ -190,22 +187,19 @@ gstd_session_set_property (GObject * object,
 {
   GstdSession *self = GSTD_SESSION (object);
 
-  gstd_object_set_code (GSTD_OBJECT (self), GSTD_EOK);
-
   switch (property_id) {
     case PROP_PIPELINES:
-      self->pipelines = g_value_get_object (value);
+      self->pipelines = g_value_dup_object (value);
       GST_INFO_OBJECT (self, "Changed pipeline list to %p", self->pipelines);
       break;
     case PROP_DEBUG:
-      self->debug = g_value_get_object (value);
+      self->debug = g_value_dup_object (value);
       GST_DEBUG_OBJECT (self, "Changing debug object to %p", self->debug);
       break;
 
     default:
       /* We don't have any other property... */
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
-      gstd_object_set_code (GSTD_OBJECT (self), GSTD_NO_RESOURCE);
       break;
   }
 }
@@ -247,118 +241,6 @@ gstd_session_new (const gchar * name)
 }
 
 GstdReturnCode
-gstd_pipeline_create (GstdSession * gstd, const gchar * name,
-    const gchar * description)
-{
-  GstdObject *list;
-  GstdReturnCode ret;
-
-  g_return_val_if_fail (GSTD_IS_SESSION (gstd), GSTD_NULL_ARGUMENT);
-  g_return_val_if_fail (name, GSTD_NULL_ARGUMENT);
-  g_return_val_if_fail (description, GSTD_NULL_ARGUMENT);
-
-  gstd_object_read (GSTD_OBJECT (gstd), "pipelines", &list);
-  ret = gstd_object_create (list, name, description);
-  g_object_unref (list);
-
-  return ret;
-}
-
-GstdReturnCode
-gstd_pipeline_destroy (GstdSession * gstd, const gchar * name)
-{
-  GstdObject *list;
-  GstdReturnCode ret;
-
-  g_return_val_if_fail (GSTD_IS_SESSION (gstd), GSTD_NULL_ARGUMENT);
-  g_return_val_if_fail (name, GSTD_NULL_ARGUMENT);
-
-  gstd_object_read (GSTD_OBJECT (gstd), "pipelines", &list);
-  ret = gstd_object_delete (list, name);
-  g_object_unref (list);
-
-  return ret;
-}
-
-GstdReturnCode
-gstd_pipeline_set_state (GstdSession * gstd, const gchar * pipe,
-    const GstdPipelineState state)
-{
-  GstdObject *pipeline;
-  gchar *uri;
-  GstdReturnCode ret;
-
-  g_return_val_if_fail (GSTD_IS_SESSION (gstd), GSTD_NULL_ARGUMENT);
-  g_return_val_if_fail (pipe, GSTD_NULL_ARGUMENT);
-
-  uri = g_strdup_printf ("/pipelines/%s/", pipe);
-  ret = gstd_get_by_uri (gstd, uri, &pipeline);
-  if (ret)
-    goto noelement;
-
-  ret = gstd_object_update (pipeline, "state", state, NULL);
-
-  g_object_unref (pipeline);
-  g_free (uri);
-
-  return ret;
-
-noelement:
-  {
-    return ret;
-  }
-}
-
-GstdReturnCode
-gstd_pipeline_get_state (GstdSession * gstd, const gchar * pipe,
-    GstdPipelineState * state)
-{
-  GstdObject *pipeline;
-  gchar *uri;
-  GstdReturnCode ret;
-  GstdObject *out;
-
-  g_return_val_if_fail (GSTD_IS_SESSION (gstd), GSTD_NULL_ARGUMENT);
-  g_return_val_if_fail (pipe, GSTD_NULL_ARGUMENT);
-
-  uri = g_strdup_printf ("/pipelines/%s/", pipe);
-  ret = gstd_get_by_uri (gstd, uri, &pipeline);
-  if (ret)
-      goto noelement;
-
-  out = GSTD_OBJECT(state);
-  ret = gstd_object_read (pipeline, "state", &out);
-
-  g_object_unref (pipeline);
-  g_free (uri);
-
-  return ret;
-
-noelement:
-  {
-    return ret;
-  }
-}
-
-GstdReturnCode
-gstd_pipeline_play (GstdSession * gstd, const gchar * pipe)
-{
-  return gstd_pipeline_set_state (gstd, pipe, GSTD_PIPELINE_PLAYING);
-}
-
-GstdReturnCode
-gstd_pipeline_null (GstdSession * gstd, const gchar * pipe)
-{
-  return gstd_pipeline_set_state (gstd, pipe, GSTD_PIPELINE_NULL);
-}
-
-GstdReturnCode
-gstd_pipeline_pause (GstdSession * gstd, const gchar * pipe)
-{
-  return gstd_pipeline_set_state (gstd, pipe, GSTD_PIPELINE_PAUSED);
-}
-
-GstdReturnCode
 gstd_get_by_uri (GstdSession * gstd, const gchar * uri, GstdObject ** node)
 {
   GstdObject *parent, *child;
@@ -394,6 +276,7 @@ gstd_get_by_uri (GstdSession * gstd, const gchar * uri, GstdObject ** node)
     ++it;
   }
 
+  g_strfreev(nodes);
   *node = parent;
   return GSTD_EOK;
 
@@ -405,6 +288,7 @@ badcommand:
 nonode:
   {
     GST_ERROR_OBJECT (gstd, "Invalid node %s", *it);
+    g_strfreev(nodes);
     return GSTD_BAD_COMMAND;
   }
 }

@@ -1,21 +1,20 @@
 /*
- * Gstreamer Daemon - Gst Launch under steroids
- * Copyright (C) 2015 RidgeRun Engineering <support@ridgerun.com>
- *
- * This file is part of Gstd.
- *
- * Gstd is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Gstd is distributed in the hope that it will be useful,
+ * GStreamer Daemon - Gst Launch under steroids
+ * Copyright (c) 2015-2017 Ridgerun, LLC (http://www.ridgerun.com)
+ * 
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with Gstd.  If not, see <http://www.gnu.org/licenses/>.
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA
  */
 
 #ifdef HAVE_CONFIG_H
@@ -33,6 +32,7 @@
 #include "gstd_pipeline_bus.h"
 #include "gstd_list_reader.h"
 #include "gstd_property_reader.h"
+#include "gstd_state.h"
 
 enum
 {
@@ -52,24 +52,6 @@ GST_DEBUG_CATEGORY_STATIC (gstd_pipeline_debug);
 #define GST_CAT_DEFAULT gstd_pipeline_debug
 
 #define GSTD_DEBUG_DEFAULT_LEVEL GST_LEVEL_INFO
-
-#define GSTD_TYPE_PIPELINE_STATE (gstd_pipeline_state_get_type ())
-static GType
-gstd_pipeline_state_get_type (void)
-{
-  static GType pipeline_state_type = 0;
-  static const GEnumValue state_types[] = {
-    {GSTD_PIPELINE_NULL, "NULL", "null"},
-    {GSTD_PIPELINE_PAUSED, "PAUSED", "paused"},
-    {GSTD_PIPELINE_PLAYING, "PLAYING", "playing"},
-    {0, NULL, NULL}
-  };
-  if (!pipeline_state_type) {
-    pipeline_state_type =
-        g_enum_register_static ("GstdPipelineState", state_types);
-  }
-  return pipeline_state_type;
-}
 
 /**
  * GstdPipeline:
@@ -105,6 +87,11 @@ struct _GstdPipeline
    * The list of GstdElement held by the pipeline
    */
   GstdList *elements;
+
+  /**
+   * The state of the GstPipeline
+   */
+  GstdState *state;
 };
 
 struct _GstdPipelineClass
@@ -119,14 +106,11 @@ static void
 gstd_pipeline_get_property (GObject *, guint, GValue *, GParamSpec *);
 static void
 gstd_pipeline_set_property (GObject *, guint, const GValue *, GParamSpec *);
-static void gstd_pipeline_constructed (GObject *);
 static void gstd_pipeline_dispose (GObject *);
 static GstdReturnCode
 gstd_pipeline_create (GstdPipeline *, const gchar *, gint, const gchar *);
 static GstdReturnCode gstd_pipeline_fill_elements (GstdPipeline *,
     GstElement *);
-static GstState gstd_to_gst (GstdPipelineState);
-static GstdPipelineState gst_to_gstd (GstState);
 
 static void
 gstd_pipeline_class_init (GstdPipelineClass * klass)
@@ -138,7 +122,6 @@ gstd_pipeline_class_init (GstdPipelineClass * klass)
   object_class->set_property = gstd_pipeline_set_property;
   object_class->get_property = gstd_pipeline_get_property;
   object_class->dispose = gstd_pipeline_dispose;
-  object_class->constructed = gstd_pipeline_constructed;
 
   properties[PROP_DESCRIPTION] =
       g_param_spec_string ("description",
@@ -163,10 +146,9 @@ gstd_pipeline_class_init (GstdPipelineClass * klass)
       G_PARAM_READABLE | G_PARAM_STATIC_STRINGS | GSTD_PARAM_READ);
 
   properties[PROP_STATE] =
-      g_param_spec_enum ("state", "State",
+      g_param_spec_object ("state", "State",
       "The state of the pipeline",
-      GSTD_TYPE_PIPELINE_STATE,
-      GSTD_PIPELINE_DEFAULT_STATE,
+      GSTD_TYPE_STATE,			   
       G_PARAM_READWRITE |
       G_PARAM_STATIC_STRINGS | GSTD_PARAM_READ | GSTD_PARAM_UPDATE);
 
@@ -191,6 +173,7 @@ gstd_pipeline_init (GstdPipeline * self)
   self->pipeline = NULL;
   self->event_handler = NULL;
   self->pipeline_bus = NULL;
+  self->state = NULL;
 
   self->elements = g_object_new (GSTD_TYPE_LIST, "name", "elements",
       "node-type", GSTD_TYPE_ELEMENT, "flags", GSTD_PARAM_READ, NULL);
@@ -201,10 +184,10 @@ gstd_pipeline_init (GstdPipeline * self)
       g_object_new (GSTD_TYPE_PROPERTY_READER, NULL));
 }
 
-static void
-gstd_pipeline_constructed (GObject * object)
+GstdReturnCode
+gstd_pipeline_build (GstdPipeline * object)
 {
-  GstdPipeline *self = GSTD_PIPELINE (object);
+  GstdPipeline *self = object;
   GstdReturnCode ret;
 
   ret =
@@ -215,8 +198,8 @@ gstd_pipeline_constructed (GObject * object)
 
   self->event_handler = gstd_event_handler_new (G_OBJECT (self->pipeline));
   if (!self->event_handler) {
-    ret = ret | GSTD_BAD_VALUE;
-    goto out;
+    ret = GSTD_BAD_VALUE;
+    goto out1;
   }
 
   self->pipeline_bus =
@@ -224,13 +207,24 @@ gstd_pipeline_constructed (GObject * object)
           (self->pipeline)));
 
   if (!self->pipeline_bus) {
-    ret = ret | GSTD_BAD_VALUE;
-    goto out;
+    ret = GSTD_BAD_VALUE;
+    goto out2;
   }
 
+  goto out;
+
+out2:
+  g_object_unref (self->event_handler);
+  self->event_handler = NULL;
+
+out1:
+  g_object_unref (self->elements);
+  self->elements = NULL;
+  g_object_unref (self->pipeline);
+  self->pipeline = NULL;
+
 out:
-  // Capture any possible error
-  gstd_object_set_code (GSTD_OBJECT (self), ret);
+  return ret;
 }
 
 static void
@@ -241,28 +235,20 @@ gstd_pipeline_dispose (GObject * object)
   GST_INFO_OBJECT (self, "Disposing %s pipeline", GSTD_OBJECT_NAME (self));
 
   /* Stop the pipe if playing */
-  if (self->pipeline) {
-    gstd_object_update (GSTD_OBJECT (self), "state", GSTD_PIPELINE_NULL, NULL);
+  if (self->state) {
+    gstd_object_update (GSTD_OBJECT(self->state), "NULL");
+    g_object_unref (self->state);
+    self->state = NULL;
   }
-
+  
   if (self->description) {
     g_free (self->description);
     self->description = NULL;
   }
 
-  if (self->pipeline) {
-    g_object_unref (self->pipeline);
-    self->pipeline = NULL;
-  }
-
-  if (self->elements) {
-    g_object_unref (self->elements);
-    self->elements = NULL;
-  }
-
   if (self->pipeline_bus) {
     g_object_unref (self->pipeline_bus);
-    self->pipeline = NULL;
+    self->pipeline_bus = NULL;
   }
 
   if (self->event_handler) {
@@ -270,37 +256,17 @@ gstd_pipeline_dispose (GObject * object)
     self->event_handler = NULL;
   }
 
+  if (self->pipeline) {
+    gst_object_unref (self->pipeline);
+    self->pipeline = NULL;
+  }
+
+  if (self->elements) {
+    g_object_unref (self->elements);
+    self->elements = NULL;
+  }
+  
   G_OBJECT_CLASS (gstd_pipeline_parent_class)->dispose (object);
-}
-
-static GstdPipelineState
-gst_to_gstd (GstState gst)
-{
-  switch (gst) {
-    case GST_STATE_PAUSED:
-      return GSTD_PIPELINE_PAUSED;
-    case GST_STATE_PLAYING:
-      return GSTD_PIPELINE_PLAYING;
-    case GST_STATE_NULL:
-    case GST_STATE_READY:
-    default:
-      return GSTD_PIPELINE_NULL;
-  }
-}
-
-static GstState
-gstd_to_gst (GstdPipelineState gstd)
-{
-  switch (gstd) {
-    case GSTD_PIPELINE_PAUSED:
-      return GST_STATE_PAUSED;
-    case GSTD_PIPELINE_PLAYING:
-      return GST_STATE_PLAYING;
-    case GSTD_PIPELINE_NULL:
-      return GST_STATE_NULL;
-  }
-  //Shhhh gcc
-  return GST_STATE_NULL;
 }
 
 static void
@@ -308,11 +274,6 @@ gstd_pipeline_get_property (GObject * object,
     guint property_id, GValue * value, GParamSpec * pspec)
 {
   GstdPipeline *self = GSTD_PIPELINE (object);
-  GstdPipelineState state;
-  GEnumValue *evalue;
-  GEnumClass *eclass;
-
-  gstd_object_set_code (GSTD_OBJECT (self), GSTD_EOK);
 
   switch (property_id) {
     case PROP_DESCRIPTION:
@@ -330,13 +291,8 @@ gstd_pipeline_get_property (GObject * object,
       // g_value_set_object (value, self->elements);
       break;
     case PROP_STATE:
-      state = gst_to_gstd (GST_STATE (self->pipeline));
-      eclass = g_type_class_ref (GSTD_TYPE_PIPELINE_STATE);
-      evalue = g_enum_get_value (eclass, state);
-      g_value_set_enum (value, state);
-      GST_DEBUG_OBJECT (self, "Returning pipeline state %d (%s)", state,
-          evalue->value_name);
-      g_type_class_unref (eclass);
+      GST_DEBUG_OBJECT (self, "Returning pipeline state %p", self->state);
+      g_value_set_object (value, self->state);
       break;
     case PROP_EVENT:
       GST_DEBUG_OBJECT (self, "Returning event handler %p",
@@ -346,7 +302,6 @@ gstd_pipeline_get_property (GObject * object,
     default:
       /* We don't have any other property... */
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
-      gstd_object_set_code (GSTD_OBJECT (self), GSTD_NO_RESOURCE);
       break;
   }
 }
@@ -356,12 +311,6 @@ gstd_pipeline_set_property (GObject * object,
     guint property_id, const GValue * value, GParamSpec * pspec)
 {
   GstdPipeline *self = GSTD_PIPELINE (object);
-  GstdPipelineState state;
-  GEnumValue *evalue;
-  GEnumClass *eclass;
-  GstStateChangeReturn stateret;
-
-  gstd_object_set_code (GSTD_OBJECT (self), GSTD_EOK);
 
   switch (property_id) {
     case PROP_DESCRIPTION:
@@ -372,25 +321,14 @@ gstd_pipeline_set_property (GObject * object,
           self->description);
       break;
     case PROP_STATE:
-      state = g_value_get_enum (value);
-      eclass = g_type_class_ref (GSTD_TYPE_PIPELINE_STATE);
-      evalue = g_enum_get_value (eclass, state);
-
-      stateret = gst_element_set_state (self->pipeline, gstd_to_gst (state));
-      if (GST_STATE_CHANGE_FAILURE == stateret) {
-        GST_ERROR_OBJECT (self, "Failed to change %s to %s",
-            GSTD_OBJECT_NAME (self), evalue->value_name);
-        gstd_object_set_code (GSTD_OBJECT (self), GSTD_STATE_ERROR);
-      } else {
-        GST_INFO_OBJECT (self, "Changed state to %d (%s)", state,
-            evalue->value_name);
+      if (self->state) {
+	g_object_unref (self->state);
       }
-      g_type_class_unref (eclass);
+      self->state = g_value_get_object (value);
       break;
     default:
       /* We don't have any other property... */
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
-      gstd_object_set_code (GSTD_OBJECT (self), GSTD_NO_RESOURCE);
       break;
   }
 }
@@ -418,23 +356,32 @@ gstd_pipeline_create (GstdPipeline * self, const gchar * name,
   GError *error;
   const gchar *fbname = "pipeline%d";
   gchar *pipename;
+  GstParseFlags flags;
 
   g_return_val_if_fail (self, GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (index != -1, GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (description, GSTD_NULL_ARGUMENT);
 
   error = NULL;
-  self->pipeline = gst_parse_launch (description, &error);
+  flags = GST_PARSE_FLAG_FATAL_ERRORS | GST_PARSE_FLAG_NO_SINGLE_ELEMENT_BINS;
+  self->pipeline = gst_parse_launch_full (description, NULL, flags, &error);
   if (!self->pipeline)
     goto wrong_pipeline;
 
-  /* Still check if error is set because a recoverable
-   * error might have occured */
-  if (error) {
-    GST_WARNING_OBJECT (self, "Recoverable error: %s", error->message);
-    g_error_free (error);
+  /* Single element descriptions (i.e.: playbin) aren't returned in a
+     pipeline. This is a problem for us since we concepts like the bus
+     which are directly related to a GstPipeline */
+  if (!GST_IS_PIPELINE(self->pipeline)) {
+    GstElement * element = self->pipeline;
+    self->pipeline = gst_pipeline_new (GST_OBJECT_NAME(element));
+    gst_bin_add (GST_BIN(self->pipeline), element);
   }
 
+  if (self->state) {
+    g_object_unref (self->state);
+  }
+  self->state = gstd_state_new (self->pipeline);
+  
   /* If the user didn't provide a name or provided an empty name
    * assign the fallback using the idex */
   if (!name || name[0] == '\0') {

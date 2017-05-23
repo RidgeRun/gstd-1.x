@@ -1,21 +1,20 @@
 /*
- * Gstreamer Daemon - Gst Launch under steroids
- * Copyright (C) 2015 RidgeRun Engineering <support@ridgerun.com>
- *
- * This file is part of Gstd.
- *
- * Gstd is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Gstd is distributed in the hope that it will be useful,
+ * GStreamer Daemon - Gst Launch under steroids
+ * Copyright (c) 2015-2017 Ridgerun, LLC (http://www.ridgerun.com)
+ * 
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with Gstd.  If not, see <http://www.gnu.org/licenses/>.
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA
  */
 
 /**
@@ -233,96 +232,6 @@ GType gstd_session_get_type (void);
  * usage using g_object_unref()
  */
 GstdSession *gstd_session_new (const gchar * name);
-
-/**
- * gstd_pipeline_create:
- * @gstd: The #GstdSession where to create the pipeline
- * @name: The name to assign to the new pipeline
- * @description: A gst-launch like description of the pipeline
- * 
- * Creates a new #GstdPipeline in the given @session using
- * @description and assigning @name as the identifier. In the case of
- * an error the pipeline will not be created and the respective error
- * code will be returned.
- *
- * Returns: A #GstdReturnCode describing the result of the operation. 
- * Values other that #GSTD_EOK will not create a pipeline.
- */
-GstdReturnCode
-gstd_pipeline_create (GstdSession * gstd, const gchar * name,
-    const gchar * description);
-
-/**
- * gstd_pipeline_delete:
- * @gstd: The #GstdSession to delete the pipeline from
- * @name: The name of the pipeline to delete
- *
- * Removes the pipeline named after @name from the session @gstd.
- *
- * Returns: A #GstdReturnCode describing the result of the operation.
- */
-GstdReturnCode gstd_pipeline_delete (GstdSession * gstd, const gchar * name);
-
-/**
- * gstd_pipeline_play:
- * @gstd: The #GstdSession to apply the operation to
- * @pipe: The name of the pipeline to set to playing
- *
- * Sets a pipeline to the playing state.
- *
- * Returns: A #GstdReturnCode describing the result of the operation.
- */
-GstdReturnCode gstd_pipeline_play (GstdSession * gstd, const gchar * pipe);
-
-/**
- * gstd_pipeline_null:
- * @gstd: The #GstdSession to apply the operation to
- * @pipe: The name of the pipeline to set to null
- *
- * Sets a pipeline to the null state.
- *
- * Returns: A #GstdReturnCode describing the result of the operation.
- */
-GstdReturnCode gstd_pipeline_null (GstdSession * gstd, const gchar * pipe);
-
-/**
- * gstd_pipeline_pause:
- * @gstd: The #GstdSession to apply the operation to
- * @pipe: The name of the pipeline to set to paused
- *
- * Sets a pipeline to the paused state.
- *
- * Returns: A #GstdReturnCode describing the result of the operation.
- */
-GstdReturnCode gstd_pipeline_pause (GstdSession * gstd, const gchar * pipe);
-
-/**
- * gstd_pipeline_set_state:
- * @gstd: The #GstdSession to apply the operation to
- * @pipe: The name of the pipeline to set to the given state
- * @state: The #GstdPipelineState to apply to the pipeline
- *
- * Sets a pipeline to the given state.
- *
- * Returns: A #GstdReturnCode describing the result of the operation.
- */
-GstdReturnCode
-gstd_pipeline_set_state (GstdSession * gstd, const gchar * pipe,
-    const GstdPipelineState state);
-
-/**
- * gstd_pipeline_get_state:
- * @gstd: The #GstdSession to apply the operation to
- * @pipe: The name of the pipeline to query the state
- * @state: (out): The #GstdPipelineState to apply to the pipeline
- *
- * Queries the state of the given pipeline
- *
- * Returns: A #GstdReturnCode describing the result of the operation.
- */
-GstdReturnCode
-gstd_pipeline_get_state (GstdSession * gstd, const gchar * pipe,
-    GstdPipelineState * state);
 
 GstdReturnCode
 gstd_get_by_uri (GstdSession * gstd, const gchar * uri, GstdObject ** node);

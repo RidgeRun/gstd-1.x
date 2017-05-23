@@ -1,21 +1,20 @@
 /*
- * Gstreamer Daemon - Gst Launch under steroids
- * Copyright (C) 2015 RidgeRun Engineering <support@ridgerun.com>
- *
- * This file is part of Gstd.
- *
- * Gstd is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Gstd is distributed in the hope that it will be useful,
+ * GStreamer Daemon - Gst Launch under steroids
+ * Copyright (c) 2015-2017 Ridgerun, LLC (http://www.ridgerun.com)
+ * 
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with Gstd.  If not, see <http://www.gnu.org/licenses/>.
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA
  */
 
 #include "gstd_pipeline_creator.h"
@@ -28,7 +27,7 @@ GST_DEBUG_CATEGORY_STATIC (gstd_pipeline_creator_debug);
 
 #define GSTD_DEBUG_DEFAULT_LEVEL GST_LEVEL_INFO
 
-static void gstd_pipeline_creator_create (GstdICreator * iface,
+static GstdReturnCode gstd_pipeline_creator_create (GstdICreator * iface,
     const gchar * name, const gchar * description, GstdObject ** out);
 
 typedef struct _GstdPipelineCreatorClass GstdPipelineCreatorClass;
@@ -75,17 +74,28 @@ gstd_pipeline_creator_init (GstdPipelineCreator * self)
   GST_INFO_OBJECT (self, "Initializing pipeline creator");
 }
 
-static void
+static GstdReturnCode
 gstd_pipeline_creator_create (GstdICreator * iface, const gchar * name,
     const gchar * description, GstdObject ** out)
 {
   GstdPipeline *pipeline;
+  *out = NULL;
 
-  g_return_if_fail (iface);
-  g_return_if_fail (name);
-  g_return_if_fail (description);
+  g_return_val_if_fail (iface, GSTD_NULL_ARGUMENT);
+
+  if (NULL == name) {
+    GST_ERROR_OBJECT (iface, "Pipeline name not provided");
+    return GSTD_MISSING_NAME;
+  }
+
+  if (NULL == description) {
+    GST_ERROR_OBJECT (iface, "Pipeline description not provided");
+    return GSTD_MISSING_ARGUMENT;
+  }
 
   pipeline = g_object_new (GSTD_TYPE_PIPELINE, "name", name, "description",
       description, NULL);
   *out = GSTD_OBJECT(pipeline);
+
+  return gstd_pipeline_build(pipeline);
 }

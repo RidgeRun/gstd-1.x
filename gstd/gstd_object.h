@@ -1,21 +1,20 @@
 /*
- * Gstreamer Daemon - Gst Launch under steroids
- * Copyright (C) 2015 RidgeRun Engineering <support@ridgerun.com>
- *
- * This file is part of Gstd.
- *
- * Gstd is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Gstd is distributed in the hope that it will be useful,
+ * GStreamer Daemon - Gst Launch under steroids
+ * Copyright (c) 2015-2017 Ridgerun, LLC (http://www.ridgerun.com)
+ * 
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with Gstd.  If not, see <http://www.gnu.org/licenses/>.
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA
  */
 #ifndef __GSTD_OBJECT_H__
 #define __GSTD_OBJECT_H__
@@ -25,6 +24,7 @@
 
 #include "gstd_icreator.h"
 #include "gstd_ireader.h"
+#include "gstd_iupdater.h"
 #include "gstd_ideleter.h"
 #include "gstd_iformatter.h"
 
@@ -68,6 +68,7 @@ struct _GstdObject
   /* CRUD behaviour */
   GstdICreator *creator;
   GstdIReader *reader;
+  GstdIUpdater *updater;
   GstdIDeleter *deleter;
 
   GstdIFormatter * formatter;
@@ -75,11 +76,6 @@ struct _GstdObject
 
 #define GSTD_OBJECT_NAME(obj) (GSTD_OBJECT(obj)->name)
 #define GSTD_OBJECT_CODE(obj) (GSTD_OBJECT(obj)->code)
-
-void gstd_object_set_code (GstdObject * self, GstdReturnCode code);
-
-GstdReturnCode gstd_object_get_code (GstdObject * self);
-
 
 struct _GstdObjectClass
 {
@@ -89,8 +85,7 @@ struct _GstdObjectClass
       const gchar * description);
     GstdReturnCode (*read) (GstdObject * object, const gchar * name,
       GstdObject ** resource);
-    GstdReturnCode (*update) (GstdObject * object, const gchar * property,
-      va_list va);
+    GstdReturnCode (*update) (GstdObject * object, const gchar * value);
     GstdReturnCode (*delete) (GstdObject * object, const gchar * name);
 
     GstdReturnCode (*to_string) (GstdObject * object, gchar ** outstring);
@@ -119,12 +114,13 @@ gstd_object_create (GstdObject * object, const gchar * name,
 GstdReturnCode
 gstd_object_read (GstdObject * object, const gchar * name, GstdObject ** resource);
 GstdReturnCode
-gstd_object_update (GstdObject * object, const gchar * property, ...);
+gstd_object_update (GstdObject * object, const gchar *value);
 GstdReturnCode gstd_object_delete (GstdObject * object, const gchar * name);
 GstdReturnCode gstd_object_to_string (GstdObject * object, gchar ** outstring);
 
 void gstd_object_set_creator (GstdObject * self, GstdICreator * creator);
 void gstd_object_set_reader (GstdObject * self, GstdIReader * reader);
+void gstd_object_set_updater (GstdObject * self, GstdIUpdater * updater);
 void gstd_object_set_deleter (GstdObject * self, GstdIDeleter * deleter);
 
 G_END_DECLS

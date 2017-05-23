@@ -1,9 +1,9 @@
-TESTS = test_gstd_session
+TESTS = test_gstd_pipeline_create 	\
+	test_gstd_no_create 		\
+	test_gstd_state
 
 check_PROGRAMS = $(TESTS)
 
-test_gstd_session_SOURCES = test_gstd_session.c 
-
-test_gstd_session_CFLAGS = $(GST_CFLAGS) -I$(top_srcdir)/gstd/
-test_gstd_session_LDFLAGS = $(GST_LIBS)
-test_gstd_session_LDADD = $(top_srcdir)/gstd/libgstd-core.la
+AM_CFLAGS = $(GST_CFLAGS) -I$(top_srcdir)/gstd/
+AM_LDFLAGS = $(GST_LIBS)
+LDADD = $(top_srcdir)/gstd/libgstd-core.la

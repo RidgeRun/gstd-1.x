@@ -1,21 +1,20 @@
 /*
- * Gstreamer Daemon - Gst Launch under steroids
- * Copyright (C) 2015 RidgeRun Engineering <support@ridgerun.com>
- *
- * This file is part of Gstd.
- *
- * Gstd is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Gstd is distributed in the hope that it will be useful,
+ * GStreamer Daemon - Gst Launch under steroids
+ * Copyright (c) 2015-2017 Ridgerun, LLC (http://www.ridgerun.com)
+ * 
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with Gstd.  If not, see <http://www.gnu.org/licenses/>.
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA
  */
 
 #ifdef HAVE_CONFIG_H
@@ -38,6 +37,7 @@
 #include "gstd_property_boolean.h"
 #include "gstd_property_string.h"
 #include "gstd_property_int.h"
+#include "gstd_property_enum.h"
 #include "gstd_list_reader.h"
 
 enum
@@ -96,8 +96,6 @@ gstd_element_get_property (GObject *, guint, GValue *, GParamSpec *);
 static void
 gstd_element_set_property (GObject *, guint, const GValue *, GParamSpec *);
 static void gstd_element_dispose (GObject *);
-static GstdReturnCode
-gstd_element_update (GstdObject *, const gchar *, va_list);
 static GstdReturnCode gstd_element_to_string (GstdObject *, gchar **);
 void gstd_element_internal_to_string (GstdElement *, gchar **);
 static GstdReturnCode
@@ -138,7 +136,6 @@ gstd_element_class_init (GstdElementClass * klass)
 
   g_object_class_install_properties (object_class, N_PROPERTIES, properties);
 
-  gstd_object_class->update = gstd_element_update;
   gstd_object_class->to_string = gstd_element_to_string;
 
   /* Initialize debug category with nice colors */
@@ -184,6 +181,7 @@ gstd_element_dispose (GObject * object)
 
   /* Free formatter */
   g_object_unref (self->formatter);
+  g_object_unref (self->element_properties);
 
   G_OBJECT_CLASS (gstd_element_parent_class)->dispose (object);
 }
@@ -193,8 +191,6 @@ gstd_element_get_property (GObject * object,
     guint property_id, GValue * value, GParamSpec * pspec)
 {
   GstdElement *self = GSTD_ELEMENT (object);
-
-  gstd_object_set_code (GSTD_OBJECT (self), GSTD_EOK);
 
   switch (property_id) {
     case PROP_GSTELEMENT:
@@ -215,7 +211,6 @@ gstd_element_get_property (GObject * object,
     default:
       /* We don't have any other property... */
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
-      gstd_object_set_code (GSTD_OBJECT (self), GSTD_NO_RESOURCE);
       return;
   }
 }
@@ -225,8 +220,6 @@ gstd_element_set_property (GObject * object,
     guint property_id, const GValue * value, GParamSpec * pspec)
 {
   GstdElement *self = GSTD_ELEMENT (object);
-
-  gstd_object_set_code (GSTD_OBJECT (self), GSTD_EOK);
 
   switch (property_id) {
     case PROP_GSTELEMENT:
@@ -245,61 +238,8 @@ gstd_element_set_property (GObject * object,
     default:
       /* We don't have any other property... */
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
-      gstd_object_set_code (GSTD_OBJECT (self), GSTD_NO_RESOURCE);
       break;
   }
-}
-
-static GstdReturnCode
-gstd_element_update (GstdObject * object, const gchar * property, va_list va)
-{
-  GstdElement *self = GSTD_ELEMENT (object);
-  GParamSpec *pspec;
-  const gchar *name;
-  GstdReturnCode ret;
-  GValue value = G_VALUE_INIT;
-  gchar *error = NULL;
-
-  g_return_val_if_fail (GSTD_IS_ELEMENT (object), GSTD_NULL_ARGUMENT);
-  g_return_val_if_fail (property, GSTD_NULL_ARGUMENT);
-
-  name = property;
-  ret = GSTD_EOK;
-
-  while (name) {
-    pspec = g_object_class_find_property (G_OBJECT_GET_CLASS (self->element),
-        name);
-    if (!pspec) {
-      GST_ERROR_OBJECT (self, "The property %s is not a property in %s",
-          name, GSTD_OBJECT_NAME (self));
-      ret |= GSTD_NO_UPDATE;
-      break;
-    }
-
-    if (pspec->flags & G_PARAM_WRITABLE & !G_PARAM_CONSTRUCT_ONLY) {
-      GST_ERROR_OBJECT (self, "The property %s is not writable", name);
-      ret |= GSTD_NO_UPDATE;
-      break;
-    }
-
-    g_value_init (&value, G_PARAM_SPEC_VALUE_TYPE (pspec));
-    G_VALUE_COLLECT (&value, va, 0, &error);
-    if (error) {
-      GST_ERROR_OBJECT (self, "%s", error);
-      g_free (error);
-      g_value_unset (&value);
-      ret |= GSTD_NO_CREATE;
-    } else {
-      g_object_set_property (G_OBJECT (self->element), name, &value);
-      GST_INFO_OBJECT (self, "Wrote object %s from %s", property,
-          GSTD_OBJECT_NAME (self));
-    }
-
-    g_value_unset (&value);
-    name = va_arg (va, const gchar *);
-  }
-
-  return ret;
 }
 
 static GstdReturnCode
@@ -429,11 +369,22 @@ gstd_element_fill_properties (GstdElement *self)
     gstd_list_append_child (self->element_properties, element_property);
   }
 
+  g_free (properties_array);
+
   return GSTD_EOK;
 }
 
 static GType
 gstd_element_property_get_type (GType g_type) {
+
+  //FIXME:
+  //I just found a way to handle all types in a generic way, hence,
+  //the base property class can handle them all. I don't want to remove
+  //specific type sublasses because the to_string method may require to
+  //add details. For example, int properties can display their max and min
+  //values, flags and enums could display the options, etc... Similar to
+  //what gst-inspect does
+  return GSTD_TYPE_PROPERTY;
 
   switch (g_type) {
     case G_TYPE_BOOLEAN:
@@ -453,7 +404,11 @@ gstd_element_property_get_type (GType g_type) {
     }
     default:
     {
-      return GSTD_TYPE_PROPERTY;
+      if (G_TYPE_IS_ENUM(g_type)) {
+	return GSTD_TYPE_PROPERTY_ENUM;
+      } else  {
+	return GSTD_TYPE_PROPERTY;
+      }
     }
   }
 }
