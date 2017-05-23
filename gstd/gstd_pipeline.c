@@ -236,8 +236,8 @@ gstd_pipeline_dispose (GObject * object)
   GST_INFO_OBJECT (self, "Disposing %s pipeline", GSTD_OBJECT_NAME (self));
 
   /* Stop the pipe if playing */
-  gstd_object_update (GSTD_OBJECT(self->state), "NULL");
   if (self->state) {
+    gstd_object_update (GSTD_OBJECT(self->state), "NULL");
     g_object_unref (self->state);
     self->state = NULL;
   }
