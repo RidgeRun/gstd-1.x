@@ -33,6 +33,7 @@
 #include "gstd_pipeline_bus.h"
 #include "gstd_list_reader.h"
 #include "gstd_property_reader.h"
+#include "gstd_state.h"
 
 enum
 {
@@ -52,24 +53,6 @@ GST_DEBUG_CATEGORY_STATIC (gstd_pipeline_debug);
 #define GST_CAT_DEFAULT gstd_pipeline_debug
 
 #define GSTD_DEBUG_DEFAULT_LEVEL GST_LEVEL_INFO
-
-#define GSTD_TYPE_PIPELINE_STATE (gstd_pipeline_state_get_type ())
-static GType
-gstd_pipeline_state_get_type (void)
-{
-  static GType pipeline_state_type = 0;
-  static const GEnumValue state_types[] = {
-    {GSTD_PIPELINE_NULL, "NULL", "null"},
-    {GSTD_PIPELINE_PAUSED, "PAUSED", "paused"},
-    {GSTD_PIPELINE_PLAYING, "PLAYING", "playing"},
-    {0, NULL, NULL}
-  };
-  if (!pipeline_state_type) {
-    pipeline_state_type =
-        g_enum_register_static ("GstdPipelineState", state_types);
-  }
-  return pipeline_state_type;
-}
 
 /**
  * GstdPipeline:
@@ -105,6 +88,11 @@ struct _GstdPipeline
    * The list of GstdElement held by the pipeline
    */
   GstdList *elements;
+
+  /**
+   * The state of the GstPipeline
+   */
+  GstdState *state;
 };
 
 struct _GstdPipelineClass
@@ -124,8 +112,6 @@ static GstdReturnCode
 gstd_pipeline_create (GstdPipeline *, const gchar *, gint, const gchar *);
 static GstdReturnCode gstd_pipeline_fill_elements (GstdPipeline *,
     GstElement *);
-static GstState gstd_to_gst (GstdPipelineState);
-static GstdPipelineState gst_to_gstd (GstState);
 
 static void
 gstd_pipeline_class_init (GstdPipelineClass * klass)
@@ -161,10 +147,9 @@ gstd_pipeline_class_init (GstdPipelineClass * klass)
       G_PARAM_READABLE | G_PARAM_STATIC_STRINGS | GSTD_PARAM_READ);
 
   properties[PROP_STATE] =
-      g_param_spec_enum ("state", "State",
+      g_param_spec_object ("state", "State",
       "The state of the pipeline",
-      GSTD_TYPE_PIPELINE_STATE,
-      GSTD_PIPELINE_DEFAULT_STATE,
+      GSTD_TYPE_STATE,			   
       G_PARAM_READWRITE |
       G_PARAM_STATIC_STRINGS | GSTD_PARAM_READ | GSTD_PARAM_UPDATE);
 
@@ -189,6 +174,7 @@ gstd_pipeline_init (GstdPipeline * self)
   self->pipeline = NULL;
   self->event_handler = NULL;
   self->pipeline_bus = NULL;
+  self->state = NULL;
 
   self->elements = g_object_new (GSTD_TYPE_LIST, "name", "elements",
       "node-type", GSTD_TYPE_ELEMENT, "flags", GSTD_PARAM_READ, NULL);
@@ -246,17 +232,16 @@ static void
 gstd_pipeline_dispose (GObject * object)
 {
   GstdPipeline *self = GSTD_PIPELINE (object);
-  GstdObject *state;
 
   GST_INFO_OBJECT (self, "Disposing %s pipeline", GSTD_OBJECT_NAME (self));
 
   /* Stop the pipe if playing */
-  if (self->pipeline) {
-    gstd_object_read (GSTD_OBJECT(self), "state", &state);
-    gstd_object_update (state, "NULL");
-    g_object_unref (state);
+  gstd_object_update (GSTD_OBJECT(self->state), "NULL");
+  if (self->state) {
+    g_object_unref (self->state);
+    self->state = NULL;
   }
-
+  
   if (self->description) {
     g_free (self->description);
     self->description = NULL;
@@ -281,39 +266,8 @@ gstd_pipeline_dispose (GObject * object)
     g_object_unref (self->elements);
     self->elements = NULL;
   }
-
-
+  
   G_OBJECT_CLASS (gstd_pipeline_parent_class)->dispose (object);
-}
-
-static GstdPipelineState
-gst_to_gstd (GstState gst)
-{
-  switch (gst) {
-    case GST_STATE_PAUSED:
-      return GSTD_PIPELINE_PAUSED;
-    case GST_STATE_PLAYING:
-      return GSTD_PIPELINE_PLAYING;
-    case GST_STATE_NULL:
-    case GST_STATE_READY:
-    default:
-      return GSTD_PIPELINE_NULL;
-  }
-}
-
-static GstState
-gstd_to_gst (GstdPipelineState gstd)
-{
-  switch (gstd) {
-    case GSTD_PIPELINE_PAUSED:
-      return GST_STATE_PAUSED;
-    case GSTD_PIPELINE_PLAYING:
-      return GST_STATE_PLAYING;
-    case GSTD_PIPELINE_NULL:
-      return GST_STATE_NULL;
-  }
-  //Shhhh gcc
-  return GST_STATE_NULL;
 }
 
 static void
@@ -321,9 +275,6 @@ gstd_pipeline_get_property (GObject * object,
     guint property_id, GValue * value, GParamSpec * pspec)
 {
   GstdPipeline *self = GSTD_PIPELINE (object);
-  GstdPipelineState state;
-  GEnumValue *evalue;
-  GEnumClass *eclass;
 
   switch (property_id) {
     case PROP_DESCRIPTION:
@@ -341,13 +292,8 @@ gstd_pipeline_get_property (GObject * object,
       // g_value_set_object (value, self->elements);
       break;
     case PROP_STATE:
-      state = gst_to_gstd (GST_STATE (self->pipeline));
-      eclass = g_type_class_ref (GSTD_TYPE_PIPELINE_STATE);
-      evalue = g_enum_get_value (eclass, state);
-      g_value_set_enum (value, state);
-      GST_DEBUG_OBJECT (self, "Returning pipeline state %d (%s)", state,
-          evalue->value_name);
-      g_type_class_unref (eclass);
+      GST_DEBUG_OBJECT (self, "Returning pipeline state %p", self->state);
+      g_value_set_object (value, self->state);
       break;
     case PROP_EVENT:
       GST_DEBUG_OBJECT (self, "Returning event handler %p",
@@ -366,10 +312,6 @@ gstd_pipeline_set_property (GObject * object,
     guint property_id, const GValue * value, GParamSpec * pspec)
 {
   GstdPipeline *self = GSTD_PIPELINE (object);
-  GstdPipelineState state;
-  GEnumValue *evalue;
-  GEnumClass *eclass;
-  GstStateChangeReturn stateret;
 
   switch (property_id) {
     case PROP_DESCRIPTION:
@@ -380,19 +322,10 @@ gstd_pipeline_set_property (GObject * object,
           self->description);
       break;
     case PROP_STATE:
-      state = g_value_get_enum (value);
-      eclass = g_type_class_ref (GSTD_TYPE_PIPELINE_STATE);
-      evalue = g_enum_get_value (eclass, state);
-
-      stateret = gst_element_set_state (self->pipeline, gstd_to_gst (state));
-      if (GST_STATE_CHANGE_FAILURE == stateret) {
-        GST_ERROR_OBJECT (self, "Failed to change %s to %s",
-            GSTD_OBJECT_NAME (self), evalue->value_name);
-      } else {
-        GST_INFO_OBJECT (self, "Changed state to %d (%s)", state,
-            evalue->value_name);
+      if (self->state) {
+	g_object_unref (self->state);
       }
-      g_type_class_unref (eclass);
+      self->state = g_value_get_object (value);
       break;
     default:
       /* We don't have any other property... */
@@ -445,6 +378,11 @@ gstd_pipeline_create (GstdPipeline * self, const gchar * name,
     gst_bin_add (GST_BIN(self->pipeline), element);
   }
 
+  if (self->state) {
+    g_object_unref (self->state);
+  }
+  self->state = gstd_state_new (self->pipeline);
+  
   /* If the user didn't provide a name or provided an empty name
    * assign the fallback using the idex */
   if (!name || name[0] == '\0') {

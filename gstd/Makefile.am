@@ -38,7 +38,8 @@ libgstd_core_la_SOURCES = gstd_session.c		\
 			  gstd_msg_reader.c		\
 			  gstd_msg_type.c		\
 			  gstd_bus_msg_qos.c		\
-			  gstd_return_codes.c
+			  gstd_return_codes.c		\
+			  gstd_state.c
 
 libgstd_core_la_CFLAGS = $(GST_CFLAGS) $(GIO_CFLAGS) $(GJSON_CFLAGS)
 libgstd_core_la_LDFLAGS = $(GST_LIBS) $(GIO_LIBS) $(GJSON_LIBS)
@@ -87,6 +88,7 @@ gstdinclude_HEADERS = \
 		  gstd_bus_msg_info.h		\
 		  gstd_msg_reader.h		\
 		  gstd_msg_type.h		\
-		  gstd_bus_msg_qos.h
+		  gstd_bus_msg_qos.h		\
+		  gstd_state.h
 
 noinst_HEADERS = 
