@@ -224,7 +224,7 @@ gstd_state_new (GstElement * target)
   g_return_val_if_fail (target, NULL);
 
   self = g_object_new (GSTD_TYPE_STATE, "name", "state", NULL);
-  self->target = target;
+  self->target = gst_object_ref (target);
 
   return self;
 }
