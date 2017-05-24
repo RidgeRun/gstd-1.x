@@ -28,7 +28,8 @@ gstd_iupdater_default_init (GstdIUpdaterInterface * iface)
 }
 
 GstdReturnCode
-gstd_iupdater_update (GstdIUpdater * self, GstdObject * object, const gchar * value)
+gstd_iupdater_update (GstdIUpdater * self, GstdObject * object,
+    const gchar * value)
 {
   g_return_val_if_fail (self, GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (object, GSTD_NULL_ARGUMENT);

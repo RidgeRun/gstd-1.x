@@ -95,7 +95,7 @@ gstd_pipeline_creator_create (GstdICreator * iface, const gchar * name,
 
   pipeline = g_object_new (GSTD_TYPE_PIPELINE, "name", name, "description",
       description, NULL);
-  *out = GSTD_OBJECT(pipeline);
+  *out = GSTD_OBJECT (pipeline);
 
-  return gstd_pipeline_build(pipeline);
+  return gstd_pipeline_build (pipeline);
 }

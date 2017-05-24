@@ -214,7 +214,7 @@ gstd_list_create (GstdObject * object, const gchar * name,
     ret = GSTD_BAD_COMMAND;
     goto error;
   }
- 
+
   self->count++;
 
   if (!gstd_list_append_child (self, out)) {
@@ -224,13 +224,13 @@ gstd_list_create (GstdObject * object, const gchar * name,
   }
 
   return ret;
- error:
+error:
   {
     if (out)
-      g_object_unref(out);
+      g_object_unref (out);
 
     GST_ERROR_OBJECT (object, "Could not create the resource  \"%s\" on \"%s\"",
-                     name, GSTD_OBJECT_NAME (self));
+        name, GSTD_OBJECT_NAME (self));
     return ret;
   }
 }
@@ -319,36 +319,38 @@ gstd_list_to_string (GstdObject * object, gchar ** outstring)
 }
 
 GstdObject *
-gstd_list_find_child (GstdList *self, const gchar * name)
+gstd_list_find_child (GstdList * self, const gchar * name)
 {
-    GList * result;
-    GstdObject * child;
+  GList *result;
+  GstdObject *child;
 
-    g_return_val_if_fail (self, NULL);
-    g_return_val_if_fail (name, NULL);
+  g_return_val_if_fail (self, NULL);
+  g_return_val_if_fail (name, NULL);
 
-    result = g_list_find_custom (self->list, name, gstd_list_find_node);
+  result = g_list_find_custom (self->list, name, gstd_list_find_node);
 
 
-    if (result) {
-	child = GSTD_OBJECT(result->data);
-    } else {
-	child = NULL;
-    }
+  if (result) {
+    child = GSTD_OBJECT (result->data);
+  } else {
+    child = NULL;
+  }
 
-    return child;
+  return child;
 }
 
 gboolean
 gstd_list_append_child (GstdList * self, GstdObject * child)
 {
-  GList * found;
-  
+  GList *found;
+
   g_return_val_if_fail (self, GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (child, GSTD_NULL_ARGUMENT);
 
   /* Test if the resource to create already exists */
-  found = g_list_find_custom (self->list, GSTD_OBJECT_NAME(child), gstd_list_find_node);
+  found =
+      g_list_find_custom (self->list, GSTD_OBJECT_NAME (child),
+      gstd_list_find_node);
   if (found)
     goto exists;
 
@@ -362,7 +364,7 @@ gstd_list_append_child (GstdList * self, GstdObject * child)
 exists:
   {
     GST_ERROR_OBJECT (self, "The resource \"%s\" already exists in \"%s\"",
-        GSTD_OBJECT_NAME(child), GSTD_OBJECT_NAME (self));
+        GSTD_OBJECT_NAME (child), GSTD_OBJECT_NAME (self));
     return FALSE;
   }
 }

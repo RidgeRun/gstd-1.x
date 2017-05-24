@@ -24,7 +24,7 @@
 #include "gstd_property_int.h"
 
 /* Gstd Property debugging category */
-GST_DEBUG_CATEGORY_STATIC(gstd_property_int_debug);
+GST_DEBUG_CATEGORY_STATIC (gstd_property_int_debug);
 #define GST_CAT_DEFAULT gstd_property_int_debug
 
 #define GSTD_DEBUG_DEFAULT_LEVEL GST_LEVEL_INFO
@@ -34,36 +34,35 @@ G_DEFINE_TYPE (GstdPropertyInt, gstd_property_int, GSTD_TYPE_PROPERTY)
 
 /* VTable */
 static void
-gstd_property_int_add_value (GstdProperty * self, GstdIFormatter *formatter,
-    GValue * value);
-static GstdReturnCode
-gstd_property_int_update (GstdObject * object, const gchar * arg);
+gstd_property_int_add_value (GstdProperty * self,
+    GstdIFormatter * formatter, GValue * value);
+static GstdReturnCode gstd_property_int_update (GstdObject * object,
+    const gchar * arg);
 
-static void
-gstd_property_int_class_init (GstdPropertyIntClass *klass)
+static void gstd_property_int_class_init (GstdPropertyIntClass * klass)
 {
   guint debug_color;
   GstdPropertyClass *pclass = GSTD_PROPERTY_CLASS (klass);
   GstdObjectClass *oclass = GSTD_OBJECT_CLASS (klass);
 
-  oclass->update = GST_DEBUG_FUNCPTR(gstd_property_int_update);
-  pclass->add_value = GST_DEBUG_FUNCPTR(gstd_property_int_add_value);
+  oclass->update = GST_DEBUG_FUNCPTR (gstd_property_int_update);
+  pclass->add_value = GST_DEBUG_FUNCPTR (gstd_property_int_add_value);
 
   /* Initialize debug category with nice colors */
   debug_color = GST_DEBUG_FG_BLACK | GST_DEBUG_BOLD | GST_DEBUG_BG_WHITE;
-  GST_DEBUG_CATEGORY_INIT (gstd_property_int_debug, "gstdpropertyint", debug_color,
-			   "Gstd Property Int category");
+  GST_DEBUG_CATEGORY_INIT (gstd_property_int_debug, "gstdpropertyint",
+      debug_color, "Gstd Property Int category");
 
 }
 
 static void
-gstd_property_int_init (GstdPropertyInt *self)
+gstd_property_int_init (GstdPropertyInt * self)
 {
-  GST_INFO_OBJECT(self, "Initializing property int");
+  GST_INFO_OBJECT (self, "Initializing property int");
 }
 
 static void
-gstd_property_int_add_value (GstdProperty * self, GstdIFormatter *formatter,
+gstd_property_int_add_value (GstdProperty * self, GstdIFormatter * formatter,
     GValue * value)
 {
   gstd_iformatter_set_value (formatter, value);
@@ -82,46 +81,46 @@ gstd_property_int_update (GstdObject * object, const gchar * value)
 
   prop = GSTD_PROPERTY (object);
 
-  pspec = g_object_class_find_property (G_OBJECT_GET_CLASS(prop->target),
-      GSTD_OBJECT_NAME(prop));
+  pspec = g_object_class_find_property (G_OBJECT_GET_CLASS (prop->target),
+      GSTD_OBJECT_NAME (prop));
 
   g_return_val_if_fail (pspec, GSTD_MISSING_INITIALIZATION);
 
   errno = 0;
 
   switch (pspec->value_type) {
-  case G_TYPE_INT64:
-  case G_TYPE_INT:
+    case G_TYPE_INT64:
+    case G_TYPE_INT:
     {
       parsed = g_ascii_strtoll (value, NULL, 10);
       if (!parsed && errno) {
-	GST_ERROR_OBJECT (object, "Cannot update %s: %s", pspec->name,
-            g_strerror(errno));
-	ret = GSTD_BAD_VALUE;
-	goto out;
+        GST_ERROR_OBJECT (object, "Cannot update %s: %s", pspec->name,
+            g_strerror (errno));
+        ret = GSTD_BAD_VALUE;
+        goto out;
       }
       break;
     }
-  case G_TYPE_UINT64:
-  case G_TYPE_UINT:
+    case G_TYPE_UINT64:
+    case G_TYPE_UINT:
     {
       parsed = g_ascii_strtoull (value, NULL, 10);
       if (!parsed && errno) {
-	GST_ERROR_OBJECT (object, "Cannot update %s: %s", pspec->name,
-            g_strerror(errno));
-	ret = GSTD_BAD_VALUE;
-	goto out;
+        GST_ERROR_OBJECT (object, "Cannot update %s: %s", pspec->name,
+            g_strerror (errno));
+        ret = GSTD_BAD_VALUE;
+        goto out;
       }
       break;
     }
-  default:
-    g_warn_if_reached ();
-    goto out;
+    default:
+      g_warn_if_reached ();
+      goto out;
   }
 
-  g_object_set (prop->target, GSTD_OBJECT_NAME(prop), parsed, NULL);
+  g_object_set (prop->target, GSTD_OBJECT_NAME (prop), parsed, NULL);
 
- out:
+out:
   {
     return ret;
   }

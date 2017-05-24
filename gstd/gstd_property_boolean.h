@@ -44,7 +44,7 @@ G_BEGIN_DECLS
 
 typedef struct _GstdPropertyBoolean GstdPropertyBoolean;
 typedef struct _GstdPropertyBooleanClass GstdPropertyBooleanClass;
-GType gstd_property_boolean_get_type();
+GType gstd_property_boolean_get_type ();
 
 
 struct _GstdPropertyBoolean
@@ -54,10 +54,11 @@ struct _GstdPropertyBoolean
 
 struct _GstdPropertyBooleanClass
 {
-    GstdPropertyClass parent_class;
+  GstdPropertyClass parent_class;
 };
 
-GstdReturnCode gstd_property_boolean_to_string (GstdObject * self, gchar ** outstring);
+GstdReturnCode gstd_property_boolean_to_string (GstdObject * self,
+    gchar ** outstring);
 
 G_END_DECLS
 

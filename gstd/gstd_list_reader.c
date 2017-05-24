@@ -88,37 +88,39 @@ gstd_list_reader_init (GstdListReader * self)
 }
 
 static GstdReturnCode
-gstd_list_reader_read (GstdIReader * iface, GstdObject * object, const gchar * name, GstdObject ** out)
+gstd_list_reader_read (GstdIReader * iface, GstdObject * object,
+    const gchar * name, GstdObject ** out)
 {
-    GstdObject * resource;
-    GstdReturnCode ret;
+  GstdObject *resource;
+  GstdReturnCode ret;
 
-    g_return_val_if_fail (iface, GSTD_NULL_ARGUMENT);
-    g_return_val_if_fail (GSTD_IS_LIST(object), GSTD_NULL_ARGUMENT);
-    g_return_val_if_fail (name, GSTD_NULL_ARGUMENT);
-    g_return_val_if_fail (out, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (iface, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (GSTD_IS_LIST (object), GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (name, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (out, GSTD_NULL_ARGUMENT);
 
-    /* In the case of lists, "count" is a keyword */
-    if (!g_strcmp0 ("count", name)) {
-	ret = gstd_list_reader_read_count (iface, object, &resource);
-    } else {
-	ret = gstd_list_reader_read_child (iface, object, name, &resource);
-    }
+  /* In the case of lists, "count" is a keyword */
+  if (!g_strcmp0 ("count", name)) {
+    ret = gstd_list_reader_read_count (iface, object, &resource);
+  } else {
+    ret = gstd_list_reader_read_child (iface, object, name, &resource);
+  }
 
-    if (!resource) {
-	GST_ERROR_OBJECT (iface, "No resource %s in %s", name, GST_OBJECT_NAME(object));
-	goto out;
-    }
+  if (!resource) {
+    GST_ERROR_OBJECT (iface, "No resource %s in %s", name,
+        GST_OBJECT_NAME (object));
+    goto out;
+  }
 
-    if (!GSTD_IS_OBJECT(resource)) {
-	GST_ERROR_OBJECT (iface, "%s is not a valid resource", name);
-	g_object_unref (resource);
-	resource = NULL;
-    }
+  if (!GSTD_IS_OBJECT (resource)) {
+    GST_ERROR_OBJECT (iface, "%s is not a valid resource", name);
+    g_object_unref (resource);
+    resource = NULL;
+  }
 
- out:
-    *out = resource;
-    return ret;
+out:
+  *out = resource;
+  return ret;
 }
 
 
@@ -126,40 +128,40 @@ static GstdReturnCode
 gstd_list_reader_read_count (GstdIReader * iface,
     GstdObject * object, GstdObject ** out)
 {
-    GstdPropertyInt * count_value;
+  GstdPropertyInt *count_value;
 
-    g_return_val_if_fail (iface, GSTD_NULL_ARGUMENT);
-    g_return_val_if_fail (object, GSTD_NULL_ARGUMENT);
-    g_return_val_if_fail (out, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (iface, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (object, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (out, GSTD_NULL_ARGUMENT);
 
-    count_value = g_object_new(GSTD_TYPE_PROPERTY_INT,
-        "name", "count", "target", object, NULL);
+  count_value = g_object_new (GSTD_TYPE_PROPERTY_INT,
+      "name", "count", "target", object, NULL);
 
-    *out = GSTD_OBJECT(count_value);
+  *out = GSTD_OBJECT (count_value);
 
-    return GSTD_EOK;
+  return GSTD_EOK;
 }
 
 static GstdReturnCode
 gstd_list_reader_read_child (GstdIReader * iface,
     GstdObject * object, const gchar * name, GstdObject ** out)
 {
-    gpointer found = NULL;
-    GstdReturnCode ret;
+  gpointer found = NULL;
+  GstdReturnCode ret;
 
-    g_return_val_if_fail (iface, GSTD_NULL_ARGUMENT);
-    g_return_val_if_fail (object, GSTD_NULL_ARGUMENT);
-    g_return_val_if_fail (name, GSTD_NULL_ARGUMENT);
-    g_return_val_if_fail (out, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (iface, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (object, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (name, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (out, GSTD_NULL_ARGUMENT);
 
-    found = gstd_list_find_child (GSTD_LIST(object), name);
-    if (found) {
-      *out = GSTD_OBJECT(g_object_ref (found));
-      ret = GSTD_EOK;
-    } else {
-      *out = NULL;
-      ret = GSTD_NO_RESOURCE;
-    }
+  found = gstd_list_find_child (GSTD_LIST (object), name);
+  if (found) {
+    *out = GSTD_OBJECT (g_object_ref (found));
+    ret = GSTD_EOK;
+  } else {
+    *out = NULL;
+    ret = GSTD_NO_RESOURCE;
+  }
 
-    return ret;
+  return ret;
 }

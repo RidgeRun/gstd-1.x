@@ -44,14 +44,13 @@ enum _GstdReturnCode
    */
   GSTD_NULL_ARGUMENT,
 
-
   /**
    * A bad pipeline description was provided
    */
   GSTD_BAD_DESCRIPTION,
 
   /**
-   * The name trying to be used already exist
+   * The name trying to be used already exists
    */
   GSTD_EXISTING_NAME,
 
@@ -85,20 +84,39 @@ enum _GstdReturnCode
    */
   GSTD_NO_UPDATE,
 
+  /**
+   * Unknown command
+   */
   GSTD_BAD_COMMAND,
 
+  /**
+   * Cannot read the given resource
+   */
   GSTD_NO_READ,
 
+  /**
+   * Cannot connect
+   */
   GSTD_NO_CONNECTION,
 
+  /**
+   * The given value is incorrect
+   */
   GSTD_BAD_VALUE,
 
+  /**
+   * Failed to change state of a pipeline
+   */
   GSTD_STATE_ERROR,
 
+  /**
+   * Failed to start IPC
+   */
   GSTD_IPC_ERROR,
 
-  GSTD_UNKNOWN_TYPE,
-
+  /**
+   * Unknown event
+   */
   GSTD_EVENT_ERROR,
 
   /**
@@ -106,6 +124,9 @@ enum _GstdReturnCode
    */
   GSTD_MISSING_ARGUMENT,
 
+  /**
+   * Missing name of the pipeline
+   */
   GSTD_MISSING_NAME,
 
 };

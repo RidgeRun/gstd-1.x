@@ -44,9 +44,9 @@ G_BEGIN_DECLS
 typedef struct _GstdState GstdState;
 typedef struct _GstdStateClass GstdStateClass;
 
-GType gstd_state_get_type();
+GType gstd_state_get_type ();
 
-GstdState * gstd_state_new (GstElement * target);
+GstdState *gstd_state_new (GstElement * target);
 
 G_END_DECLS
 

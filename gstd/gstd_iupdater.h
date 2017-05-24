@@ -38,12 +38,14 @@ struct _GstdIUpdaterInterface
 {
   GTypeInterface parent;
 
-  GstdReturnCode (*update) (GstdIUpdater * self, GstdObject * object, const gchar * value);
+  GstdReturnCode (*update) (GstdIUpdater * self, GstdObject * object,
+      const gchar * value);
 };
 
 GType gstd_iupdater_get_type (void);
 
-GstdReturnCode gstd_iupdater_update (GstdIUpdater * self, GstdObject * object, const gchar * value);
+GstdReturnCode gstd_iupdater_update (GstdIUpdater * self, GstdObject * object,
+    const gchar * value);
 
 G_END_DECLS
 #endif // __GSTD_IUPDATER_H__

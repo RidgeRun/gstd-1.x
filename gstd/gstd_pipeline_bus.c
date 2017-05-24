@@ -52,7 +52,7 @@ static void
 gstd_pipeline_bus_set_property (GObject *, guint, const GValue *, GParamSpec *);
 static void
 gstd_pipeline_bus_get_property (GObject * object,
-  guint property_id, GValue * value, GParamSpec * pspec);
+    guint property_id, GValue * value, GParamSpec * pspec);
 static void gstd_pipeline_bus_dispose (GObject *);
 
 G_DEFINE_TYPE (GstdPipelineBus, gstd_pipeline_bus, GSTD_TYPE_OBJECT);
@@ -77,14 +77,13 @@ gstd_pipeline_bus_class_init (GstdPipelineBusClass * klass)
   object_class->dispose = gstd_pipeline_bus_dispose;
 
   properties[PROP_MESSAGE] =
-    g_param_spec_object ("message",
+      g_param_spec_object ("message",
       "Message",
       "The messages sent to the pipeline",
-      GSTD_TYPE_OBJECT,
-      G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
+      GSTD_TYPE_OBJECT, G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
   properties[PROP_TIMEOUT] =
-    g_param_spec_int64 ("timeout",
+      g_param_spec_int64 ("timeout",
       "Timeout",
       "The quantity of time that messages should be waited for, -1: infinity, 0: immediate, n: nanoseconds to wait",
       GSTD_PIPELINE_BUS_TIMEOUT_MIN,
@@ -92,8 +91,8 @@ gstd_pipeline_bus_class_init (GstdPipelineBusClass * klass)
       GSTD_PIPELINE_BUS_TIMEOUT_DEFAULT,
       G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
-    properties[PROP_TYPES] =
-    g_param_spec_flags ("types",
+  properties[PROP_TYPES] =
+      g_param_spec_flags ("types",
       "Types",
       "The types of messages to read from the bus",
       GSTD_TYPE_MSG_TYPE,
@@ -116,7 +115,7 @@ gstd_pipeline_bus_init (GstdPipelineBus * self)
   self->timeout = GSTD_PIPELINE_BUS_TIMEOUT_DEFAULT;
   self->types = GSTD_PIPELINE_BUS_TYPES_DEFAULT;
 
-  gstd_object_set_reader (GSTD_OBJECT(self),
+  gstd_object_set_reader (GSTD_OBJECT (self),
       g_object_new (GSTD_TYPE_MSG_READER, NULL));
 }
 
@@ -124,7 +123,7 @@ gstd_pipeline_bus_init (GstdPipelineBus * self)
 GstdPipelineBus *
 gstd_pipeline_bus_new (GstBus * bus)
 {
-  GstdPipelineBus * self;
+  GstdPipelineBus *self;
 
   g_return_val_if_fail (bus, NULL);
 
@@ -169,7 +168,8 @@ gstd_pipeline_bus_get_property (GObject * object,
       g_value_set_object (value, NULL);
       break;
     case PROP_TIMEOUT:
-      GST_DEBUG_OBJECT (self, "Returning timeout %" GST_TIME_FORMAT, GST_TIME_ARGS(self->timeout));
+      GST_DEBUG_OBJECT (self, "Returning timeout %" GST_TIME_FORMAT,
+          GST_TIME_ARGS (self->timeout));
       g_value_set_int64 (value, self->timeout);
       break;
     case PROP_TYPES:
@@ -190,16 +190,15 @@ gstd_pipeline_bus_dispose (GObject * object)
 
   GST_INFO_OBJECT (self, "Disposing %s pipeline bus", GSTD_OBJECT_NAME (self));
 
-  g_clear_object(&self->bus);
+  g_clear_object (&self->bus);
 
   G_OBJECT_CLASS (gstd_pipeline_bus_parent_class)->dispose (object);
 }
 
 GstBus *
-gstd_pipeline_bus_get_bus (GstdPipelineBus *self)
+gstd_pipeline_bus_get_bus (GstdPipelineBus * self)
 {
   g_return_val_if_fail (self, NULL);
 
   return gst_object_ref (self->bus);
 }
-

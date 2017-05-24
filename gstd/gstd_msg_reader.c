@@ -57,12 +57,12 @@ static void
 gstd_ireader_interface_init (GstdIReaderInterface * iface)
 {
   parent_interface = g_type_interface_peek_parent (iface);
-  
+
   iface->read = gstd_msg_reader_read;
 }
 
 G_DEFINE_TYPE_WITH_CODE (GstdMsgReader, gstd_msg_reader,
-        GSTD_TYPE_PROPERTY_READER, G_IMPLEMENT_INTERFACE (GSTD_TYPE_IREADER,
+    GSTD_TYPE_PROPERTY_READER, G_IMPLEMENT_INTERFACE (GSTD_TYPE_IREADER,
         gstd_ireader_interface_init));
 
 static void
@@ -83,71 +83,73 @@ gstd_msg_reader_init (GstdMsgReader * self)
 }
 
 static GstdReturnCode
-gstd_msg_reader_read (GstdIReader * iface, GstdObject * object, const gchar * name, GstdObject ** out)
+gstd_msg_reader_read (GstdIReader * iface, GstdObject * object,
+    const gchar * name, GstdObject ** out)
 {
-    GstdReturnCode ret;
-    GstdObject * resource = NULL;
+  GstdReturnCode ret;
+  GstdObject *resource = NULL;
 
-    g_return_val_if_fail (iface, GSTD_NULL_ARGUMENT);
-    g_return_val_if_fail (object, GSTD_NULL_ARGUMENT);
-    g_return_val_if_fail (out, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (iface, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (object, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (out, GSTD_NULL_ARGUMENT);
 
-    /* If the user requested to read the message, read from the bus, 
-     * else, default to the property reading implementation
-     */
-    if (!g_ascii_strcasecmp ("message", name)) {
-      ret = gstd_msg_reader_read_message (iface, object, &resource);
-    } else {
-      ret = parent_interface->read (iface, object, name, &resource);
-    }
+  /* If the user requested to read the message, read from the bus,
+   * else, default to the property reading implementation
+   */
+  if (!g_ascii_strcasecmp ("message", name)) {
+    ret = gstd_msg_reader_read_message (iface, object, &resource);
+  } else {
+    ret = parent_interface->read (iface, object, name, &resource);
+  }
 
-    if (!ret) {
-      *out = resource;
-    }
-    
-    return ret;
+  if (!ret) {
+    *out = resource;
+  }
+
+  return ret;
 }
 
 static GstdReturnCode
 gstd_msg_reader_read_message (GstdIReader * iface,
     GstdObject * object, GstdObject ** out)
 {
-    GstdReturnCode ret = GSTD_EOK;
-    GstdPipelineBus *gstdbus;
-    GstBus * bus;
-    gint64 timeout;
-    gint types;
-    GstMessage * msg;
-  
-    g_return_val_if_fail (iface, GSTD_NULL_ARGUMENT);
-    g_return_val_if_fail (GSTD_IS_PIPELINE_BUS(object), GSTD_BAD_VALUE);
-    g_return_val_if_fail (out, GSTD_NULL_ARGUMENT);
+  GstdReturnCode ret = GSTD_EOK;
+  GstdPipelineBus *gstdbus;
+  GstBus *bus;
+  gint64 timeout;
+  gint types;
+  GstMessage *msg;
 
-    gstdbus = GSTD_PIPELINE_BUS (object);
+  g_return_val_if_fail (iface, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (GSTD_IS_PIPELINE_BUS (object), GSTD_BAD_VALUE);
+  g_return_val_if_fail (out, GSTD_NULL_ARGUMENT);
 
-    bus = gstd_pipeline_bus_get_bus (gstdbus);
-    g_object_get (gstdbus, "timeout", &timeout, NULL);
-    g_object_get (gstdbus, "types", &types, NULL);
+  gstdbus = GSTD_PIPELINE_BUS (object);
 
-    /* The unknown or none message type is not a valid polling filter,
-     * instead we interpret it as a flushing request. As such we flush
-     * the bus for "timeout" nanoseconds
-     */
-    if (GST_MESSAGE_UNKNOWN == types) {
-      GST_INFO_OBJECT (gstdbus, "Flushing the bus for %" GST_TIME_FORMAT, GST_TIME_ARGS(timeout));
-      gst_bus_set_flushing (bus, TRUE);
-      g_usleep (GST_TIME_AS_USECONDS(timeout));
-      gst_bus_set_flushing (bus, FALSE);
-      msg = NULL;
-    } else {
-      msg = gst_bus_timed_pop_filtered (bus, timeout, types);
-    }
+  bus = gstd_pipeline_bus_get_bus (gstdbus);
+  g_object_get (gstdbus, "timeout", &timeout, NULL);
+  g_object_get (gstdbus, "types", &types, NULL);
 
-    if (msg) {
-      *out = GSTD_OBJECT(gstd_bus_msg_factory_make (msg));
-    }
+  /* The unknown or none message type is not a valid polling filter,
+   * instead we interpret it as a flushing request. As such we flush
+   * the bus for "timeout" nanoseconds
+   */
+  if (GST_MESSAGE_UNKNOWN == types) {
+    GST_INFO_OBJECT (gstdbus, "Flushing the bus for %" GST_TIME_FORMAT,
+        GST_TIME_ARGS (timeout));
+    gst_bus_set_flushing (bus, TRUE);
+    g_usleep (GST_TIME_AS_USECONDS (timeout));
+    gst_bus_set_flushing (bus, FALSE);
+    msg = NULL;
+  } else {
+    msg = gst_bus_timed_pop_filtered (bus, timeout, types);
+  }
 
-    gst_object_unref (bus);
-    
-    return ret;
+  if (msg) {
+    *out = GSTD_OBJECT (gstd_bus_msg_factory_make (msg));
+  }
+
+  gst_object_unref (bus);
+
+  return ret;
 }
