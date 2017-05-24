@@ -39,7 +39,7 @@ gstd_return_code_to_string (GstdReturnCode code)
     [GSTD_NO_PIPELINE] = "Pipeline requested doesn't exist",
     [GSTD_NO_RESOURCE] = "Resource requested doesn't exist",
     [GSTD_NO_CREATE] = "Cannot create in this resource",
-    [GSTD_EXISTING_RESOURCE] = "Resource already exist",
+    [GSTD_EXISTING_RESOURCE] = "Resource already exists",
     [GSTD_NO_UPDATE] = "Cannot update this resource",
     [GSTD_BAD_COMMAND] = "Bad command",
     [GSTD_NO_READ] = "Resource not readable",
