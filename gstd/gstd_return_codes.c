@@ -47,7 +47,6 @@ gstd_return_code_to_string (GstdReturnCode code)
     [GSTD_BAD_VALUE] = "Bad value",
     [GSTD_STATE_ERROR] = "State error",
     [GSTD_IPC_ERROR] = "IPC error",
-    [GSTD_UNKNOWN_TYPE] = "Unknown type",
     [GSTD_EVENT_ERROR] = "Event error",
     [GSTD_MISSING_ARGUMENT] = "One or more arguments are missing",
     [GSTD_MISSING_NAME] = "Name is missing"

@@ -115,11 +115,6 @@ enum _GstdReturnCode
   GSTD_IPC_ERROR,
 
   /**
-   * Value of an unknown type
-   */
-  GSTD_UNKNOWN_TYPE,
-
-  /**
    * Unknown event
    */
   GSTD_EVENT_ERROR,
