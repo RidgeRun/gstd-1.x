@@ -44,25 +44,24 @@ G_BEGIN_DECLS
 
 typedef struct _GstdBusMsg GstdBusMsg;
 typedef struct _GstdBusMsgClass GstdBusMsgClass;
-GType gstd_bus_msg_get_type();
+GType gstd_bus_msg_get_type ();
 
 struct _GstdBusMsg
 {
   GstdObject parent;
 
-  GstMessage * target;
+  GstMessage *target;
 };
 
 struct _GstdBusMsgClass
 {
   GstdObjectClass parent_class;
 
-  GstdReturnCode (* to_string) (GstdBusMsg *msg, GstdIFormatter * formatter,
+  GstdReturnCode (*to_string) (GstdBusMsg * msg, GstdIFormatter * formatter,
       GstMessage * target);
 };
 
-GstdBusMsg *
-gstd_bus_msg_factory_make (GstMessage * target);
+GstdBusMsg *gstd_bus_msg_factory_make (GstMessage * target);
 
 G_END_DECLS
 

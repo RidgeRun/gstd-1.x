@@ -74,9 +74,9 @@ enum _GstdEventType
   GSTD_EVENT_NAVIGATION = 15
 };
 
-static gboolean gstd_ascii_to_gint64(const gchar *, gint64 *);
-static gboolean gstd_ascii_to_double(const gchar *, gdouble *);
-static gboolean gstd_ascii_to_boolean(const gchar *, gboolean *);
+static gboolean gstd_ascii_to_gint64 (const gchar *, gint64 *);
+static gboolean gstd_ascii_to_double (const gchar *, gdouble *);
+static gboolean gstd_ascii_to_boolean (const gchar *, gboolean *);
 GstdEventType gstd_event_factory_parse_event (const gchar *);
 static GstEvent *gstd_event_factory_make_seek_event (const gchar *);
 static GstEvent *gstd_event_factory_make_flush_stop_event (const gchar *);
@@ -103,7 +103,7 @@ gstd_event_factory_make (const gchar * name, const gchar * description)
       event = gst_event_new_flush_start ();
       break;
     case GSTD_EVENT_FLUSH_STOP:
-      event = gstd_event_factory_make_flush_stop_event(description);
+      event = gstd_event_factory_make_flush_stop_event (description);
       break;
     default:
       event = NULL;
@@ -113,31 +113,39 @@ gstd_event_factory_make (const gchar * name, const gchar * description)
   return event;
 }
 
-static gboolean gstd_ascii_to_gint64(const gchar *full_string, gint64 *out_value){
-  g_return_val_if_fail(out_value, FALSE);
+static gboolean
+gstd_ascii_to_gint64 (const gchar * full_string, gint64 * out_value)
+{
+  g_return_val_if_fail (out_value, FALSE);
   errno = 0;
-  *out_value = g_ascii_strtod(full_string, NULL);
-  if ((errno == ERANGE && (*out_value == LONG_MAX || *out_value == LONG_MIN)) || (errno != 0 && *out_value == 0)){
+  *out_value = g_ascii_strtod (full_string, NULL);
+  if ((errno == ERANGE && (*out_value == LONG_MAX || *out_value == LONG_MIN))
+      || (errno != 0 && *out_value == 0)) {
     return FALSE;
   }
   return TRUE;
 }
 
-static gboolean gstd_ascii_to_double(const gchar *full_string, gdouble *out_value){
-  g_return_val_if_fail(out_value, FALSE);
+static gboolean
+gstd_ascii_to_double (const gchar * full_string, gdouble * out_value)
+{
+  g_return_val_if_fail (out_value, FALSE);
   errno = 0;
-  *out_value = g_ascii_strtod(full_string, NULL);
-  if ((errno == ERANGE && (*out_value == HUGE_VALF || *out_value == HUGE_VALL)) || (errno != 0 && *out_value == 0)){
+  *out_value = g_ascii_strtod (full_string, NULL);
+  if ((errno == ERANGE && (*out_value == HUGE_VALF || *out_value == HUGE_VALL))
+      || (errno != 0 && *out_value == 0)) {
     return FALSE;
   }
   return TRUE;
 }
 
-static gboolean gstd_ascii_to_boolean(const gchar *full_string, gboolean *out_value){
+static gboolean
+gstd_ascii_to_boolean (const gchar * full_string, gboolean * out_value)
+{
   gboolean ret;
 
-  g_return_val_if_fail(full_string, FALSE);
-  g_return_val_if_fail(out_value, FALSE);
+  g_return_val_if_fail (full_string, FALSE);
+  g_return_val_if_fail (out_value, FALSE);
   ret = FALSE;
 
   if (!g_ascii_strcasecmp (full_string, "true")) {
@@ -173,7 +181,7 @@ gstd_event_factory_make_seek_event (const gchar * description)
     goto fallback;
   }
 
-  if (!gstd_ascii_to_double(tokens[0], &rate)){
+  if (!gstd_ascii_to_double (tokens[0], &rate)) {
     goto out;
   }
 
@@ -182,36 +190,36 @@ gstd_event_factory_make_seek_event (const gchar * description)
   }
 
   gint64 temp_format;
-  if (!gstd_ascii_to_gint64(tokens[1], &temp_format)){
+  if (!gstd_ascii_to_gint64 (tokens[1], &temp_format)) {
     goto out;
   }
-  format = (GstFormat)temp_format;
+  format = (GstFormat) temp_format;
 
   if (NULL == tokens[2]) {
     goto fallback;
   }
 
   gint64 temp_flags;
-  if (!gstd_ascii_to_gint64(tokens[2], &temp_flags)){
+  if (!gstd_ascii_to_gint64 (tokens[2], &temp_flags)) {
     goto out;
   }
-  flags = (GstSeekFlags)temp_flags;
+  flags = (GstSeekFlags) temp_flags;
 
   if (NULL == tokens[3]) {
     goto fallback;
   }
 
   gint64 temp_start_type;
-  if (!gstd_ascii_to_gint64(tokens[3], &temp_start_type)){
+  if (!gstd_ascii_to_gint64 (tokens[3], &temp_start_type)) {
     goto out;
   }
-  start_type = (GstSeekType)temp_start_type;
+  start_type = (GstSeekType) temp_start_type;
 
   if (NULL == tokens[4]) {
     goto fallback;
   }
 
-  if (!gstd_ascii_to_gint64(tokens[4], &start)){
+  if (!gstd_ascii_to_gint64 (tokens[4], &start)) {
     goto out;
   }
 
@@ -220,25 +228,26 @@ gstd_event_factory_make_seek_event (const gchar * description)
   }
 
   gint64 temp_stop_type;
-  if (!gstd_ascii_to_gint64(tokens[5], &temp_stop_type)){
+  if (!gstd_ascii_to_gint64 (tokens[5], &temp_stop_type)) {
     goto out;
   }
-  stop_type = (GstSeekType)temp_stop_type;
+  stop_type = (GstSeekType) temp_stop_type;
 
   if (NULL == tokens[6]) {
     goto fallback;
   }
 
-  if (!gstd_ascii_to_gint64(tokens[6], &stop)){
+  if (!gstd_ascii_to_gint64 (tokens[6], &stop)) {
     goto out;
   }
 
- fallback:
+fallback:
   {
-    event = gst_event_new_seek (rate, format, flags, start_type, start, stop_type,
+    event =
+        gst_event_new_seek (rate, format, flags, start_type, start, stop_type,
         stop);
   }
- out:
+out:
   {
     g_strfreev (tokens);
     return event;
@@ -251,7 +260,7 @@ gstd_event_factory_make_flush_stop_event (const gchar * description)
   gboolean reset_time = GSTD_EVENT_FACTORY_FLUSH_STOP_RESET_DEFAULT;
 
   if (NULL != description) {
-    if (!gstd_ascii_to_boolean(description, &reset_time)){
+    if (!gstd_ascii_to_boolean (description, &reset_time)) {
       return NULL;
     }
   }

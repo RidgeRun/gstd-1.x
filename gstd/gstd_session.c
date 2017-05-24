@@ -75,7 +75,7 @@ gstd_session_constructor (GType type,
 
     /* NULL out the_session when no references remain, to ensure a new
        session is created in the next constuctor */
-    g_object_add_weak_pointer (the_session, (gpointer) &the_session);
+    g_object_add_weak_pointer (the_session, (gpointer) & the_session);
   } else {
     object = g_object_ref (G_OBJECT (the_session));
   }
@@ -130,7 +130,7 @@ gstd_session_init (GstdSession * self)
 {
   GST_INFO_OBJECT (self, "Initializing gstd session");
 
-  gstd_object_set_reader (GSTD_OBJECT(self),
+  gstd_object_set_reader (GSTD_OBJECT (self),
       g_object_new (GSTD_TYPE_PROPERTY_READER, NULL));
 
   self->pipelines =
@@ -139,13 +139,13 @@ gstd_session_init (GstdSession * self)
           GSTD_PARAM_CREATE | GSTD_PARAM_READ | GSTD_PARAM_UPDATE |
           GSTD_PARAM_DELETE, NULL));
 
-  gstd_object_set_creator (GSTD_OBJECT(self->pipelines),
+  gstd_object_set_creator (GSTD_OBJECT (self->pipelines),
       g_object_new (GSTD_TYPE_PIPELINE_CREATOR, NULL));
 
-  gstd_object_set_reader (GSTD_OBJECT(self->pipelines),
+  gstd_object_set_reader (GSTD_OBJECT (self->pipelines),
       g_object_new (GSTD_TYPE_LIST_READER, NULL));
 
-  gstd_object_set_deleter (GSTD_OBJECT(self->pipelines),
+  gstd_object_set_deleter (GSTD_OBJECT (self->pipelines),
       g_object_new (GSTD_TYPE_PIPELINE_DELETER, NULL));
 
   self->debug =
@@ -276,7 +276,7 @@ gstd_get_by_uri (GstdSession * gstd, const gchar * uri, GstdObject ** node)
     ++it;
   }
 
-  g_strfreev(nodes);
+  g_strfreev (nodes);
   *node = parent;
   return GSTD_EOK;
 
@@ -288,7 +288,7 @@ badcommand:
 nonode:
   {
     GST_ERROR_OBJECT (gstd, "Invalid node %s", *it);
-    g_strfreev(nodes);
+    g_strfreev (nodes);
     return GSTD_BAD_COMMAND;
   }
 }

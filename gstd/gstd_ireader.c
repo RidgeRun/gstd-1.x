@@ -28,7 +28,8 @@ gstd_ireader_default_init (GstdIReaderInterface * iface)
 }
 
 GstdReturnCode
-gstd_ireader_read (GstdIReader * self, GstdObject * object, const gchar * name, GstdObject ** out)
+gstd_ireader_read (GstdIReader * self, GstdObject * object, const gchar * name,
+    GstdObject ** out)
 {
   g_return_val_if_fail (self, GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (object, GSTD_NULL_ARGUMENT);

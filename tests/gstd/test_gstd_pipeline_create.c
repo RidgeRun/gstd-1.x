@@ -39,9 +39,10 @@ GST_START_TEST (test_pipeline_create_successful)
   ret = gstd_object_create (node, "p0", "fakesrc ! fakesink");
   fail_if (GSTD_EOK != ret);
 
-  gst_object_unref(node);
-  gst_object_unref(test_session);
+  gst_object_unref (node);
+  gst_object_unref (test_session);
 }
+
 GST_END_TEST;
 
 
@@ -58,9 +59,10 @@ GST_START_TEST (test_pipeline_create_no_name)
   ret = gstd_object_create (node, NULL, NULL);
   fail_if (GSTD_MISSING_NAME != ret);
 
-  gst_object_unref(node);
-  gst_object_unref(test_session);
+  gst_object_unref (node);
+  gst_object_unref (test_session);
 }
+
 GST_END_TEST;
 
 
@@ -77,9 +79,10 @@ GST_START_TEST (test_pipeline_create_no_description)
   ret = gstd_object_create (node, "p2", NULL);
   fail_if (GSTD_MISSING_ARGUMENT != ret);
 
-  gst_object_unref(node);
-  gst_object_unref(test_session);
+  gst_object_unref (node);
+  gst_object_unref (test_session);
 }
+
 GST_END_TEST;
 
 
@@ -96,9 +99,10 @@ GST_START_TEST (test_pipeline_create_erroneous_description)
   ret = gstd_object_create (node, "p3", "fakesrc !");
   fail_if (GSTD_BAD_DESCRIPTION != ret);
 
-  gst_object_unref(node);
-  gst_object_unref(test_session);
+  gst_object_unref (node);
+  gst_object_unref (test_session);
 }
+
 GST_END_TEST;
 
 

@@ -25,7 +25,7 @@
 #include "gstd_bus_msg_info.h"
 
 /* Gstd Bus MsgInfo debugging category */
-GST_DEBUG_CATEGORY_STATIC(gstd_bus_msg_info_debug);
+GST_DEBUG_CATEGORY_STATIC (gstd_bus_msg_info_debug);
 
 #define GST_CAT_DEFAULT gstd_bus_msg_info_debug
 #define GSTD_DEBUG_DEFAULT_LEVEL GST_LEVEL_INFO
@@ -46,35 +46,34 @@ struct _GstdBusMsgInfoClass
 
 G_DEFINE_TYPE (GstdBusMsgInfo, gstd_bus_msg_info, GSTD_TYPE_BUS_MSG)
 
-static void
-gstd_bus_msg_info_class_init (GstdBusMsgInfoClass *klass)
+static void gstd_bus_msg_info_class_init (GstdBusMsgInfoClass * klass)
 {
-  GstdBusMsgClass * bmclass;
+  GstdBusMsgClass *bmclass;
   guint debug_color;
 
   bmclass = GSTD_BUS_MSG_CLASS (klass);
 
-  bmclass->to_string = GST_DEBUG_FUNCPTR(gstd_bus_msg_info_to_string);
+  bmclass->to_string = GST_DEBUG_FUNCPTR (gstd_bus_msg_info_to_string);
 
   /* Initialize debug category with nice colors */
   debug_color = GST_DEBUG_FG_BLACK | GST_DEBUG_BOLD | GST_DEBUG_BG_WHITE;
-  GST_DEBUG_CATEGORY_INIT (gstd_bus_msg_info_debug, "gstdbusmsginfo", debug_color,
-			   "Gstd Bus Msg Info category");
+  GST_DEBUG_CATEGORY_INIT (gstd_bus_msg_info_debug, "gstdbusmsginfo",
+      debug_color, "Gstd Bus Msg Info category");
 
 }
 
 static void
-gstd_bus_msg_info_init (GstdBusMsgInfo *self)
+gstd_bus_msg_info_init (GstdBusMsgInfo * self)
 {
-  GST_INFO_OBJECT(self, "Initializing bus info/error/warning message");
+  GST_INFO_OBJECT (self, "Initializing bus info/error/warning message");
 }
 
 static GstdReturnCode
 gstd_bus_msg_info_to_string (GstdBusMsg * msg, GstdIFormatter * formatter,
     GstMessage * target)
 {
-  GError * error;
-  gchar * debug;
+  GError *error;
+  gchar *debug;
 
   g_return_val_if_fail (msg, GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (formatter, GSTD_NULL_ARGUMENT);

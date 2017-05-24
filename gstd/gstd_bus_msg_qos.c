@@ -25,7 +25,7 @@
 #include "gstd_bus_msg_qos.h"
 
 /* Gstd Bus MsgQos debugging category */
-GST_DEBUG_CATEGORY_STATIC(gstd_bus_msg_qos_debug);
+GST_DEBUG_CATEGORY_STATIC (gstd_bus_msg_qos_debug);
 
 #define GST_CAT_DEFAULT gstd_bus_msg_qos_debug
 #define GSTD_DEBUG_DEFAULT_LEVEL GST_LEVEL_INFO
@@ -46,27 +46,26 @@ struct _GstdBusMsgQosClass
 
 G_DEFINE_TYPE (GstdBusMsgQos, gstd_bus_msg_qos, GSTD_TYPE_BUS_MSG)
 
-static void
-gstd_bus_msg_qos_class_init (GstdBusMsgQosClass *klass)
+static void gstd_bus_msg_qos_class_init (GstdBusMsgQosClass * klass)
 {
-  GstdBusMsgClass * bmclass;
+  GstdBusMsgClass *bmclass;
   guint debug_color;
 
   bmclass = GSTD_BUS_MSG_CLASS (klass);
 
-  bmclass->to_string = GST_DEBUG_FUNCPTR(gstd_bus_msg_qos_to_string);
+  bmclass->to_string = GST_DEBUG_FUNCPTR (gstd_bus_msg_qos_to_string);
 
   /* Initialize debug category with nice colors */
   debug_color = GST_DEBUG_FG_BLACK | GST_DEBUG_BOLD | GST_DEBUG_BG_WHITE;
   GST_DEBUG_CATEGORY_INIT (gstd_bus_msg_qos_debug, "gstdbusmsgqos", debug_color,
-			   "Gstd Bus Msg Qos category");
+      "Gstd Bus Msg Qos category");
 
 }
 
 static void
-gstd_bus_msg_qos_init (GstdBusMsgQos *self)
+gstd_bus_msg_qos_init (GstdBusMsgQos * self)
 {
-  GST_INFO_OBJECT(self, "Initializing bus QOS message");
+  GST_INFO_OBJECT (self, "Initializing bus QOS message");
 }
 
 static GstdReturnCode
@@ -90,89 +89,90 @@ gstd_bus_msg_qos_to_string (GstdBusMsg * msg, GstdIFormatter * formatter,
   g_return_val_if_fail (formatter, GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (target, GSTD_NULL_ARGUMENT);
 
-  gst_message_parse_qos (target, &live, &running_time, &stream_time, &timestamp, &duration);
+  gst_message_parse_qos (target, &live, &running_time, &stream_time, &timestamp,
+      &duration);
   gst_message_parse_qos_values (target, &jitter, &proportion, &quality);
   gst_message_parse_qos_stats (target, &format, &processed, &dropped);
 
   gstd_iformatter_set_member_name (formatter, "buffer");
   gstd_iformatter_begin_object (formatter);
 
-  gstd_iformatter_set_member_name(formatter, "live");
+  gstd_iformatter_set_member_name (formatter, "live");
   g_value_init (&value, G_TYPE_BOOLEAN);
   g_value_set_boolean (&value, live);
-  gstd_iformatter_set_value(formatter, &value);
+  gstd_iformatter_set_value (formatter, &value);
   g_value_unset (&value);
 
-  gstd_iformatter_set_member_name(formatter, "running_time");
+  gstd_iformatter_set_member_name (formatter, "running_time");
   g_value_init (&value, G_TYPE_UINT64);
   g_value_set_uint64 (&value, running_time);
-  gstd_iformatter_set_value(formatter, &value);
+  gstd_iformatter_set_value (formatter, &value);
   g_value_unset (&value);
 
-  gstd_iformatter_set_member_name(formatter, "stream_time");
+  gstd_iformatter_set_member_name (formatter, "stream_time");
   g_value_init (&value, G_TYPE_UINT64);
   g_value_set_uint64 (&value, stream_time);
-  gstd_iformatter_set_value(formatter, &value);
+  gstd_iformatter_set_value (formatter, &value);
   g_value_unset (&value);
 
-  gstd_iformatter_set_member_name(formatter, "timestamp");
+  gstd_iformatter_set_member_name (formatter, "timestamp");
   g_value_init (&value, G_TYPE_UINT64);
   g_value_set_uint64 (&value, timestamp);
-  gstd_iformatter_set_value(formatter, &value);
+  gstd_iformatter_set_value (formatter, &value);
   g_value_unset (&value);
 
-  gstd_iformatter_set_member_name(formatter, "duration");
+  gstd_iformatter_set_member_name (formatter, "duration");
   g_value_init (&value, G_TYPE_UINT64);
   g_value_set_uint64 (&value, duration);
-  gstd_iformatter_set_value(formatter, &value);
+  gstd_iformatter_set_value (formatter, &value);
   g_value_unset (&value);
-  
+
   gstd_iformatter_end_object (formatter);
 
   gstd_iformatter_set_member_name (formatter, "values");
   gstd_iformatter_begin_object (formatter);
 
-  gstd_iformatter_set_member_name(formatter, "jitter");
+  gstd_iformatter_set_member_name (formatter, "jitter");
   g_value_init (&value, G_TYPE_INT64);
   g_value_set_int64 (&value, jitter);
-  gstd_iformatter_set_value(formatter, &value);
+  gstd_iformatter_set_value (formatter, &value);
   g_value_unset (&value);
 
-  gstd_iformatter_set_member_name(formatter, "proportion");
+  gstd_iformatter_set_member_name (formatter, "proportion");
   g_value_init (&value, G_TYPE_DOUBLE);
   g_value_set_double (&value, proportion);
-  gstd_iformatter_set_value(formatter, &value);
+  gstd_iformatter_set_value (formatter, &value);
   g_value_unset (&value);
 
-  gstd_iformatter_set_member_name(formatter, "quality");
+  gstd_iformatter_set_member_name (formatter, "quality");
   g_value_init (&value, G_TYPE_INT);
   g_value_set_int (&value, quality);
-  gstd_iformatter_set_value(formatter, &value);
+  gstd_iformatter_set_value (formatter, &value);
   g_value_unset (&value);
-  
+
   gstd_iformatter_end_object (formatter);
 
   gstd_iformatter_set_member_name (formatter, "stats");
   gstd_iformatter_begin_object (formatter);
 
-  gstd_iformatter_set_member_name(formatter, "format");
+  gstd_iformatter_set_member_name (formatter, "format");
   g_value_init (&value, G_TYPE_INT);
   g_value_set_int (&value, format);
-  gstd_iformatter_set_value(formatter, &value);
+  gstd_iformatter_set_value (formatter, &value);
   g_value_unset (&value);
 
-  gstd_iformatter_set_member_name(formatter, "processed");
+  gstd_iformatter_set_member_name (formatter, "processed");
   g_value_init (&value, G_TYPE_UINT64);
   g_value_set_uint64 (&value, processed);
-  gstd_iformatter_set_value(formatter, &value);
+  gstd_iformatter_set_value (formatter, &value);
   g_value_unset (&value);
 
-  gstd_iformatter_set_member_name(formatter, "dropped");
+  gstd_iformatter_set_member_name (formatter, "dropped");
   g_value_init (&value, G_TYPE_UINT64);
   g_value_set_uint64 (&value, dropped);
-  gstd_iformatter_set_value(formatter, &value);
+  gstd_iformatter_set_value (formatter, &value);
   g_value_unset (&value);
-  
+
   gstd_iformatter_end_object (formatter);
 
   return GSTD_EOK;

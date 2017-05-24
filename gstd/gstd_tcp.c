@@ -111,26 +111,26 @@ static GstdReturnCode gstd_tcp_list_elements (GstdSession *, gchar *,
     gchar *, gchar **);
 static GstdReturnCode gstd_tcp_list_properties (GstdSession *, gchar *,
     gchar *, gchar **);
-static GstdReturnCode gstd_tcp_bus_read (GstdSession*, gchar *, gchar *,
+static GstdReturnCode gstd_tcp_bus_read (GstdSession *, gchar *, gchar *,
     gchar **);
-static GstdReturnCode gstd_tcp_bus_filter (GstdSession*, gchar *, gchar *,
+static GstdReturnCode gstd_tcp_bus_filter (GstdSession *, gchar *, gchar *,
     gchar **);
-static GstdReturnCode gstd_tcp_bus_timeout (GstdSession*, gchar *, gchar *,
+static GstdReturnCode gstd_tcp_bus_timeout (GstdSession *, gchar *, gchar *,
     gchar **);
-static GstdReturnCode gstd_tcp_event_eos (GstdSession*, gchar *, gchar *,
+static GstdReturnCode gstd_tcp_event_eos (GstdSession *, gchar *, gchar *,
     gchar **);
-static GstdReturnCode gstd_tcp_event_seek (GstdSession*, gchar *, gchar *,
+static GstdReturnCode gstd_tcp_event_seek (GstdSession *, gchar *, gchar *,
     gchar **);
-static GstdReturnCode gstd_tcp_event_flush_start (GstdSession*, gchar *, gchar *,
-    gchar **);
-static GstdReturnCode gstd_tcp_event_flush_stop (GstdSession*, gchar *, gchar *,
-    gchar **);
+static GstdReturnCode gstd_tcp_event_flush_start (GstdSession *, gchar *,
+    gchar *, gchar **);
+static GstdReturnCode gstd_tcp_event_flush_stop (GstdSession *, gchar *,
+    gchar *, gchar **);
 
-static GstdReturnCode gstd_tcp_debug_enable (GstdSession*, gchar *, gchar *,
+static GstdReturnCode gstd_tcp_debug_enable (GstdSession *, gchar *, gchar *,
     gchar **);
-static GstdReturnCode gstd_tcp_debug_threshold (GstdSession*, gchar *, gchar *,
+static GstdReturnCode gstd_tcp_debug_threshold (GstdSession *, gchar *, gchar *,
     gchar **);
-static GstdReturnCode gstd_tcp_debug_color (GstdSession*, gchar *, gchar *,
+static GstdReturnCode gstd_tcp_debug_color (GstdSession *, gchar *, gchar *,
     gchar **);
 
 static void gstd_tcp_set_property (GObject *, guint, const GValue *,
@@ -325,13 +325,14 @@ gstd_tcp_callback (GSocketService * service,
   g_free (message);
 
   /* Prepend the code to the output */
-  description = gstd_return_code_to_string(ret);
+  description = gstd_return_code_to_string (ret);
   response =
-      g_strdup_printf ("{\n  \"code\" : %d,\n  \"description\" : \"%s\",\n  \"response\" : %s\n}", ret, description,
-      output ? output : "null");
+      g_strdup_printf
+      ("{\n  \"code\" : %d,\n  \"description\" : \"%s\",\n  \"response\" : %s\n}",
+      ret, description, output ? output : "null");
   g_free (output);
 
-  g_output_stream_write (ostream, response, strlen(response)+1, NULL, NULL);
+  g_output_stream_write (ostream, response, strlen (response) + 1, NULL, NULL);
   g_free (response);
 
   return FALSE;
@@ -508,7 +509,7 @@ gstd_tcp_update (GstdSession * session, GstdObject * obj, gchar * args,
 
   /* Serialize the updated object */
   gstd_object_to_string (obj, response);
- out:
+out:
   {
     return ret;
   }
@@ -796,7 +797,9 @@ gstd_tcp_list_properties (GstdSession * session, gchar * action, gchar * args,
   check_argument (tokens[0], GSTD_BAD_COMMAND);
   check_argument (tokens[1], GSTD_BAD_COMMAND);
 
-  uri = g_strdup_printf ("/pipelines/%s/elements/%s/properties", tokens[0], tokens[1]);
+  uri =
+      g_strdup_printf ("/pipelines/%s/elements/%s/properties", tokens[0],
+      tokens[1]);
   ret = gstd_tcp_parse_raw_cmd (session, "read", uri, response);
 
   g_free (uri);
@@ -806,8 +809,8 @@ gstd_tcp_list_properties (GstdSession * session, gchar * action, gchar * args,
 }
 
 static GstdReturnCode
-gstd_tcp_bus_read (GstdSession *session, gchar * action,
-    gchar *pipeline, gchar **response)
+gstd_tcp_bus_read (GstdSession * session, gchar * action,
+    gchar * pipeline, gchar ** response)
 {
   GstdReturnCode ret;
   gchar *uri;
@@ -825,8 +828,8 @@ gstd_tcp_bus_read (GstdSession *session, gchar * action,
 }
 
 static GstdReturnCode
-gstd_tcp_bus_filter (GstdSession *session, gchar *action,
-    gchar *args, gchar **response)
+gstd_tcp_bus_filter (GstdSession * session, gchar * action,
+    gchar * args, gchar ** response)
 {
   GstdReturnCode ret;
   gchar *uri;
@@ -850,8 +853,8 @@ gstd_tcp_bus_filter (GstdSession *session, gchar *action,
 }
 
 static GstdReturnCode
-gstd_tcp_bus_timeout (GstdSession *session, gchar *action, gchar *args,
-    gchar **response)
+gstd_tcp_bus_timeout (GstdSession * session, gchar * action, gchar * args,
+    gchar ** response)
 {
   GstdReturnCode ret;
   gchar *uri;
@@ -875,8 +878,8 @@ gstd_tcp_bus_timeout (GstdSession *session, gchar *action, gchar *args,
 }
 
 static GstdReturnCode
-gstd_tcp_event_eos (GstdSession *session, gchar *action, gchar *pipeline,
-    gchar **response)
+gstd_tcp_event_eos (GstdSession * session, gchar * action, gchar * pipeline,
+    gchar ** response)
 {
   GstdReturnCode ret;
   gchar *uri;
@@ -894,8 +897,8 @@ gstd_tcp_event_eos (GstdSession *session, gchar *action, gchar *pipeline,
 }
 
 static GstdReturnCode
-gstd_tcp_event_seek (GstdSession *session, gchar *action, gchar *args,
-    gchar **response)
+gstd_tcp_event_seek (GstdSession * session, gchar * action, gchar * args,
+    gchar ** response)
 {
   GstdReturnCode ret;
   gchar *uri;
@@ -919,8 +922,8 @@ gstd_tcp_event_seek (GstdSession *session, gchar *action, gchar *args,
 }
 
 static GstdReturnCode
-gstd_tcp_event_flush_start (GstdSession *session, gchar *action, gchar *pipeline,
-    gchar **response)
+gstd_tcp_event_flush_start (GstdSession * session, gchar * action,
+    gchar * pipeline, gchar ** response)
 {
   GstdReturnCode ret;
   gchar *uri;
@@ -938,8 +941,8 @@ gstd_tcp_event_flush_start (GstdSession *session, gchar *action, gchar *pipeline
 }
 
 static GstdReturnCode
-gstd_tcp_event_flush_stop (GstdSession *session, gchar *action, gchar *args,
-    gchar **response)
+gstd_tcp_event_flush_stop (GstdSession * session, gchar * action, gchar * args,
+    gchar ** response)
 {
   GstdReturnCode ret;
   gchar *uri;
@@ -953,7 +956,9 @@ gstd_tcp_event_flush_stop (GstdSession *session, gchar *action, gchar *args,
   check_argument (tokens[0], GSTD_BAD_COMMAND);
   // We don't check for the second token since we want to allow defaults
 
-  uri = g_strdup_printf ("/pipelines/%s/event flush_stop %s", tokens[0], tokens[1]);
+  uri =
+      g_strdup_printf ("/pipelines/%s/event flush_stop %s", tokens[0],
+      tokens[1]);
   ret = gstd_tcp_parse_raw_cmd (session, "create", uri, response);
 
   g_free (uri);
@@ -963,8 +968,8 @@ gstd_tcp_event_flush_stop (GstdSession *session, gchar *action, gchar *args,
 }
 
 static GstdReturnCode
-gstd_tcp_debug_enable (GstdSession *session, gchar *action, gchar *enabled,
-    gchar **response)
+gstd_tcp_debug_enable (GstdSession * session, gchar * action, gchar * enabled,
+    gchar ** response)
 {
   GstdReturnCode ret;
   gchar *uri;
@@ -983,8 +988,8 @@ gstd_tcp_debug_enable (GstdSession *session, gchar *action, gchar *enabled,
 }
 
 static GstdReturnCode
-gstd_tcp_debug_threshold (GstdSession *session, gchar *action, gchar *threshold,
-    gchar **response)
+gstd_tcp_debug_threshold (GstdSession * session, gchar * action,
+    gchar * threshold, gchar ** response)
 {
   GstdReturnCode ret;
   gchar *uri;
@@ -1003,8 +1008,8 @@ gstd_tcp_debug_threshold (GstdSession *session, gchar *action, gchar *threshold,
 }
 
 static GstdReturnCode
-gstd_tcp_debug_color (GstdSession *session, gchar *action, gchar *colored,
-    gchar **response)
+gstd_tcp_debug_color (GstdSession * session, gchar * action, gchar * colored,
+    gchar ** response)
 {
   GstdReturnCode ret;
   gchar *uri;

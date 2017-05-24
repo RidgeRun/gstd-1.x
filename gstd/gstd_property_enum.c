@@ -24,7 +24,7 @@
 #include "gstd_property_enum.h"
 
 /* Gstd Property debugging category */
-GST_DEBUG_CATEGORY_STATIC(gstd_property_enum_debug);
+GST_DEBUG_CATEGORY_STATIC (gstd_property_enum_debug);
 #define GST_CAT_DEFAULT gstd_property_enum_debug
 
 #define GSTD_DEBUG_DEFAULT_LEVEL GST_LEVEL_INFO
@@ -36,33 +36,32 @@ G_DEFINE_TYPE (GstdPropertyEnum, gstd_property_enum, GSTD_TYPE_PROPERTY)
 static GstdReturnCode
 gstd_property_enum_update (GstdObject * object, const gchar * arg);
 
-static void
-gstd_property_enum_class_init (GstdPropertyEnumClass *klass)
+static void gstd_property_enum_class_init (GstdPropertyEnumClass * klass)
 {
   guint debug_color;
   GstdObjectClass *oclass = GSTD_OBJECT_CLASS (klass);
 
-  oclass->update = GST_DEBUG_FUNCPTR(gstd_property_enum_update);
+  oclass->update = GST_DEBUG_FUNCPTR (gstd_property_enum_update);
 
   /* Initialize debug category with nice colors */
   debug_color = GST_DEBUG_FG_BLACK | GST_DEBUG_BOLD | GST_DEBUG_BG_WHITE;
-  GST_DEBUG_CATEGORY_INIT (gstd_property_enum_debug, "gstdpropertyenum", debug_color,
-			   "Gstd Property Enum category");
+  GST_DEBUG_CATEGORY_INIT (gstd_property_enum_debug, "gstdpropertyenum",
+      debug_color, "Gstd Property Enum category");
 
 }
 
 static void
-gstd_property_enum_init (GstdPropertyEnum *self)
+gstd_property_enum_init (GstdPropertyEnum * self)
 {
-  GST_INFO_OBJECT(self, "Initializing property enum");
+  GST_INFO_OBJECT (self, "Initializing property enum");
 }
 
 static GstdReturnCode
 gstd_property_enum_update (GstdObject * object, const gchar * value)
 {
   GstdReturnCode ret = GSTD_EOK;
-  GstdPropertyEnum * self;
-  GstdProperty * prop;
+  GstdPropertyEnum *self;
+  GstdProperty *prop;
   GParamSpec *pspec;
   GEnumClass *c;
   GEnumValue *e;
@@ -76,8 +75,8 @@ gstd_property_enum_update (GstdObject * object, const gchar * value)
 
   g_return_val_if_fail (self->type != G_TYPE_NONE, GSTD_MISSING_INITIALIZATION);
 
-  pspec = g_object_class_find_property (G_OBJECT_GET_CLASS(prop->target),
-      GSTD_OBJECT_NAME(prop));
+  pspec = g_object_class_find_property (G_OBJECT_GET_CLASS (prop->target),
+      GSTD_OBJECT_NAME (prop));
 
   c = g_type_class_ref (pspec->value_type);
 
@@ -98,16 +97,16 @@ gstd_property_enum_update (GstdObject * object, const gchar * value)
   d = g_ascii_strtoll (value, NULL, 10);
   if (d || !errno) {
     g_object_set (prop->target, pspec->name, d, NULL);
-    goto error; //Not an error
+    goto error;                 //Not an error
   }
 
   ret = GSTD_BAD_VALUE;
   goto error;
 
- out:
+out:
   g_object_set (prop->target, pspec->name, e->value, NULL);
 
- error:
+error:
   g_type_class_unref (c);
   return ret;
 }

@@ -44,7 +44,7 @@ G_BEGIN_DECLS
 
 typedef struct _GstdPropertyInt GstdPropertyInt;
 typedef struct _GstdPropertyIntClass GstdPropertyIntClass;
-GType gstd_property_int_get_type();
+GType gstd_property_int_get_type ();
 
 
 struct _GstdPropertyInt
@@ -54,10 +54,11 @@ struct _GstdPropertyInt
 
 struct _GstdPropertyIntClass
 {
-    GstdPropertyClass parent_class;
+  GstdPropertyClass parent_class;
 };
 
-GstdReturnCode gstd_property_int_to_string (GstdObject * self, gchar ** outstring);
+GstdReturnCode gstd_property_int_to_string (GstdObject * self,
+    gchar ** outstring);
 
 G_END_DECLS
 

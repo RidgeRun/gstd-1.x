@@ -52,9 +52,9 @@ gstd_return_code_to_string (GstdReturnCode code)
     [GSTD_MISSING_NAME] = "Name is missing"
   };
 
-  const gint size = sizeof (code_description)/sizeof(gchar *);
+  const gint size = sizeof (code_description) / sizeof (gchar *);
 
-  g_return_val_if_fail ( 0 <= code, "(invalid code)");
+  g_return_val_if_fail (0 <= code, "(invalid code)");
   g_return_val_if_fail (size > code, "(invalid code)");
 
   return code_description[code];

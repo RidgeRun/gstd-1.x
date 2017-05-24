@@ -45,8 +45,7 @@ struct _GstdEventHandlerClass
 static void
 gstd_event_handler_set_property (GObject *,
     guint, const GValue *, GParamSpec *);
-static void
-gstd_event_handler_dispose (GObject *);
+static void gstd_event_handler_dispose (GObject *);
 
 G_DEFINE_TYPE (GstdEventHandler, gstd_event_handler, GSTD_TYPE_OBJECT)
 
@@ -55,8 +54,7 @@ GST_DEBUG_CATEGORY_STATIC (gstd_event_handler_debug);
 #define GST_CAT_DEFAULT gstd_event_handler_debug
 #define GSTD_DEBUG_DEFAULT_LEVEL GST_LEVEL_INFO
 
-static void
-gstd_event_handler_class_init (GstdEventHandlerClass * klass)
+static void gstd_event_handler_class_init (GstdEventHandlerClass * klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
   GParamSpec *properties[N_PROPERTIES] = { NULL, };
@@ -94,17 +92,17 @@ gstd_event_handler_set_property (GObject * object,
 
   switch (property_id) {
     case PROP_RECEIVER:
-      {
-	GstdICreator * creator;
-	
-	self->receiver = g_value_get_object (value);
-	GST_INFO_OBJECT (self, "Changed receiver to %p", self->receiver);
+    {
+      GstdICreator *creator;
 
-	creator = GSTD_ICREATOR(g_object_new (GSTD_TYPE_EVENT_CREATOR,
-            "receiver", self->receiver, NULL));
-	gstd_object_set_creator (GSTD_OBJECT(self), creator);
-	break;
-      }
+      self->receiver = g_value_get_object (value);
+      GST_INFO_OBJECT (self, "Changed receiver to %p", self->receiver);
+
+      creator = GSTD_ICREATOR (g_object_new (GSTD_TYPE_EVENT_CREATOR,
+              "receiver", self->receiver, NULL));
+      gstd_object_set_creator (GSTD_OBJECT (self), creator);
+      break;
+    }
     default:
       /* We don't have any other property... */
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -129,5 +127,5 @@ GstdEventHandler *
 gstd_event_handler_new (GObject * receiver)
 {
   return GSTD_EVENT_HANDLER (g_object_new (GSTD_TYPE_EVENT_HANDLER, "receiver",
-      receiver, "name", "event_handler", NULL));
+          receiver, "name", "event_handler", NULL));
 }

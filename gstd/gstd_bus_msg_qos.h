@@ -42,7 +42,7 @@ G_BEGIN_DECLS
 
 typedef struct _GstdBusMsgQos GstdBusMsgQos;
 typedef struct _GstdBusMsgQosClass GstdBusMsgQosClass;
-GType gstd_bus_msg_qos_get_type();
+GType gstd_bus_msg_qos_get_type ();
 
 G_END_DECLS
 

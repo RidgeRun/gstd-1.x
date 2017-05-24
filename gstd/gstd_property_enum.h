@@ -44,7 +44,7 @@ G_BEGIN_DECLS
 
 typedef struct _GstdPropertyEnum GstdPropertyEnum;
 typedef struct _GstdPropertyEnumClass GstdPropertyEnumClass;
-GType gstd_property_enum_get_type();
+GType gstd_property_enum_get_type ();
 
 
 struct _GstdPropertyEnum
@@ -56,7 +56,7 @@ struct _GstdPropertyEnum
 
 struct _GstdPropertyEnumClass
 {
-    GstdPropertyClass parent_class;
+  GstdPropertyClass parent_class;
 };
 
 G_END_DECLS

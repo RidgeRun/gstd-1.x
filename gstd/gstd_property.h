@@ -44,20 +44,21 @@ G_BEGIN_DECLS
 
 typedef struct _GstdProperty GstdProperty;
 typedef struct _GstdPropertyClass GstdPropertyClass;
-GType gstd_property_get_type();
+GType gstd_property_get_type ();
 
 struct _GstdProperty
 {
   GstdObject parent;
 
-  GObject * target;
+  GObject *target;
 };
 
 struct _GstdPropertyClass
 {
   GstdObjectClass parent_class;
 
-  void (* add_value) (GstdProperty * prop, GstdIFormatter * formatter, GValue * value);
+  void (*add_value) (GstdProperty * prop, GstdIFormatter * formatter,
+      GValue * value);
 };
 
 G_END_DECLS

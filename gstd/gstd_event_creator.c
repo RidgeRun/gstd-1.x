@@ -146,12 +146,12 @@ gstd_event_creator_create (GstdICreator * iface, const gchar * name,
     const gchar * description, GstdObject ** out)
 {
   GstdEventCreator *self;
-  
+
   g_return_val_if_fail (iface, GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (out, GSTD_NULL_ARGUMENT);
 
-  self = GSTD_EVENT_CREATOR(iface);
-  
+  self = GSTD_EVENT_CREATOR (iface);
+
   /* We don't return the newly created event */
   *out = NULL;
 
