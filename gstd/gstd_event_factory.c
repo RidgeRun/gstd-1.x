@@ -27,7 +27,6 @@
 
 #include "gstd_event_factory.h"
 
-
 #define GSTD_EVENT_FACTORY_SEEK_RATE_DEFAULT 1.0
 #define GSTD_EVENT_FACTORY_SEEK_FORMAT_DEFAULT GST_FORMAT_TIME
 #define GSTD_EVENT_FACTORY_SEEK_FLAGS_DEFAULT GST_SEEK_FLAG_FLUSH
@@ -36,8 +35,6 @@
 #define GSTD_EVENT_FACTORY_SEEK_STOP_TYPE_DEFAULT GST_SEEK_TYPE_SET
 #define GSTD_EVENT_FACTORY_SEEK_STOP_DEFAULT GST_CLOCK_TIME_NONE
 #define GSTD_EVENT_FACTORY_FLUSH_STOP_RESET_DEFAULT TRUE
-#define GSTD_EVENT_ERROR NULL
-
 
 typedef enum _GstdEventType GstdEventType;
 
@@ -91,7 +88,7 @@ gstd_event_factory_make (const gchar * name, const gchar * description)
   GstEvent *event = NULL;
   GstdEventType type;
 
-  g_return_val_if_fail (name, GSTD_EVENT_ERROR);
+  g_return_val_if_fail (name, NULL);
 
   type = gstd_event_factory_parse_event (name);
 
@@ -109,7 +106,7 @@ gstd_event_factory_make (const gchar * name, const gchar * description)
       event = gstd_event_factory_make_flush_stop_event(description);
       break;
     default:
-      event = GSTD_EVENT_ERROR;
+      event = NULL;
       break;
   }
 
@@ -165,7 +162,7 @@ gstd_event_factory_make_seek_event (const gchar * description)
   gint64 start = GSTD_EVENT_FACTORY_SEEK_START_DEFAULT;
   GstSeekType stop_type = GSTD_EVENT_FACTORY_SEEK_STOP_TYPE_DEFAULT;
   gint64 stop = GSTD_EVENT_FACTORY_SEEK_STOP_DEFAULT;
-  GstEvent *event = GSTD_EVENT_ERROR;
+  GstEvent *event = NULL;
   gchar **tokens = NULL;
 
   if (NULL != description) {
@@ -255,7 +252,7 @@ gstd_event_factory_make_flush_stop_event (const gchar * description)
 
   if (NULL != description) {
     if (!gstd_ascii_to_boolean(description, &reset_time)){
-      return GSTD_EVENT_ERROR;
+      return NULL;
     }
   }
 
