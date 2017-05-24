@@ -322,7 +322,7 @@ gstd_pipeline_set_property (GObject * object,
       break;
     case PROP_STATE:
       if (self->state) {
-	g_object_unref (self->state);
+        g_object_unref (self->state);
       }
       self->state = g_value_get_object (value);
       break;

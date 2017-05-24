@@ -209,8 +209,7 @@ gstd_debug_set_property (GObject * object,
       /* Since debug is actived when the threshold is set, then set the threshold
        * value if debug is active
        */
-      if (TRUE == gst_debug_is_active ())
-      {
+      if (TRUE == gst_debug_is_active ()) {
         gst_debug_set_threshold_from_string (self->threshold, TRUE);
       }
       break;
