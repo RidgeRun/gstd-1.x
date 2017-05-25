@@ -13,6 +13,9 @@ GIO_REQUIRED=2.44.1
 dnl required version of gio
 GJSON_REQUIRED=0.16.2
 
+dnl required version of libdaemon
+LIBD_REQUIRED=0.14
+
 AC_CONFIG_SRCDIR([gstd/gstd.c])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIRS([m4])
@@ -119,6 +122,21 @@ else
   AC_SUBST(READLINE_LIBS, $ax_cv_lib_readline)
 fi
 
+PKG_CHECK_MODULES(LIBD, [
+    libdaemon >= $LIBD_REQUIRED
+  ], [
+    AC_SUBST(LIBD_CFLAGS)
+    AC_SUBST(LIBD_LIBS)
+  ], [
+  AC_MSG_ERROR([
+    Can't find libdaemon development packages:
+
+      libdaemon-dev >= $LIBD_REQUIRED
+
+    Please make sure you have the necessary libdaemon-dev
+    development headers installed.
+  ])
+])
 
 dnl check if compiler understands -Wall (if yes, add -Wall to GST_CFLAGS)
 AC_MSG_CHECKING([to see if compiler understands -Wall])
