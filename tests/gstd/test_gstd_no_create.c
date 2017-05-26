@@ -37,6 +37,7 @@ const gchar *target_node[] = {
   "/pipelines/p0/name",
   "/pipelines/p0/description",
   "/pipelines/p0/state",
+  "/pipelines/count",
   "/debug",
   "/debug/name",
   "/debug/enable",
