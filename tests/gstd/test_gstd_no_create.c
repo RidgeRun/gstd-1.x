@@ -25,6 +25,16 @@
 
 #include "gstd_session.h"
 
+const gchar *target_node[] = {
+  "/pipelines/p0",
+  "/pipelines/p0/elements",
+  "/pipelines/p0/elements/fakesrc0",
+  "/pipelines/p0/elements/fakesrc0/properties",
+  "/pipelines/p0/elements/fakesrc0/properties/format",
+  "/pipelines/p0/bus",
+  "/pipelines/p0/bus/timeout",
+  "/pipelines/p0/bus/types"
+};
 
 GST_START_TEST (test_no_create)
 {
@@ -41,86 +51,17 @@ GST_START_TEST (test_no_create)
   fail_if (ret);
   gst_object_unref (node);
 
-  /* Test create at the pipeline level */
-  ret = gstd_get_by_uri (test_session, "/pipelines/p0", &node);
-  fail_if (ret);
-  fail_if (NULL == node);
 
-  ret = gstd_object_create (node, NULL, NULL);
-  fail_if (GSTD_NO_CREATE != ret);
-  gst_object_unref (node);
+  /* Tests */
+  for (int i = 0; i < sizeof(target_node)/sizeof(target_node[0]); i++) {
+    ret = gstd_get_by_uri (test_session, target_node[i], &node);
+    fail_if (ret);
+    fail_if (NULL == node);
 
-  /* Test create at the elements level */
-  ret = gstd_get_by_uri (test_session, "/pipelines/p0/elements", &node);
-  fail_if (ret);
-  fail_if (NULL == node);
-
-  ret = gstd_object_create (node, NULL, NULL);
-  fail_if (GSTD_NO_CREATE != ret);
-  gst_object_unref (node);
-
-  /* Test create at the element level */
-  ret =
-      gstd_get_by_uri (test_session, "/pipelines/p0/elements/fakesrc0", &node);
-  fail_if (ret);
-  fail_if (NULL == node);
-
-  ret = gstd_object_create (node, NULL, NULL);
-  fail_if (GSTD_NO_CREATE != ret);
-  gst_object_unref (node);
-
-  /* Test create at the element properties level */
-  ret =
-      gstd_get_by_uri (test_session,
-      "/pipelines/p0/elements/fakesrc0/properties", &node);
-  fail_if (ret);
-  fail_if (NULL == node);
-
-  ret = gstd_object_create (node, NULL, NULL);
-  fail_if (GSTD_NO_CREATE != ret);
-  gst_object_unref (node);
-
-  /* Test create at the element properties level */
-  ret =
-      gstd_get_by_uri (test_session,
-      "/pipelines/p0/elements/fakesrc0/properties/format", &node);
-  fail_if (ret);
-  fail_if (NULL == node);
-
-  ret = gstd_object_create (node, NULL, NULL);
-  fail_if (GSTD_NO_CREATE != ret);
-
-  gst_object_unref (node);
-
-  /* Test create at the pipeline bus level */
-  ret = gstd_get_by_uri (test_session, "/pipelines/p0/bus", &node);
-  fail_if (ret);
-  fail_if (NULL == node);
-
-  ret = gstd_object_create (node, NULL, NULL);
-  fail_if (GSTD_NO_CREATE != ret);
-
-  gst_object_unref (node);
-
-  /* Test create at the pipeline bus timeout parameter level */
-  ret = gstd_get_by_uri (test_session, "/pipelines/p0/bus/timeout", &node);
-  fail_if (ret);
-  fail_if (NULL == node);
-
-  ret = gstd_object_create (node, NULL, NULL);
-  fail_if (GSTD_NO_CREATE != ret);
-
-  gst_object_unref (node);
-
-  /* Test create at the pipeline bus types parameter level */
-  ret = gstd_get_by_uri (test_session, "/pipelines/p0/bus/types", &node);
-  fail_if (ret);
-  fail_if (NULL == node);
-
-  ret = gstd_object_create (node, NULL, NULL);
-  fail_if (GSTD_NO_CREATE != ret);
-
-  gst_object_unref (node);
+    ret = gstd_object_create (node, NULL, NULL);
+    fail_if (GSTD_NO_CREATE != ret);
+    gst_object_unref (node);
+  }
 
   gst_object_unref (test_session);
 }
