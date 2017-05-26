@@ -33,7 +33,13 @@ const gchar *target_node[] = {
   "/pipelines/p0/elements/fakesrc0/properties/format",
   "/pipelines/p0/bus",
   "/pipelines/p0/bus/timeout",
-  "/pipelines/p0/bus/types"
+  "/pipelines/p0/bus/types",
+  "/debug",
+  "/debug/name",
+  "/debug/enable",
+  "/debug/color",
+  "/debug/threshold",
+  "/debug/flags"
 };
 
 GST_START_TEST (test_no_create)
