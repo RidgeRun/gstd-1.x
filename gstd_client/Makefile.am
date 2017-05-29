@@ -1,5 +1,5 @@
-bin_PROGRAMS = gstd-client
+bin_PROGRAMS = gst-client-@GSTD_API_VERSION@
 
-gstd_client_SOURCES = gstd_client.c
-gstd_client_CFLAGS = $(GST_CFLAGS) $(GIO_CFLAGS) $(GJSON_CFLAGS) $(READLINE_CFLAGS)
-gstd_client_LDFLAGS = $(GST_LIBS) $(GIO_LIBS) $(GJSON_LIBS) $(READLINE_LIBS)
+gst_client_@GSTD_API_VERSION@_SOURCES = gstd_client.c
+gst_client_@GSTD_API_VERSION@_CFLAGS = $(GST_CFLAGS) $(GIO_CFLAGS) $(GJSON_CFLAGS) $(READLINE_CFLAGS)
+gst_client_@GSTD_API_VERSION@_LDFLAGS = $(GST_LIBS) $(GIO_LIBS) $(GJSON_LIBS) $(READLINE_LIBS)
