@@ -142,11 +142,11 @@ gstd_state_to_string (GstdObject * obj, gchar ** outstring)
   g_free (svalue);
   g_value_unset (&value);
 
-  gstd_iformatter_set_member_name (obj->formatter, "param_spec");
+  gstd_iformatter_set_member_name (obj->formatter, "param");
   /* Describe the parameter specs using a structure */
   gstd_iformatter_begin_object (obj->formatter);
 
-  gstd_iformatter_set_member_name (obj->formatter, "blurb");
+  gstd_iformatter_set_member_name (obj->formatter, "description");
   gstd_iformatter_set_string_value (obj->formatter,
       "The state of the pipeline");
 
@@ -163,12 +163,6 @@ gstd_state_to_string (GstdObject * obj, gchar ** outstring)
   gstd_iformatter_set_string_value (obj->formatter, svalue);
 
   g_free (svalue);
-
-  gstd_iformatter_set_member_name (obj->formatter, "construct");
-  g_value_init (&value, G_TYPE_BOOLEAN);
-  g_value_set_boolean (&value, FALSE);
-  gstd_iformatter_set_value (obj->formatter, &value);
-  g_value_unset (&value);
 
   /* Close parameter specs structure */
   gstd_iformatter_end_object (obj->formatter);
