@@ -138,6 +138,22 @@ PKG_CHECK_MODULES(LIBD, [
   ])
 ])
 
+dnl allow the user to specify the location of the PID files
+default=${localstatedir}/run/gstd/
+AC_ARG_WITH([gstd-runstatedir],
+  [AS_HELP_STRING([--with-gstd-runstatedir],
+    [Specify the location of the gstd's PID file @<:@default=${default}@:>@])],
+  [AC_SUBST(gstdrunstatedir, [$with_gstd_runstatedir])],
+  [AC_SUBST(gstdrunstatedir, [$default])])
+
+dnl allow the user to specify the location of the log files
+default=${localstatedir}/log/gstd/
+AC_ARG_WITH([gstd-logstatedir],
+  [AS_HELP_STRING([--with-gstd-logstatedir],
+    [Specify the location of gstd's log files @<:@default=${default}@:>@])],
+  [AC_SUBST([gstdlogstatedir], [$with_gstd_logstatedir])],
+  [AC_SUBST([gstdlogstatedir], [$default])])
+
 dnl check if compiler understands -Wall (if yes, add -Wall to GST_CFLAGS)
 AC_MSG_CHECKING([to see if compiler understands -Wall])
 save_CFLAGS="$CFLAGS"
