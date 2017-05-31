@@ -73,7 +73,7 @@ GST_DEBUG_CATEGORY_STATIC (gstd_state_debug);
  * A wrapper for the conventional state
  */
 
-G_DEFINE_TYPE (GstdState, gstd_state, GSTD_TYPE_OBJECT)
+G_DEFINE_TYPE (GstdState, gstd_state, GSTD_TYPE_OBJECT);
 
 /* VTable */
 static GstdReturnCode
@@ -83,7 +83,8 @@ gstd_state_update (GstdObject * object, const gchar * sstate);
 static void gstd_state_dispose (GObject * obj);
 static GstState gstd_state_read (GstdState * state);
 
-static void gstd_state_class_init (GstdStateClass * klass)
+static void
+gstd_state_class_init (GstdStateClass * klass)
 {
   GObjectClass *oclass = G_OBJECT_CLASS (klass);
   GstdObjectClass *gstdc = GSTD_OBJECT_CLASS (klass);

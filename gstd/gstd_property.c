@@ -42,14 +42,13 @@ GST_DEBUG_CATEGORY_STATIC (gstd_property_debug);
  * A wrapper for the conventional property
  */
 
-G_DEFINE_TYPE (GstdProperty, gstd_property, GSTD_TYPE_OBJECT)
+G_DEFINE_TYPE (GstdProperty, gstd_property, GSTD_TYPE_OBJECT);
 
 /* VTable */
 static void
 gstd_property_get_property (GObject *, guint, GValue *, GParamSpec *);
 static void
-gstd_property_set_property (GObject *, guint, const GValue *,
-    GParamSpec *);
+gstd_property_set_property (GObject *, guint, const GValue *, GParamSpec *);
 static void gstd_property_dispose (GObject *);
 static GstdReturnCode
 gstd_property_to_string (GstdObject * obj, gchar ** outstring);
@@ -59,7 +58,8 @@ gstd_property_add_value_default (GstdProperty * self,
 static GstdReturnCode gstd_property_update_default (GstdObject * object,
     const gchar * arg);
 
-static void gstd_property_class_init (GstdPropertyClass * klass)
+static void
+gstd_property_class_init (GstdPropertyClass * klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
   GstdObjectClass *gstdc = GSTD_OBJECT_CLASS (klass);
