@@ -30,6 +30,9 @@ dnl required version of libtool
 LT_PREREQ([2.2.6])
 LT_INIT
 
+GSTD_API_VERSION=1.0
+AC_SUBST(GSTD_API_VERSION)
+
 dnl error out if we can't find pkg-config
 AC_CHECK_PROG(HAVE_PKGCONFIG, pkg-config, [ ], [
   AC_MSG_ERROR([You need to have pkg-config installed or set the PATH.])
@@ -135,7 +138,7 @@ dnl =======================================================================
 AC_CONFIG_FILES([
 Makefile
 gstd/Makefile
-gstd_client/Makefile
+gst_client/Makefile
 tests/Makefile
 tests/gstd/Makefile
 docs/Makefile
