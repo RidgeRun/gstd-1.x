@@ -92,3 +92,10 @@ gstdinclude_HEADERS = \
 		  gstd_state.h
 
 noinst_HEADERS = 
+
+# Create an open area for our pid and log files
+install-data-hook: $(DESTDIR)$(gstdrunstatedir) $(DESTDIR)$(gstdlogstatedir)
+
+$(DESTDIR)@gstdrunstatedir@ $(DESTDIR)@gstdlogstatedir@:
+	$(MKDIR_P) $@
+	chmod a+w $@
