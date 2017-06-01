@@ -28,6 +28,7 @@
 #include "gstd_session.h"
 #include "gstd_ipc.h"
 #include "gstd_tcp.h"
+#include "gstd_log.h"
 
 static gboolean int_handler (gpointer user_data);
 static void ipc_add_option_groups (GstdIpc * ipc[], GType factory[],
@@ -170,6 +171,8 @@ main (gint argc, gchar * argv[])
   }
   g_option_context_free (context);
 
+  gstd_log_init ();
+
   /* Print the version and exit */
   if (version) {
     goto out;
@@ -199,6 +202,8 @@ main (gint argc, gchar * argv[])
 
   /* Stop any IPC array */
   ipc_stop (ipc_array, num_ipcs);
+
+  gstd_log_deinit ();
 
   g_object_unref (session);
   gst_deinit ();
