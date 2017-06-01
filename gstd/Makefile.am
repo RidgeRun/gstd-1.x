@@ -41,14 +41,26 @@ libgstd_core_la_SOURCES = gstd_session.c		\
 			  gstd_return_codes.c		\
 			  gstd_state.c
 
-libgstd_core_la_CFLAGS = $(GST_CFLAGS) $(GIO_CFLAGS) $(GJSON_CFLAGS)
+libgstd_core_la_CFLAGS = $(GST_CFLAGS)					\
+			 $(GIO_CFLAGS)					\
+			 $(GJSON_CFLAGS)				\
+			 -DGSTD_LOG_STATE_DIR=\"$(gstdlogstatedir)\"	\
+			 -DGSTD_RUN_STATE_DIR=\"$(gstdrunstatedir)\"
+
 libgstd_core_la_LDFLAGS = $(GST_LIBS) $(GIO_LIBS) $(GJSON_LIBS)
 
 # Standalone application that uses libgstd-core
 bin_PROGRAMS = gstd
 
-gstd_SOURCES = gstd.c
-gstd_CFLAGS = $(GST_CFLAGS) $(GIO_CFLAGS) $(GJSON_CFLAGS) $(LIBD_CFLAGS)
+gstd_SOURCES =  gstd.c
+
+gstd_CFLAGS = $(GST_CFLAGS)					\
+	      $(GIO_CFLAGS)					\
+	      $(GJSON_CFLAGS)					\
+	      $(LIBD_CFLAGS)					\
+	      -DGSTD_LOG_STATE_DIR=\"$(gstdlogstatedir)\"	\
+	      -DGSTD_RUN_STATE_DIR=\"$(gstdrunstatedir)\"
+
 gstd_LDFLAGS = $(GST_LIBS) $(GIO_LIBS) $(GJSON_LIBS) $(LIBD_LIBS) -Wl,-rpath -Wl,$(libdir)
 gstd_LDADD = libgstd-core.la
 
