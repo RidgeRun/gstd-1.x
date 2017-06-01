@@ -83,6 +83,7 @@ gstd_ipc_init (GstdIpc * self)
   GST_INFO_OBJECT (self, "Initializing gstd IPC");
   self->enabled = FALSE;
   self->session = NULL;
+  self->parser  = NULL;
 }
 
 static void
@@ -128,8 +129,12 @@ gstd_ipc_dispose (GObject * object)
 
   if (self->session)
     g_object_unref (self->session);
-
+    
+  if (self->parser)
+    g_object_unref (self->parser);
+        
   self->session = NULL;
+  self->parser = NULL;
 
   G_OBJECT_CLASS (gstd_ipc_parent_class)->dispose (object);
 }
@@ -145,7 +150,7 @@ gstd_ipc_get_option_group (GstdIpc * ipc, GOptionGroup ** group)
 }
 
 GstdReturnCode
-gstd_ipc_start (GstdIpc * ipc, GstdSession * session)
+gstd_ipc_start (GstdIpc * ipc, GstdSession * session, GstdParser * parser)
 {
   GstdIpcClass *klass;
 
@@ -154,9 +159,10 @@ gstd_ipc_start (GstdIpc * ipc, GstdSession * session)
 
 
   ipc->session = g_object_ref (session);
+  ipc->parser  = g_object_ref (parser);
 
   klass = GSTD_IPC_GET_CLASS (ipc);
-  return klass->start (ipc, session);
+  return klass->start (ipc, session, parser);
 }
 
 GstdReturnCode

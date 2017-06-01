@@ -44,7 +44,7 @@ typedef struct _GstdTcpClass GstdTcpClass;
 GType gstd_tcp_get_type ();
 
 
-GstdReturnCode gstd_tcp_start (GstdIpc * base, GstdSession * session);
+GstdReturnCode gstd_tcp_start (GstdIpc * base, GstdSession * session, GstdParser * parser);
 
 GstdReturnCode gstd_tcp_stop (GstdIpc * base);
 
