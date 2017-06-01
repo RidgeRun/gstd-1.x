@@ -39,17 +39,30 @@ libgstd_core_la_SOURCES = gstd_session.c		\
 			  gstd_msg_type.c		\
 			  gstd_bus_msg_qos.c		\
 			  gstd_return_codes.c		\
-			  gstd_state.c
+			  gstd_state.c			\
+			  gstd_log.c
 
-libgstd_core_la_CFLAGS = $(GST_CFLAGS) $(GIO_CFLAGS) $(GJSON_CFLAGS)
+libgstd_core_la_CFLAGS = $(GST_CFLAGS)					\
+			 $(GIO_CFLAGS)					\
+			 $(GJSON_CFLAGS)				\
+			 -DGSTD_LOG_STATE_DIR=\"$(gstdlogstatedir)\"	\
+			 -DGSTD_RUN_STATE_DIR=\"$(gstdrunstatedir)\"
+
 libgstd_core_la_LDFLAGS = $(GST_LIBS) $(GIO_LIBS) $(GJSON_LIBS)
 
 # Standalone application that uses libgstd-core
 bin_PROGRAMS = gstd
 
-gstd_SOURCES = gstd.c
-gstd_CFLAGS = $(GST_CFLAGS) $(GIO_CFLAGS) $(GJSON_CFLAGS)
-gstd_LDFLAGS = $(GST_LIBS) $(GIO_LIBS) $(GJSON_LIBS) -Wl,-rpath -Wl,$(libdir)
+gstd_SOURCES =  gstd.c gstd_daemon.c
+
+gstd_CFLAGS = $(GST_CFLAGS)					\
+	      $(GIO_CFLAGS)					\
+	      $(GJSON_CFLAGS)					\
+	      $(LIBD_CFLAGS)					\
+	      -DGSTD_LOG_STATE_DIR=\"$(gstdlogstatedir)\"	\
+	      -DGSTD_RUN_STATE_DIR=\"$(gstdrunstatedir)\"
+
+gstd_LDFLAGS = $(GST_LIBS) $(GIO_LIBS) $(GJSON_LIBS) $(LIBD_LIBS) -Wl,-rpath -Wl,$(libdir)
 gstd_LDADD = libgstd-core.la
 
 gstdincludedir = $(includedir)/gstd
@@ -89,6 +102,14 @@ gstdinclude_HEADERS = \
 		  gstd_msg_reader.h		\
 		  gstd_msg_type.h		\
 		  gstd_bus_msg_qos.h		\
-		  gstd_state.h
+		  gstd_state.h			\
+		  gstd_log.h
 
-noinst_HEADERS = 
+noinst_HEADERS = gstd_daemon.h
+
+# Create an open area for our pid and log files
+install-data-hook: $(DESTDIR)$(gstdrunstatedir) $(DESTDIR)$(gstdlogstatedir)
+
+$(DESTDIR)@gstdrunstatedir@ $(DESTDIR)@gstdlogstatedir@:
+	$(MKDIR_P) $@
+	chmod a+w $@
