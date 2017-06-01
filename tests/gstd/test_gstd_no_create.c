@@ -61,9 +61,9 @@ GST_START_TEST (test_no_create)
   fail_if (ret);
   gst_object_unref (node);
 
-
+  int i;
   /* Tests */
-  for (int i = 0; i < sizeof(target_node)/sizeof(target_node[0]); i++) {
+  for (i = 0; i < sizeof(target_node)/sizeof(target_node[0]); i++) {
     ret = gstd_get_by_uri (test_session, target_node[i], &node);
     fail_if (ret);
     fail_if (NULL == node);
