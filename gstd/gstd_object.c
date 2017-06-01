@@ -265,7 +265,6 @@ gstd_object_to_string_default (GstdObject * self, gchar ** outstring)
 {
   GParamSpec **properties;
   GValue value = G_VALUE_INIT;
-  GValue bool_value = G_VALUE_INIT;
   GValue flags = G_VALUE_INIT;
   gchar *sflags;
   guint n, i;
@@ -292,7 +291,7 @@ gstd_object_to_string_default (GstdObject * self, gchar ** outstring)
     gstd_iformatter_set_member_name (self->formatter, "value");
     gstd_iformatter_set_value (self->formatter, &value);
 
-    gstd_iformatter_set_member_name (self->formatter, "param_spec");
+    gstd_iformatter_set_member_name (self->formatter, "param");
     /* Describe the parameter specs using a structure */
     gstd_iformatter_begin_object (self->formatter);
 
@@ -303,7 +302,7 @@ gstd_object_to_string_default (GstdObject * self, gchar ** outstring)
     sflags = g_strdup_value_contents (&flags);
     g_value_unset (&flags);
 
-    gstd_iformatter_set_member_name (self->formatter, "blurb");
+    gstd_iformatter_set_member_name (self->formatter, "description");
     gstd_iformatter_set_string_value (self->formatter, properties[i]->_blurb);
 
     gstd_iformatter_set_member_name (self->formatter, "type");
@@ -312,13 +311,6 @@ gstd_object_to_string_default (GstdObject * self, gchar ** outstring)
     gstd_iformatter_set_member_name (self->formatter, "access");
     gstd_iformatter_set_string_value (self->formatter, sflags);
 
-    gstd_iformatter_set_member_name (self->formatter, "construct");
-
-    g_value_init (&bool_value, G_TYPE_BOOLEAN);
-    g_value_set_boolean (&bool_value,
-        GSTD_PARAM_IS_DELETE (properties[i]->flags));
-    gstd_iformatter_set_value (self->formatter, &bool_value);
-    g_value_unset (&bool_value);
     /* Close parameter specs structure */
     gstd_iformatter_end_object (self->formatter);
 

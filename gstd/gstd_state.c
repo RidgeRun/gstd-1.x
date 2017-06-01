@@ -73,7 +73,7 @@ GST_DEBUG_CATEGORY_STATIC (gstd_state_debug);
  * A wrapper for the conventional state
  */
 
-G_DEFINE_TYPE (GstdState, gstd_state, GSTD_TYPE_OBJECT)
+G_DEFINE_TYPE (GstdState, gstd_state, GSTD_TYPE_OBJECT);
 
 /* VTable */
 static GstdReturnCode
@@ -83,7 +83,8 @@ gstd_state_update (GstdObject * object, const gchar * sstate);
 static void gstd_state_dispose (GObject * obj);
 static GstState gstd_state_read (GstdState * state);
 
-static void gstd_state_class_init (GstdStateClass * klass)
+static void
+gstd_state_class_init (GstdStateClass * klass)
 {
   GObjectClass *oclass = G_OBJECT_CLASS (klass);
   GstdObjectClass *gstdc = GSTD_OBJECT_CLASS (klass);
@@ -142,11 +143,11 @@ gstd_state_to_string (GstdObject * obj, gchar ** outstring)
   g_free (svalue);
   g_value_unset (&value);
 
-  gstd_iformatter_set_member_name (obj->formatter, "param_spec");
+  gstd_iformatter_set_member_name (obj->formatter, "param");
   /* Describe the parameter specs using a structure */
   gstd_iformatter_begin_object (obj->formatter);
 
-  gstd_iformatter_set_member_name (obj->formatter, "blurb");
+  gstd_iformatter_set_member_name (obj->formatter, "description");
   gstd_iformatter_set_string_value (obj->formatter,
       "The state of the pipeline");
 
@@ -163,12 +164,6 @@ gstd_state_to_string (GstdObject * obj, gchar ** outstring)
   gstd_iformatter_set_string_value (obj->formatter, svalue);
 
   g_free (svalue);
-
-  gstd_iformatter_set_member_name (obj->formatter, "construct");
-  g_value_init (&value, G_TYPE_BOOLEAN);
-  g_value_set_boolean (&value, FALSE);
-  gstd_iformatter_set_value (obj->formatter, &value);
-  g_value_unset (&value);
 
   /* Close parameter specs structure */
   gstd_iformatter_end_object (obj->formatter);

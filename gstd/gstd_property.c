@@ -42,14 +42,13 @@ GST_DEBUG_CATEGORY_STATIC (gstd_property_debug);
  * A wrapper for the conventional property
  */
 
-G_DEFINE_TYPE (GstdProperty, gstd_property, GSTD_TYPE_OBJECT)
+G_DEFINE_TYPE (GstdProperty, gstd_property, GSTD_TYPE_OBJECT);
 
 /* VTable */
 static void
 gstd_property_get_property (GObject *, guint, GValue *, GParamSpec *);
 static void
-gstd_property_set_property (GObject *, guint, const GValue *,
-    GParamSpec *);
+gstd_property_set_property (GObject *, guint, const GValue *, GParamSpec *);
 static void gstd_property_dispose (GObject *);
 static GstdReturnCode
 gstd_property_to_string (GstdObject * obj, gchar ** outstring);
@@ -59,7 +58,8 @@ gstd_property_add_value_default (GstdProperty * self,
 static GstdReturnCode gstd_property_update_default (GstdObject * object,
     const gchar * arg);
 
-static void gstd_property_class_init (GstdPropertyClass * klass)
+static void
+gstd_property_class_init (GstdPropertyClass * klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
   GstdObjectClass *gstdc = GSTD_OBJECT_CLASS (klass);
@@ -190,11 +190,11 @@ gstd_property_to_string (GstdObject * obj, gchar ** outstring)
 
   g_value_unset (&value);
 
-  gstd_iformatter_set_member_name (obj->formatter, "param_spec");
+  gstd_iformatter_set_member_name (obj->formatter, "param");
   /* Describe the parameter specs using a structure */
   gstd_iformatter_begin_object (obj->formatter);
 
-  gstd_iformatter_set_member_name (obj->formatter, "blurb");
+  gstd_iformatter_set_member_name (obj->formatter, "description");
   gstd_iformatter_set_string_value (obj->formatter, property->_blurb);
 
   typename = g_type_name (property->value_type);
@@ -210,12 +210,6 @@ gstd_property_to_string (GstdObject * obj, gchar ** outstring)
   gstd_iformatter_set_string_value (obj->formatter, sflags);
 
   g_free (sflags);
-
-  gstd_iformatter_set_member_name (obj->formatter, "construct");
-  g_value_init (&value, G_TYPE_BOOLEAN);
-  g_value_set_boolean (&value, GSTD_PARAM_IS_DELETE (property->flags));
-  gstd_iformatter_set_value (obj->formatter, &value);
-  g_value_unset (&value);
 
   /* Close parameter specs structure */
   gstd_iformatter_end_object (obj->formatter);
