@@ -29,6 +29,15 @@
 #include <gstd/gstd_return_codes.h>
 #include <gstd/gstd_session.h>
 
+/**
+ * Parses a command received from the client.
+ * 
+ * \param session GstdSession object.
+ * \param cmd Command line to be parsed
+ * \param response Reference to the object where the result will be stored.
+ * 
+ * \return GstdReturnCode return code for the transaction.
+ **/
 GstdReturnCode gstd_parser_parse_cmd (GstdSession * session, const gchar * cmd,
     gchar ** response);
 
