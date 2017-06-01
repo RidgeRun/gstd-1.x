@@ -27,6 +27,7 @@
 
 #include <gstd/gstd_ipc.h>
 #include <gstd/gstd_tcp.h>
+#include <gstd/gstd_parser.h>
 #include <gstd/gstd_element.h>
 #include <gstd/gstd_pipeline_bus.h>
 #include <gstd/gstd_event_handler.h>
@@ -38,8 +39,6 @@ GST_DEBUG_CATEGORY_STATIC (gstd_tcp_debug);
 
 #define GSTD_DEBUG_DEFAULT_LEVEL GST_LEVEL_INFO
 
-#define check_argument(arg, code) \
-    if (NULL == (arg)) return (code)
 
 struct _GstdTcp
 {
@@ -53,10 +52,6 @@ struct _GstdTcpClass
 {
   GstdIpcClass parent_class;
 };
-
-
-
-
 
 G_DEFINE_TYPE (GstdTcp, gstd_tcp, GSTD_TYPE_IPC);
 
@@ -228,7 +223,7 @@ gstd_tcp_callback (GSocketService * service,
   read = g_input_stream_read (istream, message, size, NULL, NULL);
   message[read] = '\0';
 
-  ret = gstd_parse_parse_cmd (session, message, &output); // in the parser
+  ret = gstd_parser_parse_cmd (session, message, &output); // in the parser
   g_free (message);
 
   /* Prepend the code to the output */
@@ -246,7 +241,7 @@ gstd_tcp_callback (GSocketService * service,
 }
 
 GstdReturnCode
-gstd_tcp_start (GstdIpc * base, GstdSession * session, GstdParser * parser)
+gstd_tcp_start (GstdIpc * base, GstdSession * session)
 {
   guint debug_color;
   GError *error = NULL;

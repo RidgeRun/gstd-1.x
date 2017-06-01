@@ -20,28 +20,16 @@
 #ifndef __GSTD_PARSER_H__
 #define __GSTD_PARSER_H__
 
-#include <glib-object.h>
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include <glib.h>
+
 #include <gstd/gstd_return_codes.h>
+#include <gstd/gstd_session.h>
 
-G_BEGIN_DECLS
-/*
- * Type declaration.
- */
-#define GSTD_TYPE_PARSER \
-  (gstd_parser_get_type())
-#define GSTD_PARSER(obj) \
-  (G_TYPE_CHECK_INSTANCE_CAST((obj),GSTD_TYPE_PARSER,GstdParser))
-#define GSTD_PARSER_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_CAST((klass),GSTD_TYPE_PARSER,GstdParserClass))
-#define GSTD_IS_PARSER(obj) \
-  (G_TYPE_CHECK_INSTANCE_TYPE((obj),GSTD_TYPE_PARSER))
-#define GSTD_IS_PARSER_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_TYPE((klass),GSTD_TYPE_PARSER))
-#define GSTD_PARSER_GET_CLASS(obj) \
-  (G_TYPE_INSTANCE_GET_CLASS ((obj), GSTD_TYPE_PARSER, GstdParserClass))
-typedef struct _GstdParser GstdParser;
-typedef struct _GstdParserClass GstdParserClass;
-GType gstd_parser_get_type ();
+GstdReturnCode gstd_parser_parse_cmd (GstdSession * session, const gchar * cmd,
+    gchar ** response);
 
-G_END_DECLS
 #endif // __GSTD_PARSER_H__

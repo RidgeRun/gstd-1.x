@@ -86,17 +86,13 @@ struct _GstdIpc
    * used for the IPC
    */
   GstdSession *session;
-  /**
-  * A reference to the GstdParser used to determine what we need to do.
-  */
-  GstdParser *parser;
 };
 
 struct _GstdIpcClass
 {
   GstdObjectClass parent_class;
 
-    GstdReturnCode (*start) (GstdIpc *, GstdSession *, GstdParser *);
+    GstdReturnCode (*start) (GstdIpc *, GstdSession *);
 
     GstdReturnCode (*stop) (GstdIpc *);
 
@@ -107,7 +103,7 @@ struct _GstdIpcClass
 GType gstd_ipc_get_type (void);
 
 gboolean gstd_ipc_get_option_group (GstdIpc *, GOptionGroup **);
-GstdReturnCode gstd_ipc_start (GstdIpc *, GstdSession *, GstdParser *);
+GstdReturnCode gstd_ipc_start (GstdIpc *, GstdSession *);
 GstdReturnCode gstd_ipc_stop (GstdIpc *);
 G_END_DECLS
 #endif //__GSTD_IPC___

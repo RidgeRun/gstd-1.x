@@ -25,30 +25,12 @@
 #include <gstd/gstd_parser.h>
 #include <gstd/gstd_session.h>
 
+#define check_argument(arg, code) \
+    if (NULL == (arg)) return (code)
 
 /**
- * GstdParser:
- * A tool to parse the commands incoming to Gstd
+ * Prototypes for the functions
  */
-struct _GstdParser
-{
-  GstdObject parent;
-
-
-};
-
-struct _GstdParserClass
-{
-  GstdObjectClass parent_class;
-};
-
-
-G_DEFINE_TYPE (GstdParser, gstd_parser, GSTD_TYPE_OBJECT);
-
-
-/* VTable */
-
-
 static GstdReturnCode gstd_parser_create (GstdSession * session,
     GstdObject * obj, gchar * args, gchar ** response);
 static GstdReturnCode gstd_parser_read (GstdSession * session,
@@ -57,8 +39,6 @@ static GstdReturnCode gstd_parser_update (GstdSession * session,
     GstdObject * obj, gchar * args, gchar ** response);
 static GstdReturnCode gstd_parser_delete (GstdSession * session,
     GstdObject * obj, gchar * args, gchar ** response);
-static GstdReturnCode gstd_parser_parse_cmd (GstdSession * session, const gchar * cmd,
-    gchar ** response);
 static GstdReturnCode gstd_parser_parse_raw_cmd (GstdSession * session,
     gchar * action, gchar * args, gchar ** response);
 static GstdReturnCode gstd_parser_pipeline_create (GstdSession *, gchar *,
@@ -146,23 +126,6 @@ static GstdCmd cmds[] = {
   {NULL}
 };
 
-static void
-gstd_parser_init(GstdParser * self) {
-  GST_INFO_OBJECT (self, "Initializing gstd parser");
-}
-
-static void
-gstd_parser_class_init(GstdParserClass * klass) {
-  
-}
-
-GstdParserClass *
-gstd_parser_new() {
-  GstdParser *self;
-  self = g_object_new(GSTD_TYPE_PARSER)
-}
-
-
 static GstdReturnCode
 gstd_parser_parse_raw_cmd (GstdSession * session, gchar * action, gchar * args,
     gchar ** response)
@@ -213,9 +176,7 @@ out:
   }
 }
 
-
-
-static GstdReturnCode
+GstdReturnCode
 gstd_parser_parse_cmd (GstdSession * session, const gchar * cmd, gchar ** response)
 {
   gchar **tokens;
