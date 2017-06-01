@@ -53,7 +53,7 @@ libgstd_core_la_LDFLAGS = $(GST_LIBS) $(GIO_LIBS) $(GJSON_LIBS)
 # Standalone application that uses libgstd-core
 bin_PROGRAMS = gstd
 
-gstd_SOURCES =  gstd.c
+gstd_SOURCES =  gstd.c gstd_daemon.c
 
 gstd_CFLAGS = $(GST_CFLAGS)					\
 	      $(GIO_CFLAGS)					\
@@ -105,7 +105,7 @@ gstdinclude_HEADERS = \
 		  gstd_state.h			\
 		  gstd_log.h
 
-noinst_HEADERS = 
+noinst_HEADERS = gstd_daemon.h
 
 # Create an open area for our pid and log files
 install-data-hook: $(DESTDIR)$(gstdrunstatedir) $(DESTDIR)$(gstdlogstatedir)

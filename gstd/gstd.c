@@ -28,6 +28,7 @@
 #include "gstd_session.h"
 #include "gstd_ipc.h"
 #include "gstd_tcp.h"
+#include "gstd_daemon.h"
 #include "gstd_log.h"
 
 static gboolean int_handler (gpointer user_data);
@@ -36,6 +37,19 @@ static void ipc_add_option_groups (GstdIpc * ipc[], GType factory[],
 static gboolean ipc_start (GstdIpc * ipc[], guint num_ipcs,
     GstdSession * session);
 static void ipc_stop (GstdIpc * ipc[], guint numipc);
+static void print_header (gboolean quiet);
+
+void
+print_header (gboolean quiet)
+{
+  const gchar *header = "\nGstd version " PACKAGE_VERSION "\n"
+      "Copyright (C) 2015-2017 Ridgerun, LLC (http://www.ridgerun.com)\n\n"
+      "Log traces will be saved to %s.\nDetaching from parent process.";
+
+  if (!quiet) {
+    GST_INFO (header, gstd_log_get_gstd ());
+  }
+}
 
 static gboolean
 int_handler (gpointer user_data)
@@ -128,6 +142,9 @@ main (gint argc, gchar * argv[])
   GMainLoop *main_loop;
   GstdSession *session;
   gboolean version = FALSE;;
+  gboolean kill = FALSE;
+  gboolean nodaemon = FALSE;
+  gboolean quiet = FALSE;
   GError *error = NULL;
   GOptionContext *context;
   GOptionGroup *gstreamer_group;
@@ -147,6 +164,15 @@ main (gint argc, gchar * argv[])
   GOptionEntry entries[] = {
     {"version", 'v', 0, G_OPTION_ARG_NONE, &version,
         "Print current gstd version", NULL}
+    ,
+    {"kill", 'k', 0, G_OPTION_ARG_NONE, &kill,
+        "Kill a running gstd, if any", NULL}
+    ,
+    {"quiet", 'q', 0, G_OPTION_ARG_NONE, &quiet,
+        "Don't print any startup message", NULL}
+    ,
+    {"no-daemon", 'D', 0, G_OPTION_ARG_NONE, &nodaemon,
+        "Do not detach into a daemon", NULL}
     ,
     {NULL}
   };
@@ -172,10 +198,34 @@ main (gint argc, gchar * argv[])
   g_option_context_free (context);
 
   gstd_log_init ();
+  gstd_daemon_init (argc, argv);
 
   /* Print the version and exit */
   if (version) {
     goto out;
+  }
+
+  if (kill) {
+    if (gstd_daemon_stop ()) {
+      GST_INFO ("Gstd successfully stopped");
+    }
+    goto out;
+  }
+
+  if (nodaemon) {
+    print_header (quiet);
+  } else {
+    gboolean parent;
+
+    if (!gstd_daemon_start (&parent)) {
+      goto error;
+    }
+
+    /* Parent fork ends here */
+    if (parent) {
+      print_header (quiet);
+      goto out;
+    }
   }
 
   /*Create session */
@@ -203,10 +253,11 @@ main (gint argc, gchar * argv[])
   /* Stop any IPC array */
   ipc_stop (ipc_array, num_ipcs);
 
-  gstd_log_deinit ();
-
+  /* Free Gstd session */
   g_object_unref (session);
+
   gst_deinit ();
+  gstd_log_deinit ();
 
   goto out;
 
