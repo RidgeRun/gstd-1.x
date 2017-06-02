@@ -25,12 +25,12 @@
 #include <string.h>
 #include <gst/gst.h>
 
-#include <gstd/gstd_ipc.h>
-#include <gstd/gstd_tcp.h>
-#include <gstd/gstd_parser.h>
-#include <gstd/gstd_element.h>
-#include <gstd/gstd_pipeline_bus.h>
-#include <gstd/gstd_event_handler.h>
+#include "gstd_ipc.h"
+#include "gstd_tcp.h"
+#include "gstd_parser.h"
+#include "gstd_element.h"
+#include "gstd_pipeline_bus.h"
+#include "gstd_event_handler.h"
 
 
 /* Gstd TCP debugging category */
