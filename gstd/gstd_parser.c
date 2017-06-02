@@ -226,10 +226,6 @@ gstd_parser_create (GstdSession * session, GstdObject * obj, gchar * args,
   // This may mean a potential leak
   g_warn_if_fail (!*response);
 
-  GST_FIXME_OBJECT (session,
-      "Currently hardcoded to create pipelines and events, we must be "
-      "generic enough to create any type of object");
-
   // Tokens has the form {<name>, <description>}
   if (NULL == args) {
     name = NULL;
