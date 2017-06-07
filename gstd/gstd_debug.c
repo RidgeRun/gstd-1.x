@@ -23,9 +23,9 @@
 
 #include <glib/gprintf.h>
 
-#include "gstd/gstd_debug.h"
-#include "gstd/gstd_object.h"
-#include "gstd/gstd_property_reader.h"
+#include "gstd_debug.h"
+#include "gstd_object.h"
+#include "gstd_property_reader.h"
 
 GST_DEBUG_CATEGORY_STATIC (gstd_debug_cat);
 

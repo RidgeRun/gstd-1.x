@@ -20,8 +20,8 @@
 #define __GSTD_TCP_H__
 
 #include <gio/gio.h>
-#include <gstd/gstd_return_codes.h>
-#include <gstd/gstd_session.h>
+#include "gstd_return_codes.h"
+#include "gstd_session.h"
 #include "gstd_ipc.h"
 
 G_BEGIN_DECLS

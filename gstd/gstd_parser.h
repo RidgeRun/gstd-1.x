@@ -26,8 +26,8 @@
 
 #include <glib.h>
 
-#include <gstd/gstd_return_codes.h>
-#include <gstd/gstd_session.h>
+#include "gstd_return_codes.h"
+#include "gstd_session.h"
 
 /**
  * Parses a command received from the client.

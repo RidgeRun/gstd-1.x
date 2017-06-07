@@ -21,9 +21,9 @@
 #include "config.h"
 #endif
 
-#include <gstd/gstd_event_handler.h>
-#include <gstd/gstd_parser.h>
-#include <gstd/gstd_session.h>
+#include "gstd_event_handler.h"
+#include "gstd_parser.h"
+#include "gstd_session.h"
 
 #define check_argument(arg, code) \
     if (NULL == (arg)) return (code)
