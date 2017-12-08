@@ -1,17 +1,17 @@
 /*
  * GStreamer Daemon - Gst Launch under steroids
  * Copyright (c) 2015-2017 Ridgerun, LLC (http://www.ridgerun.com)
- * 
+ *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA
@@ -270,8 +270,24 @@ gstd_tcp_start (GstdIpc * base, GstdSession * session)
 
   for (i = 0; i < self->num_ports; i++) {
 
-    g_socket_listener_add_inet_port (G_SOCKET_LISTENER (*service),
-        port + i, NULL /* G_OBJECT(session) */ , &error);
+    GInetAddress *inet_address;
+    GSocketAddress *address;
+
+#if 1 // INET
+    inet_address = g_inet_address_new_any(G_SOCKET_FAMILY_IPV4);
+    address = g_inet_socket_address_new (inet_address, port + i);
+    g_object_unref (inet_address);
+#else // UNIX
+    address = g_unix_socket_address_new ("/tmp/edison_unix");
+#endif
+
+    g_socket_listener_add_address (G_SOCKET_LISTENER (*service),
+                 address,
+                 G_SOCKET_TYPE_STREAM,
+                 G_SOCKET_PROTOCOL_DEFAULT,
+                 NULL,
+                 NULL,
+                 &error);
     if (error)
       goto noconnection;
   }

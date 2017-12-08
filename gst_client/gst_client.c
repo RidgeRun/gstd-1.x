@@ -1,17 +1,17 @@
 /*
  * GStreamer Daemon - Gst Launch under steroids
  * Copyright (c) 2015-2017 Ridgerun, LLC (http://www.ridgerun.com)
- * 
+ *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA
@@ -56,7 +56,8 @@ extern gint read_history ();
 #endif /* HAVE_READLINE_HISTORY */
 
 /* cmdline defaults */
-#define GSTD_CLIENT_DEFAULT_ADDRESS "localhost"
+#define GSTD_CLIENT_DEFAULT_INET_ADDRESS "localhost"
+#define GSTD_CLIENT_DEFAULT_UNIX_ADDRESS "/tmp/edison_unix"
 #define GSTD_CLIENT_DEFAULT_PORT 5000
 
 typedef struct _GstdClientData GstdClientData;
@@ -285,7 +286,7 @@ main (gint argc, gchar * argv[])
     ,
     {"address", 'a', 0, G_OPTION_ARG_STRING, &address,
           "The IP address of the server (defaults to "
-          GSTD_CLIENT_DEFAULT_ADDRESS ")", "address"}
+          GSTD_CLIENT_DEFAULT_INET_ADDRESS ")", "address"}
     ,
     {"version", 'v', 0, G_OPTION_ARG_NONE, &version,
           "Print current gstd-client version", NULL}
@@ -323,7 +324,11 @@ main (gint argc, gchar * argv[])
   g_option_context_free (context);
 
   if (!address)
-    address = g_strdup (GSTD_CLIENT_DEFAULT_ADDRESS);
+#if 1 // INET
+    address = g_strdup (GSTD_CLIENT_DEFAULT_INET_ADDRESS);
+#else // UNIX
+    address = g_strdup (GSTD_CLIENT_DEFAULT_UNIX_ADDRESS);
+#endif
 
   // Enter interactive only if no commands nor file has been set, or if the
   // user explicitely asked for it
@@ -520,9 +525,27 @@ gstd_client_cmd_tcp (gchar * name, gchar * arg, GstdClientData * data)
 
   cmd = g_strconcat (name, " ", arg, NULL);
 
-  if (!data->con)
+  if (!data->con){
+
+#if 1 // INET
     data->con = g_socket_client_connect_to_host (data->client,
         data->address, data->port, NULL, &err);
+#else // UNIX
+  GSocketAddress *socket_address;
+  g_socket_client_set_family (data->client,
+                            G_SOCKET_FAMILY_UNIX);
+
+  socket_address = g_unix_socket_address_new (data->address);
+
+  data->con = g_socket_client_connect (data->client,
+                       G_SOCKET_CONNECTABLE (socket_address),
+                       NULL,
+                       &err);
+#endif
+  }
+
+g_print("gstd_client_cmd_tcp(%d)\n", __LINE__);
+
   if (err)
     goto error;
 
