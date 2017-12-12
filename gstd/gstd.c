@@ -1,17 +1,17 @@
 /*
  * GStreamer Daemon - Gst Launch under steroids
  * Copyright (c) 2015-2017 Ridgerun, LLC (http://www.ridgerun.com)
- * 
+ *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA
@@ -27,7 +27,9 @@
 
 #include "gstd_session.h"
 #include "gstd_ipc.h"
+#include "gstd_socket.h"
 #include "gstd_tcp.h"
+#include "gstd_unix.h"
 #include "gstd_daemon.h"
 #include "gstd_log.h"
 
@@ -150,11 +152,12 @@ main (gint argc, gchar * argv[])
   GOptionGroup *gstreamer_group;
   gint ret = EXIT_SUCCESS;
 
-  /* Array to specify gstd how many IPCs are supported, 
+  /* Array to specify gstd how many IPCs are supported,
    * IPCs should be added this array.
    */
   GType supported_ipcs[] = {
     GSTD_TYPE_TCP,
+    GSTD_TYPE_UNIX,
   };
 
   guint num_ipcs = (sizeof (supported_ipcs) / sizeof (GType));
@@ -236,7 +239,7 @@ main (gint argc, gchar * argv[])
     goto error;
   }
 
-  /* Starting the application's main loop, necessary for 
+  /* Starting the application's main loop, necessary for
      messaging and signaling subsystem */
   main_loop = g_main_loop_new (NULL, FALSE);
 
