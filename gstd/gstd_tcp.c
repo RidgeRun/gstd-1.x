@@ -197,25 +197,18 @@ gstd_tcp_add_listerner_address (GstdSocket * base, GSocketService ** service)
   guint16 port = self->base_port;
   guint i;
 
-  g_printerr(">> EFA: (%s):(%d))\n", __FUNCTION__, __LINE__);
-
   GST_DEBUG_OBJECT (self, "Getting TCP Socket address");
 
   if (!gstd_tcp_debug) {
-    g_printerr(">> EFA: (%s):(%d))\n", __FUNCTION__, __LINE__);
     /* Initialize debug category with nice colors */
     debug_color = GST_DEBUG_FG_BLACK | GST_DEBUG_BOLD | GST_DEBUG_BG_WHITE;
     GST_DEBUG_CATEGORY_INIT (gstd_tcp_debug, "gstdtcp", debug_color,
         "Gstd TCP category");
   }
-  g_printerr(">> EFA: (%s):(%d))\n", __FUNCTION__, __LINE__);
 
   *service = g_threaded_socket_service_new (self->num_ports);
 
-  g_printerr(">> EFA: (%s):(%d))\n", __FUNCTION__, __LINE__);
-
   for (i = 0; i < self->num_ports; i++) {
-    g_printerr(">> EFA: (%s):(%d))\n", __FUNCTION__, __LINE__);
 
     GInetAddress *inet_address;
     GSocketAddress *address;
@@ -240,7 +233,6 @@ gstd_tcp_add_listerner_address (GstdSocket * base, GSocketService ** service)
 
 noconnection:
   {
-    g_printerr(">> EFA: (%s):(%d))\n", __FUNCTION__, __LINE__);
     GST_ERROR_OBJECT (*service, "%s", error->message);
     g_printerr ("%s\n", error->message);
     g_error_free (error);
