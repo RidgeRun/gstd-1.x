@@ -1,17 +1,17 @@
 /*
  * GStreamer Daemon - Gst Launch under steroids
  * Copyright (c) 2015-2017 Ridgerun, LLC (http://www.ridgerun.com)
- * 
+ *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA
@@ -106,25 +106,40 @@ static GstdClientCmd cmds[] = {
   {"quit", gstd_client_cmd_quit, "Exits Gstd client", "quit"},
   {"exit", gstd_client_cmd_quit, "Exits Gstd client", "exit"},
   {"help", gstd_client_cmd_help, "Prints help information", "help [command]"},
-  {"create", gstd_client_cmd_tcp, "Creates a resource at the given URI",
+
+  // GStreaner debug commands
+  {"debug_enable", gstd_client_cmd_tcp,
+      "Enables/disables GStreamer debug",
+      "debug_enable <enable>"},
+  {"debug_threshold", gstd_client_cmd_tcp,
+      "The debug filter to apply (as you would use with GST_DEBUG)",
+      "debug_threshold <threshold>"},
+  {"debug_color", gstd_client_cmd_tcp,
+      "Enables/disables colors in the debug logging",
+      "debug_color <colors>"},
+
+  // Command line and scripting commands
+  {"sh", gstd_client_cmd_sh, "Locally executes a shell command", "sh <command>"},
+  {"source", gstd_client_cmd_source, "Locally sources a file containing Gstd commands",
+        "source <file>"},
+
+  // General CRUD commands
+  {"create", gstd_client_cmd_tcp, "Creates a resource at the specified URI",
         "create <URI> [property value ...]"},
-  {"read", gstd_client_cmd_tcp, "Reads the resource at the given URI",
+  {"read", gstd_client_cmd_tcp, "Reads the resource at the specified URI",
         "read <URI>"},
-  {"update", gstd_client_cmd_tcp, "Updates the resource at the given URI",
+  {"update", gstd_client_cmd_tcp, "Updates the resource at the specified URI",
         "update <URI> [property value ...]"},
   {"delete", gstd_client_cmd_tcp,
-        "Deletes the resource held at the given URI with the given name",
+        "Deletes the resource held at the specified URI with the specified name",
       "read <URI> <name>"},
-  {"sh", gstd_client_cmd_sh, "Executes a shell command", "sh <command>"},
-  {"source", gstd_client_cmd_source, "Sources a file with commands",
-        "source <file>"},
 
   // High level commands
   {"pipeline_create", gstd_client_cmd_tcp,
         "Creates a new pipeline based on the name and description",
       "pipeline_create <name> <description>"},
   {"pipeline_delete", gstd_client_cmd_tcp,
-        "Deletes the pipeline with the given name",
+        "Deletes the pipeline with the specified name",
       "pipeline_delete <name>"},
   {"pipeline_play", gstd_client_cmd_tcp, "Sets the pipeline to playing",
       "pipeline_play <name>"},
@@ -134,54 +149,43 @@ static GstdClientCmd cmds[] = {
       "pipeline_stop <name>"},
 
   {"element_set", gstd_client_cmd_tcp,
-        "Sets a property in an element of a given pipeline",
+        "Sets a property in an element of the specified pipeline",
       "element_set <pipe> <element> <property> <value>"},
   {"element_get", gstd_client_cmd_tcp,
-        "Queries a property in an element of a given pipeline",
-      "element_set <pipe> <element> <property>"},
+        "Queries a property in an element of the specified pipeline",
+      "element_get <pipe> <element> <property>"},
 
-  {"list_pipelines", gstd_client_cmd_tcp, "List the existing pipelines",
+  {"list_pipelines", gstd_client_cmd_tcp, "Lists the existing pipelines",
       "list_pipelines"},
   {"list_elements", gstd_client_cmd_tcp,
-        "List the elements in a given pipeline",
+        "Lists the elements in the specified pipeline",
       "list_elements <pipe>"},
   {"list_properties", gstd_client_cmd_tcp,
-        "List the properties of an element in a given pipeline",
+        "Lists the properties of an element in the specified pipeline",
       "list_properties <pipe> <elemement>"},
 
-  {"bus_read", gstd_client_cmd_tcp, "List the existing pipelines",
+  {"bus_read", gstd_client_cmd_tcp, "Blocks, returning when the next message from the specified pipeline is received",
       "bus_read <pipe>"},
   {"bus_filter", gstd_client_cmd_tcp,
-      "Select the types of message to be read from the bus. Separate with "
+      "Selects the types of message to be read from the bus. Separate with "
       "a '+', i.e.: eos+warning+error",
       "bus_read <pipe> <filter>"},
   {"bus_timeout", gstd_client_cmd_tcp,
-      "Apply a timeout for the bus polling. -1: forever, 0: return immediately, "
+      "Applies a timeout for the bus polling. -1: forever, 0: return immediately, "
       "n: wait n nanoseconds",
       "bus_timeout <pipe> <timeout>"},
 
-  {"event_eos", gstd_client_cmd_tcp, "Send an end-of-stream event",
+  {"event_eos", gstd_client_cmd_tcp, "Sends an end-of-stream event",
       "event_eos <pipe>"},
   {"event_seek", gstd_client_cmd_tcp,
-      "Perform a seek in the given pipeline",
+      "Performs a seek in the specified pipeline",
       "event_seek <pipe> <rate=1.0> <format=3> <flags=1> <start-type=1> <start=0> <end-type=1> <end=-1>"},
   {"event_flush_start", gstd_client_cmd_tcp,
-      "Put the pipeline in flushing mode",
+      "Puts the pipeline in flushing mode",
       "event_flush_start <pipe>"},
   {"event_flush_stop", gstd_client_cmd_tcp,
-      "Take the pipeline out from flushing mode",
+      "Takes the pipeline out from flushing mode",
       "event_flush_stop <pipe> <reset=true>"},
-
-  {"debug_enable", gstd_client_cmd_tcp,
-      "Enable/Disable GStreamer debug",
-      "debug_enable <enable>"},
-  {"debug_threshold", gstd_client_cmd_tcp,
-      "The debug filter to apply (as you would use with gst-launch)",
-      "debug_threshold <threshold>"},
-  {"debug_color", gstd_client_cmd_tcp,
-      "Enable/Disable colors in the debug logging",
-      "debug_color <colors>"},
-
   {NULL}
 };
 
@@ -280,7 +284,7 @@ main (gint argc, gchar * argv[])
           "Emulate gst-launch, often combined with -i", NULL}
     ,
     {"port", 'p', 0, G_OPTION_ARG_INT, &port,
-          "Attach to the server through the given port (default 5000)",
+          "Attach to the server through the specified port (default 5000)",
         "port"}
     ,
     {"address", 'a', 0, G_OPTION_ARG_STRING, &address,
