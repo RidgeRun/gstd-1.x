@@ -169,7 +169,7 @@ static GstdClientCmd cmds[] = {
   {"bus_filter", gstd_client_cmd_tcp,
       "Selects the types of message to be read from the bus. Separate with "
       "a '+', i.e.: eos+warning+error",
-      "bus_read <pipe> <filter>"},
+      "bus_filter <pipe> <filter>"},
   {"bus_timeout", gstd_client_cmd_tcp,
       "Applies a timeout for the bus polling. -1: forever, 0: return immediately, "
       "n: wait n nanoseconds",
