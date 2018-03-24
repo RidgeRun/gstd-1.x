@@ -150,7 +150,7 @@ gstd_json_set_string_value (GstdIFormatter * iface, const gchar * value)
 }
 
 static void
-gstd_json_set_value (GstdIFormatter * iface, GValue * value)
+gstd_json_set_value (GstdIFormatter * iface, const GValue * value)
 {
   GstdJsonBuilder *self;
   gint64 int64_value;
