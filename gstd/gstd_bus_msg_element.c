@@ -72,9 +72,37 @@ static GstdReturnCode
 gstd_bus_msg_element_to_string (GstdBusMsg * msg, GstdIFormatter * formatter,
     GstMessage * target)
 {
+  const GstStructure * st;
+  gint field;
+
   g_return_val_if_fail (msg, GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (formatter, GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (target, GSTD_NULL_ARGUMENT);
 
+  st = gst_message_get_structure (target);
+
+  /* The structure is not mandatory */
+  if (NULL == st) {
+    goto out;
+  }
+
+  gstd_iformatter_set_member_name (formatter, gst_structure_get_name (st));
+  gstd_iformatter_begin_object (formatter);
+
+  /* Iterate through all fields in the structure */
+  for (field = 0 ; field < gst_structure_n_fields (st) ; ++field) {
+    const gchar * field_name;
+    const GValue * field_value;
+
+    field_name = gst_structure_nth_field_name (st, field);
+    field_value = gst_structure_get_value (st, field_name);
+    
+    gstd_iformatter_set_member_name (formatter, field_name);
+    gstd_iformatter_set_value(formatter, (GValue *)field_value);
+  }
+
+  gstd_iformatter_end_object (formatter);
+
+ out:
   return GSTD_EOK;
 }
