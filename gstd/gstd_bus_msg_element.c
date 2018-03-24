@@ -96,9 +96,9 @@ gstd_bus_msg_element_to_string (GstdBusMsg * msg, GstdIFormatter * formatter,
 
     field_name = gst_structure_nth_field_name (st, field);
     field_value = gst_structure_get_value (st, field_name);
-    
+
     gstd_iformatter_set_member_name (formatter, field_name);
-    gstd_iformatter_set_value(formatter, (GValue *)field_value);
+    gstd_iformatter_set_value(formatter, field_value);
   }
 
   gstd_iformatter_end_object (formatter);

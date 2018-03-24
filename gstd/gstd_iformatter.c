@@ -65,7 +65,7 @@ gstd_iformatter_set_string_value (GstdIFormatter * self, const gchar * value)
 }
 
 void
-gstd_iformatter_set_value (GstdIFormatter * self, GValue * value)
+gstd_iformatter_set_value (GstdIFormatter * self, const GValue * value)
 {
   g_return_if_fail (self);
   GSTD_IFORMATTER_GET_INTERFACE (self)->set_value (self, value);
