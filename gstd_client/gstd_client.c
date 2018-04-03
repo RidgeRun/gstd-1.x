@@ -336,10 +336,6 @@ main (gint argc, gchar * argv[])
     return EXIT_SUCCESS;
   }
 
-  signal (SIGINT, sig_handler);
-  init_readline ();
-  read_history (history_full);
-
   data = (GstdClientData *) g_malloc (sizeof (GstdClientData));
   data->quiet = quiet;
   data->prompt = prompt;
@@ -367,6 +363,10 @@ main (gint argc, gchar * argv[])
   // No readline, no interaction
   quit = TRUE;
 #endif
+
+  signal (SIGINT, sig_handler);
+  init_readline ();
+  read_history (history_full);
 
   gstd_client_header (quiet);
   /* Jump here in case of an interrupt, so we can exit */
