@@ -43,8 +43,8 @@ GST_DEBUG_CATEGORY_STATIC (gstd_tcp_debug);
 struct _GstdTcp
 {
   GstdIpc parent;
-  guint16 base_port;
-  guint16 num_ports;
+  guint base_port;
+  guint num_ports;
   GSocketService *service;
 };
 
