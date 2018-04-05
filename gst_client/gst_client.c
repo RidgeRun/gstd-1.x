@@ -336,7 +336,6 @@ main (gint argc, gchar * argv[])
     return EXIT_SUCCESS;
   }
 
-  signal (SIGINT, sig_handler);
   init_readline ();
   read_history (history_full);
 
@@ -348,12 +347,16 @@ main (gint argc, gchar * argv[])
   data->client = g_socket_client_new ();
   data->con = NULL;
 
-  if (file) {
+  /* Jump here in case of an interrupt, so we can exit */
+  while (sigsetjmp (ctrlc_buf, 1) != 0);
+  signal (SIGINT, sig_handler);
+
+  if (file && !quit) {
     gstd_client_cmd_source ("source", file, data);
     g_free (file);
   }
 
-  if (remaining) {
+  if (remaining && !quit) {
     line = g_strjoinv (" ", remaining);
     gstd_client_execute (line, data);
     g_free (line);
@@ -369,7 +372,8 @@ main (gint argc, gchar * argv[])
 #endif
 
   gstd_client_header (quiet);
-  /* Jump here in case of an interrupt, so we can exit */
+
+  /* New interrupt checkpoint */
   while (sigsetjmp (ctrlc_buf, 1) != 0);
 
   while (!quit) {
