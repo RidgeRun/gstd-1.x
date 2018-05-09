@@ -173,6 +173,7 @@ AC_CONFIG_FILES([
 Makefile
 gstd/Makefile
 gst_client/Makefile
+libgstc/Makefile
 tests/Makefile
 tests/gstd/Makefile
 docs/Makefile
