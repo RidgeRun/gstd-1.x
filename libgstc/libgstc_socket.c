@@ -30,70 +30,14 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-#include "libgstc.h"
 #include "libgstc_socket.h"
 
-static GstcStatus gstc_cmd_send (GstClient * client, const char *request);
-static GstcStatus gstc_cmd_create (GstClient * client, const char *where,
-    const char *what);
-
-struct _GstClient
+struct _GstcSocket
 {
 };
 
-static GstcStatus
-gstc_cmd_send (GstClient * client, const char *request)
+GstcSocketStatus
+gstc_socket_send (GstcSocket * socket, const char *request)
 {
-  gstc_socket_send (NULL, request);
-
-  return GSTC_OK;
-}
-
-static GstcStatus
-gstc_cmd_create (GstClient * client, const char *where, const char *what)
-{
-  const char *template = "create %s %s";
-  char *request;
-
-  /* Concatenate pieces into request */
-  asprintf (&request, template, where, what);
-
-  gstc_cmd_send (NULL, request);
-
-  free (request);
-
-  return gstc_cmd_send (client, request);
-}
-
-GstClient *
-gstc_client_new (const char *address, const unsigned int port,
-    const unsigned long wait_time, const int keep_connection_open)
-{
-  return NULL;
-}
-
-GstcStatus
-gstc_pipeline_create (GstClient * client, const char *pipeline_name,
-    const char *pipeline_desc)
-{
-  const char *resource = "/pipelines";
-  const char *template = "%s %s";
-  char *create_args;
-
-  asprintf (&create_args, template, pipeline_name, pipeline_desc);
-
-  gstc_cmd_create (NULL, resource, create_args);
-
-  free (create_args);
-
-  return GSTC_OK;
-}
-
-void
-gstc_client_free (GstClient * client)
-{
+  return GSTC_SOCKET_OK;
 }
