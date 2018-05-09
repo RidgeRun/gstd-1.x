@@ -176,6 +176,7 @@ gst_client/Makefile
 libgstc/Makefile
 tests/Makefile
 tests/gstd/Makefile
+tests/libgstc/Makefile
 docs/Makefile
 docs/reference/Makefile
 docs/reference/gstd/Makefile

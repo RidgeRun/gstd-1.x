@@ -85,7 +85,68 @@ extern "C"
 {
 #endif
 
+/**
+ * GstcStatus:
+ * @GSTC_OK: Everything went okay
+ *
+ * Retrun codes for the different libgstc operations
+ */
+typedef enum
+{
+  GSTC_OK
+} GstcStatus;
 
+/**
+ * GstClient:
+ * Opaque representation of the client state
+ */
+typedef struct _GstClient GstClient;
+
+/**
+ * gstc_client_new:
+ * @address: The address to bind to
+ * @port: The port to bind to
+ * @wait_time: time to wait for a response from the daemon before
+ * returning an error, applies to all non-blocking gstc_* methods.
+ * Zero means wait forever.
+ * @keep_connection_open: if non-zero the underlying network socket
+ * will be kept open until gstc_client_free() is called
+ *
+ * Creates a new connection object to the GStreamer Daemon session in
+ * @address and @port.  Does not exchange any data with the daemon.
+ *
+ * Returns: A newly allocated GstClient. Use gstc_client_free() after
+ * usage.
+ */
+GstClient *gstc_client_new (const char *address, const unsigned int port,
+    const unsigned long wait_time, const int keep_connection_open);
+
+/**
+ * gstc_client_free:
+ * @client: A valid client allocated with gstc_client_new()
+ *
+ * Frees a previously allocated GstClient.
+ *
+ * Returns: A newly allocated GstClient. Use gstc_client_free() after
+ * usage.
+ */
+void gstc_client_free (GstClient *client);
+
+/**
+ * gstc_pipeline_create:
+ * @client: The client returned by gstc_client_new()
+ * @pipeline_name: Name to associate to the pipeline
+ * @pipeline_desc: The gst-launch style pipeline description to create
+ *
+ * Creates a new GStreamer pipeline that can be referred to using
+ * @pipeline_name.
+ *
+ * Returns: GstcStatus indicating success, daemon unreachable, daemon
+ * timeout, bad pipeline
+ */
+GstcStatus
+gstc_pipeline_create (GstClient *client, const char *pipeline_name,
+    const char *pipeline_desc);
 
 #ifdef __cplusplus
 }
