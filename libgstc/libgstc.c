@@ -45,6 +45,8 @@ static GstcStatus gstc_cmd_update (GstClient * client, const char *what,
     const char *how);
 static GstcStatus gstc_cmd_delete (GstClient * client, const char *where,
     const char *what);
+static GstcStatus gstc_cmd_change_state (GstClient * client, const char *pipe,
+    const char *state);
 
 struct _GstClient
 {
@@ -189,24 +191,46 @@ gstc_pipeline_delete (GstClient * client, const char *pipeline_name)
   return ret;
 }
 
-GstcStatus
-gstc_pipeline_play (GstClient * client, const char *pipeline_name)
+static GstcStatus
+gstc_cmd_change_state (GstClient * client, const char *pipe, const char *state)
 {
   GstcStatus ret;
   const char *template = "/pipelines/%s/state";
-  const char *state = "playing";
   char *resource;
 
   libgstc_assert_and_ret_val (NULL != client, GSTC_NULL_ARGUMENT);
-  libgstc_assert_and_ret_val (NULL != pipeline_name, GSTC_NULL_ARGUMENT);
+  libgstc_assert_and_ret_val (NULL != pipe, GSTC_NULL_ARGUMENT);
+  libgstc_assert_and_ret_val (NULL != state, GSTC_NULL_ARGUMENT);
 
-  asprintf (&resource, template, pipeline_name);
+  asprintf (&resource, template, pipe);
 
   ret = gstc_cmd_update (client, resource, state);
 
   free (resource);
 
   return ret;
+}
+
+GstcStatus
+gstc_pipeline_play (GstClient * client, const char *pipeline_name)
+{
+  const char *state = "playing";
+
+  libgstc_assert_and_ret_val (NULL != client, GSTC_NULL_ARGUMENT);
+  libgstc_assert_and_ret_val (NULL != pipeline_name, GSTC_NULL_ARGUMENT);
+
+  return gstc_cmd_change_state (client, pipeline_name, state);
+}
+
+GstcStatus
+gstc_pipeline_pause (GstClient * client, const char *pipeline_name)
+{
+  const char *state = "paused";
+
+  libgstc_assert_and_ret_val (NULL != client, GSTC_NULL_ARGUMENT);
+  libgstc_assert_and_ret_val (NULL != pipeline_name, GSTC_NULL_ARGUMENT);
+
+  return gstc_cmd_change_state (client, pipeline_name, state);
 }
 
 void

@@ -3,7 +3,8 @@ TESTS = 			\
 	libgstc_ping		\
 	libgstc_pipeline_create	\
 	libgstc_pipeline_delete	\
-	libgstc_pipeline_play
+	libgstc_pipeline_play   \
+	libgstc_pipeline_pause
 
 check_PROGRAMS = $(TESTS)
 
@@ -34,5 +35,10 @@ libgstc_pipeline_delete_SOURCES = 		\
 
 libgstc_pipeline_play_SOURCES = 		\
 	test_libgstc_pipeline_play.c		\
+	$(top_srcdir)/libgstc/libgstc.c		\
+	$(COMMON_SOURCES)
+
+libgstc_pipeline_pause_SOURCES = 		\
+	test_libgstc_pipeline_pause.c		\
 	$(top_srcdir)/libgstc/libgstc.c		\
 	$(COMMON_SOURCES)
