@@ -33,19 +33,16 @@
 #ifndef __LIBGSTC_SOCKET_H__
 #define __LIBGSTC_SOCKET_H__
 
+#include "libgstc.h"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-typedef enum
-{
-  GSTC_SOCKET_OK
-} GstcSocketStatus;
-
 typedef struct _GstcSocket GstcSocket;
 
-GstcSocketStatus
+GstcStatus
 gstc_socket_send (GstcSocket *socket, const char *request);
 
 #ifdef __cplusplus
