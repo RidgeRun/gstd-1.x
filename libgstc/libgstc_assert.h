@@ -30,29 +30,37 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <stdlib.h>
+#ifndef __LIBGSTC_ASSERT_H__
+#define __LIBGSTC_ASSERT_H__
 
-#include "libgstc_socket.h"
-
-struct _GstcSocket
+#ifdef __cplusplus
+extern "C"
 {
-};
+#endif
 
-GstcSocket *
-gstc_socket_new (const char *address, const unsigned int port,
-    const unsigned long wait_time, const int keep_connection_open)
-{
-  return (GstcSocket *)malloc (sizeof (GstcSocket));
-}
+#ifdef LIBGSTC_CRITICAL
+#define libgstc_abort() abort()
+#else
+#define libgstc_abort()
+#endif
 
-GstcStatus
-gstc_socket_send (GstcSocket * socket, const char *request)
-{
-  return GSTC_OK;
-}
+#define libgstc_assert_and_ret(cond)					\
+  _libgstc_assert ((cond), #cond, __FILE__, __FUNCTION__, __LINE__);	\
+  return
+
+#define libgstc_assert_and_ret_val(cond, val)				\
+  _libgstc_assert ((cond), #cond, __FILE__, __FUNCTION__, __LINE__);	\
+  if (!(cond)) return (val)
+
+#define libgstc_assert (cond)						\
+  _libgstc_assert ((cond), #cond, __FILE__, __FUNCTION__, __LINE__)
 
 void
-gstc_socket_free (GstcSocket * socket)
-{
-  free (socket);
+_libgstc_assert (int cond, const char *scond, const char *file,
+    const char *function, int line);
+
+#ifdef __cplusplus
 }
+#endif
+
+#endif // __LIBGSTC_ASSERT_H__
