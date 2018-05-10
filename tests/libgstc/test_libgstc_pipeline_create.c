@@ -25,6 +25,7 @@
 /* Test Fixture */
 static gchar _request[512];
 static GstClient *_client;
+static gboolean _reachable;
 
 static void
 setup ()
@@ -35,6 +36,7 @@ setup ()
   int keep_connection_open = 0;
 
   _client = gstc_client_new (address, port, wait_time, keep_connection_open);
+  _reachable = TRUE;
 }
 
 static void
@@ -51,6 +53,10 @@ typedef struct _GstcSocket
 GstcStatus
 gstc_socket_send (GstcSocket *socket, const gchar *request)
 {
+  if (!_reachable) {
+    return GSTC_UNREACHABLE;
+  }
+
   memcpy (_request, request, strlen(request));
 
   return GSTC_OK;
@@ -103,6 +109,19 @@ GST_START_TEST (test_pipeline_create_null_client)
 }
 GST_END_TEST;
 
+GST_START_TEST (test_pipeline_create_unreachable)
+{
+  GstcStatus ret;
+  const gchar * pipeline_name = "pipe";
+  const gchar * pipeline_desc = "fakesrc ! fakesink";
+
+  _reachable = FALSE;
+
+  ret = gstc_pipeline_create (_client, pipeline_name, pipeline_desc);
+  assert_equals_int (GSTC_UNREACHABLE, ret);
+}
+GST_END_TEST;
+
 static Suite *
 libgstc_pipeline_suite (void)
 {
@@ -116,6 +135,7 @@ libgstc_pipeline_suite (void)
   tcase_add_test (tc, test_pipeline_create_null_name);
   tcase_add_test (tc, test_pipeline_create_null_desc);
   tcase_add_test (tc, test_pipeline_create_null_client);
+  tcase_add_test (tc, test_pipeline_create_unreachable);
 
   return suite;
 }

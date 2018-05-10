@@ -48,25 +48,24 @@ struct _GstClient
 static GstcStatus
 gstc_cmd_send (GstClient * client, const char *request)
 {
-  gstc_socket_send (NULL, request);
-
-  return GSTC_OK;
+  return gstc_socket_send (NULL, request);
 }
 
 static GstcStatus
 gstc_cmd_create (GstClient * client, const char *where, const char *what)
 {
+  GstcStatus ret;
   const char *template = "create %s %s";
   char *request;
 
   /* Concatenate pieces into request */
   asprintf (&request, template, where, what);
 
-  gstc_cmd_send (NULL, request);
+  ret = gstc_cmd_send (NULL, request);
 
   free (request);
 
-  return gstc_cmd_send (client, request);
+  return ret;
 }
 
 GstClient *
@@ -80,6 +79,7 @@ GstcStatus
 gstc_pipeline_create (GstClient * client, const char *pipeline_name,
     const char *pipeline_desc)
 {
+  GstcStatus ret;
   const char *resource = "/pipelines";
   const char *template = "%s %s";
   char *create_args;
@@ -90,11 +90,11 @@ gstc_pipeline_create (GstClient * client, const char *pipeline_name,
 
   asprintf (&create_args, template, pipeline_name, pipeline_desc);
 
-  gstc_cmd_create (NULL, resource, create_args);
+  ret = gstc_cmd_create (NULL, resource, create_args);
 
   free (create_args);
 
-  return GSTC_OK;
+  return ret;
 }
 
 void
