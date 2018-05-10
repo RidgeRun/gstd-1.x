@@ -41,6 +41,8 @@
 static GstcStatus gstc_cmd_send (GstClient * client, const char *request);
 static GstcStatus gstc_cmd_create (GstClient * client, const char *where,
     const char *what);
+static GstcStatus gstc_cmd_update (GstClient * client, const char *what,
+    const char *how);
 static GstcStatus gstc_cmd_delete (GstClient * client, const char *where,
     const char *what);
 
@@ -71,6 +73,27 @@ gstc_cmd_create (GstClient * client, const char *where, const char *what)
 
   /* Concatenate pieces into request */
   asprintf (&request, template, where, what);
+
+  ret = gstc_cmd_send (client, request);
+
+  free (request);
+
+  return ret;
+}
+
+static GstcStatus
+gstc_cmd_update (GstClient * client, const char *what, const char *how)
+{
+  GstcStatus ret;
+  const char *template = "update %s %s";
+  char *request;
+
+  libgstc_assert_and_ret_val (NULL != client, GSTC_NULL_ARGUMENT);
+  libgstc_assert_and_ret_val (NULL != what, GSTC_NULL_ARGUMENT);
+  libgstc_assert_and_ret_val (NULL != how, GSTC_NULL_ARGUMENT);
+
+  /* Concatenate pieces into request */
+  asprintf (&request, template, what, how);
 
   ret = gstc_cmd_send (client, request);
 
@@ -162,6 +185,26 @@ gstc_pipeline_delete (GstClient * client, const char *pipeline_name)
   libgstc_assert_and_ret_val (NULL != pipeline_name, GSTC_NULL_ARGUMENT);
 
   ret = gstc_cmd_delete (client, resource, pipeline_name);
+
+  return ret;
+}
+
+GstcStatus
+gstc_pipeline_play (GstClient * client, const char *pipeline_name)
+{
+  GstcStatus ret;
+  const char *template = "/pipelines/%s/state";
+  const char *state = "playing";
+  char *resource;
+
+  libgstc_assert_and_ret_val (NULL != client, GSTC_NULL_ARGUMENT);
+  libgstc_assert_and_ret_val (NULL != pipeline_name, GSTC_NULL_ARGUMENT);
+
+  asprintf (&resource, template, pipeline_name);
+
+  ret = gstc_cmd_update (client, resource, state);
+
+  free (resource);
 
   return ret;
 }
