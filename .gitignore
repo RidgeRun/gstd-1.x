@@ -20,6 +20,7 @@ gstd/gstd
 *.o
 *.la
 *.lo
+*.dSYM/
 *.log
 *.trs
 test-driver
@@ -29,3 +30,13 @@ docs/gtk-doc.make
 gtk-doc.m4
 libtool.orig
 gst_client/gst-client-1.0
+.clang_complete
+
+# Tests
+tests/gstd/test_gstd_no_create
+tests/gstd/test_gstd_pipeline_create
+tests/gstd/test_gstd_state
+tests/libgstc/libgstc_client
+tests/libgstc/libgstc_pipeline_create
+tests/libgstc/libgstc_pipeline_delete
+
