@@ -1,5 +1,6 @@
 TESTS = 			\
 	libgstc_client		\
+	libgstc_ping		\
 	libgstc_pipeline_create	\
 	libgstc_pipeline_delete
 
@@ -12,6 +13,11 @@ COMMON_SOURCES = $(top_srcdir)/libgstc/libgstc_assert.c
 
 libgstc_client_SOURCES =		\
 	test_libgstc_client.c		\
+	$(top_srcdir)/libgstc/libgstc.c	\
+	$(COMMON_SOURCES)
+
+libgstc_ping_SOURCES =		\
+	test_libgstc_ping.c		\
 	$(top_srcdir)/libgstc/libgstc.c	\
 	$(COMMON_SOURCES)
 

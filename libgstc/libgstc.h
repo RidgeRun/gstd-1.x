@@ -141,7 +141,18 @@ GstcStatus gstc_client_new (const char *address, const unsigned int port,
  * Returns: A newly allocated GstClient. Use gstc_client_free() after
  * usage.
  */
-void gstc_client_free (GstClient *client);
+void
+gstc_client_free (GstClient *client);
+
+/**
+ * gstc_client_ping:
+ * @client: The client returned by gstc_client_new()
+ *
+ * Verifies connectivy with GStreamer Daemon.
+ *
+ * Returns: GstcStatus indicating success, daemon unreachable, daemon timeout
+ */
+GstcStatus gstc_client_ping(GstClient *client);
 
 /**
  * gstc_pipeline_create:
