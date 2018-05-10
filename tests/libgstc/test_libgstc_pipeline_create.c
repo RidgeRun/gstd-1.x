@@ -22,7 +22,26 @@
 #include "libgstc.h"
 #include "libgstc_socket.h"
 
+/* Test Fixture */
 static gchar _request[512];
+static GstClient *_client;
+
+static void
+setup ()
+{
+  const gchar * address = "";
+  unsigned int port = 0;
+  unsigned long wait_time = 0;
+  int keep_connection_open = 0;
+
+  _client = gstc_client_new (address, port, wait_time, keep_connection_open);
+}
+
+static void
+teardown (void)
+{
+  gstc_client_free (_client);
+}
 
 /* Mock implementation of a socket */
 typedef struct _GstcSocket
@@ -37,30 +56,18 @@ gstc_socket_send (GstcSocket *socket, const gchar *request)
   return GSTC_SOCKET_OK;
 }
 
-GST_START_TEST (test_pipeline_create)
+GST_START_TEST (test_pipeline_create_success)
 {
-  GstClient *client;
   GstcStatus ret;
-  
-  const gchar * address = "";
-  const unsigned int port = 0;
-  const unsigned long wait_time = 0;
-  const int keep_connection_open = 0;
-
   const gchar * pipeline_name = "pipe";
   const gchar * pipeline_desc = "fakesrc ! fakesink";
   const gchar * expected = "create /pipelines pipe fakesrc ! fakesink";
-  
-  client = gstc_client_new (address, port, wait_time, keep_connection_open);
 
-  ret = gstc_pipeline_create (client, pipeline_name, pipeline_desc);
+  ret = gstc_pipeline_create (_client, pipeline_name, pipeline_desc);
   fail_if (GSTC_OK != ret);
 
   assert_equals_string (expected, _request);
-  
-  gstc_client_free (client);
 }
-
 GST_END_TEST;
 
 static Suite *
@@ -70,7 +77,9 @@ libgstc_pipeline_suite (void)
   TCase *tc = tcase_create ("general");
 
   suite_add_tcase (suite, tc);
-  tcase_add_test (tc, test_pipeline_create);
+
+  tcase_add_checked_fixture (tc, setup, teardown);
+  tcase_add_test (tc, test_pipeline_create_success);
 
   return suite;
 }
