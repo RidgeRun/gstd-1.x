@@ -90,6 +90,28 @@ GST_START_TEST (test_client_out_of_memory)
 }
 GST_END_TEST;
 
+GST_START_TEST (test_client_null_address)
+{
+  GstClient * client;
+
+  const gchar * address = NULL;
+  guint port = 12345;
+  guint64 wait_time = 0;
+  gint keep_connection_open = 1;
+
+  client = gstc_client_new (address, port, wait_time, keep_connection_open);
+  fail_if (NULL != client);
+
+  gstc_client_free (client);
+}
+GST_END_TEST;
+
+GST_START_TEST (test_client_null_in_free)
+{
+  gstc_client_free (NULL);
+}
+GST_END_TEST;
+
 static Suite *
 libgstc_client_suite (void)
 {
@@ -100,6 +122,8 @@ libgstc_client_suite (void)
 
   tcase_add_test (tc, test_client_success);
   tcase_add_test (tc, test_client_out_of_memory);
+  tcase_add_test (tc, test_client_null_address);
+  tcase_add_test (tc, test_client_null_in_free);
 
   return suite;
 }
