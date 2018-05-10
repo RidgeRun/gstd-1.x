@@ -56,8 +56,8 @@ struct _GstClient
 static GstcStatus
 gstc_cmd_send (GstClient * client, const char *request)
 {
-  libgstc_assert_and_ret_val (NULL != client, GSTC_NULL_ARGUMENT);
-  libgstc_assert_and_ret_val (NULL != request, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != client, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != request, GSTC_NULL_ARGUMENT);
 
   return gstc_socket_send (client->socket, request);
 }
@@ -69,9 +69,9 @@ gstc_cmd_create (GstClient * client, const char *where, const char *what)
   const char *template = "create %s %s";
   char *request;
 
-  libgstc_assert_and_ret_val (NULL != client, GSTC_NULL_ARGUMENT);
-  libgstc_assert_and_ret_val (NULL != where, GSTC_NULL_ARGUMENT);
-  libgstc_assert_and_ret_val (NULL != what, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != client, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != where, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != what, GSTC_NULL_ARGUMENT);
 
   /* Concatenate pieces into request */
   asprintf (&request, template, where, what);
@@ -90,9 +90,9 @@ gstc_cmd_update (GstClient * client, const char *what, const char *how)
   const char *template = "update %s %s";
   char *request;
 
-  libgstc_assert_and_ret_val (NULL != client, GSTC_NULL_ARGUMENT);
-  libgstc_assert_and_ret_val (NULL != what, GSTC_NULL_ARGUMENT);
-  libgstc_assert_and_ret_val (NULL != how, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != client, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != what, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != how, GSTC_NULL_ARGUMENT);
 
   /* Concatenate pieces into request */
   asprintf (&request, template, what, how);
@@ -111,9 +111,9 @@ gstc_cmd_delete (GstClient * client, const char *where, const char *what)
   const char *template = "delete %s %s";
   char *request;
 
-  libgstc_assert_and_ret_val (NULL != client, GSTC_NULL_ARGUMENT);
-  libgstc_assert_and_ret_val (NULL != where, GSTC_NULL_ARGUMENT);
-  libgstc_assert_and_ret_val (NULL != what, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != client, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != where, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != what, GSTC_NULL_ARGUMENT);
 
   /* Concatenate pieces into request */
   asprintf (&request, template, where, what);
@@ -133,8 +133,8 @@ gstc_client_new (const char *address, const unsigned int port,
   GstClient *client;
   GstcStatus ret = GSTC_OK;
 
-  libgstc_assert_and_ret_val (NULL != address, GSTC_NULL_ARGUMENT);
-  libgstc_assert_and_ret_val (NULL != out, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != address, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != out, GSTC_NULL_ARGUMENT);
 
   *out = NULL;
 
@@ -164,9 +164,9 @@ gstc_pipeline_create (GstClient * client, const char *pipeline_name,
   const char *template = "%s %s";
   char *create_args;
 
-  libgstc_assert_and_ret_val (NULL != client, GSTC_NULL_ARGUMENT);
-  libgstc_assert_and_ret_val (NULL != pipeline_name, GSTC_NULL_ARGUMENT);
-  libgstc_assert_and_ret_val (NULL != pipeline_desc, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != client, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != pipeline_name, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != pipeline_desc, GSTC_NULL_ARGUMENT);
 
   asprintf (&create_args, template, pipeline_name, pipeline_desc);
 
@@ -183,8 +183,8 @@ gstc_pipeline_delete (GstClient * client, const char *pipeline_name)
   GstcStatus ret;
   const char *resource = "/pipelines";
 
-  libgstc_assert_and_ret_val (NULL != client, GSTC_NULL_ARGUMENT);
-  libgstc_assert_and_ret_val (NULL != pipeline_name, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != client, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != pipeline_name, GSTC_NULL_ARGUMENT);
 
   ret = gstc_cmd_delete (client, resource, pipeline_name);
 
@@ -198,9 +198,9 @@ gstc_cmd_change_state (GstClient * client, const char *pipe, const char *state)
   const char *template = "/pipelines/%s/state";
   char *resource;
 
-  libgstc_assert_and_ret_val (NULL != client, GSTC_NULL_ARGUMENT);
-  libgstc_assert_and_ret_val (NULL != pipe, GSTC_NULL_ARGUMENT);
-  libgstc_assert_and_ret_val (NULL != state, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != client, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != pipe, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != state, GSTC_NULL_ARGUMENT);
 
   asprintf (&resource, template, pipe);
 
@@ -216,8 +216,8 @@ gstc_pipeline_play (GstClient * client, const char *pipeline_name)
 {
   const char *state = "playing";
 
-  libgstc_assert_and_ret_val (NULL != client, GSTC_NULL_ARGUMENT);
-  libgstc_assert_and_ret_val (NULL != pipeline_name, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != client, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != pipeline_name, GSTC_NULL_ARGUMENT);
 
   return gstc_cmd_change_state (client, pipeline_name, state);
 }
@@ -227,8 +227,8 @@ gstc_pipeline_pause (GstClient * client, const char *pipeline_name)
 {
   const char *state = "paused";
 
-  libgstc_assert_and_ret_val (NULL != client, GSTC_NULL_ARGUMENT);
-  libgstc_assert_and_ret_val (NULL != pipeline_name, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != client, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != pipeline_name, GSTC_NULL_ARGUMENT);
 
   return gstc_cmd_change_state (client, pipeline_name, state);
 }
@@ -238,8 +238,8 @@ gstc_pipeline_stop (GstClient * client, const char *pipeline_name)
 {
   const char *state = "null";
 
-  libgstc_assert_and_ret_val (NULL != client, GSTC_NULL_ARGUMENT);
-  libgstc_assert_and_ret_val (NULL != pipeline_name, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != client, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != pipeline_name, GSTC_NULL_ARGUMENT);
 
   return gstc_cmd_change_state (client, pipeline_name, state);
 }
@@ -247,7 +247,7 @@ gstc_pipeline_stop (GstClient * client, const char *pipeline_name)
 void
 gstc_client_free (GstClient * client)
 {
-  libgstc_assert_and_ret (NULL != client);
+  gstc_assert_and_ret (NULL != client);
 
   gstc_socket_free (client->socket);
   free (client);
@@ -258,7 +258,7 @@ gstc_client_ping (GstClient * client)
 {
   const char *request = "read /";
 
-  libgstc_assert_and_ret_val (NULL != client, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != client, GSTC_NULL_ARGUMENT);
 
   return gstc_cmd_send (client, request);
 }
