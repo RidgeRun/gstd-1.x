@@ -40,3 +40,4 @@ tests/libgstc/libgstc_client
 tests/libgstc/libgstc_pipeline_create
 tests/libgstc/libgstc_pipeline_delete
 tests/libgstc/libgstc_ping
+tests/libgstc/libgstc_pipeline_play
