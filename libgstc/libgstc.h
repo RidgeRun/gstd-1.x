@@ -159,6 +159,19 @@ GstcStatus
 gstc_pipeline_create (GstClient *client, const char *pipeline_name,
     const char *pipeline_desc);
 
+/**
+ * gstc_pipeline_delete:
+ * @client: The client returned by gstc_client_new()
+ * @pipeline_name: Name assoicated with the pipeline
+ *
+ * Deletes a previously created GStreamer pipeline named @pipeline_name.
+ *
+ * Returns: GstcStatus indicating success, daemon unreachable, daemon
+ * timeout, bad pipeline name
+ */
+GstcStatus
+gstc_pipeline_delete(GstClient *client, const char *pipeline_name);
+
 #ifdef __cplusplus
 }
 #endif
