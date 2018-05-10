@@ -36,7 +36,7 @@ struct _GstcSocket
 {
 };
 
-GstcSocketStatus
+GstcStatus
 gstc_socket_send (GstcSocket * socket, const char *request)
 {
   return GSTC_SOCKET_OK;

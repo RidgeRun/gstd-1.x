@@ -48,12 +48,12 @@ typedef struct _GstcSocket
 {
 } GstcSocket;
 
-GstcSocketStatus
+GstcStatus
 gstc_socket_send (GstcSocket *socket, const gchar *request)
 {
   memcpy (_request, request, strlen(request));
 
-  return GSTC_SOCKET_OK;
+  return GSTC_OK;
 }
 
 GST_START_TEST (test_pipeline_create_success)
