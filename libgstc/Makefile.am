@@ -4,10 +4,13 @@ gstdincludedir = $(includedir)/gstd
 gstdinclude_HEADERS = libgstc.h
 
 libgstc_@GSTD_API_VERSION@_la_SOURCES = \
-	libgstc.c
-	libgstc_socket.c
+	libgstc.c			\
+	libgstc_socket.c		\
+	libgstc_assert.c
 
 libgstc_@GSTD_API_VERSION@_la_CFLAGS = 
 libgstc_@GSTD_API_VERSION@_la_LDFLAGS =
 
-noinst_HEADERS = libgstc_socket.h
+noinst_HEADERS = \
+	libgstc_socket.h	\
+	libgstc_assert.h

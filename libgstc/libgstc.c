@@ -36,6 +36,7 @@
 
 #include "libgstc.h"
 #include "libgstc_socket.h"
+#include "libgstc_assert.h"
 
 static GstcStatus gstc_cmd_send (GstClient * client, const char *request);
 static GstcStatus gstc_cmd_create (GstClient * client, const char *where,
@@ -92,9 +93,9 @@ gstc_pipeline_create (GstClient * client, const char *pipeline_name,
   const char *template = "%s %s";
   char *create_args;
 
-  if (NULL == client || NULL == pipeline_name || NULL == pipeline_desc) {
-    return GSTC_NULL_ARGUMENT;
-  }
+  libgstc_assert_and_ret_val (NULL != client, GSTC_NULL_ARGUMENT);
+  libgstc_assert_and_ret_val (NULL != pipeline_name, GSTC_NULL_ARGUMENT);
+  libgstc_assert_and_ret_val (NULL != pipeline_desc, GSTC_NULL_ARGUMENT);
 
   asprintf (&create_args, template, pipeline_name, pipeline_desc);
 

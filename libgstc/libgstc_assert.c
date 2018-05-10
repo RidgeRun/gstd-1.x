@@ -30,29 +30,18 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <stdio.h>
 #include <stdlib.h>
 
-#include "libgstc_socket.h"
-
-struct _GstcSocket
-{
-};
-
-GstcSocket *
-gstc_socket_new (const char *address, const unsigned int port,
-    const unsigned long wait_time, const int keep_connection_open)
-{
-  return (GstcSocket *)malloc (sizeof (GstcSocket));
-}
-
-GstcStatus
-gstc_socket_send (GstcSocket * socket, const char *request)
-{
-  return GSTC_OK;
-}
+#include "libgstc_assert.h"
 
 void
-gstc_socket_free (GstcSocket * socket)
+_libgstc_assert (int cond, const char * scond, const char * file,
+    const char * function, int line)
 {
-  free (socket);
+  if (0 == cond) {						
+    fprintf (stderr, "**libgstc**: %s:%s:%d: \"%s\" failed!\n", file,
+        function, line, scond);
+    libgstc_abort();
+  }
 }
