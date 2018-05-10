@@ -95,7 +95,8 @@ extern "C"
 typedef enum
 {
   GSTC_OK,
-  GSTC_NULL_ARGUMENT
+  GSTC_NULL_ARGUMENT,
+  GSTC_UNREACHABLE
 } GstcStatus;
 
 /**
