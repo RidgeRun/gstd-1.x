@@ -88,12 +88,14 @@ extern "C"
 /**
  * GstcStatus:
  * @GSTC_OK: Everything went okay
+ * @GSTC_NULL_ARGUMENT: A mandatory argument was passed in as NULL
  *
  * Retrun codes for the different libgstc operations
  */
 typedef enum
 {
-  GSTC_OK
+  GSTC_OK,
+  GSTC_NULL_ARGUMENT
 } GstcStatus;
 
 /**

@@ -73,7 +73,7 @@ GstClient *
 gstc_client_new (const char *address, const unsigned int port,
     const unsigned long wait_time, const int keep_connection_open)
 {
-  return NULL;
+  return (GstClient *) malloc (sizeof (GstClient));
 }
 
 GstcStatus
@@ -83,6 +83,10 @@ gstc_pipeline_create (GstClient * client, const char *pipeline_name,
   const char *resource = "/pipelines";
   const char *template = "%s %s";
   char *create_args;
+
+  if (NULL == client || NULL == pipeline_name || NULL == pipeline_desc) {
+    return GSTC_NULL_ARGUMENT;
+  }
 
   asprintf (&create_args, template, pipeline_name, pipeline_desc);
 
@@ -96,4 +100,5 @@ gstc_pipeline_create (GstClient * client, const char *pipeline_name,
 void
 gstc_client_free (GstClient * client)
 {
+  free (client);
 }
