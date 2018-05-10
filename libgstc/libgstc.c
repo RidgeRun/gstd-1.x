@@ -44,12 +44,15 @@ static GstcStatus gstc_cmd_create (GstClient * client, const char *where,
 
 struct _GstClient
 {
-  GstcSocket * socket;
+  GstcSocket *socket;
 };
 
 static GstcStatus
 gstc_cmd_send (GstClient * client, const char *request)
 {
+  libgstc_assert_and_ret_val (NULL != client, GSTC_NULL_ARGUMENT);
+  libgstc_assert_and_ret_val (NULL != request, GSTC_NULL_ARGUMENT);
+
   return gstc_socket_send (client->socket, request);
 }
 
@@ -59,6 +62,10 @@ gstc_cmd_create (GstClient * client, const char *where, const char *what)
   GstcStatus ret;
   const char *template = "create %s %s";
   char *request;
+
+  libgstc_assert_and_ret_val (NULL != client, GSTC_NULL_ARGUMENT);
+  libgstc_assert_and_ret_val (NULL != where, GSTC_NULL_ARGUMENT);
+  libgstc_assert_and_ret_val (NULL != what, GSTC_NULL_ARGUMENT);
 
   /* Concatenate pieces into request */
   asprintf (&request, template, where, what);
@@ -74,7 +81,9 @@ GstClient *
 gstc_client_new (const char *address, const unsigned int port,
     const unsigned long wait_time, const int keep_connection_open)
 {
-  GstClient * client;
+  GstClient *client;
+
+  libgstc_assert_and_ret_val (NULL != address, NULL);
 
   client = (GstClient *) malloc (sizeof (GstClient));
 
@@ -109,6 +118,8 @@ gstc_pipeline_create (GstClient * client, const char *pipeline_name,
 void
 gstc_client_free (GstClient * client)
 {
+  libgstc_assert_and_ret (NULL != client);
+
   gstc_socket_free (client->socket);
   free (client);
 }

@@ -42,7 +42,7 @@ GstcSocket *
 gstc_socket_new (const char *address, const unsigned int port,
     const unsigned long wait_time, const int keep_connection_open)
 {
-  return (GstcSocket *)malloc (sizeof (GstcSocket));
+  return (GstcSocket *) malloc (sizeof (GstcSocket));
 }
 
 GstcStatus
