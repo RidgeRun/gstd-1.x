@@ -44,6 +44,18 @@ gstc_socket_send (GstcSocket *socket, const gchar *request)
   return GSTC_OK;
 }
 
+/* Mock implementation of malloc */
+gboolean _use_mock_malloc = FALSE;
+void *
+malloc (gsize size) {
+  if (_use_mock_malloc) {
+    /* Simulate out of memory */
+    return NULL;
+  } else {
+    return calloc (1, size);
+  }
+}
+
 GST_START_TEST (test_client_success)
 {
   GstClient * client;
@@ -60,6 +72,24 @@ GST_START_TEST (test_client_success)
 }
 GST_END_TEST;
 
+GST_START_TEST (test_client_out_of_memory)
+{
+  GstClient * client;
+
+  const gchar * address = "127.0.0.1";
+  guint port = 12345;
+  guint64 wait_time = 0;
+  gint keep_connection_open = 1;
+
+  _use_mock_malloc = TRUE;
+
+  client = gstc_client_new (address, port, wait_time, keep_connection_open);
+  fail_if (NULL != client);
+
+  gstc_client_free (client);
+}
+GST_END_TEST;
+
 static Suite *
 libgstc_client_suite (void)
 {
@@ -69,6 +99,7 @@ libgstc_client_suite (void)
   suite_add_tcase (suite, tc);
 
   tcase_add_test (tc, test_client_success);
+  tcase_add_test (tc, test_client_out_of_memory);
 
   return suite;
 }
