@@ -174,3 +174,13 @@ gstc_client_free (GstClient * client)
   gstc_socket_free (client->socket);
   free (client);
 }
+
+GstcStatus
+gstc_client_ping (GstClient * client)
+{
+  const char *request = "read /";
+
+  libgstc_assert_and_ret_val (NULL != client, GSTC_NULL_ARGUMENT);
+
+  return gstc_cmd_send (client, request);
+}
