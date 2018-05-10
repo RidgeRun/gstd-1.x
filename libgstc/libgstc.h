@@ -90,6 +90,7 @@ extern "C"
  * @GSTC_OK: Everything went okay
  * @GSTC_NULL_ARGUMENT: A mandatory argument was passed in as NULL
  * @GSTC_TIMEOUT: The server has timed out before responding
+ * @GSTC_OOM: The system has run out of memory
  *
  * Return codes for the different libgstc operations
  */
@@ -98,7 +99,8 @@ typedef enum
   GSTC_OK,
   GSTC_NULL_ARGUMENT,
   GSTC_UNREACHABLE,
-  GSTC_TIMEOUT
+  GSTC_TIMEOUT,
+  GSTC_OOM
 } GstcStatus;
 
 /**
@@ -116,15 +118,19 @@ typedef struct _GstClient GstClient;
  * Zero means wait forever.
  * @keep_connection_open: if non-zero the underlying network socket
  * will be kept open until gstc_client_free() is called
+ * @client: placeholder for newly allocated client.
  *
  * Creates a new connection object to the GStreamer Daemon session in
- * @address and @port.  Does not exchange any data with the daemon.
+ * @address and @port.  Does not exchange any data with the
+ * daemon. When successful, a newly allocated client is returned
+ * through @client. If an error occurs, the appropriate status is
+ * returned and @client is not valid.
  *
- * Returns: A newly allocated GstClient. Use gstc_client_free() after
- * usage.
+ * Returns: GstcStatus indicating success, daemon unreachable, out of
+ * memory.
  */
-GstClient *gstc_client_new (const char *address, const unsigned int port,
-    const unsigned long wait_time, const int keep_connection_open);
+GstcStatus gstc_client_new (const char *address, const unsigned int port,
+    const unsigned long wait_time, const int keep_connection_open, GstClient ** client);
 
 /**
  * gstc_client_free:
