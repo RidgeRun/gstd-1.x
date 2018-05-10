@@ -24,6 +24,8 @@
 
 /* Test Fixture */
 static GstClient *_client;
+static gboolean _reachable;
+static guint64 _proc_time;
 
 static void
 setup ()
@@ -34,6 +36,8 @@ setup ()
   int keep_connection_open = 0;
 
   gstc_client_new (address, port, wait_time, keep_connection_open, &_client);
+  _reachable = TRUE;
+  _proc_time = 0;
 }
 
 static void
@@ -45,6 +49,7 @@ teardown (void)
 /* Mock implementation of a socket */
 typedef struct _GstcSocket
 {
+  guint64 wait_time;
 } GstcSocket;
 
 GstcSocket _socket;
@@ -53,6 +58,8 @@ GstcSocket *
 gstc_socket_new (const char *address, const unsigned int port,
     const unsigned long wait_time, const int keep_connection_open)
 {
+  _socket.wait_time = wait_time;
+
   return &_socket;
 }
 
@@ -64,6 +71,14 @@ gstc_socket_free (GstcSocket * socket)
 GstcStatus
 gstc_socket_send (GstcSocket *socket, const gchar *request)
 {
+  if (!_reachable) {
+    return GSTC_UNREACHABLE;
+  }
+
+  if (_proc_time > socket->wait_time) {
+    return GSTC_TIMEOUT;
+  }
+
   return GSTC_OK;
 }
 
@@ -85,6 +100,34 @@ GST_START_TEST (test_ping_null_client)
 }
 GST_END_TEST;
 
+GST_START_TEST (test_ping_unreachable)
+{
+  GstcStatus ret;
+
+  _reachable = FALSE;
+
+  ret = gstc_client_ping (_client);
+  assert_equals_int (GSTC_UNREACHABLE, ret);
+}
+GST_END_TEST;
+
+GST_START_TEST (test_ping_timeout)
+{
+  GstcStatus ret;
+
+  /* The fixture sets the wait_time to 5 */
+  _proc_time = 4;
+
+  ret = gstc_client_ping (_client);
+  assert_equals_int (GSTC_OK, ret);
+
+  _proc_time = 10;
+
+  ret = gstc_client_ping (_client);
+  assert_equals_int (GSTC_TIMEOUT, ret);
+}
+GST_END_TEST;
+
 static Suite *
 libgstc_ping_suite (void)
 {
@@ -96,6 +139,8 @@ libgstc_ping_suite (void)
   tcase_add_checked_fixture (tc, setup, teardown);
   tcase_add_test (tc, test_ping_success);
   tcase_add_test (tc, test_ping_null_client);
+  tcase_add_test (tc, test_ping_unreachable);
+  tcase_add_test (tc, test_ping_timeout);
 
   return suite;
 }
