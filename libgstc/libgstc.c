@@ -77,23 +77,28 @@ gstc_cmd_create (GstClient * client, const char *where, const char *what)
   return ret;
 }
 
-GstClient *
+GstcStatus
 gstc_client_new (const char *address, const unsigned int port,
-    const unsigned long wait_time, const int keep_connection_open)
+    const unsigned long wait_time, const int keep_connection_open,
+    GstClient ** out)
 {
   GstClient *client;
+  GstcStatus ret = GSTC_OK;
 
-  libgstc_assert_and_ret_val (NULL != address, NULL);
+  libgstc_assert_and_ret_val (NULL != address, GSTC_NULL_ARGUMENT);
+  libgstc_assert_and_ret_val (NULL != out, GSTC_NULL_ARGUMENT);
 
   client = (GstClient *) malloc (sizeof (GstClient));
   if (NULL == client) {
-    return NULL;
+    return GSTC_OOM;
   }
 
   client->socket = gstc_socket_new (address, port, wait_time,
       keep_connection_open);
 
-  return client;
+  *out = client;
+
+  return ret;
 }
 
 GstcStatus

@@ -59,13 +59,15 @@ malloc (gsize size) {
 GST_START_TEST (test_client_success)
 {
   GstClient * client;
+  GstcStatus ret;
 
   const gchar * address = "127.0.0.1";
   guint port = 12345;
   guint64 wait_time = 0;
   gint keep_connection_open = 1;
 
-  client = gstc_client_new (address, port, wait_time, keep_connection_open);
+  ret = gstc_client_new (address, port, wait_time, keep_connection_open, &client);
+  assert_equals_int(GSTC_OK, ret);
   fail_if (NULL == client);
 
   gstc_client_free (client);
@@ -75,6 +77,7 @@ GST_END_TEST;
 GST_START_TEST (test_client_out_of_memory)
 {
   GstClient * client;
+  GstcStatus ret;
 
   const gchar * address = "127.0.0.1";
   guint port = 12345;
@@ -83,26 +86,39 @@ GST_START_TEST (test_client_out_of_memory)
 
   _use_mock_malloc = TRUE;
 
-  client = gstc_client_new (address, port, wait_time, keep_connection_open);
-  fail_if (NULL != client);
-
-  gstc_client_free (client);
+  ret = gstc_client_new (address, port, wait_time, keep_connection_open, &client);
+  assert_equals_int (GSTC_OOM, ret);
+  assert_equals_pointer(NULL, client)
 }
 GST_END_TEST;
 
 GST_START_TEST (test_client_null_address)
 {
   GstClient * client;
+  GstcStatus ret;
 
   const gchar * address = NULL;
   guint port = 12345;
   guint64 wait_time = 0;
   gint keep_connection_open = 1;
 
-  client = gstc_client_new (address, port, wait_time, keep_connection_open);
-  fail_if (NULL != client);
+  ret = gstc_client_new (address, port, wait_time, keep_connection_open, &client);
+  assert_equals_int (GSTC_NULL_ARGUMENT, ret);
+  assert_equals_pointer(NULL, client)
+}
+GST_END_TEST;
 
-  gstc_client_free (client);
+GST_START_TEST (test_client_null_placeholder)
+{
+  GstcStatus ret;
+
+  const gchar * address = "127.0.0.1";
+  guint port = 12345;
+  guint64 wait_time = 0;
+  gint keep_connection_open = 1;
+
+  ret = gstc_client_new (address, port, wait_time, keep_connection_open, NULL);
+  assert_equals_int (GSTC_NULL_ARGUMENT, ret);
 }
 GST_END_TEST;
 
@@ -123,6 +139,7 @@ libgstc_client_suite (void)
   tcase_add_test (tc, test_client_success);
   tcase_add_test (tc, test_client_out_of_memory);
   tcase_add_test (tc, test_client_null_address);
+  tcase_add_test (tc, test_client_null_placeholder);
   tcase_add_test (tc, test_client_null_in_free);
 
   return suite;

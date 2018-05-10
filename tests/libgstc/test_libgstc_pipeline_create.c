@@ -36,7 +36,7 @@ setup ()
   unsigned long wait_time = 5;
   int keep_connection_open = 0;
 
-  _client = gstc_client_new (address, port, wait_time, keep_connection_open);
+  gstc_client_new (address, port, wait_time, keep_connection_open, &_client);
   _reachable = TRUE;
   _proc_time = 0;
 }
