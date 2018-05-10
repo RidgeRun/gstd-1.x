@@ -26,11 +26,18 @@ typedef struct _GstcSocket
 {
 } GstcSocket;
 
+static GstcSocket _socket;
+static gboolean _fail_socket = FALSE;
+
 GstcSocket *
 gstc_socket_new (const char *address, const unsigned int port,
     const unsigned long wait_time, const int keep_connection_open)
 {
-  return NULL;
+  if (_fail_socket) {
+    return NULL;
+  } else {
+    return &_socket;
+  }
 }
 
 void
@@ -54,6 +61,16 @@ malloc (gsize size) {
   } else {
     return calloc (1, size);
   }
+}
+
+void setup ()
+{
+  _use_mock_malloc = FALSE;
+  _fail_socket = FALSE;
+}
+
+void teardown ()
+{
 }
 
 GST_START_TEST (test_client_success)
@@ -128,6 +145,24 @@ GST_START_TEST (test_client_null_in_free)
 }
 GST_END_TEST;
 
+GST_START_TEST (test_client_no_socket)
+{
+  GstClient * client;
+  GstcStatus ret;
+
+  const gchar * address = "127.0.0.1";
+  guint port = 12345;
+  guint64 wait_time = 0;
+  gint keep_connection_open = 1;
+
+  _fail_socket = TRUE;
+
+  ret = gstc_client_new (address, port, wait_time, keep_connection_open, &client);
+  fail_if (GSTC_OK, ret);
+  assert_equals_pointer(NULL, client);
+}
+GST_END_TEST;
+
 static Suite *
 libgstc_client_suite (void)
 {
@@ -136,11 +171,13 @@ libgstc_client_suite (void)
 
   suite_add_tcase (suite, tc);
 
+  tcase_add_checked_fixture (tc, setup, teardown);
   tcase_add_test (tc, test_client_success);
   tcase_add_test (tc, test_client_out_of_memory);
   tcase_add_test (tc, test_client_null_address);
   tcase_add_test (tc, test_client_null_placeholder);
   tcase_add_test (tc, test_client_null_in_free);
+  tcase_add_test (tc, test_client_no_socket);
 
   return suite;
 }

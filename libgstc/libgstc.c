@@ -88,6 +88,8 @@ gstc_client_new (const char *address, const unsigned int port,
   libgstc_assert_and_ret_val (NULL != address, GSTC_NULL_ARGUMENT);
   libgstc_assert_and_ret_val (NULL != out, GSTC_NULL_ARGUMENT);
 
+  *out = NULL;
+
   client = (GstClient *) malloc (sizeof (GstClient));
   if (NULL == client) {
     return GSTC_OOM;
@@ -95,6 +97,10 @@ gstc_client_new (const char *address, const unsigned int port,
 
   client->socket = gstc_socket_new (address, port, wait_time,
       keep_connection_open);
+  if (NULL == client->socket) {
+    free (client);
+    return GSTC_OOM;
+  }
 
   *out = client;
 
