@@ -70,6 +70,39 @@ GST_START_TEST (test_pipeline_create_success)
 }
 GST_END_TEST;
 
+GST_START_TEST (test_pipeline_create_null_name)
+{
+  GstcStatus ret;
+  const gchar * pipeline_name = NULL;
+  const gchar * pipeline_desc = "fakesrc ! fakesink";
+
+  ret = gstc_pipeline_create (_client, pipeline_name, pipeline_desc);
+  assert_equals_int (GSTC_NULL_ARGUMENT, ret);
+}
+GST_END_TEST;
+
+GST_START_TEST (test_pipeline_create_null_desc)
+{
+  GstcStatus ret;
+  const gchar * pipeline_name = "pipe";
+  const gchar * pipeline_desc = NULL;
+
+  ret = gstc_pipeline_create (_client, pipeline_name, pipeline_desc);
+  assert_equals_int (GSTC_NULL_ARGUMENT, ret);
+}
+GST_END_TEST;
+
+GST_START_TEST (test_pipeline_create_null_client)
+{
+  GstcStatus ret;
+  const gchar * pipeline_name = "pipe";
+  const gchar * pipeline_desc = "fakesrc ! fakesink";
+
+  ret = gstc_pipeline_create (NULL, pipeline_name, pipeline_desc);
+  assert_equals_int (GSTC_NULL_ARGUMENT, ret);
+}
+GST_END_TEST;
+
 static Suite *
 libgstc_pipeline_suite (void)
 {
@@ -80,6 +113,9 @@ libgstc_pipeline_suite (void)
 
   tcase_add_checked_fixture (tc, setup, teardown);
   tcase_add_test (tc, test_pipeline_create_success);
+  tcase_add_test (tc, test_pipeline_create_null_name);
+  tcase_add_test (tc, test_pipeline_create_null_desc);
+  tcase_add_test (tc, test_pipeline_create_null_client);
 
   return suite;
 }
