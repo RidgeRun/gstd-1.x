@@ -38,11 +38,17 @@ extern "C"
 {
 #endif
 
-#ifdef LIBGSTC_CRITICAL
+#ifdef LIBGSTC_CHECKS_CRITICAL
 #define libgstc_abort() abort()
 #else
 #define libgstc_abort()
 #endif
+
+#ifdef LIBGST_CHECKS_DISABLE
+#define libgstc_assert_and_ret(cond)
+#define libgstc_assert_and_ret_val(cond, val)
+#define libgstc_assert(cond)
+#else
 
 #define libgstc_assert_and_ret(cond)					\
   _libgstc_assert ((cond), #cond, __FILE__, __FUNCTION__, __LINE__);	\
@@ -52,12 +58,14 @@ extern "C"
   _libgstc_assert ((cond), #cond, __FILE__, __FUNCTION__, __LINE__);	\
   if (!(cond)) return (val)
 
-#define libgstc_assert (cond)						\
+#define libgstc_assert(cond)						\
   _libgstc_assert ((cond), #cond, __FILE__, __FUNCTION__, __LINE__)
 
 void
 _libgstc_assert (int cond, const char *scond, const char *file,
     const char *function, int line);
+
+#endif // LIBGSTC_CHECKS_DISABLE
 
 #ifdef __cplusplus
 }
