@@ -233,6 +233,17 @@ gstc_pipeline_pause (GstClient * client, const char *pipeline_name)
   return gstc_cmd_change_state (client, pipeline_name, state);
 }
 
+GstcStatus
+gstc_pipeline_stop (GstClient * client, const char *pipeline_name)
+{
+  const char *state = "null";
+
+  libgstc_assert_and_ret_val (NULL != client, GSTC_NULL_ARGUMENT);
+  libgstc_assert_and_ret_val (NULL != pipeline_name, GSTC_NULL_ARGUMENT);
+
+  return gstc_cmd_change_state (client, pipeline_name, state);
+}
+
 void
 gstc_client_free (GstClient * client)
 {

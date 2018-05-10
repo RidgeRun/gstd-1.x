@@ -209,6 +209,19 @@ gstc_pipeline_play(GstClient *client, const char *pipeline_name);
 GstcStatus
 gstc_pipeline_pause(GstClient *client, const char *pipeline_name);
 
+/**
+ * gstc_pipeline_stop:
+ * @client: The client returned by gstc_client_new()
+ * @pipeline_name: Name assoicated with the pipeline
+ *
+ * Attempts to change the named pipeline to the null state.
+ *
+ * Returns: GstcStatus indicating success, daemon unreachable, daemon
+ * timeout, bad pipeline name, unable to change pipeline state
+ */
+GstcStatus
+gstc_pipeline_stop(GstClient *client, const char *pipeline_name);
+
 #ifdef __cplusplus
 }
 #endif
