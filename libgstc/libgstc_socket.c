@@ -36,8 +36,21 @@ struct _GstcSocket
 {
 };
 
+GstcSocket *
+gstc_socket_new (const char *address, const unsigned int port,
+    const unsigned long wait_time, const int keep_connection_open)
+{
+  return (GstcSocket *)malloc (sizeof (GstcSocket));
+}
+
 GstcStatus
 gstc_socket_send (GstcSocket * socket, const char *request)
 {
   return GSTC_SOCKET_OK;
+}
+
+void
+gstc_socket_free (GstcSocket * socket);
+{
+  free (socket);
 }

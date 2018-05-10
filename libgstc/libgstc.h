@@ -89,14 +89,16 @@ extern "C"
  * GstcStatus:
  * @GSTC_OK: Everything went okay
  * @GSTC_NULL_ARGUMENT: A mandatory argument was passed in as NULL
+ * @GSTC_TIMEOUT: The server has timed out before responding
  *
- * Retrun codes for the different libgstc operations
+ * Return codes for the different libgstc operations
  */
 typedef enum
 {
   GSTC_OK,
   GSTC_NULL_ARGUMENT,
-  GSTC_UNREACHABLE
+  GSTC_UNREACHABLE,
+  GSTC_TIMEOUT
 } GstcStatus;
 
 /**

@@ -26,17 +26,19 @@
 static gchar _request[512];
 static GstClient *_client;
 static gboolean _reachable;
+static guint64 _proc_time;
 
 static void
 setup ()
 {
   const gchar * address = "";
   unsigned int port = 0;
-  unsigned long wait_time = 0;
+  unsigned long wait_time = 5;
   int keep_connection_open = 0;
 
   _client = gstc_client_new (address, port, wait_time, keep_connection_open);
   _reachable = TRUE;
+  _proc_time = 0;
 }
 
 static void
@@ -48,13 +50,35 @@ teardown (void)
 /* Mock implementation of a socket */
 typedef struct _GstcSocket
 {
+  guint64 wait_time;
 } GstcSocket;
+
+GstcSocket *
+gstc_socket_new (const char *address, const unsigned int port,
+    const unsigned long wait_time, const int keep_connection_open)
+{
+  GstcSocket * socket = g_malloc0 (sizeof (GstcSocket));;
+
+  socket->wait_time = wait_time;
+
+  return socket;
+}
+
+void
+gstc_socket_free (GstcSocket * socket)
+{
+  g_free (socket);
+}
 
 GstcStatus
 gstc_socket_send (GstcSocket *socket, const gchar *request)
 {
   if (!_reachable) {
     return GSTC_UNREACHABLE;
+  }
+
+  if (_proc_time > socket->wait_time) {
+    return GSTC_TIMEOUT;
   }
 
   memcpy (_request, request, strlen(request));
@@ -122,6 +146,26 @@ GST_START_TEST (test_pipeline_create_unreachable)
 }
 GST_END_TEST;
 
+GST_START_TEST (test_pipeline_create_timeout)
+{
+  GstcStatus ret;
+  const gchar * pipeline_name = "pipe";
+  const gchar * pipeline_desc = "fakesrc ! fakesink";
+
+  /* The fixture sets the wait_time to 5 */
+
+  _proc_time = 4;
+
+  ret = gstc_pipeline_create (_client, pipeline_name, pipeline_desc);
+  assert_equals_int (GSTC_OK, ret);
+
+  _proc_time = 10;
+
+  ret = gstc_pipeline_create (_client, pipeline_name, pipeline_desc);
+  assert_equals_int (GSTC_TIMEOUT, ret);
+}
+GST_END_TEST;
+
 static Suite *
 libgstc_pipeline_suite (void)
 {
@@ -136,6 +180,7 @@ libgstc_pipeline_suite (void)
   tcase_add_test (tc, test_pipeline_create_null_desc);
   tcase_add_test (tc, test_pipeline_create_null_client);
   tcase_add_test (tc, test_pipeline_create_unreachable);
+  tcase_add_test (tc, test_pipeline_create_timeout);
 
   return suite;
 }
