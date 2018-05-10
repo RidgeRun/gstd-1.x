@@ -36,12 +36,12 @@
 #include "libgstc_assert.h"
 
 void
-_libgstc_assert (int cond, const char * scond, const char * file,
+_gstc_assert (int cond, const char * scond, const char * file,
     const char * function, int line)
 {
   if (0 == cond) {						
     fprintf (stderr, "**libgstc**: %s:%s:%d: \"%s\" failed!\n", file,
         function, line, scond);
-    libgstc_abort();
+    gstc_abort();
   }
 }
