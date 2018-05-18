@@ -75,6 +75,29 @@ GST_START_TEST (test_json_int_wrong_type)
 }
 GST_END_TEST;
 
+GST_START_TEST (test_json_int_null_name)
+{
+  GstcStatus ret;
+  gint code;
+  const char * json = "{ \"string\" : \"string val\" }";
+
+  ret = gstc_json_get_int (json, NULL, &code);
+
+  assert_equals_int (GSTC_NULL_ARGUMENT, ret);
+}
+GST_END_TEST;
+
+GST_START_TEST (test_json_int_null_placeholder)
+{
+  GstcStatus ret;
+  const char * json = "{ \"string\" : \"string val\" }";
+
+  ret = gstc_json_get_int (json, "string", NULL);
+
+  assert_equals_int (GSTC_NULL_ARGUMENT, ret);
+}
+GST_END_TEST;
+
 static Suite *
 libgstc_ping_suite (void)
 {
@@ -87,6 +110,8 @@ libgstc_ping_suite (void)
   tcase_add_test (tc, test_json_int);
   tcase_add_test (tc, test_json_int_neg);
   tcase_add_test (tc, test_json_int_wrong_type);
+  tcase_add_test (tc, test_json_int_null_name);
+  tcase_add_test (tc, test_json_int_null_placeholder);
 
   return suite;
 }
