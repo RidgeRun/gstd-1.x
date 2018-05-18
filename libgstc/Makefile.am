@@ -6,11 +6,13 @@ gstdinclude_HEADERS = libgstc.h
 libgstc_@GSTD_API_VERSION@_la_SOURCES = \
 	libgstc.c			\
 	libgstc_socket.c		\
-	libgstc_assert.c
+	libgstc_assert.c		\
+	libgstc_json.c
 
-libgstc_@GSTD_API_VERSION@_la_CFLAGS = 
-libgstc_@GSTD_API_VERSION@_la_LDFLAGS =
+libgstc_@GSTD_API_VERSION@_la_CFLAGS = $(JANSSON_CFLAGS)
+libgstc_@GSTD_API_VERSION@_la_LDFLAGS = $(JANSSON_LIBS)
 
 noinst_HEADERS = \
 	libgstc_socket.h	\
-	libgstc_assert.h
+	libgstc_assert.h	\
+	libgstc_json.h
