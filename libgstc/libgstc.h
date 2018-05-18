@@ -91,6 +91,7 @@ extern "C"
  * @GSTC_NULL_ARGUMENT: A mandatory argument was passed in as NULL
  * @GSTC_TIMEOUT: The server has timed out before responding
  * @GSTC_OOM: The system has run out of memory
+ * @GSTC_TYPE_ERROR: An error occurred parsing a type from a string
  *
  * Return codes for the different libgstc operations
  */
@@ -100,7 +101,8 @@ typedef enum
   GSTC_NULL_ARGUMENT,
   GSTC_UNREACHABLE,
   GSTC_TIMEOUT,
-  GSTC_OOM
+  GSTC_OOM,
+  GSTC_TYPE_ERROR
 } GstcStatus;
 
 /**
