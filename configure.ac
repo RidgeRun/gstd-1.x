@@ -16,6 +16,9 @@ GJSON_REQUIRED=0.16.2
 dnl required version of libdaemon
 LIBD_REQUIRED=0.14
 
+dnl required version of jansson
+JANSSON_REQUIRED=2.11
+
 AC_CONFIG_SRCDIR([gstd/gstd.c])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIRS([m4])
@@ -134,6 +137,22 @@ PKG_CHECK_MODULES(LIBD, [
       libdaemon-dev >= $LIBD_REQUIRED
 
     Please make sure you have the necessary libdaemon-dev
+    development headers installed.
+  ])
+])
+
+PKG_CHECK_MODULES(JANSSON, [
+    jansson >= $JANSSON_REQUIRED
+  ], [
+    AC_SUBST(JANSSON_CFLAGS)
+    AC_SUBST(JANSSON_LIBS)
+  ], [
+  AC_MSG_ERROR([
+    Can't find janssonaemon development packages:
+
+      libjansson-dev >= $JANSSON_REQUIRED
+
+    Please make sure you have the necessary libjansson-dev
     development headers installed.
   ])
 ])

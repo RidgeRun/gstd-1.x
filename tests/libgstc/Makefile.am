@@ -5,12 +5,13 @@ TESTS = 			\
 	libgstc_pipeline_delete	\
 	libgstc_pipeline_play   \
 	libgstc_pipeline_pause	\
-	libgstc_pipeline_stop
+	libgstc_pipeline_stop	\
+	libgstc_json
 
 check_PROGRAMS = $(TESTS)
 
-AM_CFLAGS = $(GST_CFLAGS) -I$(top_srcdir)/libgstc
-AM_LDFLAGS = $(GST_LIBS)
+AM_CFLAGS = $(GST_CFLAGS) $(JANSSON_CFLAGS) -I$(top_srcdir)/libgstc
+AM_LDFLAGS = $(GST_LIBS) $(JANSSON_LIBS)
 
 COMMON_SOURCES = $(top_srcdir)/libgstc/libgstc_assert.c
 
@@ -47,4 +48,9 @@ libgstc_pipeline_pause_SOURCES = 		\
 libgstc_pipeline_stop_SOURCES = 		\
 	test_libgstc_pipeline_stop.c		\
 	$(top_srcdir)/libgstc/libgstc.c		\
+	$(COMMON_SOURCES)
+
+libgstc_json_SOURCES =		 		\
+	test_libgstc_json.c			\
+	$(top_srcdir)/libgstc/libgstc_json.c	\
 	$(COMMON_SOURCES)
