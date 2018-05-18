@@ -49,18 +49,24 @@ gstc_json_get_int (const char *json, const char *name, int *out)
   gstc_assert_and_ret_val (out != NULL, GSTC_NULL_ARGUMENT);
 
   root = json_loads (json, 0, &error);
+  if (!root) {
+    ret = GSTC_MALFORMED;
+    goto out;
+  }
+
   data = json_object_get (root, name);
 
   if (!json_is_integer (data)) {
     ret = GSTC_TYPE_ERROR;
-    goto out;
+    goto unref;
   }
 
   *out = json_integer_value (data);
   ret = GSTC_OK;
 
- out:
+ unref:
   json_decref (root);
 
+ out:
   return ret;
 }
