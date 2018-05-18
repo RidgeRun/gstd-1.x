@@ -55,6 +55,10 @@ gstc_json_get_int (const char *json, const char *name, int *out)
   }
 
   data = json_object_get (root, name);
+  if (!data) {
+    ret = GSTC_NOT_FOUND;
+    goto unref;
+  }
 
   if (!json_is_integer (data)) {
     ret = GSTC_TYPE_ERROR;
