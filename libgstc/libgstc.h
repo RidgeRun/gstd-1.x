@@ -92,6 +92,7 @@ extern "C"
  * @GSTC_TIMEOUT: The server has timed out before responding
  * @GSTC_OOM: The system has run out of memory
  * @GSTC_TYPE_ERROR: An error occurred parsing a type from a string
+ * @GSTC_MALFORMED: An attempt to parse a malformed JSON was made
  *
  * Return codes for the different libgstc operations
  */
@@ -102,7 +103,8 @@ typedef enum
   GSTC_UNREACHABLE,
   GSTC_TIMEOUT,
   GSTC_OOM,
-  GSTC_TYPE_ERROR
+  GSTC_TYPE_ERROR,
+  GSTC_MALFORMED,
 } GstcStatus;
 
 /**

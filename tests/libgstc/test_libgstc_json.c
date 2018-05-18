@@ -98,6 +98,18 @@ GST_START_TEST (test_json_int_null_placeholder)
 }
 GST_END_TEST;
 
+GST_START_TEST (test_json_int_corrupted)
+{
+  GstcStatus ret;
+  int out;
+  const char * json = "{ \"int\" : 123 "; // Note the missing closing }
+
+  ret = gstc_json_get_int (json, "int", &out);
+
+  assert_equals_int (GSTC_MALFORMED, ret);
+}
+GST_END_TEST;
+
 static Suite *
 libgstc_ping_suite (void)
 {
@@ -112,6 +124,7 @@ libgstc_ping_suite (void)
   tcase_add_test (tc, test_json_int_wrong_type);
   tcase_add_test (tc, test_json_int_null_name);
   tcase_add_test (tc, test_json_int_null_placeholder);
+  tcase_add_test (tc, test_json_int_corrupted);
 
   return suite;
 }
