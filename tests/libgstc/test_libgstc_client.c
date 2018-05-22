@@ -121,7 +121,6 @@ GST_START_TEST (test_client_null_address)
 
   ret = gstc_client_new (address, port, wait_time, keep_connection_open, &client);
   assert_equals_int (GSTC_NULL_ARGUMENT, ret);
-  assert_equals_pointer(NULL, client)
 }
 GST_END_TEST;
 
