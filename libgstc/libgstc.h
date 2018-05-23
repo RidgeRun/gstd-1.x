@@ -94,6 +94,8 @@ extern "C"
  * @GSTC_TYPE_ERROR: An error occurred parsing a type from a string
  * @GSTC_MALFORMED: An attempt to parse a malformed JSON was made
  * @GSTC_NOT_FOUND: The response is missing the field requested
+ * @GSTC_SEND_ERROR: There was a problem sending the request
+ * @GSTC_RECV_ERROR: There was a problem receiving the response
  *
  * Return codes for the different libgstc operations
  */
@@ -107,6 +109,8 @@ typedef enum
   GSTC_TYPE_ERROR,
   GSTC_MALFORMED,
   GSTC_NOT_FOUND,
+  GSTC_SEND_ERROR,
+  GSTC_RECV_ERROR
 } GstcStatus;
 
 /**
