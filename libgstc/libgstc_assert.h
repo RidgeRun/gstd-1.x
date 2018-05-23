@@ -52,7 +52,7 @@ extern "C"
 
 #define gstc_assert_and_ret(cond)					\
   _gstc_assert ((cond), #cond, __FILE__, __FUNCTION__, __LINE__);	\
-  return
+  if (!(cond)) return
 
 #define gstc_assert_and_ret_val(cond, val)				\
   _gstc_assert ((cond), #cond, __FILE__, __FUNCTION__, __LINE__);	\
