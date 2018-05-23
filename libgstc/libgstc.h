@@ -89,6 +89,7 @@ extern "C"
  * GstcStatus:
  * @GSTC_OK: Everything went okay
  * @GSTC_NULL_ARGUMENT: A mandatory argument was passed in as NULL
+ * @GSTC_UNREACHABLE: Unable to reach the server
  * @GSTC_TIMEOUT: The server has timed out before responding
  * @GSTC_OOM: The system has run out of memory
  * @GSTC_TYPE_ERROR: An error occurred parsing a type from a string
