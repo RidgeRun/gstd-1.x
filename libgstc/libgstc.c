@@ -36,6 +36,7 @@
 
 #include "libgstc.h"
 #include "libgstc_socket.h"
+#include "libgstc_json.h"
 #include "libgstc_assert.h"
 
 static GstcStatus gstc_cmd_send (GstClient * client, const char *request);
@@ -47,6 +48,7 @@ static GstcStatus gstc_cmd_delete (GstClient * client, const char *where,
     const char *what);
 static GstcStatus gstc_cmd_change_state (GstClient * client, const char *pipe,
     const char *state);
+static GstcStatus gstc_response_get_code (const char * response, int * code);
 
 struct _GstClient
 {
@@ -54,12 +56,44 @@ struct _GstClient
 };
 
 static GstcStatus
+gstc_response_get_code (const char * response, int * code)
+{
+  const char * code_field_name = "code";
+
+  gstc_assert_and_ret_val (NULL != response, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != code, GSTC_NULL_ARGUMENT);
+
+  return gstc_json_get_int(response, code_field_name, code);
+}
+
+static GstcStatus
 gstc_cmd_send (GstClient * client, const char *request)
 {
+  GstcStatus ret;
+  char * response = NULL;
+  int code = GSTC_NOT_FOUND;
+
   gstc_assert_and_ret_val (NULL != client, GSTC_NULL_ARGUMENT);
   gstc_assert_and_ret_val (NULL != request, GSTC_NULL_ARGUMENT);
 
-  return gstc_socket_send (client->socket, request);
+  ret = gstc_socket_send (client->socket, request, &response);
+  if (GSTC_OK != ret) {
+    goto out;
+  }
+
+  ret = gstc_response_get_code(response, &code);
+  if (GSTC_OK != ret) {
+    goto free;
+  }
+
+  /* Everything went okay, forward the server's code to the user */
+  ret = code;
+
+ free:
+  free (response);
+
+ out:
+  return ret;
 }
 
 static GstcStatus

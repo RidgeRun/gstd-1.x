@@ -46,7 +46,8 @@ gstc_socket_new (const char *address, const unsigned int port,
 }
 
 GstcStatus
-gstc_socket_send (GstcSocket * socket, const char *request)
+gstc_socket_send (GstcSocket * socket, const char *request,
+    char ** response)
 {
   return GSTC_OK;
 }
