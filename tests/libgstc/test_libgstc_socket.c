@@ -36,21 +36,31 @@ mock_server_cb  (GSocketService *service, GSocketConnection *connection,
   GInputStream * istream = g_io_stream_get_input_stream (G_IO_STREAM (connection));
   GOutputStream * ostream = g_io_stream_get_output_stream (G_IO_STREAM (connection));
   gchar message[64];
-  
-  g_input_stream_read  (istream,
-			message,
-			1024,
-			NULL,
-			&error);
-  fail_if (error);
+  gssize count;
 
-  fail_if (NULL == _mock_expected);
-  g_output_stream_write(ostream,
-			_mock_expected,
-			strlen(_mock_expected)+1,
-			NULL,
-			&error);
-  fail_if (error);
+  while (TRUE) {
+    count = g_input_stream_read  (istream,
+				 message,
+				 1024,
+				 NULL,
+				 &error);
+    fail_if (error);
+    fail_if (-1 == count);
+
+    if (0 == count) {
+      break;
+    }
+
+    fail_if (NULL == _mock_expected);
+
+    count = g_output_stream_write(ostream,
+				  _mock_expected,
+				  strlen(_mock_expected) + 1,
+				  NULL,
+				  &error);
+    fail_if (error);
+    fail_if (-1 == count);
+  }
 
   return TRUE;
 }
@@ -68,19 +78,18 @@ mock_server_new ()
 {
   GError * error = NULL;
 
-  _mock_server = g_socket_service_new ();
+  _mock_server = g_threaded_socket_service_new (-1);
   _mock_expected = NULL;
 
   g_socket_listener_add_inet_port ((GSocketListener*)_mock_server,
      54321, NULL, &error);
   fail_if (error);
 
-  g_signal_connect (_mock_server, "incoming", G_CALLBACK (mock_server_cb), NULL);
+  g_signal_connect (_mock_server, "run", G_CALLBACK (mock_server_cb), NULL);
   g_socket_service_start (_mock_server);
 
   _loop = g_main_loop_new(NULL, FALSE);
   _mock_thread = g_thread_new ("mock_server", mock_server_thread, NULL);
-  
 }
 
 static void
@@ -127,7 +136,41 @@ GST_START_TEST (test_socket_success)
   assert_equals_string (expected, response);
 
   g_free (response);
-  gstc_socket_free (socket);  
+  gstc_socket_free (socket);
+}
+GST_END_TEST;
+
+GST_START_TEST (test_socket_persistent)
+{
+  GstcSocket * socket;
+  GstcStatus ret;
+  const gchar *address = "127.0.0.1";
+  const gint port = 54321;
+  const unsigned long wait_time = 0;
+  const gint keep_open = TRUE;
+  const gchar *request = "ping";
+  const gchar *expected = "pong";
+  gchar *response;
+
+  socket = gstc_socket_new(address, port, wait_time, keep_open);
+  fail_if (NULL == socket);
+
+  _mock_expected = expected;
+  ret = gstc_socket_send(socket, request, &response);
+
+  assert_equals_int (GSTC_OK, ret);
+  assert_equals_string (expected, response);
+
+  g_free (response);
+  _mock_expected = expected = "ping";
+  request = "ping";
+  ret = gstc_socket_send(socket, request, &response);
+
+  assert_equals_int (GSTC_OK, ret);
+  assert_equals_string (expected, response);
+
+  g_free (response);
+  gstc_socket_free (socket);
 }
 GST_END_TEST;
 
@@ -141,6 +184,7 @@ libgstc_client_suite (void)
 
   tcase_add_checked_fixture (tc, setup, teardown);
   tcase_add_test (tc, test_socket_success);
+  tcase_add_test (tc, test_socket_persistent);
 
   return suite;
 }
