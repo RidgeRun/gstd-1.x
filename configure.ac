@@ -193,6 +193,8 @@ Makefile
 gstd/Makefile
 gst_client/Makefile
 libgstc/Makefile
+examples/Makefile
+examples/libgstc/Makefile
 tests/Makefile
 tests/gstd/Makefile
 tests/libgstc/Makefile

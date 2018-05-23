@@ -45,3 +45,6 @@ tests/libgstc/libgstc_pipeline_pause
 tests/libgstc/libgstc_pipeline_stop
 tests/libgstc/libgstc_json
 tests/libgstc/libgstc_socket
+
+# Examples
+examples/libgstc/simple_pipeline
