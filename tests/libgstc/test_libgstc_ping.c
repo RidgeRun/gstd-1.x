@@ -69,8 +69,11 @@ gstc_socket_free (GstcSocket * socket)
 }
 
 GstcStatus
-gstc_socket_send (GstcSocket *socket, const gchar *request)
+gstc_socket_send (GstcSocket *socket, const gchar *request,
+    gchar ** response)
 {
+  *response = malloc (1);
+
   if (!_reachable) {
     return GSTC_UNREACHABLE;
   }
@@ -80,6 +83,11 @@ gstc_socket_send (GstcSocket *socket, const gchar *request)
   }
 
   return GSTC_OK;
+}
+
+GstcStatus
+gstc_json_get_int (const gchar * json, const gchar * name, gint * out) {
+  return *out = GSTC_OK;
 }
 
 GST_START_TEST (test_ping_success)

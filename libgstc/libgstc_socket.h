@@ -47,7 +47,8 @@ gstc_socket_new (const char *address, const unsigned int port,
     const unsigned long wait_time, const int keep_connection_open);
 
 GstcStatus
-gstc_socket_send (GstcSocket *socket, const char *request);
+gstc_socket_send (GstcSocket *socket, const char *request,
+    char ** response);
 
 void
 gstc_socket_free ();

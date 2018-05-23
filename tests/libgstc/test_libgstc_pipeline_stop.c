@@ -63,11 +63,19 @@ gstc_socket_free (GstcSocket * socket)
 }
 
 GstcStatus
-gstc_socket_send (GstcSocket *socket, const gchar *request)
+gstc_socket_send (GstcSocket *socket, const gchar *request,
+    gchar ** response)
 {
+  *response = malloc (1);
+
   memcpy (_request, request, strlen(request));
 
   return GSTC_OK;
+}
+
+GstcStatus
+gstc_json_get_int (const gchar * json, const gchar * name, gint * out) {
+  return *out = GSTC_OK;
 }
 
 GST_START_TEST (test_pipeline_stop_success)
