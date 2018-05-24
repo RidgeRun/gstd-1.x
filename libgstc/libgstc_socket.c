@@ -56,7 +56,7 @@ gstc_socket_new (const char *address, const unsigned int port,
     GstcSocket ** out)
 {
   GstcStatus ret;
-  GstcSocket * self;
+  GstcSocket *self;
   const int domain = AF_INET;
   const int type = SOCK_STREAM;
   const int proto = 0;

@@ -68,9 +68,9 @@ gstc_json_get_int (const char *json, const char *name, int *out)
   *out = json_integer_value (data);
   ret = GSTC_OK;
 
- unref:
+unref:
   json_decref (root);
 
- out:
+out:
   return ret;
 }

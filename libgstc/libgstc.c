@@ -48,7 +48,7 @@ static GstcStatus gstc_cmd_delete (GstClient * client, const char *where,
     const char *what);
 static GstcStatus gstc_cmd_change_state (GstClient * client, const char *pipe,
     const char *state);
-static GstcStatus gstc_response_get_code (const char * response, int * code);
+static GstcStatus gstc_response_get_code (const char *response, int *code);
 
 struct _GstClient
 {
@@ -56,21 +56,21 @@ struct _GstClient
 };
 
 static GstcStatus
-gstc_response_get_code (const char * response, int * code)
+gstc_response_get_code (const char *response, int *code)
 {
-  const char * code_field_name = "code";
+  const char *code_field_name = "code";
 
   gstc_assert_and_ret_val (NULL != response, GSTC_NULL_ARGUMENT);
   gstc_assert_and_ret_val (NULL != code, GSTC_NULL_ARGUMENT);
 
-  return gstc_json_get_int(response, code_field_name, code);
+  return gstc_json_get_int (response, code_field_name, code);
 }
 
 static GstcStatus
 gstc_cmd_send (GstClient * client, const char *request)
 {
   GstcStatus ret;
-  char * response = NULL;
+  char *response = NULL;
   int code = GSTC_NOT_FOUND;
 
   gstc_assert_and_ret_val (NULL != client, GSTC_NULL_ARGUMENT);
@@ -81,7 +81,7 @@ gstc_cmd_send (GstClient * client, const char *request)
     goto out;
   }
 
-  ret = gstc_response_get_code(response, &code);
+  ret = gstc_response_get_code (response, &code);
   if (GSTC_OK != ret) {
     goto free;
   }
@@ -89,10 +89,10 @@ gstc_cmd_send (GstClient * client, const char *request)
   /* Everything went okay, forward the server's code to the user */
   ret = code;
 
- free:
+free:
   free (response);
 
- out:
+out:
   return ret;
 }
 
@@ -178,7 +178,7 @@ gstc_client_new (const char *address, const unsigned int port,
   }
 
   ret = gstc_socket_new (address, port, wait_time,
-    keep_connection_open, &(client->socket));
+      keep_connection_open, &(client->socket));
   if (GSTC_OK != ret) {
     free (client);
     return ret;
