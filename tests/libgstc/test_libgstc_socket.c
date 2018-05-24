@@ -207,6 +207,26 @@ GST_START_TEST (test_socket_oom)
 
 GST_END_TEST;
 
+GST_START_TEST (test_socket_unreachable)
+{
+  GstcSocket *socket;
+  GstcStatus ret;
+  const gchar *address = "127.0.0.1";
+  const gint port = 54321;
+  const unsigned long wait_time = 0;
+  const gint keep_open = TRUE;
+
+  teardown ();
+
+  ret = gstc_socket_new (address, port, wait_time, keep_open, &socket);
+  assert_equals_int (GSTC_UNREACHABLE, ret);
+  assert_equals_pointer (NULL, socket);
+
+  setup ();
+}
+
+GST_END_TEST;
+
 static Suite *
 libgstc_client_suite (void)
 {
@@ -219,6 +239,7 @@ libgstc_client_suite (void)
   tcase_add_test (tc, test_socket_success);
   tcase_add_test (tc, test_socket_persistent);
   tcase_add_test (tc, test_socket_oom);
+  tcase_add_test (tc, test_socket_unreachable);
 
   return suite;
 }
