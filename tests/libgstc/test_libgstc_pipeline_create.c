@@ -51,11 +51,14 @@ typedef struct _GstcSocket
 
 GstcSocket _socket;
 
-GstcSocket *
+GstcStatus
 gstc_socket_new (const char *address, const unsigned int port,
-    const unsigned long wait_time, const int keep_connection_open)
+    const unsigned long wait_time, const int keep_connection_open,
+    GstcSocket **out)
 {
-  return &_socket;
+  *out = &_socket;
+
+  return GSTC_OK;
 }
 
 void

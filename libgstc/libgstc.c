@@ -177,11 +177,11 @@ gstc_client_new (const char *address, const unsigned int port,
     return GSTC_OOM;
   }
 
-  client->socket = gstc_socket_new (address, port, wait_time,
-      keep_connection_open);
-  if (NULL == client->socket) {
+  ret = gstc_socket_new (address, port, wait_time,
+    keep_connection_open, &(client->socket));
+  if (GSTC_OK != ret) {
     free (client);
-    return GSTC_OOM;
+    return ret;
   }
 
   *out = client;

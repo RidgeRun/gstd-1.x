@@ -50,21 +50,31 @@ struct _GstcSocket
   struct sockaddr_in server;
 };
 
-GstcSocket *
+GstcStatus
 gstc_socket_new (const char *address, const unsigned int port,
-    const unsigned long wait_time, const int keep_connection_open)
+    const unsigned long wait_time, const int keep_connection_open,
+    GstcSocket ** out)
 {
-  GstcSocket *self;
+  GstcStatus ret;
+  GstcSocket * self;
   const int domain = AF_INET;
   const int type = SOCK_STREAM;
   const int proto = 0;
 
-  gstc_assert_and_ret_val (NULL != address, NULL);
+  gstc_assert_and_ret_val (NULL != address, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != out, GSTC_NULL_ARGUMENT);
+
+  *out = NULL;
 
   self = (GstcSocket *) malloc (sizeof (GstcSocket));
+  if (NULL == self) {
+    ret = GSTC_OOM;
+    goto out;
+  }
 
   self->socket = socket (domain, type, proto);
   if (-1 == self->socket) {
+    ret = GSTC_SOCKET_ERROR;
     goto free_self;
   }
 
@@ -74,10 +84,12 @@ gstc_socket_new (const char *address, const unsigned int port,
 
   if (connect (self->socket, (struct sockaddr *) &self->server,
           sizeof (self->server)) < 0) {
+    ret = GSTC_UNREACHABLE;
     goto close_socket;
   }
 
-  /* Success */
+  ret = GSTC_OK;
+  *out = self;
   goto out;
 
 close_socket:
@@ -88,7 +100,7 @@ free_self:
   self = NULL;
 
 out:
-  return self;
+  return ret;
 }
 
 GstcStatus

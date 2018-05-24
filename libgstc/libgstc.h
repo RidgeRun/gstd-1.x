@@ -97,6 +97,7 @@ extern "C"
  * @GSTC_NOT_FOUND: The response is missing the field requested
  * @GSTC_SEND_ERROR: There was a problem sending the request
  * @GSTC_RECV_ERROR: There was a problem receiving the response
+ * @GSTC_SOCKET_ERROR: Unable to open the network socket
  *
  * Return codes for the different libgstc operations
  */
@@ -111,7 +112,8 @@ typedef enum
   GSTC_MALFORMED,
   GSTC_NOT_FOUND,
   GSTC_SEND_ERROR,
-  GSTC_RECV_ERROR
+  GSTC_RECV_ERROR,
+  GSTC_SOCKET_ERROR
 } GstcStatus;
 
 /**

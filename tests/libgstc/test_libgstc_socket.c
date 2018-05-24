@@ -104,8 +104,22 @@ mock_server_free ()
   g_thread_unref (_mock_thread);
 }
 
+/* Mock implementation of malloc */
+static gboolean _mock_malloc_oom;
+
+gpointer
+malloc (gsize size)
+{
+  if (_mock_malloc_oom) {
+    return NULL;
+  } else {
+    return g_malloc (size);
+  }
+}
+
 void setup ()
 {
+  _mock_malloc_oom = FALSE;
   mock_server_new ();
 }
 
@@ -126,7 +140,8 @@ GST_START_TEST (test_socket_success)
   const gchar *expected = "pong";
   gchar *response;
 
-  socket = gstc_socket_new(address, port, wait_time, keep_open);
+  ret = gstc_socket_new(address, port, wait_time, keep_open, &socket);
+  assert_equals_int (GSTC_OK, ret);
   fail_if (NULL == socket);
 
   _mock_expected = expected;
@@ -152,7 +167,8 @@ GST_START_TEST (test_socket_persistent)
   const gchar *expected = "pong";
   gchar *response;
 
-  socket = gstc_socket_new(address, port, wait_time, keep_open);
+  ret = gstc_socket_new(address, port, wait_time, keep_open, &socket);
+  assert_equals_int (GSTC_OK, ret);
   fail_if (NULL == socket);
 
   _mock_expected = expected;
@@ -174,6 +190,23 @@ GST_START_TEST (test_socket_persistent)
 }
 GST_END_TEST;
 
+GST_START_TEST (test_socket_oom)
+{
+  GstcSocket * socket;
+  GstcStatus ret;
+  const gchar *address = "127.0.0.1";
+  const gint port = 54321;
+  const unsigned long wait_time = 0;
+  const gint keep_open = TRUE;
+
+  _mock_malloc_oom = TRUE;
+
+  ret = gstc_socket_new(address, port, wait_time, keep_open, &socket);
+  assert_equals_int(GSTC_OOM, ret);
+  assert_equals_pointer(NULL, socket);
+}
+GST_END_TEST;
+
 static Suite *
 libgstc_client_suite (void)
 {
@@ -185,6 +218,7 @@ libgstc_client_suite (void)
   tcase_add_checked_fixture (tc, setup, teardown);
   tcase_add_test (tc, test_socket_success);
   tcase_add_test (tc, test_socket_persistent);
+  tcase_add_test (tc, test_socket_oom);
 
   return suite;
 }
