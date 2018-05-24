@@ -227,6 +227,90 @@ GST_START_TEST (test_socket_unreachable)
 
 GST_END_TEST;
 
+GST_START_TEST (test_socket_null_address)
+{
+  GstcSocket *socket;
+  GstcStatus ret;
+  const gchar *address = NULL;
+  const gint port = 54321;
+  const unsigned long wait_time = 0;
+  const gint keep_open = TRUE;
+
+  ret = gstc_socket_new (address, port, wait_time, keep_open, &socket);
+  assert_equals_int (GSTC_NULL_ARGUMENT, ret);
+}
+
+GST_END_TEST;
+
+GST_START_TEST (test_socket_null_placeholder)
+{
+  GstcStatus ret;
+  const gchar *address = "127.0.0.1";
+  const gint port = 54321;
+  const unsigned long wait_time = 0;
+  const gint keep_open = TRUE;
+
+  ret = gstc_socket_new (address, port, wait_time, keep_open, NULL);
+  assert_equals_int (GSTC_NULL_ARGUMENT, ret);
+}
+
+GST_END_TEST;
+
+GST_START_TEST (test_socket_null_socket)
+{
+  GstcStatus ret;
+  const gchar *request = "ping";
+  gchar *response;
+
+  ret = gstc_socket_send (NULL, request, &response);
+  assert_equals_int (GSTC_NULL_ARGUMENT, ret);
+}
+
+GST_END_TEST;
+
+GST_START_TEST (test_socket_null_request)
+{
+  GstcSocket *socket;
+  GstcStatus ret;
+  const gchar *address = "127.0.0.1";
+  const gint port = 54321;
+  const unsigned long wait_time = 0;
+  const gint keep_open = TRUE;
+  const gchar *request = NULL;
+  gchar *response;
+
+  ret = gstc_socket_new (address, port, wait_time, keep_open, &socket);
+  assert_equals_int (GSTC_OK, ret);
+
+  ret = gstc_socket_send (socket, request, &response);
+  assert_equals_int (GSTC_NULL_ARGUMENT, ret);
+
+  gstc_socket_free (socket);
+}
+
+GST_END_TEST;
+
+GST_START_TEST (test_socket_null_resp_placeholder)
+{
+  GstcSocket *socket;
+  GstcStatus ret;
+  const gchar *address = "127.0.0.1";
+  const gint port = 54321;
+  const unsigned long wait_time = 0;
+  const gint keep_open = TRUE;
+  const gchar *request = "ping";
+
+  ret = gstc_socket_new (address, port, wait_time, keep_open, &socket);
+  assert_equals_int (GSTC_OK, ret);
+
+  ret = gstc_socket_send (socket, request, NULL);
+  assert_equals_int (GSTC_NULL_ARGUMENT, ret);
+
+  gstc_socket_free (socket);
+}
+
+GST_END_TEST;
+
 static Suite *
 libgstc_client_suite (void)
 {
@@ -240,6 +324,11 @@ libgstc_client_suite (void)
   tcase_add_test (tc, test_socket_persistent);
   tcase_add_test (tc, test_socket_oom);
   tcase_add_test (tc, test_socket_unreachable);
+  tcase_add_test (tc, test_socket_null_address);
+  tcase_add_test (tc, test_socket_null_placeholder);
+  tcase_add_test (tc, test_socket_null_socket);
+  tcase_add_test (tc, test_socket_null_request);
+  tcase_add_test (tc, test_socket_null_resp_placeholder);
 
   return suite;
 }
