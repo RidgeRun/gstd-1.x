@@ -126,6 +126,8 @@ gstc_socket_send (GstcSocket * self, const char *request, char **response)
 void
 gstc_socket_free (GstcSocket * socket)
 {
+  gstc_assert_and_ret (NULL != socket);
+
   close (socket->socket);
   free (socket);
 }

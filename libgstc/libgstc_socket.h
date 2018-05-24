@@ -52,7 +52,7 @@ gstc_socket_send (GstcSocket *socket, const char *request,
     char ** response);
 
 void
-gstc_socket_free ();
+gstc_socket_free (GstcSocket *socket);
 
 #ifdef __cplusplus
 }
