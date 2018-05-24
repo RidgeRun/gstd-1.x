@@ -29,14 +29,17 @@ typedef struct _GstcSocket
 static GstcSocket _socket;
 static gboolean _fail_socket = FALSE;
 
-GstcSocket *
+GstcStatus
 gstc_socket_new (const char *address, const unsigned int port,
-    const unsigned long wait_time, const int keep_connection_open)
+    const unsigned long wait_time, const int keep_connection_open,
+    GstcSocket **out)
 {
   if (_fail_socket) {
-    return NULL;
+    *out = NULL;
+    return GSTC_SOCKET_ERROR;
   } else {
-    return &_socket;
+    *out = &_socket;
+    return GSTC_OK;
   }
 }
 
