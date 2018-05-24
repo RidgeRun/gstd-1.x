@@ -29,7 +29,7 @@ static GstClient *_client;
 static void
 setup ()
 {
-  const gchar * address = "";
+  const gchar *address = "";
   unsigned int port = 0;
   unsigned long wait_time = 5;
   int keep_connection_open = 0;
@@ -54,7 +54,7 @@ GstcSocket _socket;
 GstcStatus
 gstc_socket_new (const char *address, const unsigned int port,
     const unsigned long wait_time, const int keep_connection_open,
-    GstcSocket **out)
+    GstcSocket ** out)
 {
   *out = &_socket;
 
@@ -67,66 +67,70 @@ gstc_socket_free (GstcSocket * socket)
 }
 
 GstcStatus
-gstc_socket_send (GstcSocket *socket, const gchar *request,
-    gchar ** response)
+gstc_socket_send (GstcSocket * socket, const gchar * request, gchar ** response)
 {
   *response = malloc (1);
 
-  memcpy (_request, request, strlen(request));
+  memcpy (_request, request, strlen (request));
 
   return GSTC_OK;
 }
 
 GstcStatus
-gstc_json_get_int (const gchar * json, const gchar * name, gint * out) {
+gstc_json_get_int (const gchar * json, const gchar * name, gint * out)
+{
   return *out = GSTC_OK;
 }
 
 GST_START_TEST (test_pipeline_create_success)
 {
   GstcStatus ret;
-  const gchar * pipeline_name = "pipe";
-  const gchar * pipeline_desc = "fakesrc ! fakesink";
-  const gchar * expected = "create /pipelines pipe fakesrc ! fakesink";
+  const gchar *pipeline_name = "pipe";
+  const gchar *pipeline_desc = "fakesrc ! fakesink";
+  const gchar *expected = "create /pipelines pipe fakesrc ! fakesink";
 
   ret = gstc_pipeline_create (_client, pipeline_name, pipeline_desc);
   fail_if (GSTC_OK != ret);
 
   assert_equals_string (expected, _request);
 }
+
 GST_END_TEST;
 
 GST_START_TEST (test_pipeline_create_null_name)
 {
   GstcStatus ret;
-  const gchar * pipeline_name = NULL;
-  const gchar * pipeline_desc = "fakesrc ! fakesink";
+  const gchar *pipeline_name = NULL;
+  const gchar *pipeline_desc = "fakesrc ! fakesink";
 
   ret = gstc_pipeline_create (_client, pipeline_name, pipeline_desc);
   assert_equals_int (GSTC_NULL_ARGUMENT, ret);
 }
+
 GST_END_TEST;
 
 GST_START_TEST (test_pipeline_create_null_desc)
 {
   GstcStatus ret;
-  const gchar * pipeline_name = "pipe";
-  const gchar * pipeline_desc = NULL;
+  const gchar *pipeline_name = "pipe";
+  const gchar *pipeline_desc = NULL;
 
   ret = gstc_pipeline_create (_client, pipeline_name, pipeline_desc);
   assert_equals_int (GSTC_NULL_ARGUMENT, ret);
 }
+
 GST_END_TEST;
 
 GST_START_TEST (test_pipeline_create_null_client)
 {
   GstcStatus ret;
-  const gchar * pipeline_name = "pipe";
-  const gchar * pipeline_desc = "fakesrc ! fakesink";
+  const gchar *pipeline_name = "pipe";
+  const gchar *pipeline_desc = "fakesrc ! fakesink";
 
   ret = gstc_pipeline_create (NULL, pipeline_name, pipeline_desc);
   assert_equals_int (GSTC_NULL_ARGUMENT, ret);
 }
+
 GST_END_TEST;
 
 static Suite *

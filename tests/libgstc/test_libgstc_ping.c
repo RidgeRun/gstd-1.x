@@ -30,7 +30,7 @@ static guint64 _proc_time;
 static void
 setup ()
 {
-  const gchar * address = "";
+  const gchar *address = "";
   unsigned int port = 0;
   unsigned long wait_time = 5;
   int keep_connection_open = 0;
@@ -57,7 +57,7 @@ GstcSocket _socket;
 GstcStatus
 gstc_socket_new (const char *address, const unsigned int port,
     const unsigned long wait_time, const int keep_connection_open,
-    GstcSocket **out)
+    GstcSocket ** out)
 {
   _socket.wait_time = wait_time;
 
@@ -72,8 +72,7 @@ gstc_socket_free (GstcSocket * socket)
 }
 
 GstcStatus
-gstc_socket_send (GstcSocket *socket, const gchar *request,
-    gchar ** response)
+gstc_socket_send (GstcSocket * socket, const gchar * request, gchar ** response)
 {
   *response = malloc (1);
 
@@ -89,7 +88,8 @@ gstc_socket_send (GstcSocket *socket, const gchar *request,
 }
 
 GstcStatus
-gstc_json_get_int (const gchar * json, const gchar * name, gint * out) {
+gstc_json_get_int (const gchar * json, const gchar * name, gint * out)
+{
   return *out = GSTC_OK;
 }
 
@@ -100,6 +100,7 @@ GST_START_TEST (test_ping_success)
   ret = gstc_client_ping (_client);
   assert_equals_int (GSTC_OK, ret);
 }
+
 GST_END_TEST;
 
 GST_START_TEST (test_ping_null_client)
@@ -109,6 +110,7 @@ GST_START_TEST (test_ping_null_client)
   ret = gstc_client_ping (NULL);
   assert_equals_int (GSTC_NULL_ARGUMENT, ret);
 }
+
 GST_END_TEST;
 
 GST_START_TEST (test_ping_unreachable)
@@ -120,6 +122,7 @@ GST_START_TEST (test_ping_unreachable)
   ret = gstc_client_ping (_client);
   assert_equals_int (GSTC_UNREACHABLE, ret);
 }
+
 GST_END_TEST;
 
 GST_START_TEST (test_ping_timeout)
@@ -137,6 +140,7 @@ GST_START_TEST (test_ping_timeout)
   ret = gstc_client_ping (_client);
   assert_equals_int (GSTC_TIMEOUT, ret);
 }
+
 GST_END_TEST;
 
 static Suite *

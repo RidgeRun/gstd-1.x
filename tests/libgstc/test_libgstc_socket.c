@@ -24,26 +24,24 @@
 
 /* Mock implementation of gstd */
 GMainLoop *_loop;
-GSocketService * _mock_server;
-GThread * _mock_thread;
+GSocketService *_mock_server;
+GThread *_mock_thread;
 const gchar *_mock_expected;
 
 static gboolean
-mock_server_cb  (GSocketService *service, GSocketConnection *connection,
-    GObject *source_object, gpointer user_data)
+mock_server_cb (GSocketService * service, GSocketConnection * connection,
+    GObject * source_object, gpointer user_data)
 {
-  GError * error;
-  GInputStream * istream = g_io_stream_get_input_stream (G_IO_STREAM (connection));
-  GOutputStream * ostream = g_io_stream_get_output_stream (G_IO_STREAM (connection));
+  GError *error;
+  GInputStream *istream =
+      g_io_stream_get_input_stream (G_IO_STREAM (connection));
+  GOutputStream *ostream =
+      g_io_stream_get_output_stream (G_IO_STREAM (connection));
   gchar message[64];
   gssize count;
 
   while (TRUE) {
-    count = g_input_stream_read  (istream,
-				 message,
-				 1024,
-				 NULL,
-				 &error);
+    count = g_input_stream_read (istream, message, 1024, NULL, &error);
     fail_if (error);
     fail_if (-1 == count);
 
@@ -53,11 +51,8 @@ mock_server_cb  (GSocketService *service, GSocketConnection *connection,
 
     fail_if (NULL == _mock_expected);
 
-    count = g_output_stream_write(ostream,
-				  _mock_expected,
-				  strlen(_mock_expected) + 1,
-				  NULL,
-				  &error);
+    count = g_output_stream_write (ostream,
+        _mock_expected, strlen (_mock_expected) + 1, NULL, &error);
     fail_if (error);
     fail_if (-1 == count);
   }
@@ -68,7 +63,7 @@ mock_server_cb  (GSocketService *service, GSocketConnection *connection,
 gpointer
 mock_server_thread (gpointer data)
 {
-  g_main_loop_run(_loop);
+  g_main_loop_run (_loop);
 
   return NULL;
 }
@@ -76,19 +71,19 @@ mock_server_thread (gpointer data)
 static void
 mock_server_new ()
 {
-  GError * error = NULL;
+  GError *error = NULL;
 
   _mock_server = g_threaded_socket_service_new (-1);
   _mock_expected = NULL;
 
-  g_socket_listener_add_inet_port ((GSocketListener*)_mock_server,
-     54321, NULL, &error);
+  g_socket_listener_add_inet_port ((GSocketListener *) _mock_server,
+      54321, NULL, &error);
   fail_if (error);
 
   g_signal_connect (_mock_server, "run", G_CALLBACK (mock_server_cb), NULL);
   g_socket_service_start (_mock_server);
 
-  _loop = g_main_loop_new(NULL, FALSE);
+  _loop = g_main_loop_new (NULL, FALSE);
   _mock_thread = g_thread_new ("mock_server", mock_server_thread, NULL);
 }
 
@@ -97,9 +92,9 @@ mock_server_free ()
 {
   g_socket_service_stop (_mock_server);
   g_object_unref (_mock_server);
-  
+
   g_main_loop_quit (_loop);
-  g_main_loop_unref(_loop);
+  g_main_loop_unref (_loop);
   g_thread_join (_mock_thread);
   g_thread_unref (_mock_thread);
 }
@@ -117,20 +112,22 @@ malloc (gsize size)
   }
 }
 
-void setup ()
+void
+setup ()
 {
   _mock_malloc_oom = FALSE;
   mock_server_new ();
 }
 
-void teardown ()
+void
+teardown ()
 {
   mock_server_free ();
 }
 
 GST_START_TEST (test_socket_success)
 {
-  GstcSocket * socket;
+  GstcSocket *socket;
   GstcStatus ret;
   const gchar *address = "127.0.0.1";
   const gint port = 54321;
@@ -140,12 +137,12 @@ GST_START_TEST (test_socket_success)
   const gchar *expected = "pong";
   gchar *response;
 
-  ret = gstc_socket_new(address, port, wait_time, keep_open, &socket);
+  ret = gstc_socket_new (address, port, wait_time, keep_open, &socket);
   assert_equals_int (GSTC_OK, ret);
   fail_if (NULL == socket);
 
   _mock_expected = expected;
-  ret = gstc_socket_send(socket, request, &response);
+  ret = gstc_socket_send (socket, request, &response);
 
   assert_equals_int (GSTC_OK, ret);
   assert_equals_string (expected, response);
@@ -153,11 +150,12 @@ GST_START_TEST (test_socket_success)
   g_free (response);
   gstc_socket_free (socket);
 }
+
 GST_END_TEST;
 
 GST_START_TEST (test_socket_persistent)
 {
-  GstcSocket * socket;
+  GstcSocket *socket;
   GstcStatus ret;
   const gchar *address = "127.0.0.1";
   const gint port = 54321;
@@ -167,12 +165,12 @@ GST_START_TEST (test_socket_persistent)
   const gchar *expected = "pong";
   gchar *response;
 
-  ret = gstc_socket_new(address, port, wait_time, keep_open, &socket);
+  ret = gstc_socket_new (address, port, wait_time, keep_open, &socket);
   assert_equals_int (GSTC_OK, ret);
   fail_if (NULL == socket);
 
   _mock_expected = expected;
-  ret = gstc_socket_send(socket, request, &response);
+  ret = gstc_socket_send (socket, request, &response);
 
   assert_equals_int (GSTC_OK, ret);
   assert_equals_string (expected, response);
@@ -180,7 +178,7 @@ GST_START_TEST (test_socket_persistent)
   g_free (response);
   _mock_expected = expected = "ping";
   request = "ping";
-  ret = gstc_socket_send(socket, request, &response);
+  ret = gstc_socket_send (socket, request, &response);
 
   assert_equals_int (GSTC_OK, ret);
   assert_equals_string (expected, response);
@@ -188,11 +186,12 @@ GST_START_TEST (test_socket_persistent)
   g_free (response);
   gstc_socket_free (socket);
 }
+
 GST_END_TEST;
 
 GST_START_TEST (test_socket_oom)
 {
-  GstcSocket * socket;
+  GstcSocket *socket;
   GstcStatus ret;
   const gchar *address = "127.0.0.1";
   const gint port = 54321;
@@ -201,10 +200,11 @@ GST_START_TEST (test_socket_oom)
 
   _mock_malloc_oom = TRUE;
 
-  ret = gstc_socket_new(address, port, wait_time, keep_open, &socket);
-  assert_equals_int(GSTC_OOM, ret);
-  assert_equals_pointer(NULL, socket);
+  ret = gstc_socket_new (address, port, wait_time, keep_open, &socket);
+  assert_equals_int (GSTC_OOM, ret);
+  assert_equals_pointer (NULL, socket);
 }
+
 GST_END_TEST;
 
 static Suite *

@@ -67,59 +67,64 @@ GST_START_TEST (test_json_int_wrong_type)
 {
   GstcStatus ret;
   gint code;
-  const char * json = "{ \"string\" : \"string val\" }";
+  const char *json = "{ \"string\" : \"string val\" }";
 
   ret = gstc_json_get_int (json, "string", &code);
 
   assert_equals_int (GSTC_TYPE_ERROR, ret);
 }
+
 GST_END_TEST;
 
 GST_START_TEST (test_json_int_null_name)
 {
   GstcStatus ret;
   gint code;
-  const char * json = "{ \"string\" : \"string val\" }";
+  const char *json = "{ \"string\" : \"string val\" }";
 
   ret = gstc_json_get_int (json, NULL, &code);
 
   assert_equals_int (GSTC_NULL_ARGUMENT, ret);
 }
+
 GST_END_TEST;
 
 GST_START_TEST (test_json_int_null_placeholder)
 {
   GstcStatus ret;
-  const char * json = "{ \"string\" : \"string val\" }";
+  const char *json = "{ \"string\" : \"string val\" }";
 
   ret = gstc_json_get_int (json, "string", NULL);
 
   assert_equals_int (GSTC_NULL_ARGUMENT, ret);
 }
+
 GST_END_TEST;
 
 GST_START_TEST (test_json_int_corrupted)
 {
   GstcStatus ret;
   int out;
-  const char * json = "{ \"int\" : 123 "; // Note the missing closing }
+  const char *json = "{ \"int\" : 123 ";        // Note the missing closing }
 
   ret = gstc_json_get_int (json, "int", &out);
 
   assert_equals_int (GSTC_MALFORMED, ret);
 }
+
 GST_END_TEST;
 
 GST_START_TEST (test_json_int_missing)
 {
   GstcStatus ret;
   int out;
-  const char * json = "{ \"int\" : 123 }";
+  const char *json = "{ \"int\" : 123 }";
 
   ret = gstc_json_get_int (json, "integer", &out);
 
   assert_equals_int (GSTC_NOT_FOUND, ret);
 }
+
 GST_END_TEST;
 
 static Suite *
