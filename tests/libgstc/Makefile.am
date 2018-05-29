@@ -11,52 +11,54 @@ TESTS = 			\
 
 check_PROGRAMS = $(TESTS)
 
-AM_CFLAGS = $(GST_CFLAGS) $(JANSSON_CFLAGS) -I$(top_srcdir)/libgstc
+AM_CFLAGS = $(GST_CFLAGS) $(JANSSON_CFLAGS) $(GIO_CFLAGS) -I$(top_srcdir)/libgstc
 AM_LDFLAGS = $(GST_LIBS) $(JANSSON_LIBS) $(GIO_LIBS)
 
-COMMON_SOURCES = $(top_srcdir)/libgstc/libgstc_assert.c
+COMMON_SOURCES = @top_srcdir@/libgstc/libgstc_assert.c
 
 libgstc_client_SOURCES =		\
 	test_libgstc_client.c		\
-	$(top_srcdir)/libgstc/libgstc.c	\
+	@top_srcdir@/libgstc/libgstc.c	\
 	$(COMMON_SOURCES)
+libgstc_client_CPPFLAGS = -Dmalloc=mock_malloc
 
 libgstc_ping_SOURCES =			\
 	test_libgstc_ping.c		\
-	$(top_srcdir)/libgstc/libgstc.c	\
+	@top_srcdir@/libgstc/libgstc.c	\
 	$(COMMON_SOURCES)
 
 libgstc_pipeline_create_SOURCES = 		\
 	test_libgstc_pipeline_create.c		\
-	$(top_srcdir)/libgstc/libgstc.c		\
+	@top_srcdir@/libgstc/libgstc.c		\
 	$(COMMON_SOURCES)
 
 libgstc_pipeline_delete_SOURCES = 		\
 	test_libgstc_pipeline_delete.c		\
-	$(top_srcdir)/libgstc/libgstc.c		\
+	@top_srcdir@/libgstc/libgstc.c		\
 	$(COMMON_SOURCES)
 
 libgstc_pipeline_play_SOURCES = 		\
 	test_libgstc_pipeline_play.c		\
-	$(top_srcdir)/libgstc/libgstc.c		\
+	@top_srcdir@/libgstc/libgstc.c		\
 	$(COMMON_SOURCES)
 
 libgstc_pipeline_pause_SOURCES = 		\
 	test_libgstc_pipeline_pause.c		\
-	$(top_srcdir)/libgstc/libgstc.c		\
+	@top_srcdir@/libgstc/libgstc.c		\
 	$(COMMON_SOURCES)
 
 libgstc_pipeline_stop_SOURCES = 		\
 	test_libgstc_pipeline_stop.c		\
-	$(top_srcdir)/libgstc/libgstc.c		\
+	@top_srcdir@/libgstc/libgstc.c		\
 	$(COMMON_SOURCES)
 
 libgstc_json_SOURCES =		 		\
 	test_libgstc_json.c			\
-	$(top_srcdir)/libgstc/libgstc_json.c	\
+	@top_srcdir@/libgstc/libgstc_json.c	\
 	$(COMMON_SOURCES)
 
 libgstc_socket_SOURCES =	 		\
 	test_libgstc_socket.c			\
-	$(top_srcdir)/libgstc/libgstc_socket.c	\
+	@top_srcdir@/libgstc/libgstc_socket.c	\
 	$(COMMON_SOURCES)
+libgstc_socket_CPPFLAGS = -Dmalloc=mock_malloc

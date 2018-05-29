@@ -65,7 +65,7 @@ gstc_json_get_int (const gchar * json, const gchar * name, gint * out)
 /* Mock implementation of malloc */
 gboolean _use_mock_malloc = FALSE;
 void *
-malloc (gsize size)
+mock_malloc (size_t size)
 {
   if (_use_mock_malloc) {
     /* Simulate out of memory */
