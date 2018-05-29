@@ -211,18 +211,14 @@ GST_START_TEST (test_socket_unreachable)
 {
   GstcSocket *socket;
   GstcStatus ret;
-  const gchar *address = "127.0.0.1";
+  const gchar *address = "500.0.0.1"; /* Note the invalid IP */
   const gint port = 54321;
   const unsigned long wait_time = 0;
   const gint keep_open = TRUE;
 
-  teardown ();
-
   ret = gstc_socket_new (address, port, wait_time, keep_open, &socket);
   assert_equals_int (GSTC_UNREACHABLE, ret);
   assert_equals_pointer (NULL, socket);
-
-  setup ();
 }
 
 GST_END_TEST;
