@@ -99,11 +99,11 @@ mock_server_free ()
   g_thread_unref (_mock_thread);
 }
 
-/* Mock implementation of malloc */
+/* Mock implementation of malloc, replaced in Makefile.am */
 static gboolean _mock_malloc_oom;
 
 gpointer
-malloc (gsize size)
+mock_malloc (gsize size)
 {
   if (_mock_malloc_oom) {
     return NULL;
