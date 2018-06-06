@@ -31,6 +31,7 @@
  */
 
 #define _GNU_SOURCE
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -296,4 +297,28 @@ gstc_client_ping (GstClient * client)
   gstc_assert_and_ret_val (NULL != client, GSTC_NULL_ARGUMENT);
 
   return gstc_cmd_send (client, request);
+}
+
+GstcStatus
+gstc_element_set (GstClient * client, const char *pname,
+    const char *element, const char *parameter, const char *format, ...)
+{
+  va_list ap;
+  const char *what_fmt = "/pipelines/%s/elements/%s/properties/%s";
+  char *what;
+  char *how;
+
+  va_start (ap, format);
+
+  asprintf (&what, what_fmt, pname, element, parameter);
+  vasprintf (&how, format, ap);
+
+  gstc_cmd_update (client, what, how);
+
+  va_end (ap);
+
+  free (what);
+  free (how);
+
+  return GSTC_OK;
 }
