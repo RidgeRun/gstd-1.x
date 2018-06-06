@@ -46,6 +46,7 @@ tests/libgstc/libgstc_pipeline_stop
 tests/libgstc/libgstc_json
 tests/libgstc/libgstc_socket
 tests/libgstc/libgstc_element_set
+examples/libgstc/dynamic_property_change
 
 # Examples
 examples/libgstc/simple_pipeline
