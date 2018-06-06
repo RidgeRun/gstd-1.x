@@ -235,6 +235,28 @@ gstc_pipeline_pause(GstClient *client, const char *pipeline_name);
 GstcStatus
 gstc_pipeline_stop(GstClient *client, const char *pipeline_name);
 
+/**
+ * gstc_element_set:
+ * @client: The client returned by gstc_client_new()
+ * @pipeline_name: Name assoicated with the pipeline
+ * @element_name: Element name to be set
+ * @property_name: Property name to be set
+ * @format: Zero or more directives: ordinary characters (not %), are
+ * copied unchanged to the output stream; and conversion
+ * specifications, each of which results in fetching zero or more
+ * subsequent arguments.  Each conversion specification is introduced
+ * by the % character.
+ * @...: One or more arguments corresponding to properly (after type
+ *  promotion) the matching conversion specifier in format.
+ *
+ * Sets the value of the specified element property.
+ *
+ * Returns: GstcStatus indicating success, daemon unreachable, daemon
+ * timeout, bad pipeline name, bad element name, out of memory
+ */
+GstcStatus gstc_element_set(GstClient *client, const char *pname,
+    const char *element, const char *parameter, const char *format, ...);
+
 #ifdef __cplusplus
 }
 #endif

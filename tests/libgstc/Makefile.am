@@ -7,7 +7,8 @@ TESTS = 			\
 	libgstc_pipeline_pause	\
 	libgstc_pipeline_stop	\
 	libgstc_json		\
-	libgstc_socket
+	libgstc_socket		\
+	libgstc_element_set
 
 check_PROGRAMS = $(TESTS)
 
@@ -62,3 +63,8 @@ libgstc_socket_SOURCES =	 		\
 	@top_srcdir@/libgstc/libgstc_socket.c	\
 	$(COMMON_SOURCES)
 libgstc_socket_CPPFLAGS = -Dmalloc=mock_malloc
+
+libgstc_element_set_SOURCES =	 		\
+	test_libgstc_element_set.c		\
+	$(top_srcdir)/libgstc/libgstc.c		\
+	$(COMMON_SOURCES)
