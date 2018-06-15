@@ -17,7 +17,7 @@ dnl required version of libdaemon
 LIBD_REQUIRED=0.14
 
 dnl required version of jansson
-JANSSON_REQUIRED=2.11
+JANSSON_REQUIRED=2.8
 
 AC_CONFIG_SRCDIR([gstd/gstd.c])
 AC_CONFIG_HEADERS([config.h])
