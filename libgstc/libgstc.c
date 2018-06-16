@@ -322,3 +322,20 @@ gstc_element_set (GstClient * client, const char *pname,
 
   return GSTC_OK;
 }
+
+GstcStatus
+gstc_pipeline_inject_eos (GstClient * client, const char *pipeline_name)
+{
+  GstcStatus ret;
+  char *where;
+  const char *what = "eos";
+  const char *where_fmt = "/pipelines/%s/event";
+
+  asprintf (&where, where_fmt, pipeline_name);
+
+  ret = gstc_cmd_create (client, where, what);
+
+  free (where);
+
+  return ret;
+}

@@ -257,6 +257,23 @@ gstc_pipeline_stop(GstClient *client, const char *pipeline_name);
 GstcStatus gstc_element_set(GstClient *client, const char *pname,
     const char *element, const char *parameter, const char *format, ...);
 
+/**
+ * gstc_pipeline_inject_eos:
+ * @client: The client returned by gstc_client_new()
+ * @pipeline_name: Name associated with the pipeline
+ *
+ * Injects an end-of-stream marker into the named pipeline. The EOS
+ * event is useful for notifying the elements in a pipeline that no
+ * further buffers are expected and they can wrap up any processing
+ * required to properly close the stream. Effectively causes gstd to
+ * invoke gst_event_new_eos().
+ *
+ * Returns: GstcStatus indicating success, daemon unreachable, daemon
+ * timeout, bad pipeline name, out of memory
+ */
+GstcStatus gstc_pipeline_inject_eos (GstClient *client,
+    const char *pipeline_name);
+
 #ifdef __cplusplus
 }
 #endif
