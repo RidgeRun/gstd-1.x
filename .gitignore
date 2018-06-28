@@ -47,6 +47,7 @@ tests/libgstc/libgstc_json
 tests/libgstc/libgstc_socket
 tests/libgstc/libgstc_element_set
 tests/libgstc/libgstc_pipeline_inject_eos
+tests/libgstc/libgstc_pipeline_bus_wait_async
 
 # Examples
 examples/libgstc/simple_pipeline
