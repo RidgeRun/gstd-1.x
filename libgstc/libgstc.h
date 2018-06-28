@@ -317,6 +317,24 @@ gstc_pipeline_bus_wait_async (GstClient *client,
     const long timeout, GstcPipelineBusWaitCallback callback,
     void *user_data);
 
+/**
+ * gstc_pipeline_bus_wait:
+ * @client: The client returned by gstc_client_new()
+ * @pipeline_name: Name associated with the pipeline
+ * @message_name: The type of message to receive
+ * @timeout: The amount of nanoseconds to wait for the event, or -1
+ * for unlimited
+ * 
+ * Block until a message of type @message_name is received in the bus
+ * or a timeout occurs.
+ *
+ * Returns: GstcStatus indicating success, thread error or timeout.
+ */
+GstcStatus
+gstc_pipeline_bus_wait (GstClient *client,
+    const char *pipeline_name, const char *message_name,
+    const long timeout);
+
 #ifdef __cplusplus
 }
 #endif
