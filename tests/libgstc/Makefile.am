@@ -1,22 +1,26 @@
-TESTS = 			\
-	libgstc_client		\
-	libgstc_ping		\
-	libgstc_pipeline_create	\
-	libgstc_pipeline_delete	\
-	libgstc_pipeline_play   \
-	libgstc_pipeline_pause	\
-	libgstc_pipeline_stop	\
-	libgstc_json		\
-	libgstc_socket		\
-	libgstc_element_set	\
-	libgstc_pipeline_inject_eos
+TESTS = 				\
+	libgstc_client			\
+	libgstc_ping			\
+	libgstc_pipeline_create		\
+	libgstc_pipeline_delete		\
+	libgstc_pipeline_play   	\
+	libgstc_pipeline_pause		\
+	libgstc_pipeline_stop		\
+	libgstc_json			\
+	libgstc_socket			\
+	libgstc_element_set		\
+	libgstc_pipeline_inject_eos 	\
+	libgstc_pipeline_bus_wait_async
 
 check_PROGRAMS = $(TESTS)
 
 AM_CFLAGS = $(GST_CFLAGS) $(JANSSON_CFLAGS) $(GIO_CFLAGS) -I$(top_srcdir)/libgstc
 AM_LDFLAGS = $(GST_LIBS) $(JANSSON_LIBS) $(GIO_LIBS)
 
-COMMON_SOURCES = @top_srcdir@/libgstc/libgstc_assert.c
+COMMON_SOURCES = \
+	@top_srcdir@/libgstc/libgstc_assert.c \
+	@top_srcdir@/libgstc/libgstc_thread.c
+
 
 libgstc_client_SOURCES =		\
 	test_libgstc_client.c		\
@@ -72,5 +76,10 @@ libgstc_element_set_SOURCES =	 		\
 
 libgstc_pipeline_inject_eos_SOURCES =	 	\
 	test_libgstc_pipeline_inject_eos.c	\
+	$(top_srcdir)/libgstc/libgstc.c		\
+	$(COMMON_SOURCES)
+
+libgstc_pipeline_bus_wait_async_SOURCES = 	\
+	test_libgstc_pipeline_bus_wait_async.c	\
 	$(top_srcdir)/libgstc/libgstc.c		\
 	$(COMMON_SOURCES)

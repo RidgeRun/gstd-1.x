@@ -40,10 +40,12 @@
 #include "libgstc_socket.h"
 #include "libgstc_json.h"
 #include "libgstc_assert.h"
+#include "libgstc_thread.h"
 
 static GstcStatus gstc_cmd_send (GstClient * client, const char *request);
 static GstcStatus gstc_cmd_create (GstClient * client, const char *where,
     const char *what);
+static GstcStatus gstc_cmd_read (GstClient * client, const char *what);
 static GstcStatus gstc_cmd_update (GstClient * client, const char *what,
     const char *how);
 static GstcStatus gstc_cmd_delete (GstClient * client, const char *where,
@@ -51,10 +53,22 @@ static GstcStatus gstc_cmd_delete (GstClient * client, const char *where,
 static GstcStatus gstc_cmd_change_state (GstClient * client, const char *pipe,
     const char *state);
 static GstcStatus gstc_response_get_code (const char *response, int *code);
+static void *gstc_bus_thread (void *user_data);
 
 struct _GstClient
 {
   GstcSocket *socket;
+};
+
+typedef struct _GstcThreadData GstcThreadData;
+struct _GstcThreadData
+{
+  GstClient *client;
+  const char *pipeline_name;
+  const char *message;
+  GstcPipelineBusWaitCallback func;
+  void *user_data;
+  long long timeout;
 };
 
 static GstcStatus
@@ -111,6 +125,26 @@ gstc_cmd_create (GstClient * client, const char *where, const char *what)
 
   /* Concatenate pieces into request */
   asprintf (&request, template, where, what);
+
+  ret = gstc_cmd_send (client, request);
+
+  free (request);
+
+  return ret;
+}
+
+static GstcStatus
+gstc_cmd_read (GstClient * client, const char *what)
+{
+  GstcStatus ret;
+  const char *template = "read %s";
+  char *request;
+
+  gstc_assert_and_ret_val (NULL != client, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != what, GSTC_NULL_ARGUMENT);
+
+  /* Concatenate pieces into request */
+  asprintf (&request, template, what);
 
   ret = gstc_cmd_send (client, request);
 
@@ -338,4 +372,64 @@ gstc_pipeline_inject_eos (GstClient * client, const char *pipeline_name)
   free (where);
 
   return ret;
+}
+
+static void *
+gstc_bus_thread (void *user_data)
+{
+  GstcThreadData *data = (GstcThreadData *) user_data;
+  char *where;
+  const char *fmt = "/pipelines/%s/bus/message";
+  const char *pipeline_name = data->pipeline_name;
+  const char *message_name = data->message;
+  long long timeout = data->timeout;
+  GstClient *client = data->client;
+
+  asprintf (&where, fmt, pipeline_name);
+
+  gstc_cmd_read (client, where);
+  data->func (client, pipeline_name, message_name, timeout, data->user_data);
+
+  free (where);
+  free (data);
+
+  return NULL;
+}
+
+GstcStatus
+gstc_pipeline_bus_wait_async (GstClient * client,
+    const char *pipeline_name, const char *message_name,
+    const long timeout, GstcPipelineBusWaitCallback callback, void *user_data)
+{
+  GstcThread *thread;
+  GstcThreadData *data;
+  char *where_timeout;
+  char *where_types;
+  char *how_timeout;
+  const char *what_timeout = "timeout";
+  const char *what_types = "types";
+  const char *where_fmt = "/pipelines/%s/bus/%s";
+  const char *how_timeout_fmt = "%lli";
+
+  asprintf (&where_timeout, where_fmt, pipeline_name, what_timeout);
+  asprintf (&how_timeout, how_timeout_fmt, timeout);
+  asprintf (&where_types, where_fmt, pipeline_name, what_types);
+
+  gstc_cmd_update (client, where_types, message_name);
+  gstc_cmd_update (client, where_timeout, how_timeout);
+
+  data = malloc (sizeof (GstcThreadData));
+  data->client = client;
+  data->pipeline_name = pipeline_name;
+  data->message = message_name;
+  data->func = callback;
+  data->user_data = user_data;
+  data->timeout = timeout;
+  gstc_thread_new (gstc_bus_thread, data, &thread);
+
+  free (where_timeout);
+  free (where_types);
+  free (how_timeout);
+
+  return GSTC_OK;
 }

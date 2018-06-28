@@ -98,6 +98,7 @@ extern "C"
  * @GSTC_SEND_ERROR: There was a problem sending the request
  * @GSTC_RECV_ERROR: There was a problem receiving the response
  * @GSTC_SOCKET_ERROR: Unable to open the network socket
+ * @GSTC_THREAD_ERROR: Unable to create a new thread
  *
  * Return codes for the different libgstc operations
  */
@@ -113,7 +114,8 @@ typedef enum
   GSTC_NOT_FOUND,
   GSTC_SEND_ERROR,
   GSTC_RECV_ERROR,
-  GSTC_SOCKET_ERROR
+  GSTC_SOCKET_ERROR,
+  GSTC_THREAD_ERROR
 } GstcStatus;
 
 /**
@@ -273,6 +275,47 @@ GstcStatus gstc_element_set(GstClient *client, const char *pname,
  */
 GstcStatus gstc_pipeline_inject_eos (GstClient *client,
     const char *pipeline_name);
+
+/**
+ * GstcPipelineBusWaitCallback:
+ * @client: The client returned by gstc_client_new()
+ * @pipeline_name: Name associated with the pipeline
+ * @message_name: The type of message to receive
+ * @timeout: The amount of nanoseconds to wait for the event, or -1
+ * for unlimited
+ * @user_data: (allow none): A placeholder for custom data
+ * 
+ * The callback signature of the function to be registered in
+ * gst_pipeline_bus_wait_async().
+ *
+ * Returns: GstcStatus indicating success, thread error or timeout.
+ */
+typedef GstcStatus
+(*GstcPipelineBusWaitCallback) (GstClient *client,
+    const char *pipeline_name, const char *message_name,
+    const long long timeout, void *user_data);
+
+/**
+ * gstc_pipeline_bus_wait_async:
+ * @client: The client returned by gstc_client_new()
+ * @pipeline_name: Name associated with the pipeline
+ * @message_name: The type of message to receive
+ * @timeout: The amount of nanoseconds to wait for the event, or -1
+ * for unlimited
+ * @callback: The function to be called when the message (or timeout)
+ * is received on the bus.
+ * @user_data: (allow none): A placeholder for custom data
+ * 
+ * Register a callback function to be called when a specific message
+ * is received on the bus or a timeout ocurred.
+ *
+ * Returns: GstcStatus indicating success, thread error or timeout.
+ */
+GstcStatus
+gstc_pipeline_bus_wait_async (GstClient *client,
+    const char *pipeline_name, const char *message_name,
+    const long timeout, GstcPipelineBusWaitCallback callback,
+    void *user_data);
 
 #ifdef __cplusplus
 }
