@@ -35,6 +35,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <pthread.h>
 
 #include "libgstc.h"
 #include "libgstc_socket.h"
@@ -54,6 +55,9 @@ static GstcStatus gstc_cmd_change_state (GstClient * client, const char *pipe,
     const char *state);
 static GstcStatus gstc_response_get_code (const char *response, int *code);
 static void *gstc_bus_thread (void *user_data);
+static GstcStatus
+gstc_pipeline_bus_wait_callback (GstClient * _client, const char *pipeline_name,
+    const char *message_name, const long long timeout, void *user_data);
 
 struct _GstClient
 {
@@ -69,6 +73,14 @@ struct _GstcThreadData
   GstcPipelineBusWaitCallback func;
   void *user_data;
   long long timeout;
+};
+
+typedef struct _GstcSyncBusData GstcSyncBusData;
+struct _GstcSyncBusData
+{
+  pthread_cond_t cond;
+  pthread_mutex_t mutex;
+  int waiting;
 };
 
 static GstcStatus
@@ -432,4 +444,45 @@ gstc_pipeline_bus_wait_async (GstClient * client,
   free (how_timeout);
 
   return GSTC_OK;
+}
+
+
+
+static GstcStatus
+gstc_pipeline_bus_wait_callback (GstClient * _client, const char *pipeline_name,
+    const char *message_name, const long long timeout, void *user_data)
+{
+  GstcSyncBusData *data = (GstcSyncBusData *) user_data;
+
+  pthread_mutex_lock (&(data->mutex));
+  data->waiting = 0;
+  pthread_cond_signal (&(data->cond));
+  pthread_mutex_unlock (&(data->mutex));
+
+  return GSTC_OK;
+}
+
+
+GstcStatus
+gstc_pipeline_bus_wait (GstClient * client,
+    const char *pipeline_name, const char *message_name, const long timeout)
+{
+  GstcSyncBusData data;
+  GstcStatus ret;
+
+  pthread_cond_init (&(data.cond), NULL);
+  pthread_mutex_init (&(data.mutex), NULL);
+  data.waiting = 1;
+
+  ret =
+      gstc_pipeline_bus_wait_async (client, pipeline_name, message_name,
+      timeout, gstc_pipeline_bus_wait_callback, &data);
+
+  pthread_mutex_lock (&(data.mutex));
+  while (1 == data.waiting) {
+    pthread_cond_wait (&(data.cond), &(data.mutex));
+  }
+  pthread_mutex_unlock (&(data.mutex));
+
+  return ret;
 }

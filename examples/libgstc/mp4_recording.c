@@ -84,8 +84,9 @@ main (int argc, char *argv[])
     goto close_pipeline;
   }
 
-  /* TODO: We need to wait here for the EOS to be processed. Sleep in the meantime */
-  sleep (5);
+  printf ("Waiting for EOS...");
+  gstc_pipeline_bus_wait (client, "pipe", "eos", 5000000000);
+  printf (" received!\n");
 
 close_pipeline:
   ret = gstc_pipeline_stop (client, "pipe");
