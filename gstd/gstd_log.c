@@ -37,20 +37,19 @@ GST_DEBUG_CATEGORY (gstd_debug);
 static void
 gstd_log_proxy (GstDebugCategory * category, GstDebugLevel level,
     const gchar * file, const gchar * function, gint line, GObject * object,
-    GstDebugMessage * message, gpointer user_data)
-    G_GNUC_NO_INSTRUMENT;
+    GstDebugMessage * message, gpointer user_data) G_GNUC_NO_INSTRUMENT;
 
-     static const gchar *gstd_log_get_gstd_default ();
-     static const gchar *gstd_log_get_gst_default ();
-     static gchar *gstd_log_get_filename (const gchar * filename,
-    const gchar * default_filename);
+static const gchar *gstd_log_get_gstd_default ();
+static const gchar *gstd_log_get_gst_default ();
+static gchar *gstd_log_get_filename (const gchar * filename, const gchar * default_filename);
 
-     static FILE *_gstdlog = NULL;
-     static FILE *_gstlog = NULL;
-     static gchar *gstd_filename;
-     static gchar *gst_filename;
+static FILE *_gstdlog = NULL;
+static FILE *_gstlog = NULL;
+static gchar *gstd_filename;
+static gchar *gst_filename;
 
-     void gstd_log_init (const gchar * gstdfilename, const gchar * gstfilename)
+void
+gstd_log_init (const gchar * gstdfilename, const gchar * gstfilename)
 {
   gint debug_color;
 
