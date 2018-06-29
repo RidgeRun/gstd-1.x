@@ -181,13 +181,13 @@ main (gint argc, gchar * argv[])
     {"no-daemon", 'D', 0, G_OPTION_ARG_NONE, &nodaemon,
         "Do not detach into a daemon", NULL}
     ,
-    {"pid-path", 'P', 0, G_OPTION_ARG_FILENAME, &pidfile,
+    {"pid-path", 'p', 0, G_OPTION_ARG_FILENAME, &pidfile,
         "Create gstd.pid file into path", NULL}
     ,
-    {"gstd-log-filename", 0, 0, G_OPTION_ARG_FILENAME, &gstdlogfile,
+    {"gstd-log-filename", 'l', 0, G_OPTION_ARG_FILENAME, &gstdlogfile,
         "Create gstd.log file to path", NULL}
     ,
-    {"gst-log-filename", 0, 0, G_OPTION_ARG_FILENAME, &gstlogfile,
+    {"gst-log-filename", 'd', 0, G_OPTION_ARG_FILENAME, &gstlogfile,
         "Create gst.log file to path", NULL}
     ,
     {NULL}
