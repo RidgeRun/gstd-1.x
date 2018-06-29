@@ -411,7 +411,8 @@ gstc_bus_thread (void *user_data)
 GstcStatus
 gstc_pipeline_bus_wait_async (GstClient * client,
     const char *pipeline_name, const char *message_name,
-    const long timeout, GstcPipelineBusWaitCallback callback, void *user_data)
+    const long long timeout, GstcPipelineBusWaitCallback callback,
+    void *user_data)
 {
   GstcThread thread;
   GstcThreadData *data;
@@ -464,7 +465,8 @@ gstc_pipeline_bus_wait_callback (GstClient * _client, const char *pipeline_name,
 
 GstcStatus
 gstc_pipeline_bus_wait (GstClient * client,
-    const char *pipeline_name, const char *message_name, const long timeout)
+    const char *pipeline_name, const char *message_name,
+    const long long timeout)
 {
   GstcStatus ret;
   GstcSyncBusData data;

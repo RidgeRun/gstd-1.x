@@ -314,7 +314,7 @@ typedef GstcStatus
 GstcStatus
 gstc_pipeline_bus_wait_async (GstClient *client,
     const char *pipeline_name, const char *message_name,
-    const long timeout, GstcPipelineBusWaitCallback callback,
+    const long long timeout, GstcPipelineBusWaitCallback callback,
     void *user_data);
 
 /**
@@ -333,7 +333,7 @@ gstc_pipeline_bus_wait_async (GstClient *client,
 GstcStatus
 gstc_pipeline_bus_wait (GstClient *client,
     const char *pipeline_name, const char *message_name,
-    const long timeout);
+    const long long timeout);
 
 #ifdef __cplusplus
 }

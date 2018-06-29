@@ -85,7 +85,7 @@ main (int argc, char *argv[])
   }
 
   printf ("Waiting for EOS...");
-  gstc_pipeline_bus_wait (client, "pipe", "eos", 5000000000);
+  gstc_pipeline_bus_wait (client, "pipe", "eos", 10000000000);
   printf (" received!\n");
 
 close_pipeline:
