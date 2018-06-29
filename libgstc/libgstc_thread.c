@@ -30,45 +30,72 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <pthread.h>
 #include <stdlib.h>
 
 #include "libgstc_assert.h"
 #include "libgstc_thread.h"
 
-struct _GstcThread
-{
-  pthread_t thread;
-};
-
 GstcStatus
-gstc_thread_new (GstcThreadFunction func, void *user_data, GstcThread ** self)
+gstc_thread_new (GstcThread * self, GstcThreadFunction func, void *user_data)
 {
-  GstcThread *out;
-  int tret;
+  int ret;
 
   gstc_assert_and_ret_val (NULL != func, GSTC_NULL_ARGUMENT);
   gstc_assert_and_ret_val (NULL != self, GSTC_NULL_ARGUMENT);
 
-  out = malloc (sizeof (GstcThread));
-
-  tret = pthread_create (&(out->thread), NULL, func, user_data);
-  if (tret) {
-    free (out);
+  ret = pthread_create (&(self->thread), NULL, func, user_data);
+  if (ret) {
     return GSTC_THREAD_ERROR;
   }
-
-  *self = out;
 
   return GSTC_OK;
 }
 
 void
-gstc_thread_free (GstcThread * self)
+gstc_mutex_init (GstcMutex * mutex)
 {
-  gstc_assert_and_ret (NULL != self);
+  gstc_assert_and_ret (NULL != mutex);
 
-  pthread_join (self->thread, NULL);
+  pthread_mutex_init (&(mutex->mutex), NULL);
+}
 
-  free (self);
+void
+gstc_mutex_lock (GstcMutex * mutex)
+{
+  gstc_assert_and_ret (NULL != mutex);
+
+  pthread_mutex_lock (&(mutex->mutex));
+}
+
+void
+gstc_mutex_unlock (GstcMutex * mutex)
+{
+  gstc_assert_and_ret (NULL != mutex);
+
+  pthread_mutex_unlock (&(mutex->mutex));
+}
+
+void
+gstc_cond_init (GstcCond * cond)
+{
+  gstc_assert_and_ret (NULL != cond);
+
+  pthread_cond_init (&(cond->cond), NULL);
+}
+
+void
+gstc_cond_wait (GstcCond * cond, GstcMutex * mutex)
+{
+  gstc_assert_and_ret (NULL != cond);
+  gstc_assert_and_ret (NULL != mutex);
+
+  pthread_cond_wait (&(cond->cond), &(mutex->mutex));
+}
+
+void
+gstc_cond_signal (GstcCond * cond)
+{
+  gstc_assert_and_ret (NULL != cond);
+
+  pthread_cond_signal (&(cond->cond));
 }

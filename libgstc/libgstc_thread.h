@@ -33,6 +33,8 @@
 #ifndef __LIBGSTC_THREAD_H__
 #define __LIBGSTC_THREAD_H__
 
+#include <pthread.h>
+
 #include "libgstc.h"
 
 #ifdef __cplusplus
@@ -41,15 +43,47 @@ extern "C"
 #endif
 
 typedef struct _GstcThread GstcThread;
+typedef struct _GstcCond GstcCond;
+typedef struct _GstcMutex GstcMutex;
+
+struct _GstcThread
+{
+  pthread_t thread;
+};
+
+struct _GstcCond
+{
+  pthread_cond_t cond;
+};
+
+struct _GstcMutex
+{
+  pthread_mutex_t mutex;
+};
 
 typedef void *(*GstcThreadFunction) (void *);
   
 GstcStatus
-gstc_thread_new (GstcThreadFunction func, void * user_data, GstcThread **self);
+gstc_thread_new (GstcThread *thread, GstcThreadFunction func, void * user_data);
 
 void
-gstc_thread_free (GstcThread *self);
-  
+gstc_mutex_init (GstcMutex *mutex);
+
+void
+gstc_mutex_lock (GstcMutex *mutex);
+
+void
+gstc_mutex_unlock (GstcMutex *mutex);
+
+void
+gstc_cond_init (GstcCond *mutex);
+
+void
+gstc_cond_wait (GstcCond *cond, GstcMutex *mutex);
+
+void
+gstc_cond_signal (GstcCond *cond);
+
 #ifdef __cplusplus
 }
 #endif
