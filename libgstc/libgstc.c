@@ -78,8 +78,8 @@ struct _GstcThreadData
 typedef struct _GstcSyncBusData GstcSyncBusData;
 struct _GstcSyncBusData
 {
-  pthread_cond_t cond;
-  pthread_mutex_t mutex;
+  GstcCond cond;
+  GstcMutex mutex;
   int waiting;
 };
 
@@ -413,7 +413,7 @@ gstc_pipeline_bus_wait_async (GstClient * client,
     const char *pipeline_name, const char *message_name,
     const long timeout, GstcPipelineBusWaitCallback callback, void *user_data)
 {
-  GstcThread *thread;
+  GstcThread thread;
   GstcThreadData *data;
   char *where_timeout;
   char *where_types;
@@ -437,7 +437,7 @@ gstc_pipeline_bus_wait_async (GstClient * client,
   data->func = callback;
   data->user_data = user_data;
   data->timeout = timeout;
-  gstc_thread_new (gstc_bus_thread, data, &thread);
+  gstc_thread_new (&thread, gstc_bus_thread, data);
 
   free (where_timeout);
   free (where_types);
@@ -454,35 +454,34 @@ gstc_pipeline_bus_wait_callback (GstClient * _client, const char *pipeline_name,
 {
   GstcSyncBusData *data = (GstcSyncBusData *) user_data;
 
-  pthread_mutex_lock (&(data->mutex));
+  gstc_mutex_lock (&(data->mutex));
   data->waiting = 0;
-  pthread_cond_signal (&(data->cond));
-  pthread_mutex_unlock (&(data->mutex));
+  gstc_cond_signal (&(data->cond));
+  gstc_mutex_unlock (&(data->mutex));
 
   return GSTC_OK;
 }
-
 
 GstcStatus
 gstc_pipeline_bus_wait (GstClient * client,
     const char *pipeline_name, const char *message_name, const long timeout)
 {
-  GstcSyncBusData data;
   GstcStatus ret;
+  GstcSyncBusData data;
 
-  pthread_cond_init (&(data.cond), NULL);
-  pthread_mutex_init (&(data.mutex), NULL);
+  gstc_cond_init (&(data.cond));
+  gstc_mutex_init (&(data.mutex));
   data.waiting = 1;
 
   ret =
       gstc_pipeline_bus_wait_async (client, pipeline_name, message_name,
       timeout, gstc_pipeline_bus_wait_callback, &data);
 
-  pthread_mutex_lock (&(data.mutex));
+  gstc_mutex_lock (&(data.mutex));
   while (1 == data.waiting) {
-    pthread_cond_wait (&(data.cond), &(data.mutex));
+    gstc_cond_wait (&(data.cond), &(data.mutex));
   }
-  pthread_mutex_unlock (&(data.mutex));
+  gstc_mutex_unlock (&(data.mutex));
 
   return ret;
 }
