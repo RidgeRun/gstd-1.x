@@ -33,7 +33,7 @@
  * \param argv The array of cmdline arguments given to 
  * the process in the application's main
  **/
-void gstd_daemon_init (gint argc, gchar * argv[]);
+void gstd_daemon_init (gint argc, gchar * argv[], gchar * pidfilename);
 
 /**
  * Daemonizes the current process using the given process name

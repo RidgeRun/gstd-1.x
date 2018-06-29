@@ -39,11 +39,17 @@ gstd_log_proxy (GstDebugCategory * category, GstDebugLevel level,
     const gchar * file, const gchar * function, gint line, GObject * object,
     GstDebugMessage * message, gpointer user_data) G_GNUC_NO_INSTRUMENT;
 
+static const gchar *gstd_log_get_gstd_default ();
+static const gchar *gstd_log_get_gst_default ();
+static gchar *gstd_log_get_filename (const gchar * filename, const gchar * default_filename);
+
 static FILE *_gstdlog = NULL;
 static FILE *_gstlog = NULL;
+static gchar *gstd_filename;
+static gchar *gst_filename;
 
 void
-gstd_log_init ()
+gstd_log_init (const gchar * gstdfilename, const gchar * gstfilename)
 {
   gint debug_color;
 
@@ -51,13 +57,19 @@ gstd_log_init ()
     return;
   }
 
-  _gstdlog = g_fopen (gstd_log_get_gstd (), "a+");
+  gstd_filename =
+      gstd_log_get_filename (gstdfilename, gstd_log_get_gstd_default ());
+  _gstdlog = g_fopen (gstd_filename, "a+");
+
   if (!_gstdlog) {
     g_printerr ("Unable to open Gstd log file: %s\n", g_strerror (errno));
     return;
   }
 
-  _gstlog = g_fopen (gstd_log_get_gst (), "a+");
+  gst_filename =
+      gstd_log_get_filename (gstfilename, gstd_log_get_gst_default ());
+  _gstlog = g_fopen (gst_filename, "a+");
+
   if (!_gstlog) {
     g_printerr ("Unable to open Gst log file: %s\n", g_strerror (errno));
     return;
@@ -78,6 +90,9 @@ gstd_log_init ()
 void
 gstd_log_deinit ()
 {
+  g_free (gstd_filename);
+  g_free (gst_filename);
+
   if (!_gstdlog) {
     return;
   }
@@ -107,14 +122,41 @@ gstd_log_proxy (GstDebugCategory * category, GstDebugLevel level,
   }
 }
 
-const gchar *
-gstd_log_get_gstd ()
+static const gchar *
+gstd_log_get_gstd_default ()
 {
   return GSTD_LOG_STATE_DIR GSTD_LOG_NAME;
 }
 
-const gchar *
-gstd_log_get_gst ()
+static const gchar *
+gstd_log_get_gst_default ()
 {
   return GSTD_LOG_STATE_DIR GST_LOG_NAME;
+}
+
+static gchar *
+gstd_log_get_filename (const gchar * filename, const gchar * default_filename)
+{
+  if (filename == NULL)
+    return g_strdup (default_filename);
+
+  if (g_path_is_absolute (filename)) {
+    return g_strdup (filename);
+  } else {
+    g_printerr
+      ("WARNING: The pid filename is not absolute since default filename\n");
+    return g_strdup (default_filename);;
+  }
+}
+
+gchar *
+gstd_log_get_current_gstd ()
+{
+  return g_strdup (gstd_filename);
+}
+
+gchar *
+gstd_log_get_current_gst ()
+{
+  return g_strdup (gst_filename);
 }

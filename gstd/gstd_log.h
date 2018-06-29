@@ -25,8 +25,8 @@
 void gstd_log_init ();
 void gstd_log_deinit ();
 
-const gchar *gstd_log_get_gstd ();
-const gchar *gstd_log_get_gst ();
+gchar *gstd_log_get_current_gstd ();
+gchar *gstd_log_get_current_gst ();
 
 /* A default category for every object not defining its own */
 GST_DEBUG_CATEGORY_EXTERN (gstd_debug);
