@@ -225,7 +225,7 @@ gstd_daemon_get_pid_filename (const gchar * filename)
   if (g_path_is_absolute (filename)) {
     return g_strdup (filename);
   } else {
-    GST_WARNING ("The pid filename is not absolute since default filename");
+    g_printerr ("The pid filename is not absolute since default filename\n");
     return g_strdup (GSTD_RUN_STATE_DIR);
   }
 }
