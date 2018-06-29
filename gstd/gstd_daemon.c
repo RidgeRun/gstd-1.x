@@ -40,11 +40,13 @@
 static gboolean gstd_daemon_start_parent ();
 static gboolean gstd_daemon_start_child ();
 static const gchar *gstd_daemon_pid ();
+static gchar *gstd_daemon_get_pid_filename (const gchar * filename);
 
 static gboolean _initialized = FALSE;
+static gchar *pid_filename = NULL;
 
 void
-gstd_daemon_init (gint argc, gchar * argv[])
+gstd_daemon_init (gint argc, gchar * argv[], gchar * pidfilename)
 {
   const gchar *process_name;
 
@@ -59,6 +61,11 @@ gstd_daemon_init (gint argc, gchar * argv[])
   /* Use the process name as the identification prefix for the 
      pid file */
   daemon_pid_file_ident = process_name;
+
+  /*
+     Create a gstd.pid file in another path, it could be 
+     nullable  */
+  pid_filename = pidfilename;
 
   /* Override the default pid file location to /tmp/ to avoid the need
      of root privileges */
@@ -175,11 +182,10 @@ gstd_daemon_stop ()
   gboolean ret = FALSE;
   guint timeout = 5;
 
-  /* Check if the new function daemon_pid_file_kill_wait() is
-     available, if it is, use it. */
   ret = daemon_pid_file_kill_wait (SIGTERM, timeout);
   if (ret < 0) {
-    GST_ERROR ("No running Gstd found");
+    GST_ERROR
+        ("No running Gstd found or gstd.pid was saved using \"--pid-path\"");
     ret = FALSE;
   } else {
     ret = TRUE;
@@ -195,14 +201,31 @@ static const gchar *
 gstd_daemon_pid ()
 {
   static gchar *fn = NULL;
+  gchar *filename;
 
   if (fn) {
     g_free (fn);
   }
 
-  fn = g_strdup_printf (GSTD_RUN_STATE_DIR "%s.pid",
+  filename = gstd_daemon_get_pid_filename (pid_filename);
+  fn = g_strdup_printf ("%s/%s.pid", filename,
       daemon_pid_file_ident ? daemon_pid_file_ident : "gstd");
+  g_free (filename);
 
   return fn;
 
+}
+
+static gchar *
+gstd_daemon_get_pid_filename (const gchar * filename)
+{
+  if (filename == NULL)
+    return g_strdup (GSTD_RUN_STATE_DIR);
+
+  if (g_path_is_absolute (filename)) {
+    return g_strdup (filename);
+  } else {
+    GST_WARNING ("The pid filename is not absolute since default filename");
+    return g_strdup (GSTD_RUN_STATE_DIR);
+  }
 }

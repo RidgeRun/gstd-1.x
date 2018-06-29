@@ -47,7 +47,10 @@ print_header (gboolean quiet)
       "Log traces will be saved to %s.\nDetaching from parent process.";
 
   if (!quiet) {
-    GST_INFO (header, gstd_log_get_gstd ());
+    gchar *filename;
+    filename = gstd_log_get_current_gstd ();
+    GST_INFO (header, filename);
+    g_free (filename);
   }
 }
 
@@ -145,10 +148,14 @@ main (gint argc, gchar * argv[])
   gboolean kill = FALSE;
   gboolean nodaemon = FALSE;
   gboolean quiet = FALSE;
+  const gchar *gstdlogfile = NULL;
+  const gchar *gstlogfile = NULL;
+  gchar *pidfile = NULL;
   GError *error = NULL;
   GOptionContext *context;
   GOptionGroup *gstreamer_group;
   gint ret = EXIT_SUCCESS;
+  gchar *current_filename = NULL;
 
   /* Array to specify gstd how many IPCs are supported, 
    * IPCs should be added this array.
@@ -174,6 +181,15 @@ main (gint argc, gchar * argv[])
     {"no-daemon", 'D', 0, G_OPTION_ARG_NONE, &nodaemon,
         "Do not detach into a daemon", NULL}
     ,
+    {"pid-path", 'P', 0, G_OPTION_ARG_FILENAME, &pidfile,
+        "Create gstd.pid file into path", NULL}
+    ,
+    {"gstd-log-filename", 0, 0, G_OPTION_ARG_FILENAME, &gstdlogfile,
+        "Create gstd.log file to path", NULL}
+    ,
+    {"gst-log-filename", 0, 0, G_OPTION_ARG_FILENAME, &gstlogfile,
+        "Create gst.log file to path", NULL}
+    ,
     {NULL}
   };
 
@@ -197,8 +213,8 @@ main (gint argc, gchar * argv[])
   }
   g_option_context_free (context);
 
-  gstd_log_init ();
-  gstd_daemon_init (argc, argv);
+  gstd_log_init (gstdlogfile, gstlogfile);
+  gstd_daemon_init (argc, argv, pidfile);
 
   /* Print the version and exit */
   if (version) {
@@ -263,9 +279,12 @@ main (gint argc, gchar * argv[])
 
 error:
   {
+    current_filename = gstd_log_get_current_gstd ();
     GST_ERROR ("Unable to start Gstd. Check %s for more details.",
-        gstd_log_get_gstd ());
+        current_filename);
+    g_free (current_filename);
     ret = EXIT_FAILURE;
+
   }
 out:
   {
