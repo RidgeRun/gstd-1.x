@@ -25,6 +25,7 @@
 #include "gstd_ipc.h"
 
 G_BEGIN_DECLS
+#define GSTD_TCP_DEFAULT_HOST "127.0.0.1"
 #define GSTD_TCP_DEFAULT_PORT 5000
 #define GSTD_TCP_DEFAULT_NUM_PORTS 1
 #define GSTD_TYPE_TCP \

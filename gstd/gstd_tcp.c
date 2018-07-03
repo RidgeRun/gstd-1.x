@@ -44,6 +44,7 @@ struct _GstdTcp
 {
   GstdIpc parent;
   guint base_port;
+  gchar *host;
   guint num_ports;
   GSocketService *service;
 };
@@ -59,6 +60,7 @@ enum
 {
   PROP_BASE_PORT = 1,
   PROP_NUM_PORTS = 2,
+  PROP_HOST = 3,
   N_PROPERTIES                  // NOT A PROPERTY
 };
 
@@ -74,6 +76,7 @@ static void gstd_tcp_set_property (GObject *, guint, const GValue *,
 static void gstd_tcp_get_property (GObject *, guint, GValue *, GParamSpec *);
 static void gstd_tcp_dispose (GObject *);
 gboolean gstd_tcp_init_get_option_group (GstdIpc * base, GOptionGroup ** group);
+static gboolean gstd_tcp_add_listeners(GSocketService *service, gchar * address, gint port, GError ** error);
 
 
 static void
@@ -90,6 +93,14 @@ gstd_tcp_class_init (GstdTcpClass * klass)
   gstdipc_class->get_option_group =
       GST_DEBUG_FUNCPTR (gstd_tcp_init_get_option_group);
   object_class->dispose = gstd_tcp_dispose;
+
+  properties[PROP_HOST] =
+      g_param_spec_string ("base-address",
+      "Base Address",
+      "The address to start listening to",
+      GSTD_TCP_DEFAULT_HOST,
+      G_PARAM_READWRITE |
+      G_PARAM_CONSTRUCT_ONLY | G_PARAM_STATIC_STRINGS | GSTD_PARAM_READ);
 
   properties[PROP_BASE_PORT] =
       g_param_spec_uint ("base-port",
@@ -125,6 +136,7 @@ gstd_tcp_init (GstdTcp * self)
   GST_INFO_OBJECT (self, "Initializing gstd Tcp");
   GstdIpc *base = GSTD_IPC (self);
   self->base_port = GSTD_TCP_DEFAULT_PORT;
+  self->host = g_strdup(GSTD_TCP_DEFAULT_HOST);
   self->num_ports = GSTD_TCP_DEFAULT_NUM_PORTS;
   self->service = NULL;
   base->enabled = FALSE;
@@ -137,6 +149,10 @@ gstd_tcp_get_property (GObject * object,
   GstdTcp *self = GSTD_TCP (object);
 
   switch (property_id) {
+    case PROP_HOST:
+      GST_DEBUG_OBJECT (self, "Returning base-address %s", self->host);
+      g_value_set_string (value, self->host);
+      break;
     case PROP_BASE_PORT:
       GST_DEBUG_OBJECT (self, "Returning base-port %u", self->base_port);
       g_value_set_uint (value, self->base_port);
@@ -160,6 +176,18 @@ gstd_tcp_set_property (GObject * object,
   GstdTcp *self = GSTD_TCP (object);
 
   switch (property_id) {
+    case PROP_HOST:
+      {
+      const gchar * host;
+      GST_DEBUG_OBJECT (self, "Changing base-port current value: %s",
+          self->host);
+
+      host = g_value_get_string (value);
+      g_free(self->host);
+      self->host = g_strdup(host);
+      GST_DEBUG_OBJECT (self, "Value changed %s", self->host);
+      break;
+      }
     case PROP_BASE_PORT:
       GST_DEBUG_OBJECT (self, "Changing base-port current value: %u",
           self->base_port);
@@ -187,6 +215,9 @@ gstd_tcp_dispose (GObject * object)
   GstdTcp *self = GSTD_TCP (object);
 
   GST_INFO_OBJECT (object, "Deinitializing gstd TCP");
+
+  if(self->host)
+    g_free(self->host);
 
   if (self->service) {
     self->service = NULL;
@@ -248,6 +279,7 @@ gstd_tcp_start (GstdIpc * base, GstdSession * session)
   GstdTcp *self = GSTD_TCP (base);
   GSocketService **service;
   guint16 port = self->base_port;
+  gchar *host = self->host;
   guint i;
   if (!base->enabled) {
     GST_DEBUG_OBJECT (self, "TCP not enabled, skipping");
@@ -269,9 +301,7 @@ gstd_tcp_start (GstdIpc * base, GstdSession * session)
   *service = g_threaded_socket_service_new (self->num_ports);
 
   for (i = 0; i < self->num_ports; i++) {
-
-    g_socket_listener_add_inet_port (G_SOCKET_LISTENER (*service),
-        port + i, NULL /* G_OBJECT(session) */ , &error);
+    gstd_tcp_add_listeners(*service, host, port + i, &error);
     if (error)
       goto noconnection;
   }
@@ -331,6 +361,10 @@ gstd_tcp_init_get_option_group (GstdIpc * base, GOptionGroup ** group)
     {"enable-tcp-protocol", 't', 0, G_OPTION_ARG_NONE, &base->enabled,
         "Enable attach the server through given TCP ports ", NULL}
     ,
+    {"host", 'h', 0, G_OPTION_ARG_STRING, &self->host,
+          "Attach to the server starting through a given address (default 127.0.0.1)",
+        "host-address"}
+    ,
     {"base-port", 'p', 0, G_OPTION_ARG_INT, &self->base_port,
           "Attach to the server starting through a given port (default 5000)",
         "base-port"}
@@ -346,4 +380,26 @@ gstd_tcp_init_get_option_group (GstdIpc * base, GOptionGroup ** group)
 
   g_option_group_add_entries (*group, tcp_args);
   return TRUE;
+}
+
+static gboolean
+gstd_tcp_add_listeners(GSocketService *service, gchar * address, gint port, GError ** error)
+{
+  GSocketAddress * sa;
+  GError *err = NULL;
+  gboolean ret = TRUE;
+
+  sa = g_inet_socket_address_new_from_string(address, port);
+
+  if(g_socket_listener_add_address(G_SOCKET_LISTENER(service), sa,
+    G_SOCKET_TYPE_STREAM, G_SOCKET_PROTOCOL_TCP, NULL, NULL, &err)
+      == FALSE ){
+    g_printerr ("set_address: error while adding the address to socket listener: %s\n",
+	   err->message);
+    ret = FALSE;
+  }
+
+  g_object_unref(sa);
+
+  return ret;
 }
