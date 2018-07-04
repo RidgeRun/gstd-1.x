@@ -386,16 +386,17 @@ static gboolean
 gstd_tcp_add_listeners(GSocketService *service, gchar * address, gint port, GError ** error)
 {
   GSocketAddress * sa;
-  GError *err = NULL;
   gboolean ret = TRUE;
+
+  g_return_val_if_fail(service, FALSE);
+  g_return_val_if_fail(address, FALSE);
+  g_return_val_if_fail(error != NULL, FALSE);
 
   sa = g_inet_socket_address_new_from_string(address, port);
 
   if(g_socket_listener_add_address(G_SOCKET_LISTENER(service), sa,
-    G_SOCKET_TYPE_STREAM, G_SOCKET_PROTOCOL_TCP, NULL, NULL, &err)
+    G_SOCKET_TYPE_STREAM, G_SOCKET_PROTOCOL_TCP, NULL, NULL, error)
       == FALSE ){
-    g_printerr ("set_address: error while adding the address to socket listener: %s\n",
-	   err->message);
     ret = FALSE;
   }
 
