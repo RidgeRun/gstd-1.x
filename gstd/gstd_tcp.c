@@ -44,7 +44,7 @@ struct _GstdTcp
 {
   GstdIpc parent;
   guint base_port;
-  gchar *host;
+  gchar *address;
   guint num_ports;
   GSocketService *service;
 };
@@ -60,7 +60,7 @@ enum
 {
   PROP_BASE_PORT = 1,
   PROP_NUM_PORTS = 2,
-  PROP_HOST = 3,
+  PROP_ADDRESS = 3,
   N_PROPERTIES                  // NOT A PROPERTY
 };
 
@@ -94,11 +94,11 @@ gstd_tcp_class_init (GstdTcpClass * klass)
       GST_DEBUG_FUNCPTR (gstd_tcp_init_get_option_group);
   object_class->dispose = gstd_tcp_dispose;
 
-  properties[PROP_HOST] =
+  properties[PROP_ADDRESS] =
       g_param_spec_string ("base-address",
       "Base Address",
       "The address to start listening to",
-      GSTD_TCP_DEFAULT_HOST,
+      GSTD_TCP_DEFAULT_ADDRESS,
       G_PARAM_READWRITE |
       G_PARAM_CONSTRUCT_ONLY | G_PARAM_STATIC_STRINGS | GSTD_PARAM_READ);
 
@@ -136,7 +136,7 @@ gstd_tcp_init (GstdTcp * self)
   GST_INFO_OBJECT (self, "Initializing gstd Tcp");
   GstdIpc *base = GSTD_IPC (self);
   self->base_port = GSTD_TCP_DEFAULT_PORT;
-  self->host = g_strdup(GSTD_TCP_DEFAULT_HOST);
+  self->address = g_strdup(GSTD_TCP_DEFAULT_ADDRESS);
   self->num_ports = GSTD_TCP_DEFAULT_NUM_PORTS;
   self->service = NULL;
   base->enabled = FALSE;
@@ -149,9 +149,9 @@ gstd_tcp_get_property (GObject * object,
   GstdTcp *self = GSTD_TCP (object);
 
   switch (property_id) {
-    case PROP_HOST:
-      GST_DEBUG_OBJECT (self, "Returning base-address %s", self->host);
-      g_value_set_string (value, self->host);
+    case PROP_ADDRESS:
+      GST_DEBUG_OBJECT (self, "Returning base-address %s", self->address);
+      g_value_set_string (value, self->address);
       break;
     case PROP_BASE_PORT:
       GST_DEBUG_OBJECT (self, "Returning base-port %u", self->base_port);
@@ -176,16 +176,16 @@ gstd_tcp_set_property (GObject * object,
   GstdTcp *self = GSTD_TCP (object);
 
   switch (property_id) {
-    case PROP_HOST:
+    case PROP_ADDRESS:
       {
-      const gchar * host;
+      const gchar * address;
       GST_DEBUG_OBJECT (self, "Changing base-port current value: %s",
-          self->host);
+          self->address);
 
-      host = g_value_get_string (value);
-      g_free(self->host);
-      self->host = g_strdup(host);
-      GST_DEBUG_OBJECT (self, "Value changed %s", self->host);
+      address = g_value_get_string (value);
+      g_free(self->address);
+      self->address = g_strdup(address);
+      GST_DEBUG_OBJECT (self, "Value changed %s", self->address);
       break;
       }
     case PROP_BASE_PORT:
@@ -216,8 +216,8 @@ gstd_tcp_dispose (GObject * object)
 
   GST_INFO_OBJECT (object, "Deinitializing gstd TCP");
 
-  if(self->host)
-    g_free(self->host);
+  if(self->address)
+    g_free(self->address);
 
   if (self->service) {
     self->service = NULL;
@@ -279,7 +279,7 @@ gstd_tcp_start (GstdIpc * base, GstdSession * session)
   GstdTcp *self = GSTD_TCP (base);
   GSocketService **service;
   guint16 port = self->base_port;
-  gchar *host = self->host;
+  gchar *address = self->address;
   guint i;
   if (!base->enabled) {
     GST_DEBUG_OBJECT (self, "TCP not enabled, skipping");
@@ -301,7 +301,7 @@ gstd_tcp_start (GstdIpc * base, GstdSession * session)
   *service = g_threaded_socket_service_new (self->num_ports);
 
   for (i = 0; i < self->num_ports; i++) {
-    gstd_tcp_add_listeners(*service, host, port + i, &error);
+    gstd_tcp_add_listeners(*service, address, port + i, &error);
     if (error)
       goto noconnection;
   }
@@ -361,9 +361,9 @@ gstd_tcp_init_get_option_group (GstdIpc * base, GOptionGroup ** group)
     {"enable-tcp-protocol", 't', 0, G_OPTION_ARG_NONE, &base->enabled,
         "Enable attach the server through given TCP ports ", NULL}
     ,
-    {"host", 'h', 0, G_OPTION_ARG_STRING, &self->host,
+    {"address", 'a', 0, G_OPTION_ARG_STRING, &self->address,
           "Attach to the server starting through a given address (default 127.0.0.1)",
-        "host-address"}
+        "address"}
     ,
     {"base-port", 'p', 0, G_OPTION_ARG_INT, &self->base_port,
           "Attach to the server starting through a given port (default 5000)",
