@@ -45,6 +45,7 @@ main (int argc, char *argv[])
   const unsigned int port = 5000;
   const unsigned long wait_time = 0;
   const int keep_open = 1;
+  char *eos;
 
   ret = gstc_client_new (address, port, wait_time, keep_open, &client);
   if (GSTC_OK != ret) {
@@ -84,9 +85,18 @@ main (int argc, char *argv[])
     goto close_pipeline;
   }
 
-  printf ("Waiting for EOS...");
-  gstc_pipeline_bus_wait (client, "pipe", "eos", 10000000000);
-  printf (" received!\n");
+  printf ("Waiting for EOS... ");
+  ret = gstc_pipeline_bus_wait (client, "pipe", "eos", 10000000000, &eos);
+  if (GSTC_OK == ret) {
+    printf ("received!\n");
+    free (eos);
+  } else if (GSTC_BUS_TIMEOUT == ret) {
+    printf ("timeout!\n");
+    fprintf (stderr, "EOS not received, file will be unreadable\n");
+  } else {
+    printf ("error!\n");
+    fprintf (stderr, "An error occurred waiting for EOS: %d\n", ret);
+  }
 
 close_pipeline:
   ret = gstc_pipeline_stop (client, "pipe");
