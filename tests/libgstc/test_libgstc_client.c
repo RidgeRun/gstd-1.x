@@ -62,6 +62,13 @@ gstc_json_get_int (const gchar * json, const gchar * name, gint * out)
   return *out = GSTC_OK;
 }
 
+GstcStatus
+gstc_json_is_null (const gchar * json, const gchar * name, gint * out)
+{
+  *out = 0;
+  return GSTC_OK;
+}
+
 /* Mock implementation of malloc */
 gboolean _use_mock_malloc = FALSE;
 void *

@@ -81,6 +81,13 @@ gstc_json_get_int (const gchar * json, const gchar * name, gint * out)
   return *out = GSTC_OK;
 }
 
+GstcStatus
+gstc_json_is_null (const gchar * json, const gchar * name, gint * out)
+{
+  *out = 0;
+  return GSTC_OK;
+}
+
 GST_START_TEST (test_pipeline_pause_success)
 {
   GstcStatus ret;

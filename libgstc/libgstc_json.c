@@ -36,28 +36,51 @@
 #include "libgstc_assert.h"
 #include "libgstc_json.h"
 
+static GstcStatus gstc_json_get_value (const char *json, const char *name,
+    json_t ** root, json_t ** out);
+
+static GstcStatus
+gstc_json_get_value (const char *json, const char *name, json_t ** root,
+    json_t ** out)
+{
+  GstcStatus ret = GSTC_OK;
+  json_error_t error;
+
+  gstc_assert_and_ret_val (json != NULL, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (name != NULL, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (root != NULL, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (out != NULL, GSTC_NULL_ARGUMENT);
+
+  *root = json_loads (json, 0, &error);
+  if (!*root) {
+    ret = GSTC_MALFORMED;
+    goto out;
+  }
+
+  *out = json_object_get (*root, name);
+  if (!*out) {
+    ret = GSTC_NOT_FOUND;
+    json_decref (*root);
+  }
+
+out:
+  return ret;
+}
+
 GstcStatus
 gstc_json_get_int (const char *json, const char *name, int *out)
 {
   GstcStatus ret;
   json_t *root;
   json_t *data;
-  json_error_t error;
 
   gstc_assert_and_ret_val (json != NULL, GSTC_NULL_ARGUMENT);
   gstc_assert_and_ret_val (name != NULL, GSTC_NULL_ARGUMENT);
   gstc_assert_and_ret_val (out != NULL, GSTC_NULL_ARGUMENT);
 
-  root = json_loads (json, 0, &error);
-  if (!root) {
-    ret = GSTC_MALFORMED;
+  ret = gstc_json_get_value (json, name, &root, &data);
+  if (GSTC_OK != ret) {
     goto out;
-  }
-
-  data = json_object_get (root, name);
-  if (!data) {
-    ret = GSTC_NOT_FOUND;
-    goto unref;
   }
 
   if (!json_is_integer (data)) {
@@ -69,6 +92,29 @@ gstc_json_get_int (const char *json, const char *name, int *out)
   ret = GSTC_OK;
 
 unref:
+  json_decref (root);
+
+out:
+  return ret;
+}
+
+GstcStatus
+gstc_json_is_null (const char *json, const char *name, int *out)
+{
+  GstcStatus ret;
+  json_t *root;
+  json_t *data;
+
+  gstc_assert_and_ret_val (json != NULL, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (name != NULL, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (out != NULL, GSTC_NULL_ARGUMENT);
+
+  ret = gstc_json_get_value (json, name, &root, &data);
+  if (GSTC_OK != ret) {
+    goto out;
+  }
+
+  *out = json_is_null (data);
   json_decref (root);
 
 out:
