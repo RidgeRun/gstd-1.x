@@ -41,7 +41,7 @@ setup ()
 static void
 teardown (void)
 {
-  //gstc_client_free (_client);
+  gstc_client_free (_client);
 }
 
 /* Mock implementation of a socket */
