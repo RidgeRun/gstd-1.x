@@ -99,6 +99,7 @@ extern "C"
  * @GSTC_RECV_ERROR: There was a problem receiving the response
  * @GSTC_SOCKET_ERROR: Unable to open the network socket
  * @GSTC_THREAD_ERROR: Unable to create a new thread
+ * @GSTC_BUS_TIMEOUT: A timeout was received while waiting on the bus
  *
  * Return codes for the different libgstc operations
  */
@@ -115,7 +116,8 @@ typedef enum
   GSTC_SEND_ERROR,
   GSTC_RECV_ERROR,
   GSTC_SOCKET_ERROR,
-  GSTC_THREAD_ERROR
+  GSTC_THREAD_ERROR,
+  GSTC_BUS_TIMEOUT
 } GstcStatus;
 
 /**
@@ -293,7 +295,7 @@ GstcStatus gstc_pipeline_inject_eos (GstClient *client,
 typedef GstcStatus
 (*GstcPipelineBusWaitCallback) (GstClient *client,
     const char *pipeline_name, const char *message_name,
-    const long long timeout, void *user_data);
+    const long long timeout, char *message, void *user_data);
 
 /**
  * gstc_pipeline_bus_wait_async:
@@ -333,7 +335,7 @@ gstc_pipeline_bus_wait_async (GstClient *client,
 GstcStatus
 gstc_pipeline_bus_wait (GstClient *client,
     const char *pipeline_name, const char *message_name,
-    const long long timeout);
+    const long long timeout, char **message);
 
 #ifdef __cplusplus
 }
