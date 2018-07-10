@@ -35,6 +35,34 @@ GST_START_TEST (test_json_empty)
 
 GST_END_TEST;
 
+GST_START_TEST (test_json_is_null)
+{
+  GstcStatus ret;
+  gint is_null;
+  const char *json = "{ \"string\" : \"string val\", \"null\" : null }";
+
+  ret = gstc_json_is_null (json, "null", &is_null);
+
+  assert_equals_int (GSTC_OK, ret);
+  assert_equals_int (is_null, 1);
+}
+
+GST_END_TEST;
+
+GST_START_TEST (test_json_is_not_null)
+{
+  GstcStatus ret;
+  gint is_null;
+  const char *json = "{ \"string\" : \"string val\", \"null\" : \"not null\" }";
+
+  ret = gstc_json_is_null (json, "null", &is_null);
+
+  assert_equals_int (GSTC_OK, ret);
+  assert_equals_int (is_null, 0);
+}
+
+GST_END_TEST;
+
 GST_START_TEST (test_json_int)
 {
   GstcStatus ret;
@@ -136,6 +164,8 @@ libgstc_ping_suite (void)
   suite_add_tcase (suite, tc);
 
   tcase_add_test (tc, test_json_empty);
+  tcase_add_test (tc, test_json_is_null);
+  tcase_add_test (tc, test_json_is_not_null);
   tcase_add_test (tc, test_json_int);
   tcase_add_test (tc, test_json_int_neg);
   tcase_add_test (tc, test_json_int_wrong_type);
