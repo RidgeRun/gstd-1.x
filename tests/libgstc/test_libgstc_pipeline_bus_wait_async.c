@@ -70,7 +70,7 @@ GstcStatus
 gstc_socket_send (GstcSocket * socket, const gchar * request, gchar ** response)
 {
   static int reqnum = 0;
-  
+
   *response = malloc (1);
 
   memcpy (_request[reqnum], request, strlen (request));
@@ -94,8 +94,9 @@ gstc_json_get_int (const gchar * json, const gchar * name, gint * out)
 }
 
 GstcStatus
-callback (GstClient *_client, const gchar *pipeline_name,
-    const gchar *message_name, const long long timeout, gpointer user_data)
+callback (GstClient * _client, const gchar * pipeline_name,
+    const gchar * message_name, const long long timeout, char *message,
+    gpointer user_data)
 {
   return GSTC_OK;
 }
@@ -106,11 +107,14 @@ GST_START_TEST (test_pipeline_bus_wait_async_success)
   const gchar *pipeline_name = "pipe";
   const gchar *message_name = "eos";
   const gint64 timeout = -1;
-  const gchar *expected[] = {"update /pipelines/pipe/bus/types eos",
-			     "update /pipelines/pipe/bus/timeout -1",
-			     "read /pipelines/pipe/bus/message"};
+  const gchar *expected[] = { "update /pipelines/pipe/bus/types eos",
+    "update /pipelines/pipe/bus/timeout -1",
+    "read /pipelines/pipe/bus/message"
+  };
 
-  ret = gstc_pipeline_bus_wait_async (_client, pipeline_name, message_name, timeout, callback, NULL);
+  ret =
+      gstc_pipeline_bus_wait_async (_client, pipeline_name, message_name,
+      timeout, callback, NULL);
   assert_equals_int (GSTC_OK, ret);
 
   assert_equals_string (expected[0], _request[0]);

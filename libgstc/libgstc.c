@@ -44,9 +44,12 @@
 #include "libgstc_thread.h"
 
 static GstcStatus gstc_cmd_send (GstClient * client, const char *request);
+static GstcStatus gstc_cmd_send_get_response (GstClient * client,
+    const char *request, char **reponse);
 static GstcStatus gstc_cmd_create (GstClient * client, const char *where,
     const char *what);
-static GstcStatus gstc_cmd_read (GstClient * client, const char *what);
+static GstcStatus gstc_cmd_read (GstClient * client, const char *what,
+    char **response);
 static GstcStatus gstc_cmd_update (GstClient * client, const char *what,
     const char *how);
 static GstcStatus gstc_cmd_delete (GstClient * client, const char *where,
@@ -57,7 +60,8 @@ static GstcStatus gstc_response_get_code (const char *response, int *code);
 static void *gstc_bus_thread (void *user_data);
 static GstcStatus
 gstc_pipeline_bus_wait_callback (GstClient * _client, const char *pipeline_name,
-    const char *message_name, const long long timeout, void *user_data);
+    const char *message_name, const long long timeout, char *message,
+    void *user_data);
 
 struct _GstClient
 {
@@ -81,6 +85,8 @@ struct _GstcSyncBusData
   GstcCond cond;
   GstcMutex mutex;
   int waiting;
+  char *message;
+  GstcStatus ret;
 };
 
 static GstcStatus
@@ -95,32 +101,46 @@ gstc_response_get_code (const char *response, int *code)
 }
 
 static GstcStatus
-gstc_cmd_send (GstClient * client, const char *request)
+gstc_cmd_send_get_response (GstClient * client, const char *request,
+    char **response)
 {
   GstcStatus ret;
-  char *response = NULL;
   int code = GSTC_NOT_FOUND;
 
   gstc_assert_and_ret_val (NULL != client, GSTC_NULL_ARGUMENT);
   gstc_assert_and_ret_val (NULL != request, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != response, GSTC_NULL_ARGUMENT);
 
-  ret = gstc_socket_send (client->socket, request, &response);
+  ret = gstc_socket_send (client->socket, request, response);
   if (GSTC_OK != ret) {
     goto out;
   }
 
-  ret = gstc_response_get_code (response, &code);
+  ret = gstc_response_get_code (*response, &code);
   if (GSTC_OK != ret) {
-    goto free;
+    goto out;
   }
 
   /* Everything went okay, forward the server's code to the user */
   ret = code;
 
-free:
+out:
+  return ret;
+}
+
+static GstcStatus
+gstc_cmd_send (GstClient * client, const char *request)
+{
+  GstcStatus ret;
+  char *response = NULL;
+
+  gstc_assert_and_ret_val (NULL != client, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != request, GSTC_NULL_ARGUMENT);
+
+  ret = gstc_cmd_send_get_response (client, request, &response);
+
   free (response);
 
-out:
   return ret;
 }
 
@@ -146,7 +166,7 @@ gstc_cmd_create (GstClient * client, const char *where, const char *what)
 }
 
 static GstcStatus
-gstc_cmd_read (GstClient * client, const char *what)
+gstc_cmd_read (GstClient * client, const char *what, char **response)
 {
   GstcStatus ret;
   const char *template = "read %s";
@@ -158,7 +178,7 @@ gstc_cmd_read (GstClient * client, const char *what)
   /* Concatenate pieces into request */
   asprintf (&request, template, what);
 
-  ret = gstc_cmd_send (client, request);
+  ret = gstc_cmd_send_get_response (client, request, response);
 
   free (request);
 
@@ -391,6 +411,7 @@ gstc_bus_thread (void *user_data)
 {
   GstcThreadData *data = (GstcThreadData *) user_data;
   char *where;
+  char *response;
   const char *fmt = "/pipelines/%s/bus/message";
   const char *pipeline_name = data->pipeline_name;
   const char *message_name = data->message;
@@ -399,10 +420,12 @@ gstc_bus_thread (void *user_data)
 
   asprintf (&where, fmt, pipeline_name);
 
-  gstc_cmd_read (client, where);
-  data->func (client, pipeline_name, message_name, timeout, data->user_data);
+  gstc_cmd_read (client, where, &response);
+  data->func (client, pipeline_name, message_name, timeout, response,
+      data->user_data);
 
   free (where);
+  free (response);
   free (data);
 
   return NULL;
@@ -447,16 +470,31 @@ gstc_pipeline_bus_wait_async (GstClient * client,
   return GSTC_OK;
 }
 
-
-
 static GstcStatus
 gstc_pipeline_bus_wait_callback (GstClient * _client, const char *pipeline_name,
-    const char *message_name, const long long timeout, void *user_data)
+    const char *message_name, const long long timeout, char *message,
+    void *user_data)
 {
   GstcSyncBusData *data = (GstcSyncBusData *) user_data;
+  GstcStatus ret = GSTC_OK;
+  const int msglen = strlen (message) + 1;
+  const char *response_tag = "response";
+  int is_null;
 
   gstc_mutex_lock (&(data->mutex));
   data->waiting = 0;
+  data->message = (char *) malloc (msglen);
+  memcpy (data->message, message, msglen);
+
+  /* If a valid string was received, a valid bus message was received.
+     Otherwise, a timeout occurred */
+  ret = gstc_json_is_null (message, response_tag, &is_null);
+  if (GSTC_OK == ret) {
+    data->ret = is_null ? GSTC_BUS_TIMEOUT : ret;
+  } else {
+    data->ret = ret;
+  }
+
   gstc_cond_signal (&(data->cond));
   gstc_mutex_unlock (&(data->mutex));
 
@@ -466,17 +504,15 @@ gstc_pipeline_bus_wait_callback (GstClient * _client, const char *pipeline_name,
 GstcStatus
 gstc_pipeline_bus_wait (GstClient * client,
     const char *pipeline_name, const char *message_name,
-    const long long timeout)
+    const long long timeout, char **message)
 {
-  GstcStatus ret;
   GstcSyncBusData data;
 
   gstc_cond_init (&(data.cond));
   gstc_mutex_init (&(data.mutex));
   data.waiting = 1;
 
-  ret =
-      gstc_pipeline_bus_wait_async (client, pipeline_name, message_name,
+  gstc_pipeline_bus_wait_async (client, pipeline_name, message_name,
       timeout, gstc_pipeline_bus_wait_callback, &data);
 
   gstc_mutex_lock (&(data.mutex));
@@ -485,5 +521,8 @@ gstc_pipeline_bus_wait (GstClient * client,
   }
   gstc_mutex_unlock (&(data.mutex));
 
-  return ret;
+  /* Output the message back to the user */
+  *message = data.message;
+
+  return data.ret;
 }
