@@ -32,6 +32,8 @@
 #include "gstd_log.h"
 
 static gboolean int_handler (gpointer user_data);
+static gboolean usr1_handler (gpointer user_data);
+typedef struct { const gchar *gstd; const gchar *gst; } gstlogfiles_t;
 static void ipc_add_option_groups (GstdIpc * ipc[], GType factory[],
     guint num_ipcs, GOptionContext * context, GOptionGroup * groups[]);
 static gboolean ipc_start (GstdIpc * ipc[], guint num_ipcs,
@@ -67,6 +69,25 @@ int_handler (gpointer user_data)
      so the application closes itself */
   GST_INFO ("Interrupt received, shutting down...");
   g_main_loop_quit (main_loop);
+
+  return TRUE;
+}
+
+/* Handle Unix SIGUSR1 - reopen logfiles (after a logrotate.) */
+static gboolean
+usr1_handler (gpointer user_data)
+{
+  gstlogfiles_t *logfiles;
+
+  g_return_val_if_fail (user_data, TRUE);
+
+  logfiles = (gstlogfiles_t *) user_data;
+
+  GST_INFO ("SIGUSR1 received, closing log files");
+  gstd_log_deinit ();
+
+  gstd_log_init (logfiles->gstd, logfiles->gst);
+  GST_INFO ("reopened log files after SIGUSR1");
 
   return TRUE;
 }
@@ -258,6 +279,12 @@ main (gint argc, gchar * argv[])
 
   /* Install a handler for the interrupt signal */
   g_unix_signal_add (SIGINT, int_handler, main_loop);
+
+  /* Install a handler for the USR1 signal */
+  gstlogfiles_t logfiles;
+  logfiles.gstd = gstdlogfile;
+  logfiles.gst = gstlogfile;
+  g_unix_signal_add (SIGUSR1, usr1_handler, &logfiles);
 
   GST_INFO ("Gstd started");
   g_main_loop_run (main_loop);

@@ -47,6 +47,7 @@ static FILE *_gstdlog = NULL;
 static FILE *_gstlog = NULL;
 static gchar *gstd_filename;
 static gchar *gst_filename;
+static int gstd_log_init_run_once = NULL;
 
 void
 gstd_log_init (const gchar * gstdfilename, const gchar * gstfilename)
@@ -75,6 +76,8 @@ gstd_log_init (const gchar * gstdfilename, const gchar * gstfilename)
     return;
   }
 
+  if (gstd_log_init_run_once) return;
+
   /* Turn on up to info for gstd debug */
   gst_debug_set_threshold_from_string (GSTD_DEBUG_PREFIX "*:" GSTD_DEBUG_LEVEL,
       FALSE);
@@ -85,6 +88,7 @@ gstd_log_init (const gchar * gstdfilename, const gchar * gstfilename)
   /* Initialize debug category with nice colors */
   debug_color = GST_DEBUG_FG_BLACK | GST_DEBUG_BOLD | GST_DEBUG_BG_WHITE;
   GST_DEBUG_CATEGORY_INIT (gstd_debug, "gstd", debug_color, "Gstd category");
+  gstd_log_init_run_once = 1;
 }
 
 void
@@ -99,6 +103,9 @@ gstd_log_deinit ()
 
   fclose (_gstdlog);
   fclose (_gstlog);
+
+  _gstdlog = NULL;
+  _gstlog = NULL;
 }
 
 static void
