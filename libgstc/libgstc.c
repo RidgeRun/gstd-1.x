@@ -455,6 +455,28 @@ gstc_pipeline_inject_eos (GstClient * client, const char *pipeline_name)
   return ret;
 }
 
+GstcStatus
+gstc_pipeline_seek(const GstClient *client, const char *pipeline_name,
+    double rate, int format, int flags, int start_type, long start,
+    int stop_type, long stop)
+{
+  GstcStatus ret;
+  char *where;
+  char *what;
+  const char *where_fmt = "/pipelines/%s/event";
+  const char *what_fmt = "seek %f %d %d %d %ld %d %ld";
+
+  asprintf (&where, where_fmt, pipeline_name);
+  asprintf (&what, what_fmt, rate, format, flags, start_type, start, stop_type, stop);
+
+  ret = gstc_cmd_create (client, where, what);
+
+  free (where);
+  free (what);
+
+  return ret;
+}
+
 static void *
 gstc_bus_thread (void *user_data)
 {
