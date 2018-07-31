@@ -323,6 +323,46 @@ GstcStatus gstc_pipeline_inject_eos (GstClient *client,
     const char *pipeline_name);
 
 /**
+ * gstc_pipeline_seek:
+ * @client: The client returned by gstc_client_new()
+ * @pname: Name associated with the pipeline
+ * @rate: New playback rate, e.g. 1 is normal, 0.5 is half speed,
+ * 2 is twice as fast as normal.  Negatives values means backwards playback.
+ * @format: Format for seek values: undefined (0), default (1), bytes (2),
+ * nanoseconds(3), buffers (4) or percent (5) where default means to use the
+ * format of the pad/element, nanoseconds means time in nanoseconds and percentage
+ * means percentage of the stream.
+ * @flags: Seek flags: none (0), flush (1), accurate (2), key unit (3),
+ * segment (4), trickmode (5), skip (6), snap before (7), snap after (8),
+ * snap nearest (9), trickmode key units (10) or trickmode no audio (11)
+ * where none means no flags, flush means that the pipeline should be flushed,
+ * accurate means accurate position but might be slower for some formats,
+ * key unit means seek to the nearest frame which is faster but less accurate,
+ * segment means to performa a segment seek, trickmode means that it allows
+ * elements to skip frames, snap before means go to a location before the requested
+ * position, snap after means to go to a position after the requeste position,
+ * snap nearest means to go to the closest to the request position, trickmode key
+ * unit means that when doing fast forwarding or fast reverse playback it only
+ * should only decode keyframes and skip all other content, trickmode no audio
+ * means that the audio encoder elements be skipped
+ * @start_type: none (0), set (1), or end (2) where none means no change in
+ * position, set means absolute position, and end means relative position to duration
+ * @start: time of the starting point of the segment
+ * @stop_type: none (0), set (1), or end (2) where none means no change in
+ * position, set means absolute position, and end means relative position to duration
+ * @stop: time of the stopping point of the segment
+ *
+ * Configures playback of the pipeline between @start to @stop at the speed
+ * given in @rate.  Effectively causes gstd to invoke gst_element_seek().
+ *
+ * Returns: GSTC_STATUS indicating success, daemon unreachable, daemon timeout,
+ * bad pipeline name, out of memory
+ */
+GstcStatus gstc_pipeline_seek(const GstClient *client, const char *pname,
+    double rate, int format, int flags, int start_type, long start,
+    int stop_type, long stop);
+
+/**
  * GstcPipelineBusWaitCallback:
  * @client: The client returned by gstc_client_new()
  * @pipeline_name: Name associated with the pipeline
