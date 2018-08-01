@@ -124,6 +124,41 @@ GST_START_TEST (test_seek_success)
 
 GST_END_TEST;
 
+GST_START_TEST (test_null_client)
+{
+  GstcStatus ret;
+  const gchar *pipe_name = "pipe";
+  const double rate = 1.0;
+  const int format = 3;
+  const int flags = 1;
+  const int start_type = 1;
+  const unsigned long start = 0;
+  const int end_type = 1;
+  const unsigned long end = 9999;
+  
+  ret = gstc_pipeline_seek (NULL, pipe_name, rate, format, flags, start_type, start, end_type, end);
+  assert_equals_int (GSTC_NULL_ARGUMENT, ret);
+}
+
+GST_END_TEST;
+
+GST_START_TEST (test_null_pipe_name)
+{
+  GstcStatus ret;
+  const double rate = 1.0;
+  const int format = 3;
+  const int flags = 1;
+  const int start_type = 1;
+  const unsigned long start = 0;
+  const int end_type = 1;
+  const unsigned long end = 9999;
+  
+  ret = gstc_pipeline_seek (_client, NULL, rate, format, flags, start_type, start, end_type, end);
+  assert_equals_int (GSTC_NULL_ARGUMENT, ret);
+}
+
+GST_END_TEST;
+
 static Suite *
 libgstc_pipeline_seek_suite (void)
 {
@@ -134,6 +169,8 @@ libgstc_pipeline_seek_suite (void)
 
   tcase_add_checked_fixture (tc, setup, teardown);
   tcase_add_test (tc, test_seek_success);
+  tcase_add_test (tc, test_null_client);
+  tcase_add_test (tc, test_null_pipe_name);
 
   return suite;
 }

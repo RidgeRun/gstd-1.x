@@ -465,10 +465,13 @@ gstc_pipeline_seek(const GstClient *client, const char *pipeline_name,
   char *what;
   const char *where_fmt = "/pipelines/%s/event";
   const char *what_fmt = "seek %f %d %d %d %ld %d %ld";
+  
+  gstc_assert_and_ret_val (NULL != client, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != pipeline_name, GSTC_NULL_ARGUMENT);
 
   asprintf (&where, where_fmt, pipeline_name);
   asprintf (&what, what_fmt, rate, format, flags, start_type, start, stop_type, stop);
-
+  
   ret = gstc_cmd_create (client, where, what);
 
   free (where);
