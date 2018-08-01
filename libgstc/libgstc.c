@@ -457,14 +457,14 @@ gstc_pipeline_inject_eos (GstClient * client, const char *pipeline_name)
 
 GstcStatus
 gstc_pipeline_seek(const GstClient *client, const char *pipeline_name,
-    double rate, int format, int flags, int start_type, long start,
-    int stop_type, long stop)
+    double rate, int format, int flags, int start_type, long long start,
+    int stop_type, long long stop)
 {
   GstcStatus ret;
   char *where;
   char *what;
   const char *where_fmt = "/pipelines/%s/event";
-  const char *what_fmt = "seek %f %d %d %d %ld %d %ld";
+  const char *what_fmt = "seek %f %d %d %d %lld %d %lld";
   
   gstc_assert_and_ret_val (NULL != client, GSTC_NULL_ARGUMENT);
   gstc_assert_and_ret_val (NULL != pipeline_name, GSTC_NULL_ARGUMENT);
