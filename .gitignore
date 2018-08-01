@@ -55,3 +55,4 @@ tests/libgstc/libgstc_pipeline_seek
 examples/libgstc/simple_pipeline
 examples/libgstc/dynamic_property_change
 examples/libgstc/mp4_recording
+examples/libgstc/gapless_playback

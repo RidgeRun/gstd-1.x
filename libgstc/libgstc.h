@@ -355,12 +355,12 @@ GstcStatus gstc_pipeline_inject_eos (GstClient *client,
  * Configures playback of the pipeline between @start to @stop at the speed
  * given in @rate.  Effectively causes gstd to invoke gst_element_seek().
  *
- * Returns: GSTC_STATUS indicating success, daemon unreachable, daemon timeout,
+ * Returns: GstcStatus indicating success, daemon unreachable, daemon timeout,
  * bad pipeline name, out of memory
  */
 GstcStatus gstc_pipeline_seek(const GstClient *client, const char *pname,
-    double rate, int format, int flags, int start_type, long start,
-    int stop_type, long stop);
+    double rate, int format, int flags, int start_type, long long start,
+    int stop_type, long long stop);
 
 /**
  * GstcPipelineBusWaitCallback:
