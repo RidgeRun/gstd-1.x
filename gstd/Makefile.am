@@ -94,6 +94,7 @@ gstdinclude_HEADERS = \
 		  gstd_property_int.h		\
 		  gstd_property_string.h	\
 		  gstd_property_boolean.h	\
+		  gstd_property_array.h         \
 		  gstd_iupdater.h		\
 		  gstd_no_updater.h		\
 		  gstd_property_enum.h		\
