@@ -25,46 +25,46 @@
 #include <stdlib.h>
 
 /* Gstd Property debugging category */
-GST_DEBUG_CATEGORY_STATIC(gstd_property_array_debug);
+GST_DEBUG_CATEGORY_STATIC (gstd_property_array_debug);
 #define GST_CAT_DEFAULT gstd_property_array_debug
 
 #define GSTD_DEBUG_DEFAULT_LEVEL GST_LEVEL_INFO
 
 
-G_DEFINE_TYPE (GstdPropertyArray, gstd_property_array, GSTD_TYPE_PROPERTY)
+G_DEFINE_TYPE (GstdPropertyArray, gstd_property_array, GSTD_TYPE_PROPERTY);
 
 /* VTable */
 static void
-gstd_property_array_add_value (GstdProperty * self, GstdIFormatter *formatter,
-    GValue * value);
-static GstdReturnCode
-gstd_property_array_update (GstdObject * object, const gchar * arg);
+gstd_property_array_add_value (GstdProperty * self,
+    GstdIFormatter * formatter, GValue * value);
+static GstdReturnCode gstd_property_array_update (GstdObject * object,
+    const gchar * arg);
 
 static void
-gstd_property_array_class_init (GstdPropertyArrayClass *klass)
+gstd_property_array_class_init (GstdPropertyArrayClass * klass)
 {
   guint debug_color;
   GstdPropertyClass *pclass = GSTD_PROPERTY_CLASS (klass);
   GstdObjectClass *oclass = GSTD_OBJECT_CLASS (klass);
 
-  oclass->update = GST_DEBUG_FUNCPTR(gstd_property_array_update);
-  pclass->add_value = GST_DEBUG_FUNCPTR(gstd_property_array_add_value);
+  oclass->update = GST_DEBUG_FUNCPTR (gstd_property_array_update);
+  pclass->add_value = GST_DEBUG_FUNCPTR (gstd_property_array_add_value);
 
   /* Initialize debug category with nice colors */
   debug_color = GST_DEBUG_FG_BLACK | GST_DEBUG_BOLD | GST_DEBUG_BG_WHITE;
-  GST_DEBUG_CATEGORY_INIT (gstd_property_array_debug, "gstdpropertyarray", debug_color,
-			   "Gstd Property Array category");
+  GST_DEBUG_CATEGORY_INIT (gstd_property_array_debug, "gstdpropertyarray",
+      debug_color, "Gstd Property Array category");
 
 }
 
 static void
-gstd_property_array_init (GstdPropertyArray *self)
+gstd_property_array_init (GstdPropertyArray * self)
 {
-  GST_INFO_OBJECT(self, "Initializing property array");
+  GST_INFO_OBJECT (self, "Initializing property array");
 }
 
 static void
-gstd_property_array_add_value (GstdProperty * self, GstdIFormatter *formatter,
+gstd_property_array_add_value (GstdProperty * self, GstdIFormatter * formatter,
     GValue * value)
 {
   GArray *garray;
@@ -74,7 +74,7 @@ gstd_property_array_add_value (GstdProperty * self, GstdIFormatter *formatter,
   g_return_if_fail (self);
   g_return_if_fail (formatter);
   g_return_if_fail (value);
-  
+
   g_value_init (&val, G_TYPE_FLOAT);
   garray = (GArray *) g_value_get_boxed (value);
 
@@ -104,8 +104,8 @@ gstd_property_array_update (GstdObject * object, const gchar * value)
 
   prop = GSTD_PROPERTY (object);
 
-  pspec = g_object_class_find_property (G_OBJECT_GET_CLASS(prop->target),
-      GSTD_OBJECT_NAME(prop));
+  pspec = g_object_class_find_property (G_OBJECT_GET_CLASS (prop->target),
+      GSTD_OBJECT_NAME (prop));
 
   g_return_val_if_fail (pspec, GSTD_MISSING_INITIALIZATION);
 
@@ -115,26 +115,27 @@ gstd_property_array_update (GstdObject * object, const gchar * value)
 
   tokens = g_strsplit (value, " ", -1);
   if (!*tokens && errno) {
-    GST_ERROR_OBJECT (object, "Cannot update %s: %s", pspec->name, g_strerror(errno));
+    GST_ERROR_OBJECT (object, "Cannot update %s: %s", pspec->name,
+        g_strerror (errno));
     ret = GSTD_BAD_VALUE;
     goto out;
   }
   token_counter = tokens;
-    
+
   while (*token_counter) {
     token = *token_counter++;
     f_token = atof (token);
     g_array_append_val (garray, f_token);
   }
   if (garray != NULL) {
-    g_object_set (prop->target, GSTD_OBJECT_NAME(prop), garray, NULL);
+    g_object_set (prop->target, GSTD_OBJECT_NAME (prop), garray, NULL);
   } else {
-    GST_ERROR_OBJECT (object, "Cannot update %s: Array is empty", pspec->name); 
+    GST_ERROR_OBJECT (object, "Cannot update %s: Array is empty", pspec->name);
     ret = GSTD_BAD_VALUE;
     goto out;
-  }    
+  }
 
- out:
+out:
   {
     return ret;
   }
