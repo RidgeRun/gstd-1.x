@@ -28,6 +28,7 @@ libgstd_core_la_SOURCES = gstd_session.c		\
 			  gstd_property_int.c		\
 			  gstd_property_string.c	\
 			  gstd_property_boolean.c	\
+			  gstd_property_array.c		\
 			  gstd_iupdater.c		\
 			  gstd_no_updater.c		\
 			  gstd_property_enum.c		\

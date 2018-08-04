@@ -38,6 +38,7 @@
 #include "gstd_property_string.h"
 #include "gstd_property_int.h"
 #include "gstd_property_enum.h"
+#include "gstd_property_array.h"
 #include "gstd_list_reader.h"
 
 enum
@@ -381,7 +382,12 @@ gstd_element_property_get_type (GType g_type)
   //add details. For example, int properties can display their max and min
   //values, flags and enums could display the options, etc... Similar to
   //what gst-inspect does
-  return GSTD_TYPE_PROPERTY;
+
+  if (g_type == G_TYPE_ARRAY) {
+    return GSTD_TYPE_PROPERTY_ARRAY;
+  } else {
+    return GSTD_TYPE_PROPERTY;
+  }
 
   switch (g_type) {
     case G_TYPE_BOOLEAN:
