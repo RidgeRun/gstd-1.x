@@ -366,6 +366,37 @@ gstc_client_ping (GstClient * client)
 }
 
 GstcStatus
+gstc_client_debug (GstClient * client, const char *threshold, const int colors)
+{
+  GstcStatus ret;
+
+  gstc_assert_and_ret_val (NULL != client, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != threshold, GSTC_NULL_ARGUMENT);
+
+  /* Enable debug of the pipeline */
+  ret = gstc_cmd_update (client, "/debug/enable", "true");
+  if (ret != GSTC_OK) {
+    return ret;
+  }
+
+  /* Set the level of debug */
+  ret = gstc_cmd_update (client, "/debug/threshold", threshold);
+  if (ret != GSTC_OK) {
+    return ret;
+  }
+
+  /* Enable the color in debug */
+  const char * colored = colors == 0 ? "false" : "true";
+  ret = gstc_cmd_update (client, "/debug/color", colored);
+  
+  if (ret != GSTC_OK) {
+    return ret;
+  }
+
+  return ret;
+}
+
+GstcStatus
 gstc_element_set (GstClient * client, const char *pname,
     const char *element, const char *parameter, const char *format, ...)
 {
