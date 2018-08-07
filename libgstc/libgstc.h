@@ -186,6 +186,24 @@ GstcStatus gstc_client_ping(GstClient *client);
 GstcStatus
 gstc_pipeline_create (GstClient *client, const char *pipeline_name,
     const char *pipeline_desc);
+  
+/**
+ * gstc_pipeline_list:
+ * @client: The client returned by gstc_client_new()
+ * @pipelines: List of existing pipelines names returned by the client library
+ * @list_lenght: Number of elements in the pipelines list
+ *
+ * Returns a list of the names of the existing pipelines.  Depending on the
+ * deployment, another  application may have created some of the pipelines.
+ * The client application needs to do a free(*pipelines) and a
+ * free(*pipelines[idx]) to release the resources used to hold the list and
+ * its elements
+ *
+ * Returns: GstcStatus indicating success, daemon unreachable, daemon timeout,
+ * out of memory
+ */
+GstcStatus gstc_pipeline_list(GstClient *client, char **pipelines[],
+  int *list_lenght);
 
 /**
  * gstc_pipeline_delete:

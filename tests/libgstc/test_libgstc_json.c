@@ -155,6 +155,201 @@ GST_START_TEST (test_json_int_missing)
 
 GST_END_TEST;
 
+GST_START_TEST (test_json_child_char_success)
+{
+  GstcStatus ret;
+  const char *json = "{ \"parent\" : { \"array\" : [{ \"string\" : \"result1\" }, \
+    { \"string\" : \"result2\" },{ \"string\" : \"result3\" }] } } ";
+  int list_lenght;
+  char **result;
+
+  ret = gstc_json_get_child_char_array (json, "parent", "array",
+    "string", &result, &list_lenght);
+
+  assert_equals_int (GSTC_OK, ret);
+  assert_equals_int (3, list_lenght);
+  
+  assert_equals_string (result[0], "result1");
+  assert_equals_string (result[1], "result2");
+  assert_equals_string (result[2], "result3");
+}
+
+GST_END_TEST;
+
+GST_START_TEST (test_json_child_char_empty_array)
+{
+  GstcStatus ret;
+  const char *json = "{ \"parent\" : { \"array\" : [] } } ";
+  int list_lenght;
+  char **result;
+
+  ret = gstc_json_get_child_char_array (json, "parent", "array",
+    "name", &result, &list_lenght);
+
+  assert_equals_int (GSTC_OK, ret);
+  assert_equals_int (0, list_lenght);
+}
+
+GST_END_TEST;
+
+GST_START_TEST (test_json_child_char_array_null_json)
+{
+  GstcStatus ret;
+  const char *json = NULL;
+  int list_lenght;
+  char **result;
+
+  ret = gstc_json_get_child_char_array (json, "parent", "array",
+    "string", &result, &list_lenght);
+
+  assert_equals_int (GSTC_NULL_ARGUMENT, ret);
+}
+
+GST_END_TEST;
+
+GST_START_TEST (test_json_child_char_array_null_parent_name)
+{
+  GstcStatus ret;
+  const char *json = "{ \"parent\" : { \"array\" : [{ \"string\" : \"result1\" }, \
+    { \"string\" : \"result2\" },{ \"string\" : \"result3\" }] } } ";
+  int list_lenght;
+  char **result;
+
+  ret = gstc_json_get_child_char_array (json, NULL, "array",
+    "string", &result, &list_lenght);
+
+  assert_equals_int (GSTC_NULL_ARGUMENT, ret);
+}
+
+GST_END_TEST;
+
+GST_START_TEST (test_json_child_char_array_null_array_name)
+{
+  GstcStatus ret;
+  const char *json = "{ \"parent\" : { \"array\" : [{ \"string\" : \"result1\" }, \
+    { \"string\" : \"result2\" },{ \"string\" : \"result3\" }] } } ";
+  int list_lenght;
+  char **result;
+
+  ret = gstc_json_get_child_char_array (json, "parent", NULL,
+    "string", &result, &list_lenght);
+
+  assert_equals_int (GSTC_NULL_ARGUMENT, ret);
+}
+
+GST_END_TEST;
+
+GST_START_TEST (test_json_child_char_array_null_element_name)
+{
+  GstcStatus ret;
+  const char *json = "{ \"parent\" : { \"array\" : [{ \"string\" : \"result1\" }, \
+    { \"string\" : \"result2\" },{ \"string\" : \"result3\" }] } } ";
+  int list_lenght;
+  char **result;
+
+  ret = gstc_json_get_child_char_array (json, "parent", "array",
+    NULL, &result, &list_lenght);
+  assert_equals_int (GSTC_NULL_ARGUMENT, ret); 
+}
+
+GST_END_TEST;
+
+GST_START_TEST (test_json_child_char_array_null_out)
+{
+  GstcStatus ret;
+  const char *json = "{ \"parent\" : { \"array\" : [{ \"string\" : \"result1\" }, \
+    { \"string\" : \"result2\" },{ \"string\" : \"result3\" }] } } ";
+  int list_lenght;
+  char ***result = NULL;
+
+  ret = gstc_json_get_child_char_array (json, "parent", "array",
+    "string", result, &list_lenght);
+
+  assert_equals_int (GSTC_NULL_ARGUMENT, ret); 
+}
+
+GST_END_TEST;
+
+GST_START_TEST (test_json_child_char_array_null_list_lenght)
+{
+  GstcStatus ret;
+  const char *json = "{ \"parent\" : { \"array\" : [{ \"string\" : \"result1\" }, \
+    { \"string\" : \"result2\" },{ \"string\" : \"result3\" }] } } ";
+  int* list_lenght = NULL;
+  char **result;
+
+  ret = gstc_json_get_child_char_array (json, "parent", "array",
+    "string", &result, list_lenght);
+
+  assert_equals_int (GSTC_NULL_ARGUMENT, ret); 
+}
+
+GST_END_TEST;
+
+GST_START_TEST (test_json_child_char_array_arrays_parent_wrong_type)
+{
+  GstcStatus ret;
+  /* In this case parent is int not object*/
+  const char *json = "{ \"parent\" : 15 }"; 
+  int list_lenght;
+  char **result;
+
+  ret = gstc_json_get_child_char_array (json, "parent", "array",
+    "string", &result, &list_lenght);
+    
+  assert_equals_int (GSTC_TYPE_ERROR, ret);
+}
+
+GST_END_TEST;
+
+GST_START_TEST (test_json_child_char_array_array_wrong_type)
+{
+  GstcStatus ret;
+  /* In this case array is int not array*/
+  const char *json = "{ \"parent\" : { \"array\" : 15 } } ";
+  int list_lenght;
+  char **result;
+
+  ret = gstc_json_get_child_char_array (json, "parent", "array",
+    "string", &result, &list_lenght);
+
+  assert_equals_int (GSTC_TYPE_ERROR, ret); 
+}
+
+GST_END_TEST;
+
+GST_START_TEST (test_json_child_char_array_arrays_child_wrong_type)
+{
+  GstcStatus ret;
+  /* Array's elements must be objects*/
+  const char *json = "{ \"parent\" : { \"array\" : [ 5, \"string\", 7 ] } } ";
+  int list_lenght;
+  char **result;
+
+  ret = gstc_json_get_child_char_array (json, "parent", "array",
+    "string", &result, &list_lenght);
+
+  assert_equals_int (GSTC_TYPE_ERROR, ret); 
+}
+
+GST_END_TEST;
+
+GST_START_TEST (test_json_child_char_array_arrays_child_not_string)
+{
+  GstcStatus ret;
+  /* Array's elements must contain strings*/
+  const char *json = "{ \"parent\" : { \"array\" : [{ \"string\" : 5 }] } } ";
+  int list_lenght;
+  char **result;
+
+  ret = gstc_json_get_child_char_array (json, "parent", "array",
+    "string", &result, &list_lenght);
+
+  assert_equals_int (GSTC_TYPE_ERROR, ret);  
+}
+
+GST_END_TEST;
+
 static Suite *
 libgstc_ping_suite (void)
 {
@@ -173,6 +368,17 @@ libgstc_ping_suite (void)
   tcase_add_test (tc, test_json_int_null_placeholder);
   tcase_add_test (tc, test_json_int_corrupted);
   tcase_add_test (tc, test_json_int_missing);
+  tcase_add_test (tc, test_json_child_char_success);
+  tcase_add_test (tc, test_json_child_char_empty_array);
+  tcase_add_test (tc, test_json_child_char_array_null_json);
+  tcase_add_test (tc, test_json_child_char_array_null_parent_name);
+  tcase_add_test (tc, test_json_child_char_array_null_array_name);
+  tcase_add_test (tc, test_json_child_char_array_null_element_name);
+  tcase_add_test (tc, test_json_child_char_array_null_out);
+  tcase_add_test (tc, test_json_child_char_array_arrays_parent_wrong_type);
+  tcase_add_test (tc, test_json_child_char_array_array_wrong_type);
+  tcase_add_test (tc, test_json_child_char_array_arrays_child_wrong_type);
+  tcase_add_test (tc, test_json_child_char_array_arrays_child_not_string);
 
   return suite;
 }

@@ -32,6 +32,7 @@
 
 #include <jansson.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "libgstc_assert.h"
 #include "libgstc_json.h"
@@ -119,4 +120,87 @@ gstc_json_is_null (const char *json, const char *name, int *out)
 
 out:
   return ret;
+}
+
+GstcStatus
+gstc_json_get_child_char_array (const char *json, const char *parent_name,
+    const char *array_name, const char *element_name, char **out[],
+    int *array_lenght)
+{
+  GstcStatus ret;
+  json_t *root;
+  json_t *arrays_parent;
+  json_t *array_data;
+  json_t *data, *name;
+  int i, j;
+
+  gstc_assert_and_ret_val (json != NULL, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (parent_name != NULL, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (array_name != NULL, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (element_name != NULL, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (out != NULL, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (array_lenght != NULL, GSTC_NULL_ARGUMENT);
+
+  ret = gstc_json_get_value (json, parent_name, &root, &arrays_parent);
+  if (GSTC_OK != ret) {
+    goto out;
+  }
+
+  if (!json_is_object (arrays_parent)) {
+    ret = GSTC_TYPE_ERROR;
+    goto unref;
+  }
+  array_data = json_object_get (arrays_parent, array_name);
+
+  if (!json_is_array (array_data)) {
+    ret = GSTC_TYPE_ERROR;
+    goto unref;
+  }
+
+  *array_lenght = json_array_size (array_data);
+
+  /* Allocate enough memory for all names */
+  *out = malloc ((*array_lenght) * sizeof (char *));
+
+  for (i = 0; i < (*array_lenght); i++) {
+    const char *string;
+
+    data = json_array_get (array_data, i);
+    if (!json_is_object (data)) {
+      ret = GSTC_TYPE_ERROR;
+      goto clear_mem;
+    }
+
+    name = json_object_get (data, element_name);
+    if (!json_is_string (name)) {
+      ret = GSTC_TYPE_ERROR;
+      goto clear_mem;
+    }
+
+    string = json_string_value (name);
+
+    /**
+      * Jansson library frees memory after parent object is dereferenced,
+      * memory copies are necessary in order to preserve data
+      */
+    (*out)[i] = malloc (strlen (string) + 1);
+    strncpy ((*out)[i], string, strlen (string));
+    /* Ensure traling null byte is copied */
+    (*out)[i][strlen (string)] = '\0';
+  }
+
+unref:
+  json_decref (root);
+
+out:
+  return ret;
+
+clear_mem:
+  /* In case of failure all allocated memory is freed */
+  for (j = 0; j < i; j++) {
+    free ((*out)[j]);
+  }
+  free (*out);
+  return ret;
+
 }
