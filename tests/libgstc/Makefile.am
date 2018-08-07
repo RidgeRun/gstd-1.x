@@ -11,7 +11,8 @@ TESTS = 				\
 	libgstc_element_set		\
 	libgstc_pipeline_inject_eos 	\
 	libgstc_pipeline_bus_wait_async \
-	libgstc_pipeline_bus_wait
+	libgstc_pipeline_bus_wait \
+	libgstc_pipeline_flush_start
 
 check_PROGRAMS = $(TESTS)
 
@@ -89,4 +90,9 @@ libgstc_pipeline_bus_wait_SOURCES = 	\
 	test_libgstc_pipeline_bus_wait.c	\
 	$(top_srcdir)/libgstc/libgstc_json.c	\
 	$(top_srcdir)/libgstc/libgstc.c		\
+	$(COMMON_SOURCES)
+
+libgstc_pipeline_flush_start_SOURCES = 		\
+	test_libgstc_pipeline_flush_start.c		\
+	@top_srcdir@/libgstc/libgstc.c		\
 	$(COMMON_SOURCES)
