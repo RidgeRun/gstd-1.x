@@ -104,13 +104,14 @@ gstc_json_is_null (const gchar * json, const gchar * name, gint * out)
   return GSTC_OK;
 }
 
-GST_START_TEST (test_pipeline_flush_start_success)
+GST_START_TEST (test_pipeline_flush_stop_success_reset)
 {
   GstcStatus ret;
   const gchar *pipeline_name = "pipe";
-  const gchar *expected = "create /pipelines/pipe/event flush_start";
+  const gchar *expected = "create /pipelines/pipe/event flush_stop true";
+  const int reset = 1;
 
-  ret = gstc_pipeline_flush_start (_client, pipeline_name);
+  ret = gstc_pipeline_flush_stop (_client, pipeline_name, reset);
   assert_equals_int (GSTC_OK, ret);
 
   assert_equals_string (expected, _request);
@@ -118,42 +119,60 @@ GST_START_TEST (test_pipeline_flush_start_success)
 
 GST_END_TEST;
 
-GST_START_TEST (test_pipeline_flush_start_null_name)
+GST_START_TEST (test_pipeline_flush_stop_success_no_reset)
+{
+  GstcStatus ret;
+  const gchar *pipeline_name = "pipe";
+  const gchar *expected = "create /pipelines/pipe/event flush_stop false";
+  const int reset = 0;
+
+  ret = gstc_pipeline_flush_stop (_client, pipeline_name, reset);
+  assert_equals_int (GSTC_OK, ret);
+
+  assert_equals_string (expected, _request);
+}
+
+GST_END_TEST;
+
+GST_START_TEST (test_pipeline_flush_stop_null_name)
 {
   GstcStatus ret;
   const gchar *pipeline_name = NULL;
+  const int reset = 1;
 
-  ret = gstc_pipeline_flush_start (_client, pipeline_name);
+  ret = gstc_pipeline_flush_stop (_client, pipeline_name, reset);
   assert_equals_int (GSTC_NULL_ARGUMENT, ret);
 }
 
 GST_END_TEST;
 
-GST_START_TEST (test_pipeline_flush_start_null_client)
+GST_START_TEST (test_pipeline_flush_stop_null_client)
 {
   GstcStatus ret;
   const gchar *pipeline_name = "pipe";
+  const int reset = 1;
 
-  ret = gstc_pipeline_flush_start (NULL, pipeline_name);
+  ret = gstc_pipeline_flush_stop (NULL, pipeline_name, reset);
   assert_equals_int (GSTC_NULL_ARGUMENT, ret);
 }
 
 GST_END_TEST;
 
 static Suite *
-libgstc_pipeline_flush_start_suite (void)
+libgstc_pipeline_flush_stop_suite (void)
 {
-  Suite *suite = suite_create ("libgstc_pipeline_flush_start");
+  Suite *suite = suite_create ("libgstc_pipeline_flush_stop");
   TCase *tc = tcase_create ("general");
 
   suite_add_tcase (suite, tc);
 
   tcase_add_checked_fixture (tc, setup, teardown);
-  tcase_add_test (tc, test_pipeline_flush_start_success);
-  tcase_add_test (tc, test_pipeline_flush_start_null_name);
-  tcase_add_test (tc, test_pipeline_flush_start_null_client);
+  tcase_add_test (tc, test_pipeline_flush_stop_success_reset);
+  tcase_add_test (tc, test_pipeline_flush_stop_success_no_reset);
+  tcase_add_test (tc, test_pipeline_flush_stop_null_name);
+  tcase_add_test (tc, test_pipeline_flush_stop_null_client);
 
   return suite;
 }
 
-GST_CHECK_MAIN (libgstc_pipeline_flush_start);
+GST_CHECK_MAIN (libgstc_pipeline_flush_stop);
