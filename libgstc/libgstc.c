@@ -575,3 +575,25 @@ gstc_pipeline_bus_wait (GstClient * client,
 
   return data.ret;
 }
+
+GstcStatus
+gstc_pipeline_list (GstClient * client, char **pipelines[], int *list_lenght)
+{
+  GstcStatus ret;
+  char *response;
+
+  gstc_assert_and_ret_val (NULL != client, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != list_lenght, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != pipelines, GSTC_NULL_ARGUMENT);
+
+  ret = gstc_cmd_read (client, "/pipelines", &response);
+  if (GSTC_OK != ret) {
+    goto out;
+  }
+
+  ret = gstc_json_get_child_char_array (response, "response", "nodes",
+      "name", pipelines, list_lenght);
+
+out:
+  return ret;
+}

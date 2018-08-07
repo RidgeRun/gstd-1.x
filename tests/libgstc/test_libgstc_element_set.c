@@ -89,6 +89,13 @@ gstc_json_is_null (const gchar * json, const gchar * name, gint * out)
   return GSTC_OK;
 }
 
+GstcStatus
+gstc_json_get_child_char_array(const char *json, const char* parent_name,
+  const char* array_name, const char *element_name, char **out[], int *array_lenght)
+{
+  return GSTC_OK;
+}
+
 GST_START_TEST (test_property_set_int)
 {
   GstcStatus ret;

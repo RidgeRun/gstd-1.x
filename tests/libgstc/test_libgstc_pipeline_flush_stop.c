@@ -104,6 +104,20 @@ gstc_json_is_null (const gchar * json, const gchar * name, gint * out)
   return GSTC_OK;
 }
 
+GstcStatus
+gstc_json_get_child_char_array(const char *json, const char* parent_name,
+  const char* array_name, const char *element_name, char **out[], int *array_lenght)
+{
+  gstc_assert_and_ret_val (NULL != json, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != parent_name, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != array_name, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != element_name, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != out, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != array_lenght, GSTC_NULL_ARGUMENT);
+    
+  return GSTC_OK;
+}
+
 GST_START_TEST (test_pipeline_flush_stop_success_reset)
 {
   GstcStatus ret;

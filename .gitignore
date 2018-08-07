@@ -51,6 +51,7 @@ tests/libgstc/libgstc_pipeline_bus_wait_async
 tests/libgstc/libgstc_pipeline_bus_wait
 tests/libgstc/libgstc_pipeline_flush_start
 tests/libgstc/libgstc_pipeline_flush_stop
+tests/libgstc/libgstc_pipeline_list
 
 # Examples
 examples/libgstc/simple_pipeline

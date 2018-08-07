@@ -94,6 +94,13 @@ gstc_json_get_int (const gchar * json, const gchar * name, gint * out)
 }
 
 GstcStatus
+gstc_json_get_child_char_array(const char *json, const char* parent_name,
+  const char* array_name, const char *element_name, char **out[], int *array_lenght)
+{
+  return GSTC_OK;
+}
+
+GstcStatus
 callback (GstClient * _client, const gchar * pipeline_name,
     const gchar * message_name, const long long timeout, char *message,
     gpointer user_data)
