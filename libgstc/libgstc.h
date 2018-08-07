@@ -291,6 +291,27 @@ gstc_pipeline_stop(GstClient *client, const char *pipeline_name);
  */
 GstcStatus gstc_element_set(GstClient *client, const char *pname,
     const char *element, const char *parameter, const char *format, ...);
+    
+/**
+ * gstc_element_properties_list:
+ * @client: The client returned by gstc_client_new()
+ * @pipeline_name: Name associated with the pipeline
+ * @element: Element name to be queried
+ * @properties: List of element properties in the specified pipeline
+ * @list_lenght: Number of properties in the properties list
+ *
+ * Returns a list of pipeline element properties.  The client application needs
+ * to do a free(*properties) to release the resources used to hold the list.
+ * The GStreamer Daemon definition for this functionality returns both property
+ * name and value, however, do to the lack of polymorphism in the C language,
+ * only the property names are returned by gstc_element_properties_list(). To get the
+ * values, use  gstc_element_get().
+ *
+ * Returns: GstcStatus indicating success, daemon unreachable, daemon timeout,
+ * bad pipeline name, out of memory
+ */
+GstcStatus gstc_element_properties_list(const GstClient *client,
+  const char *pipeline_name, char *element, char **properties[], int *list_lenght);
 
 /**
  * gstc_pipeline_flush_start:
