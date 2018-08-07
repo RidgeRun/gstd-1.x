@@ -389,13 +389,14 @@ gstc_element_set (GstClient * client, const char *pname,
   return GSTC_OK;
 }
 
-GstcStatus gstc_pipeline_flush_start(const GstClient *client, const char *pipeline_name)
+GstcStatus
+gstc_pipeline_flush_start (const GstClient * client, const char *pipeline_name)
 {
   GstcStatus ret;
   char *where;
   const char *what = "flush_start";
   const char *where_fmt = "/pipelines/%s/event";
-  
+
   gstc_assert_and_ret_val (NULL != client, GSTC_NULL_ARGUMENT);
   gstc_assert_and_ret_val (NULL != pipeline_name, GSTC_NULL_ARGUMENT);
 
@@ -404,6 +405,35 @@ GstcStatus gstc_pipeline_flush_start(const GstClient *client, const char *pipeli
   ret = gstc_cmd_create (client, where, what);
 
   free (where);
+
+  return ret;
+}
+
+GstcStatus
+gstc_pipeline_flush_stop (const GstClient * client, const char *pipeline_name,
+    const int reset)
+{
+  GstcStatus ret;
+  char *where;
+  char *what;
+  const char *what_fmt = "flush_stop %s";
+  const char *where_fmt = "/pipelines/%s/event";
+
+  gstc_assert_and_ret_val (NULL != client, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != pipeline_name, GSTC_NULL_ARGUMENT);
+
+  asprintf (&where, where_fmt, pipeline_name);
+
+  if (reset != 0) {
+    asprintf (&what, what_fmt, "true");
+  } else {
+    asprintf (&what, what_fmt, "false");
+  }
+
+  ret = gstc_cmd_create (client, where, what);
+
+  free (where);
+  free (what);
 
   return ret;
 }

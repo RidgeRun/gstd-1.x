@@ -263,15 +263,29 @@ GstcStatus gstc_element_set(GstClient *client, const char *pname,
 
 /**
  * gstc_pipeline_flush_start:
- * @client: The client returned by gstc_new()
+ * @client: The client returned by gstc_client_new()
  * @pipeline_name: Name associated with the pipeline
  *
  * Causes elements in the pipeline to unblock and discard any pipeline data.
- * Returns: GSTC_STATUS indicating success, daemon unreachable, daemon timeout,
+ * Returns: GstcStatus indicating success, daemon unreachable, daemon timeout,
  * bad pipeline name, out of memory
  *
  */
 GstcStatus gstc_pipeline_flush_start(const GstClient *client, const char *pipeline_name);
+
+/**
+ * gstc_pipeline_flush_stop:
+ * @client: The client returned by gstc_client_new()
+ * @pipeline_name: Name associated with the pipeline
+ * @reset: if non-zero the running_time of the pipeline is set back to 0
+ *
+ *  Causes elements in the pipeline to process pipeline data normally.
+ *
+ * Returns: GstcStatus indicating success, daemon unreachable, daemon timeout,
+ * bad pipeline name, out of memory
+ */
+GstcStatus gstc_pipeline_flush_stop(const GstClient *client, const char *pipeline_name,
+  const int reset);
 
 /**
  * gstc_pipeline_inject_eos:
