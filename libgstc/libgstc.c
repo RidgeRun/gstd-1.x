@@ -470,6 +470,39 @@ gstc_pipeline_flush_stop (const GstClient * client, const char *pipeline_name,
 }
 
 GstcStatus
+gstc_element_properties_list (const GstClient * client,
+    const char *pipeline_name, char *element, char **properties[],
+    int *list_lenght)
+{
+  GstcStatus ret;
+  char *response;
+  char *what;
+  const char *what_fmt = "/pipelines/%s/elements/%s/properties";
+
+  gstc_assert_and_ret_val (NULL != client, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != pipeline_name, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != element, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != properties, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != list_lenght, GSTC_NULL_ARGUMENT);
+
+  asprintf (&what, what_fmt, pipeline_name, element);
+
+  ret = gstc_cmd_read (client, what, &response);
+  if (GSTC_OK != ret) {
+    goto out;
+  }
+
+  ret = gstc_json_get_child_char_array (response, "response", "nodes",
+      "name", properties, list_lenght);
+
+  free (response);
+
+out:
+  free (what);
+  return ret;
+}
+
+GstcStatus
 gstc_pipeline_inject_eos (GstClient * client, const char *pipeline_name)
 {
   GstcStatus ret;
