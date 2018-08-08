@@ -19,7 +19,8 @@ TESTS = 				\
 	libgstc_debug			\
 	libgstc_pipeline_list_elements	\
 	libgstc_pipeline_list 		\
-	libgstc_pipeline_list_properties
+	libgstc_pipeline_list_properties\
+	libgstc_pipeline_element_get
 
 check_PROGRAMS = $(TESTS)
 
@@ -133,3 +134,8 @@ libgstc_pipeline_list_properties_SOURCES = 	\
 	test_libgstc_pipeline_list_properties.c	\
 	@top_srcdir@/libgstc/libgstc.c		\
 	$(COMMON_SOURCES)
+
+libgstc_pipeline_element_get_SOURCES =		\
+	test_libgstc_element_get.c		\
+	$(top_srcdir)/libgstc/libgstc.c		\
+		$(COMMON_SOURCES)

@@ -20,6 +20,7 @@
 
 #include "libgstc.h"
 #include "libgstc_socket.h"
+#include "libgstc_assert.h"
 
 /* Mock implementation of a socket */
 typedef struct _GstcSocket
@@ -74,6 +75,23 @@ gstc_json_get_child_char_array (const char *json, const char *parent_name,
     const char *array_name, const char *element_name, char **out[],
     int *array_lenght)
 {
+  gstc_assert_and_ret_val (NULL != json, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != parent_name, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != array_name, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != element_name, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != out, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != array_lenght, GSTC_NULL_ARGUMENT);
+  return GSTC_OK;
+}
+
+gstc_json_child_string (const char *json, const char *parent_name,
+    const char *data_name, char **out)
+{
+  gstc_assert_and_ret_val (NULL != json, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != parent_name, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != data_name, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != out, GSTC_NULL_ARGUMENT);
+
   return GSTC_OK;
 }
 

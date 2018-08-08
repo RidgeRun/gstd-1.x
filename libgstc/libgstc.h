@@ -272,6 +272,25 @@ GstcStatus
 gstc_pipeline_stop(GstClient *client, const char *pipeline_name);
 
 /**
+ * gstc_element_get:
+ * @client: The client returned by gstc_client_new()
+ * @pname: Name associated with the pipeline
+ * @element: Element name to be queried
+ * @property: Parameter name to be queried
+ * @format: sscanf style format string to turn the string representation of the
+ * value into the datatype expected by the application
+ * @...: One or more pointer arguments corresponding to the properly (after type
+ *  promotion) matching conversion specifier in format.
+ *
+ * Retrieves the current value of the specified element property.
+ *
+ * Returns: GstcStatus indicating success, daemon unreachable, daemon timeout,
+ * bad pipeline name, bad element name, out of memory
+ */
+GstcStatus gstc_element_get (GstClient *client, const char *pname,
+  const char *element, const char *property, const char *format, ...);
+
+/**
  * gstc_element_set:
  * @client: The client returned by gstc_client_new()
  * @pipeline_name: Name assoicated with the pipeline

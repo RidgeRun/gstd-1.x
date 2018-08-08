@@ -57,3 +57,19 @@ gstc_json_is_null (const char * json, const char * name, int * out);
 GstcStatus
 gstc_json_get_child_char_array(const char *json, const char* parent_name,
   const char* array_name, const char *element_name, char **out[], int *array_lenght);
+
+  /**
+   * gstc_json_child_string:
+   * @json: Json as a cstring with the data to be searched for
+   * @parent_name: element name that is parent to the string
+   * @data_name: name of the string
+   * @out: pointer to output string memory, this memory should be freed by the user
+   *
+   * Returns string that has data_name and its parent is parent_name
+   *
+   * Returns: GstcStatus indicating success, null argument, type error,
+   * malformed string, unfound element
+   */
+  GstcStatus
+  gstc_json_child_string (const char * json, const char * parent_name,
+    const char * data_name, char ** out); 

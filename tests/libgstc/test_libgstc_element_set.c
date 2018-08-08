@@ -22,6 +22,7 @@
 #include "libgstc.h"
 #include "libgstc_json.h"
 #include "libgstc_socket.h"
+#include "libgstc_assert.h"
 
 /* Test Fixture */
 static gchar _request[512];
@@ -94,6 +95,18 @@ gstc_json_get_child_char_array (const char *json, const char *parent_name,
     const char *array_name, const char *element_name, char **out[],
     int *array_lenght)
 {
+  return GSTC_OK;
+}
+
+GstcStatus
+gstc_json_child_string (const char * json, const char * parent_name,
+  const char * data_name, char ** out)
+{
+  gstc_assert_and_ret_val (NULL != json, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != parent_name, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != data_name, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != out, GSTC_NULL_ARGUMENT);
+  
   return GSTC_OK;
 }
 
