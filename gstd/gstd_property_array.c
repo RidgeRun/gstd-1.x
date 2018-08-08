@@ -84,6 +84,7 @@ gstd_property_array_add_value (GstdProperty * self, GstdIFormatter * formatter,
     g_value_set_float (&val, fvalue);
     gstd_iformatter_set_value (formatter, &val);
   }
+  g_value_unset (&val);
   gstd_iformatter_end_array (formatter);
 }
 
@@ -137,6 +138,7 @@ gstd_property_array_update (GstdObject * object, const gchar * value)
 
 out:
   {
+    g_free (tokens);
     return ret;
   }
 }
