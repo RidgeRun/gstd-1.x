@@ -56,6 +56,7 @@ tests/libgstc/libgstc_pipeline_list
 tests/libgstc/libgstc_debug
 tests/libgstc/libgstc_pipeline_list_elements
 tests/libgstc/libgstc_pipeline_list_properties
+tests/libgstc/libgstc_pipeline_element_get
 
 # Examples
 examples/libgstc/simple_pipeline

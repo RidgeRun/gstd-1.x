@@ -204,3 +204,48 @@ clear_mem:
   return ret;
 
 }
+
+GstcStatus
+gstc_json_child_string (const char *json, const char *parent_name,
+    const char *data_name, char **out)
+{
+  GstcStatus ret;
+  json_t *root;
+  json_t *parent;
+  json_t *data;
+  const char *tmp_string;
+  
+  gstc_assert_and_ret_val (json != NULL, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (parent_name != NULL, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (data_name != NULL, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (out != NULL, GSTC_NULL_ARGUMENT);
+  
+  ret = gstc_json_get_value (json, parent_name, &root, &parent);
+  if (GSTC_OK != ret) {
+    goto out;
+  }
+  
+  data = json_object_get (parent, data_name);
+  if (data == NULL) {
+    ret = GSTC_NOT_FOUND;
+    goto unref;
+  }
+  
+  if (!json_is_string (data)) {
+    ret = GSTC_TYPE_ERROR;
+    goto unref;
+  }
+  
+  tmp_string = json_string_value (data);
+  /* Allocate memory for output */
+  *out = malloc ((strlen (tmp_string) + 1) * sizeof (char));
+  strncpy (*out, tmp_string, strlen (tmp_string));
+  /* Ensure traling null byte is copied */
+  (*out)[strlen (tmp_string)] = '\0';
+  ret = GSTC_OK;
+  
+unref:
+  json_decref (root);
+out:
+  return ret;
+}

@@ -401,6 +401,50 @@ gstc_client_debug (GstClient * client, const char *threshold, const int colors)
 }
 
 GstcStatus
+gstc_element_get (GstClient * client, const char *pname,
+    const char *element, const char *property, const char *format, ...)
+{
+  GstcStatus ret;
+  va_list ap;
+  const char *what_fmt = "/pipelines/%s/elements/%s/properties/%s";
+  char *what;
+  char *response;
+  char *out;
+
+  gstc_assert_and_ret_val (client != NULL, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (pname != NULL, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (element != NULL, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (property != NULL, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (format != NULL, GSTC_NULL_ARGUMENT);
+
+  va_start (ap, format);
+
+  asprintf (&what, what_fmt, pname, element, property);
+
+  ret = gstc_cmd_read (client, what, &response, client->timeout);
+  if (ret != GSTC_OK) {
+    goto unref;
+  }
+
+  ret = gstc_json_child_string (response, "response", "value", &out);
+  if (ret != GSTC_OK) {
+    goto unref_response;
+  }
+
+  vsscanf (out, format, ap);
+
+  free (out);
+
+unref_response:
+  free (response);
+
+unref:
+  free (what);
+  va_end (ap);
+  return GSTC_OK;
+}
+
+GstcStatus
 gstc_element_set (GstClient * client, const char *pname,
     const char *element, const char *parameter, const char *format, ...)
 {
