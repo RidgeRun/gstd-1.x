@@ -16,11 +16,21 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA
  */
+#include <arpa/inet.h>
 #include <gst/check/gstcheck.h>
 #include <gio/gio.h>
+#include <sys/socket.h>
 
 #include "libgstc.h"
 #include "libgstc_socket.h"
+
+struct _GstcSocket
+{
+  int socket;
+  struct sockaddr_in server;
+  unsigned long wait_time;
+  int keep_connection_open;
+};
 
 /* Mock implementation of gstd */
 GMainLoop *_loop;
@@ -146,7 +156,7 @@ teardown ()
   mock_server_free ();
 }
 
-GST_START_TEST (test_socket_success)
+GST_START_TEST (test_socket_success_keep_open)
 {
   GstcSocket *socket;
   GstcStatus ret;
@@ -228,6 +238,51 @@ GST_START_TEST (test_socket_timeout_reached)
   g_free (response);
   gstc_socket_free (socket);
   socket_delay = 0;
+}
+
+GST_END_TEST;
+
+GST_START_TEST (test_socket_success_keep_closed)
+{
+  GstcSocket *gstc_socket;
+  GstcStatus ret;
+  const gchar *address = "127.0.0.1";
+  const gint port = 54321;
+  const long wait_time = -1;
+  const gint keep_open = FALSE;
+  const gchar *request = "ping";
+  const gchar *expected = "pong";
+  gchar *response;
+  int socket_errno;
+
+  ret = gstc_socket_new (address, port, keep_open, &gstc_socket);
+  assert_equals_int (GSTC_OK, ret);
+  fail_if (NULL == gstc_socket);
+
+  /* Attempt new connection,if it remained open it will fail */
+  gstc_socket->socket = socket (AF_INET, SOCK_STREAM, 0);
+  socket_errno =
+      connect (gstc_socket->socket, (struct sockaddr *) &gstc_socket->server,
+      sizeof (gstc_socket->server));
+  fail_if (0 != socket_errno);
+  close (gstc_socket->socket);
+
+  _mock_expected = expected;
+  ret = gstc_socket_send (gstc_socket, request, &response, wait_time);
+
+  /* Attempt new connection,if it remained open it will fail */
+  gstc_socket->socket = socket (AF_INET, SOCK_STREAM, 0);
+  socket_errno =
+      connect (gstc_socket->socket, (struct sockaddr *) &gstc_socket->server,
+      sizeof (gstc_socket->server));
+  fail_if (0 != socket_errno);
+  close (gstc_socket->socket);
+
+  assert_equals_int (GSTC_OK, ret);
+  assert_equals_string (expected, response);
+
+  g_free (response);
+  gstc_socket_free (gstc_socket);
 }
 
 GST_END_TEST;
@@ -392,9 +447,10 @@ libgstc_client_suite (void)
   suite_add_tcase (suite, tc);
 
   tcase_add_checked_fixture (tc, setup, teardown);
-  tcase_add_test (tc, test_socket_success);
   tcase_add_test (tc, test_socket_timeout_reached);
   tcase_add_test (tc, test_socket_timeout_sucess);
+  tcase_add_test (tc, test_socket_success_keep_open);
+  tcase_add_test (tc, test_socket_success_keep_closed);
   tcase_add_test (tc, test_socket_persistent);
   tcase_add_test (tc, test_socket_oom);
   tcase_add_test (tc, test_socket_unreachable);

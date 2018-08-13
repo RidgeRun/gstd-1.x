@@ -45,11 +45,43 @@
 #  define GSTC_MAX_RESPONSE_LENGTH 4096
 #endif
 
+static int create_new_socket ();
+static GstcStatus open_socket(GstcSocket *self);
+
 struct _GstcSocket
 {
   int socket;
   struct sockaddr_in server;
+  int keep_connection_open;
 };
+
+static int
+create_new_socket ()
+{
+  const int domain = AF_INET;
+  const int type = SOCK_STREAM;
+  const int proto = 0;
+
+  return socket (domain, type, proto);
+}
+
+static GstcStatus
+open_socket(GstcSocket *self)
+{
+  gstc_assert_and_ret_val (NULL != self, GSTC_NULL_ARGUMENT);
+
+  self->socket = create_new_socket ();
+  if (-1 == self->socket) {
+    return GSTC_SOCKET_ERROR;
+  }
+
+  if (connect (self->socket, (struct sockaddr *) &self->server,
+          sizeof (self->server)) < 0) {
+    close (self->socket);
+    return GSTC_UNREACHABLE;
+  }
+  return GSTC_OK;
+}
 
 GstcStatus
 gstc_socket_new (const char *address, const unsigned int port,
@@ -58,8 +90,6 @@ gstc_socket_new (const char *address, const unsigned int port,
   GstcStatus ret;
   GstcSocket *self;
   const int domain = AF_INET;
-  const int type = SOCK_STREAM;
-  const int proto = 0;
 
   gstc_assert_and_ret_val (NULL != address, GSTC_NULL_ARGUMENT);
   gstc_assert_and_ret_val (NULL != out, GSTC_NULL_ARGUMENT);
@@ -72,28 +102,22 @@ gstc_socket_new (const char *address, const unsigned int port,
     goto out;
   }
 
-  self->socket = socket (domain, type, proto);
-  if (-1 == self->socket) {
-    ret = GSTC_SOCKET_ERROR;
-    goto free_self;
-  }
-
+  self->keep_connection_open = keep_connection_open;
+  
   self->server.sin_addr.s_addr = inet_addr (address);
   self->server.sin_family = domain;
   self->server.sin_port = htons (port);
 
-  if (connect (self->socket, (struct sockaddr *) &self->server,
-          sizeof (self->server)) < 0) {
-    ret = GSTC_UNREACHABLE;
-    goto close_socket;
+  if (self->keep_connection_open) {
+    ret = open_socket(self);
+    if (ret != GSTC_OK) {
+      goto free_self;
+    }
   }
 
   ret = GSTC_OK;
   *out = self;
   goto out;
-
-close_socket:
-  close (self->socket);
 
 free_self:
   free (self);
@@ -110,13 +134,22 @@ gstc_socket_send (GstcSocket * self, const char *request, char **response,
   int rv;
   const int number_of_sockets = 1;
   struct pollfd ufds[number_of_sockets];
+  GstcStatus ret;
 
   gstc_assert_and_ret_val (NULL != self, GSTC_NULL_ARGUMENT);
   gstc_assert_and_ret_val (NULL != request, GSTC_NULL_ARGUMENT);
   gstc_assert_and_ret_val (NULL != response, GSTC_NULL_ARGUMENT);
 
+  if (!self->keep_connection_open) {
+    ret = open_socket(self);
+    if (ret != GSTC_OK) {
+      goto out;
+    }
+  }
+
   if (send (self->socket, request, strlen (request), 0) < 0) {
-    return GSTC_SEND_ERROR;
+    ret = GSTC_SEND_ERROR;
+    goto out;
   }
 
   *response = malloc (GSTC_MAX_RESPONSE_LENGTH);
@@ -144,7 +177,14 @@ gstc_socket_send (GstcSocket * self, const char *request, char **response,
     }
   }
 
-  return GSTC_OK;
+  ret = GSTC_OK;
+
+out:
+  if (!self->keep_connection_open) {
+    close (self->socket);
+  }
+
+  return ret;
 }
 
 void
@@ -152,6 +192,8 @@ gstc_socket_free (GstcSocket * socket)
 {
   gstc_assert_and_ret (NULL != socket);
 
-  close (socket->socket);
+  if (socket->keep_connection_open) {
+    close (socket->socket);
+  }
   free (socket);
 }
