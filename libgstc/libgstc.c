@@ -511,6 +511,39 @@ gstc_pipeline_seek(const GstClient *client, const char *pipeline_name,
   return ret;
 }
 
+GstcStatus
+gstc_pipeline_list_elements (const GstClient * client,
+    const char *pipeline_name, char **elements[], int *list_lenght)
+{
+  GstcStatus ret;
+  char *response;
+  char *what;
+  const char *what_fmt = "/pipelines/%s/elements/";
+
+  gstc_assert_and_ret_val (NULL != client, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != pipeline_name, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != elements, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != list_lenght, GSTC_NULL_ARGUMENT);
+
+  asprintf (&what, what_fmt, pipeline_name);
+
+  ret = gstc_cmd_read (client, what, &response);
+  if (GSTC_OK != ret) {
+    goto out;
+  }
+
+  ret =
+      gstc_json_get_child_char_array (response, "response", "nodes", "name",
+      elements, list_lenght);
+
+  free (response);
+
+out:
+  free (what);
+
+  return ret;
+}
+
 static void *
 gstc_bus_thread (void *user_data)
 {

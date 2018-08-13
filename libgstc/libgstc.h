@@ -375,6 +375,25 @@ GstcStatus gstc_pipeline_seek(const GstClient *client, const char *pname,
     double rate, int format, int flags, int start_type, long long start,
     int stop_type, long long stop);
 
+
+/**
+ * Configures playback of the pipeline between @start to @stop at the speed
+ * given in @rate.  Effectively causes gstd to invoke gst_element_seek().
+ * gstc_pipeline_list_elements:
+ * @client: The client returned by gstc_client_new()
+ * @pipeline_name: Name associated with the pipeline
+ * @elements: List of elements in the specified pipelines returned by the
+ * client library
+ *
+ * Returns a list of pipeline elements.  The client application needs
+ * to do a free(*elements) to release the resources used to hold the list.
+ *
+ * Returns: GstcStatus indicating success, daemon unreachable, daemon timeout,
+ * bad pipeline name, out of memory
+ */
+GstcStatus gstc_pipeline_list_elements(const GstClient *client, const char *pipeline_name,
+ char **elements[], int* list_lenght);
+
 /**
  * GstcPipelineBusWaitCallback:
  * @client: The client returned by gstc_client_new()
