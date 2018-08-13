@@ -54,6 +54,7 @@ tests/libgstc/libgstc_pipeline_flush_start
 tests/libgstc/libgstc_pipeline_flush_stop
 tests/libgstc/libgstc_pipeline_list
 tests/libgstc/libgstc_debug
+tests/libgstc/libgstc_pipeline_list_elements
 
 # Examples
 examples/libgstc/simple_pipeline
