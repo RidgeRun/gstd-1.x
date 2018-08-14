@@ -117,7 +117,8 @@ typedef enum
   GSTC_RECV_ERROR,
   GSTC_SOCKET_ERROR,
   GSTC_THREAD_ERROR,
-  GSTC_BUS_TIMEOUT
+  GSTC_BUS_TIMEOUT,
+  GSTC_SOCKET_TIMEOUT
 } GstcStatus;
 
 /**
@@ -130,9 +131,9 @@ typedef struct _GstClient GstClient;
  * gstc_client_new:
  * @address: The address to bind to
  * @port: The port to bind to
- * @wait_time: time to wait for a response from the daemon before
- * returning an error, applies to all non-blocking gstc_* methods.
- * Zero means wait forever.
+ * @wait_time: time to wait in milliseconds for a response from the daemon
+ * before returning an error, applies to all non-blocking gstc_* methods.
+ * Zero returns immediately and negative means wait forever.
  * @keep_connection_open: if non-zero the underlying network socket
  * will be kept open until gstc_client_free() is called
  * @client: placeholder for newly allocated client.
@@ -147,7 +148,7 @@ typedef struct _GstClient GstClient;
  * memory.
  */
 GstcStatus gstc_client_new (const char *address, const unsigned int port,
-    const unsigned long wait_time, const int keep_connection_open, GstClient ** client);
+    const int wait_time, const int keep_connection_open, GstClient ** client);
 
 /**
  * gstc_client_free:
@@ -310,7 +311,7 @@ GstcStatus gstc_element_set(GstClient *client, const char *pname,
  * Returns: GstcStatus indicating success, daemon unreachable, daemon timeout,
  * bad pipeline name, out of memory
  */
-GstcStatus gstc_element_properties_list(const GstClient *client,
+GstcStatus gstc_element_properties_list(GstClient *client,
   const char *pipeline_name, char *element, char **properties[], int *list_lenght);
 
 /**
@@ -323,7 +324,7 @@ GstcStatus gstc_element_properties_list(const GstClient *client,
  * bad pipeline name, out of memory
  *
  */
-GstcStatus gstc_pipeline_flush_start(const GstClient *client, const char *pipeline_name);
+GstcStatus gstc_pipeline_flush_start(GstClient *client, const char *pipeline_name);
 
 /**
  * gstc_pipeline_flush_stop:
@@ -336,7 +337,7 @@ GstcStatus gstc_pipeline_flush_start(const GstClient *client, const char *pipeli
  * Returns: GstcStatus indicating success, daemon unreachable, daemon timeout,
  * bad pipeline name, out of memory
  */
-GstcStatus gstc_pipeline_flush_stop(const GstClient *client, const char *pipeline_name,
+GstcStatus gstc_pipeline_flush_stop(GstClient *client, const char *pipeline_name,
   const int reset);
 
 /**
@@ -392,7 +393,7 @@ GstcStatus gstc_pipeline_inject_eos (GstClient *client,
  * Returns: GstcStatus indicating success, daemon unreachable, daemon timeout,
  * bad pipeline name, out of memory
  */
-GstcStatus gstc_pipeline_seek(const GstClient *client, const char *pname,
+GstcStatus gstc_pipeline_seek(GstClient *client, const char *pname,
     double rate, int format, int flags, int start_type, long long start,
     int stop_type, long long stop);
 
@@ -412,7 +413,7 @@ GstcStatus gstc_pipeline_seek(const GstClient *client, const char *pname,
  * Returns: GstcStatus indicating success, daemon unreachable, daemon timeout,
  * bad pipeline name, out of memory
  */
-GstcStatus gstc_pipeline_list_elements(const GstClient *client, const char *pipeline_name,
+GstcStatus gstc_pipeline_list_elements(GstClient *client, const char *pipeline_name,
  char **elements[], int* list_lenght);
 
 /**

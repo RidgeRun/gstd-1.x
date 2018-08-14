@@ -52,9 +52,7 @@ typedef struct _GstcSocket
 GstcSocket _socket;
 
 GstcStatus
-gstc_socket_new (const char *address, const unsigned int port,
-    const unsigned long wait_time, const int keep_connection_open,
-    GstcSocket ** out)
+gstc_socket_new (const char *address, const unsigned int port, const int keep_connection_open, GstcSocket ** out)
 {
   *out = &_socket;
 
@@ -67,7 +65,8 @@ gstc_socket_free (GstcSocket * socket)
 }
 
 GstcStatus
-gstc_socket_send (GstcSocket * socket, const gchar * request, gchar ** response)
+gstc_socket_send (GstcSocket * socket, const gchar * request, gchar ** response,
+    const int timeout)
 {
   *response = malloc (1);
 

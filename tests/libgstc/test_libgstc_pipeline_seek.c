@@ -54,12 +54,11 @@ GstcSocket _socket;
 
 GstcStatus
 gstc_socket_new (const char *address, const unsigned int port,
-    const unsigned long wait_time, const int keep_connection_open,
-    GstcSocket ** out)
+    const int keep_connection_open, GstcSocket ** out)
 {
   gstc_assert_and_ret_val (NULL != address, GSTC_NULL_ARGUMENT);
   gstc_assert_and_ret_val (NULL != out, GSTC_NULL_ARGUMENT);
-  
+
   *out = &_socket;
 
   return GSTC_OK;
@@ -71,12 +70,13 @@ gstc_socket_free (GstcSocket * socket)
 }
 
 GstcStatus
-gstc_socket_send (GstcSocket * socket, const gchar * request, gchar ** response)
+gstc_socket_send (GstcSocket * socket, const gchar * request, gchar ** response,
+    const int timeout)
 {
   gstc_assert_and_ret_val (NULL != socket, GSTC_NULL_ARGUMENT);
   gstc_assert_and_ret_val (NULL != request, GSTC_NULL_ARGUMENT);
   gstc_assert_and_ret_val (NULL != response, GSTC_NULL_ARGUMENT);
-  
+
   *response = malloc (1);
 
   memcpy (_request, request, strlen (request));
@@ -90,7 +90,7 @@ gstc_json_get_int (const gchar * json, const gchar * name, gint * out)
   gstc_assert_and_ret_val (NULL != json, GSTC_NULL_ARGUMENT);
   gstc_assert_and_ret_val (NULL != name, GSTC_NULL_ARGUMENT);
   gstc_assert_and_ret_val (NULL != out, GSTC_NULL_ARGUMENT);
-  
+
   return *out = GSTC_OK;
 }
 
@@ -100,14 +100,15 @@ gstc_json_is_null (const gchar * json, const gchar * name, gint * out)
   gstc_assert_and_ret_val (NULL != json, GSTC_NULL_ARGUMENT);
   gstc_assert_and_ret_val (NULL != name, GSTC_NULL_ARGUMENT);
   gstc_assert_and_ret_val (NULL != out, GSTC_NULL_ARGUMENT);
-  
+
   *out = 0;
   return GSTC_OK;
 }
 
 GstcStatus
-gstc_json_get_child_char_array(const char *json, const char* parent_name,
-  const char* array_name, const char *element_name, char **out[], int *array_lenght)
+gstc_json_get_child_char_array (const char *json, const char *parent_name,
+    const char *array_name, const char *element_name, char **out[],
+    int *array_lenght)
 {
   gstc_assert_and_ret_val (NULL != json, GSTC_NULL_ARGUMENT);
   gstc_assert_and_ret_val (NULL != parent_name, GSTC_NULL_ARGUMENT);
@@ -115,7 +116,7 @@ gstc_json_get_child_char_array(const char *json, const char* parent_name,
   gstc_assert_and_ret_val (NULL != element_name, GSTC_NULL_ARGUMENT);
   gstc_assert_and_ret_val (NULL != out, GSTC_NULL_ARGUMENT);
   gstc_assert_and_ret_val (NULL != array_lenght, GSTC_NULL_ARGUMENT);
-    
+
   return GSTC_OK;
 }
 
@@ -130,9 +131,12 @@ GST_START_TEST (test_seek_success)
   const long long start = 0;
   const int end_type = 1;
   const long long end = 9999;
-  const gchar *expected = "create /pipelines/pipe/event seek 1.000000 3 1 1 0 1 9999";
-  
-  ret = gstc_pipeline_seek (_client, pipe_name, rate, format, flags, start_type, start, end_type, end);
+  const gchar *expected =
+      "create /pipelines/pipe/event seek 1.000000 3 1 1 0 1 9999";
+
+  ret =
+      gstc_pipeline_seek (_client, pipe_name, rate, format, flags, start_type,
+      start, end_type, end);
   assert_equals_int (GSTC_OK, ret);
 
   assert_equals_string (expected, _request);
@@ -151,8 +155,10 @@ GST_START_TEST (test_null_client)
   const long long start = 0;
   const int end_type = 1;
   const long long end = 9999;
-  
-  ret = gstc_pipeline_seek (NULL, pipe_name, rate, format, flags, start_type, start, end_type, end);
+
+  ret =
+      gstc_pipeline_seek (NULL, pipe_name, rate, format, flags, start_type,
+      start, end_type, end);
   assert_equals_int (GSTC_NULL_ARGUMENT, ret);
 }
 
@@ -168,8 +174,10 @@ GST_START_TEST (test_null_pipe_name)
   const long long start = 0;
   const int end_type = 1;
   const long long end = 9999;
-  
-  ret = gstc_pipeline_seek (_client, NULL, rate, format, flags, start_type, start, end_type, end);
+
+  ret =
+      gstc_pipeline_seek (_client, NULL, rate, format, flags, start_type, start,
+      end_type, end);
   assert_equals_int (GSTC_NULL_ARGUMENT, ret);
 }
 
