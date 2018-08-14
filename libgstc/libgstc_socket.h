@@ -43,13 +43,11 @@ extern "C"
 typedef struct _GstcSocket GstcSocket;
 
 GstcStatus
-gstc_socket_new (const char *address, const unsigned int port,
-    const unsigned long wait_time, const int keep_connection_open,
-    GstcSocket ** socket);
+gstc_socket_new (const char *address, const unsigned int port, const int keep_connection_open, GstcSocket ** socket);
 
 GstcStatus
 gstc_socket_send (GstcSocket *socket, const char *request,
-    char ** response);
+    char ** response, const int timeout);
 
 void
 gstc_socket_free (GstcSocket *socket);

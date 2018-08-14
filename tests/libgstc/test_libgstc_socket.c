@@ -27,6 +27,7 @@ GMainLoop *_loop;
 GSocketService *_mock_server;
 GThread *_mock_thread;
 const gchar *_mock_expected;
+long socket_delay;
 
 static gboolean
 mock_server_cb (GSocketService * service, GSocketConnection * connection,
@@ -50,6 +51,7 @@ mock_server_cb (GSocketService * service, GSocketConnection * connection,
     }
 
     fail_if (NULL == _mock_expected);
+    usleep (socket_delay * 1000);
 
     count = g_output_stream_write (ostream,
         _mock_expected, strlen (_mock_expected) + 1, NULL, &error);
@@ -133,6 +135,7 @@ mock_malloc (gsize size)
 void
 setup ()
 {
+  socket_delay = 0;
   _mock_malloc_oom = FALSE;
   mock_server_new ();
 }
@@ -149,18 +152,18 @@ GST_START_TEST (test_socket_success)
   GstcStatus ret;
   const gchar *address = "127.0.0.1";
   const gint port = 54321;
-  const unsigned long wait_time = 0;
+  const int timeout = -1;
   const gint keep_open = TRUE;
   const gchar *request = "ping";
   const gchar *expected = "pong";
   gchar *response;
 
-  ret = gstc_socket_new (address, port, wait_time, keep_open, &socket);
+  ret = gstc_socket_new (address, port, keep_open, &socket);
   assert_equals_int (GSTC_OK, ret);
   fail_if (NULL == socket);
 
   _mock_expected = expected;
-  ret = gstc_socket_send (socket, request, &response);
+  ret = gstc_socket_send (socket, request, &response, timeout);
 
   assert_equals_int (GSTC_OK, ret);
   assert_equals_string (expected, response);
@@ -171,24 +174,82 @@ GST_START_TEST (test_socket_success)
 
 GST_END_TEST;
 
+GST_START_TEST (test_socket_timeout_sucess)
+{
+  GstcSocket *socket;
+  GstcStatus ret;
+  const gchar *address = "127.0.0.1";
+  const gint port = 54321;
+  const int timeout = 150;
+  const gint keep_open = TRUE;
+  const gchar *request = "ping";
+  const gchar *expected = "pong";
+  gchar *response;
+  socket_delay = 100;
+
+  ret = gstc_socket_new (address, port, keep_open, &socket);
+  assert_equals_int (GSTC_OK, ret);
+  fail_if (NULL == socket);
+
+  _mock_expected = expected;
+  ret = gstc_socket_send (socket, request, &response, timeout);
+
+  assert_equals_int (GSTC_OK, ret);
+  assert_equals_string (expected, response);
+
+  g_free (response);
+  gstc_socket_free (socket);
+  socket_delay = 0;
+}
+
+GST_END_TEST;
+
+GST_START_TEST (test_socket_timeout_reached)
+{
+  GstcSocket *socket;
+  GstcStatus ret;
+  const gchar *address = "127.0.0.1";
+  const gint port = 54321;
+  const int timeout = 50;
+  const gint keep_open = TRUE;
+  const gchar *request = "ping";
+  const gchar *expected = "pong";
+  gchar *response;
+  socket_delay = 100;
+
+  ret = gstc_socket_new (address, port, keep_open, &socket);
+  assert_equals_int (GSTC_OK, ret);
+  fail_if (NULL == socket);
+
+  _mock_expected = expected;
+  ret = gstc_socket_send (socket, request, &response, timeout);
+  assert_equals_int (GSTC_SOCKET_TIMEOUT, ret);
+
+  g_free (response);
+  gstc_socket_free (socket);
+  socket_delay = 0;
+}
+
+GST_END_TEST;
+
 GST_START_TEST (test_socket_persistent)
 {
   GstcSocket *socket;
   GstcStatus ret;
   const gchar *address = "127.0.0.1";
   const gint port = 54321;
-  const unsigned long wait_time = 0;
+  const int timeout = -1;
   const gint keep_open = TRUE;
   const gchar *request = "ping";
   const gchar *expected = "pong";
   gchar *response;
 
-  ret = gstc_socket_new (address, port, wait_time, keep_open, &socket);
+  ret = gstc_socket_new (address, port, keep_open, &socket);
   assert_equals_int (GSTC_OK, ret);
   fail_if (NULL == socket);
 
   _mock_expected = expected;
-  ret = gstc_socket_send (socket, request, &response);
+  ret = gstc_socket_send (socket, request, &response, timeout);
 
   assert_equals_int (GSTC_OK, ret);
   assert_equals_string (expected, response);
@@ -196,7 +257,7 @@ GST_START_TEST (test_socket_persistent)
   g_free (response);
   _mock_expected = expected = "ping";
   request = "ping";
-  ret = gstc_socket_send (socket, request, &response);
+  ret = gstc_socket_send (socket, request, &response, timeout);
 
   assert_equals_int (GSTC_OK, ret);
   assert_equals_string (expected, response);
@@ -213,12 +274,11 @@ GST_START_TEST (test_socket_oom)
   GstcStatus ret;
   const gchar *address = "127.0.0.1";
   const gint port = 54321;
-  const unsigned long wait_time = 0;
   const gint keep_open = TRUE;
 
   _mock_malloc_oom = TRUE;
 
-  ret = gstc_socket_new (address, port, wait_time, keep_open, &socket);
+  ret = gstc_socket_new (address, port, keep_open, &socket);
   assert_equals_int (GSTC_OOM, ret);
   assert_equals_pointer (NULL, socket);
 }
@@ -231,10 +291,9 @@ GST_START_TEST (test_socket_unreachable)
   GstcStatus ret;
   const gchar *address = "500.0.0.1";   /* Note the invalid IP */
   const gint port = 54321;
-  const unsigned long wait_time = 0;
   const gint keep_open = TRUE;
 
-  ret = gstc_socket_new (address, port, wait_time, keep_open, &socket);
+  ret = gstc_socket_new (address, port, keep_open, &socket);
   assert_equals_int (GSTC_UNREACHABLE, ret);
   assert_equals_pointer (NULL, socket);
 }
@@ -247,10 +306,9 @@ GST_START_TEST (test_socket_null_address)
   GstcStatus ret;
   const gchar *address = NULL;
   const gint port = 54321;
-  const unsigned long wait_time = 0;
   const gint keep_open = TRUE;
 
-  ret = gstc_socket_new (address, port, wait_time, keep_open, &socket);
+  ret = gstc_socket_new (address, port, keep_open, &socket);
   assert_equals_int (GSTC_NULL_ARGUMENT, ret);
 }
 
@@ -261,10 +319,9 @@ GST_START_TEST (test_socket_null_placeholder)
   GstcStatus ret;
   const gchar *address = "127.0.0.1";
   const gint port = 54321;
-  const unsigned long wait_time = 0;
   const gint keep_open = TRUE;
 
-  ret = gstc_socket_new (address, port, wait_time, keep_open, NULL);
+  ret = gstc_socket_new (address, port, keep_open, NULL);
   assert_equals_int (GSTC_NULL_ARGUMENT, ret);
 }
 
@@ -274,9 +331,10 @@ GST_START_TEST (test_socket_null_socket)
 {
   GstcStatus ret;
   const gchar *request = "ping";
+  const int timeout = -1;
   gchar *response;
 
-  ret = gstc_socket_send (NULL, request, &response);
+  ret = gstc_socket_send (NULL, request, &response, timeout);
   assert_equals_int (GSTC_NULL_ARGUMENT, ret);
 }
 
@@ -288,15 +346,15 @@ GST_START_TEST (test_socket_null_request)
   GstcStatus ret;
   const gchar *address = "127.0.0.1";
   const gint port = 54321;
-  const unsigned long wait_time = 0;
+  const int timeout = -1;
   const gint keep_open = TRUE;
   const gchar *request = NULL;
   gchar *response;
 
-  ret = gstc_socket_new (address, port, wait_time, keep_open, &socket);
+  ret = gstc_socket_new (address, port, keep_open, &socket);
   assert_equals_int (GSTC_OK, ret);
 
-  ret = gstc_socket_send (socket, request, &response);
+  ret = gstc_socket_send (socket, request, &response, timeout);
   assert_equals_int (GSTC_NULL_ARGUMENT, ret);
 
   gstc_socket_free (socket);
@@ -310,14 +368,14 @@ GST_START_TEST (test_socket_null_resp_placeholder)
   GstcStatus ret;
   const gchar *address = "127.0.0.1";
   const gint port = 54321;
-  const unsigned long wait_time = 0;
+  const int timeout = -1;
   const gint keep_open = TRUE;
   const gchar *request = "ping";
 
-  ret = gstc_socket_new (address, port, wait_time, keep_open, &socket);
+  ret = gstc_socket_new (address, port, keep_open, &socket);
   assert_equals_int (GSTC_OK, ret);
 
-  ret = gstc_socket_send (socket, request, NULL);
+  ret = gstc_socket_send (socket, request, NULL, timeout);
   assert_equals_int (GSTC_NULL_ARGUMENT, ret);
 
   gstc_socket_free (socket);
@@ -335,6 +393,8 @@ libgstc_client_suite (void)
 
   tcase_add_checked_fixture (tc, setup, teardown);
   tcase_add_test (tc, test_socket_success);
+  tcase_add_test (tc, test_socket_timeout_reached);
+  tcase_add_test (tc, test_socket_timeout_sucess);
   tcase_add_test (tc, test_socket_persistent);
   tcase_add_test (tc, test_socket_oom);
   tcase_add_test (tc, test_socket_unreachable);

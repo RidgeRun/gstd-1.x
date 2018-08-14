@@ -53,7 +53,7 @@ main (int argc, char *argv[])
   GstcStatus ret;
   const char *address = "127.0.0.1";
   const unsigned int port = 5000;
-  const unsigned long wait_time = 0;
+  const long wait_time = -1;
   const int keep_open = 1;
   int format = 0;
 

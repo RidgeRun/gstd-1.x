@@ -31,6 +31,7 @@
  */
 
 #include <arpa/inet.h>
+#include <poll.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/socket.h>
@@ -52,8 +53,7 @@ struct _GstcSocket
 
 GstcStatus
 gstc_socket_new (const char *address, const unsigned int port,
-    const unsigned long wait_time, const int keep_connection_open,
-    GstcSocket ** out)
+    const int keep_connection_open, GstcSocket ** out)
 {
   GstcStatus ret;
   GstcSocket *self;
@@ -104,8 +104,13 @@ out:
 }
 
 GstcStatus
-gstc_socket_send (GstcSocket * self, const char *request, char **response)
+gstc_socket_send (GstcSocket * self, const char *request, char **response,
+    const int timeout)
 {
+  int rv;
+  const int number_of_sockets = 1;
+  struct pollfd ufds[number_of_sockets];
+
   gstc_assert_and_ret_val (NULL != self, GSTC_NULL_ARGUMENT);
   gstc_assert_and_ret_val (NULL != request, GSTC_NULL_ARGUMENT);
   gstc_assert_and_ret_val (NULL != response, GSTC_NULL_ARGUMENT);
@@ -116,8 +121,27 @@ gstc_socket_send (GstcSocket * self, const char *request, char **response)
 
   *response = malloc (GSTC_MAX_RESPONSE_LENGTH);
 
-  if (recv (self->socket, *response, GSTC_MAX_RESPONSE_LENGTH, 0) < 0) {
-    return GSTC_RECV_ERROR;
+  ufds[0].fd = self->socket;
+  ufds[0].events = POLLIN;
+  
+  rv = poll (ufds, number_of_sockets, timeout);
+
+  /* Error ocurred in poll */
+  if (rv == -1) {
+    return GSTC_SOCKET_ERROR;
+  }
+  /* Timeout ocurred */
+  else if (rv == 0) {
+    return GSTC_SOCKET_TIMEOUT;
+  } else {
+    /* Check for events on the socket */
+    if (ufds[0].revents & POLLIN) {
+      if (recv (self->socket, *response, GSTC_MAX_RESPONSE_LENGTH, 0) < 0) {
+        return GSTC_RECV_ERROR;
+      }
+    } else {
+      return GSTC_SOCKET_ERROR;
+    }
   }
 
   return GSTC_OK;

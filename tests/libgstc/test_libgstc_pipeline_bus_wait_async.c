@@ -53,8 +53,7 @@ GstcSocket _socket;
 
 GstcStatus
 gstc_socket_new (const char *address, const unsigned int port,
-    const unsigned long wait_time, const int keep_connection_open,
-    GstcSocket ** out)
+    const int keep_connection_open, GstcSocket ** out)
 {
   *out = &_socket;
 
@@ -67,7 +66,8 @@ gstc_socket_free (GstcSocket * socket)
 }
 
 GstcStatus
-gstc_socket_send (GstcSocket * socket, const gchar * request, gchar ** response)
+gstc_socket_send (GstcSocket * socket, const gchar * request, gchar ** response,
+    const int timeout)
 {
   static int reqnum = 0;
 
@@ -94,8 +94,9 @@ gstc_json_get_int (const gchar * json, const gchar * name, gint * out)
 }
 
 GstcStatus
-gstc_json_get_child_char_array(const char *json, const char* parent_name,
-  const char* array_name, const char *element_name, char **out[], int *array_lenght)
+gstc_json_get_child_char_array (const char *json, const char *parent_name,
+    const char *array_name, const char *element_name, char **out[],
+    int *array_lenght)
 {
   return GSTC_OK;
 }

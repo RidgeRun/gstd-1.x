@@ -49,18 +49,14 @@ teardown (void)
 /* Mock implementation of a socket */
 typedef struct _GstcSocket
 {
-  guint64 wait_time;
 } GstcSocket;
 
 GstcSocket _socket;
 
 GstcStatus
 gstc_socket_new (const char *address, const unsigned int port,
-    const unsigned long wait_time, const int keep_connection_open,
-    GstcSocket ** out)
+    const int keep_connection_open, GstcSocket ** out)
 {
-  _socket.wait_time = wait_time;
-
   *out = &_socket;
 
   return GSTC_OK;
@@ -72,7 +68,8 @@ gstc_socket_free (GstcSocket * socket)
 }
 
 GstcStatus
-gstc_socket_send (GstcSocket * socket, const gchar * request, gchar ** response)
+gstc_socket_send (GstcSocket * socket, const gchar * request, gchar ** response,
+    const int timeout)
 {
   *response = malloc (1);
 
@@ -80,7 +77,7 @@ gstc_socket_send (GstcSocket * socket, const gchar * request, gchar ** response)
     return GSTC_UNREACHABLE;
   }
 
-  if (_proc_time > socket->wait_time) {
+  if (_proc_time > timeout) {
     return GSTC_TIMEOUT;
   }
 
@@ -101,8 +98,9 @@ gstc_json_is_null (const gchar * json, const gchar * name, gint * out)
 }
 
 GstcStatus
-gstc_json_get_child_char_array(const char *json, const char* parent_name,
-  const char* array_name, const char *element_name, char **out[], int *array_lenght)
+gstc_json_get_child_char_array (const char *json, const char *parent_name,
+    const char *array_name, const char *element_name, char **out[],
+    int *array_lenght)
 {
   return GSTC_OK;
 }
