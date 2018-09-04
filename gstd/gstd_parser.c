@@ -193,7 +193,7 @@ gstd_parser_parse_cmd (GstdSession * session, const gchar * cmd, gchar ** respon
   args = tokens[1];
 
   cb = cmds;
-  while (cb) {
+  while (cb->cmd) {
     if (!g_ascii_strcasecmp (cb->cmd, action)) {
       ret = cb->callback (session, action, args, response);
       break;
