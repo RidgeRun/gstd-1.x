@@ -72,6 +72,10 @@ static void
 mock_server_new ()
 {
   GError *error = NULL;
+  gint64 start_time;
+  gint64 start_timeout = 1000000;       /* 1s */
+  gint64 loop_wait_time = 5000;        /* 5ms */
+  gint64 time_passed = 0;
 
   _mock_server = g_threaded_socket_service_new (-1);
   _mock_expected = NULL;
@@ -85,6 +89,20 @@ mock_server_new ()
 
   _loop = g_main_loop_new (NULL, FALSE);
   _mock_thread = g_thread_new ("mock_server", mock_server_thread, NULL);
+
+  /* 
+   * FIXME this is done in order to ensure that the socket loop is running
+   * before starting the test and isn't dereferenced in an inconsistent state.
+   * This timeouts after 1s
+   */
+  start_time = g_get_monotonic_time ();
+  while (!g_main_loop_is_running (_loop) ) {
+    g_usleep (loop_wait_time);  /* Wait before checking again */
+      
+    /* Exit if timeout is reached */
+    time_passed = g_get_monotonic_time () - start_time;
+    g_return_if_fail(time_passed < start_timeout);
+  }
 }
 
 static void
@@ -94,8 +112,8 @@ mock_server_free ()
   g_object_unref (_mock_server);
 
   g_main_loop_quit (_loop);
-  g_main_loop_unref (_loop);
   g_thread_join (_mock_thread);
+  g_main_loop_unref (_loop);
   g_thread_unref (_mock_thread);
 }
 
@@ -211,7 +229,7 @@ GST_START_TEST (test_socket_unreachable)
 {
   GstcSocket *socket;
   GstcStatus ret;
-  const gchar *address = "500.0.0.1"; /* Note the invalid IP */
+  const gchar *address = "500.0.0.1";   /* Note the invalid IP */
   const gint port = 54321;
   const unsigned long wait_time = 0;
   const gint keep_open = TRUE;
