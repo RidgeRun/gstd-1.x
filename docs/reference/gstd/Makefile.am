@@ -66,7 +66,7 @@ GTKDOC_LIBS=$(top_builddir)/gstd/libgstd-core.la
 
 
 # This includes the standard gtk-doc make rules, copied by gtkdocize.
-include $(top_srcdir)/docs/gtk-doc.make
+include $(top_builddir)/docs/gtk-doc.make
 
 # Comment this out if you want 'make check' to test you doc status
 # and run some sanity checks
