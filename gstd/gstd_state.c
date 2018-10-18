@@ -231,6 +231,8 @@ gstd_state_dispose (GObject * object)
 
   gst_object_unref (self->target);
   self->target = NULL;
+
+  G_OBJECT_CLASS (gstd_state_parent_class)->dispose (object);
 }
 
 static GstState
