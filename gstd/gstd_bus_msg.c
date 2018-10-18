@@ -77,6 +77,8 @@ gstd_bus_msg_dispose (GObject * object)
     gst_message_unref (self->target);
     self->target = NULL;
   }
+
+  G_OBJECT_CLASS (gstd_bus_msg_parent_class)->dispose (object);
 }
 
 GstdBusMsg *
