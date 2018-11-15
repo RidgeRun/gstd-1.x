@@ -37,7 +37,7 @@
 #include "libgstc.h"
 
 int
-main (int argc, char *argv[])
+main ()
 {
   GstClient *client;
   GstcStatus ret;

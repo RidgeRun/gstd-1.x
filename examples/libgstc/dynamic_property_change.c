@@ -47,7 +47,7 @@ sig_handler (int sig)
 }
 
 int
-main (int argc, char *argv[])
+main ()
 {
   GstClient *client;
   GstcStatus ret;

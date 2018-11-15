@@ -30,6 +30,7 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#define _GNU_SOURCE
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -37,7 +38,7 @@
 
 #include "libgstc.h"
 
-char running = 1;
+static int running = 1;
 
 static void
 sig_handler (int sig)

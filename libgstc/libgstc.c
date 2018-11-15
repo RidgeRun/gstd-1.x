@@ -43,6 +43,8 @@
 #include "libgstc_assert.h"
 #include "libgstc_thread.h"
 
+#define PRINTF_ERROR -1
+
 static GstcStatus gstc_cmd_send (GstClient * client, const char *request);
 static GstcStatus gstc_cmd_send_get_response (GstClient * client,
     const char *request, char **reponse, const int timeout);
@@ -150,6 +152,7 @@ static GstcStatus
 gstc_cmd_create (GstClient * client, const char *where, const char *what)
 {
   GstcStatus ret;
+  int asprintf_ret;
   const char *template = "create %s %s";
   char *request;
 
@@ -158,7 +161,10 @@ gstc_cmd_create (GstClient * client, const char *where, const char *what)
   gstc_assert_and_ret_val (NULL != what, GSTC_NULL_ARGUMENT);
 
   /* Concatenate pieces into request */
-  asprintf (&request, template, where, what);
+  asprintf_ret = asprintf (&request, template, where, what);
+  if(asprintf_ret == PRINTF_ERROR) {
+    return GSTC_OOM;
+  }
 
   ret = gstc_cmd_send (client, request);
 
@@ -172,6 +178,7 @@ gstc_cmd_read (GstClient * client, const char *what, char **response,
     const int timeout)
 {
   GstcStatus ret;
+  int asprintf_ret;
   const char *template = "read %s";
   char *request;
 
@@ -179,7 +186,10 @@ gstc_cmd_read (GstClient * client, const char *what, char **response,
   gstc_assert_and_ret_val (NULL != what, GSTC_NULL_ARGUMENT);
 
   /* Concatenate pieces into request */
-  asprintf (&request, template, what);
+  asprintf_ret = asprintf (&request, template, what);
+  if(asprintf_ret == PRINTF_ERROR) {
+    return GSTC_OOM;
+  }
 
   ret = gstc_cmd_send_get_response (client, request, response, timeout);
 
@@ -192,6 +202,7 @@ static GstcStatus
 gstc_cmd_update (GstClient * client, const char *what, const char *how)
 {
   GstcStatus ret;
+  int asprintf_ret;
   const char *template = "update %s %s";
   char *request;
 
@@ -200,7 +211,10 @@ gstc_cmd_update (GstClient * client, const char *what, const char *how)
   gstc_assert_and_ret_val (NULL != how, GSTC_NULL_ARGUMENT);
 
   /* Concatenate pieces into request */
-  asprintf (&request, template, what, how);
+  asprintf_ret = asprintf (&request, template, what, how);
+  if(asprintf_ret == PRINTF_ERROR) {
+    return GSTC_OOM;
+  }
 
   ret = gstc_cmd_send (client, request);
 
@@ -213,6 +227,7 @@ static GstcStatus
 gstc_cmd_delete (GstClient * client, const char *where, const char *what)
 {
   GstcStatus ret;
+  int asprintf_ret;
   const char *template = "delete %s %s";
   char *request;
 
@@ -221,7 +236,10 @@ gstc_cmd_delete (GstClient * client, const char *where, const char *what)
   gstc_assert_and_ret_val (NULL != what, GSTC_NULL_ARGUMENT);
 
   /* Concatenate pieces into request */
-  asprintf (&request, template, where, what);
+  asprintf_ret = asprintf (&request, template, where, what);
+  if(asprintf_ret == PRINTF_ERROR) {
+    return GSTC_OOM;
+  }
 
   ret = gstc_cmd_send (client, request);
 
@@ -266,6 +284,7 @@ gstc_pipeline_create (GstClient * client, const char *pipeline_name,
     const char *pipeline_desc)
 {
   GstcStatus ret;
+  int asprintf_ret;
   const char *resource = "/pipelines";
   const char *template = "%s %s";
   char *create_args;
@@ -274,7 +293,10 @@ gstc_pipeline_create (GstClient * client, const char *pipeline_name,
   gstc_assert_and_ret_val (NULL != pipeline_name, GSTC_NULL_ARGUMENT);
   gstc_assert_and_ret_val (NULL != pipeline_desc, GSTC_NULL_ARGUMENT);
 
-  asprintf (&create_args, template, pipeline_name, pipeline_desc);
+  asprintf_ret = asprintf (&create_args, template, pipeline_name, pipeline_desc);
+  if(asprintf_ret == PRINTF_ERROR) {
+    return GSTC_OOM;
+  }
 
   ret = gstc_cmd_create (client, resource, create_args);
 
@@ -301,6 +323,7 @@ static GstcStatus
 gstc_cmd_change_state (GstClient * client, const char *pipe, const char *state)
 {
   GstcStatus ret;
+  int asprintf_ret;
   const char *template = "/pipelines/%s/state";
   char *resource;
 
@@ -308,7 +331,10 @@ gstc_cmd_change_state (GstClient * client, const char *pipe, const char *state)
   gstc_assert_and_ret_val (NULL != pipe, GSTC_NULL_ARGUMENT);
   gstc_assert_and_ret_val (NULL != state, GSTC_NULL_ARGUMENT);
 
-  asprintf (&resource, template, pipe);
+  asprintf_ret = asprintf (&resource, template, pipe);
+  if(asprintf_ret == PRINTF_ERROR) {
+    return GSTC_OOM;
+  }
 
   ret = gstc_cmd_update (client, resource, state);
 
@@ -405,6 +431,7 @@ gstc_element_get (GstClient * client, const char *pname,
     const char *element, const char *property, const char *format, ...)
 {
   GstcStatus ret;
+  int asprintf_ret;
   va_list ap;
   const char *what_fmt = "/pipelines/%s/elements/%s/properties/%s";
   char *what;
@@ -419,7 +446,10 @@ gstc_element_get (GstClient * client, const char *pname,
 
   va_start (ap, format);
 
-  asprintf (&what, what_fmt, pname, element, property);
+  asprintf_ret = asprintf (&what, what_fmt, pname, element, property);
+  if(asprintf_ret == PRINTF_ERROR) {
+    return GSTC_OOM;
+  }
 
   ret = gstc_cmd_read (client, what, &response, client->timeout);
   if (ret != GSTC_OK) {
@@ -449,14 +479,21 @@ gstc_element_set (GstClient * client, const char *pname,
     const char *element, const char *parameter, const char *format, ...)
 {
   va_list ap;
+  int asprintf_ret;
   const char *what_fmt = "/pipelines/%s/elements/%s/properties/%s";
   char *what;
   char *how;
 
   va_start (ap, format);
 
-  asprintf (&what, what_fmt, pname, element, parameter);
-  vasprintf (&how, format, ap);
+  asprintf_ret = asprintf (&what, what_fmt, pname, element, parameter);
+  if(asprintf_ret == PRINTF_ERROR) {
+    return GSTC_OOM;
+  }
+  asprintf_ret = vasprintf (&how, format, ap);
+  if(asprintf_ret == PRINTF_ERROR) {
+    return GSTC_OOM;
+  }
 
   gstc_cmd_update (client, what, how);
 
@@ -472,6 +509,7 @@ GstcStatus
 gstc_pipeline_flush_start (GstClient * client, const char *pipeline_name)
 {
   GstcStatus ret;
+  int asprintf_ret;
   char *where;
   const char *what = "flush_start";
   const char *where_fmt = "/pipelines/%s/event";
@@ -479,7 +517,10 @@ gstc_pipeline_flush_start (GstClient * client, const char *pipeline_name)
   gstc_assert_and_ret_val (NULL != client, GSTC_NULL_ARGUMENT);
   gstc_assert_and_ret_val (NULL != pipeline_name, GSTC_NULL_ARGUMENT);
 
-  asprintf (&where, where_fmt, pipeline_name);
+  asprintf_ret = asprintf (&where, where_fmt, pipeline_name);
+  if(asprintf_ret == PRINTF_ERROR) {
+    return GSTC_OOM;
+  }
 
   ret = gstc_cmd_create (client, where, what);
 
@@ -493,6 +534,7 @@ gstc_pipeline_flush_stop (GstClient * client, const char *pipeline_name,
     const int reset)
 {
   GstcStatus ret;
+  int asprintf_ret;
   char *where;
   char *what;
   const char *what_fmt = "flush_stop %s";
@@ -501,12 +543,18 @@ gstc_pipeline_flush_stop (GstClient * client, const char *pipeline_name,
   gstc_assert_and_ret_val (NULL != client, GSTC_NULL_ARGUMENT);
   gstc_assert_and_ret_val (NULL != pipeline_name, GSTC_NULL_ARGUMENT);
 
-  asprintf (&where, where_fmt, pipeline_name);
+  asprintf_ret = asprintf (&where, where_fmt, pipeline_name);
+  if(asprintf_ret == PRINTF_ERROR) {
+    return GSTC_OOM;
+  }
 
   if (reset != 0) {
-    asprintf (&what, what_fmt, "true");
+    asprintf_ret = asprintf (&what, what_fmt, "true");
   } else {
-    asprintf (&what, what_fmt, "false");
+    asprintf_ret = asprintf (&what, what_fmt, "false");
+  }
+  if(asprintf_ret == PRINTF_ERROR) {
+    return GSTC_OOM;
   }
 
   ret = gstc_cmd_create (client, where, what);
@@ -523,6 +571,7 @@ gstc_element_properties_list (GstClient * client,
     int *list_lenght)
 {
   GstcStatus ret;
+  int asprintf_ret;
   char *response;
   char *what;
   const char *what_fmt = "/pipelines/%s/elements/%s/properties";
@@ -533,7 +582,10 @@ gstc_element_properties_list (GstClient * client,
   gstc_assert_and_ret_val (NULL != properties, GSTC_NULL_ARGUMENT);
   gstc_assert_and_ret_val (NULL != list_lenght, GSTC_NULL_ARGUMENT);
 
-  asprintf (&what, what_fmt, pipeline_name, element);
+  asprintf_ret = asprintf (&what, what_fmt, pipeline_name, element);
+  if(asprintf_ret == PRINTF_ERROR) {
+    return GSTC_OOM;
+  }
 
   ret = gstc_cmd_read (client, what, &response, client->timeout);
   if (GSTC_OK != ret) {
@@ -554,11 +606,15 @@ GstcStatus
 gstc_pipeline_inject_eos (GstClient * client, const char *pipeline_name)
 {
   GstcStatus ret;
+  int asprintf_ret;
   char *where;
   const char *what = "eos";
   const char *where_fmt = "/pipelines/%s/event";
 
-  asprintf (&where, where_fmt, pipeline_name);
+  asprintf_ret = asprintf (&where, where_fmt, pipeline_name);
+  if(asprintf_ret == PRINTF_ERROR) {
+    return GSTC_OOM;
+  }
 
   ret = gstc_cmd_create (client, where, what);
 
@@ -573,6 +629,7 @@ gstc_pipeline_seek(GstClient *client, const char *pipeline_name,
     int stop_type, long long stop)
 {
   GstcStatus ret;
+  int asprintf_ret;
   char *where;
   char *what;
   const char *where_fmt = "/pipelines/%s/event";
@@ -581,8 +638,14 @@ gstc_pipeline_seek(GstClient *client, const char *pipeline_name,
   gstc_assert_and_ret_val (NULL != client, GSTC_NULL_ARGUMENT);
   gstc_assert_and_ret_val (NULL != pipeline_name, GSTC_NULL_ARGUMENT);
 
-  asprintf (&where, where_fmt, pipeline_name);
-  asprintf (&what, what_fmt, rate, format, flags, start_type, start, stop_type, stop);
+  asprintf_ret = asprintf (&where, where_fmt, pipeline_name);
+  if(asprintf_ret == PRINTF_ERROR) {
+    return GSTC_OOM;
+  }
+  asprintf_ret = asprintf (&what, what_fmt, rate, format, flags, start_type, start, stop_type, stop);
+  if(asprintf_ret == PRINTF_ERROR) {
+    return GSTC_OOM;
+  }
   
   ret = gstc_cmd_create (client, where, what);
 
@@ -597,6 +660,7 @@ gstc_pipeline_list_elements (GstClient * client,
     const char *pipeline_name, char **elements[], int *list_lenght)
 {
   GstcStatus ret;
+  int asprintf_ret;
   char *response;
   char *what;
   const char *what_fmt = "/pipelines/%s/elements/";
@@ -606,7 +670,10 @@ gstc_pipeline_list_elements (GstClient * client,
   gstc_assert_and_ret_val (NULL != elements, GSTC_NULL_ARGUMENT);
   gstc_assert_and_ret_val (NULL != list_lenght, GSTC_NULL_ARGUMENT);
 
-  asprintf (&what, what_fmt, pipeline_name);
+  asprintf_ret = asprintf (&what, what_fmt, pipeline_name);
+  if(asprintf_ret == PRINTF_ERROR) {
+    return GSTC_OOM;
+  }
 
   ret = gstc_cmd_read (client, what, &response, client->timeout);
   if (GSTC_OK != ret) {
@@ -629,6 +696,7 @@ static void *
 gstc_bus_thread (void *user_data)
 {
   GstcThreadData *data = (GstcThreadData *) user_data;
+  int asprintf_ret;
   char *where;
   char *response;
   const char *fmt = "/pipelines/%s/bus/message";
@@ -637,7 +705,10 @@ gstc_bus_thread (void *user_data)
   long long timeout = data->timeout;
   GstClient *client = data->client;
 
-  asprintf (&where, fmt, pipeline_name);
+  asprintf_ret = asprintf (&where, fmt, pipeline_name);
+  if(asprintf_ret == PRINTF_ERROR) {
+    return NULL;
+  }
 
   /* -1 is used in this function so that the socket has an unlimited timeout */ 
   gstc_cmd_read (client, where, &response, -1);
@@ -657,6 +728,7 @@ gstc_pipeline_bus_wait_async (GstClient * client,
     const long long timeout, GstcPipelineBusWaitCallback callback,
     void *user_data)
 {
+  int asprintf_ret;
   GstcThread thread;
   GstcThreadData *data;
   char *where_timeout;
@@ -667,9 +739,20 @@ gstc_pipeline_bus_wait_async (GstClient * client,
   const char *where_fmt = "/pipelines/%s/bus/%s";
   const char *how_timeout_fmt = "%lli";
 
-  asprintf (&where_timeout, where_fmt, pipeline_name, what_timeout);
-  asprintf (&how_timeout, how_timeout_fmt, timeout);
-  asprintf (&where_types, where_fmt, pipeline_name, what_types);
+  asprintf_ret = asprintf (&where_timeout, where_fmt, pipeline_name, what_timeout);
+  if(asprintf_ret == PRINTF_ERROR) {
+    return GSTC_OOM;
+  }
+
+  asprintf_ret = asprintf (&how_timeout, how_timeout_fmt, timeout);
+  if(asprintf_ret == PRINTF_ERROR) {
+    return GSTC_OOM;
+  }
+
+  asprintf_ret = asprintf (&where_types, where_fmt, pipeline_name, what_types);
+  if(asprintf_ret == PRINTF_ERROR) {
+    return GSTC_OOM;
+  }
 
   gstc_cmd_update (client, where_types, message_name);
   gstc_cmd_update (client, where_timeout, how_timeout);
@@ -690,6 +773,12 @@ gstc_pipeline_bus_wait_async (GstClient * client,
   return GSTC_OK;
 }
 
+/*
+ * The Wunused-parameter warning is ignored for this function since it should
+ * carry all of this information for the callback even when the parameters
+ * aren't directly used
+ */
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 static GstcStatus
 gstc_pipeline_bus_wait_callback (GstClient * _client, const char *pipeline_name,
     const char *message_name, const long long timeout, char *message,
@@ -720,6 +809,7 @@ gstc_pipeline_bus_wait_callback (GstClient * _client, const char *pipeline_name,
 
   return GSTC_OK;
 }
+#pragma GCC diagnostic pop
 
 GstcStatus
 gstc_pipeline_bus_wait (GstClient * client,
