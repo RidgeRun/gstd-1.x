@@ -1,1 +1,3 @@
-SUBDIRS = gstd
+SUBDIRS = 	\
+	gstd	\
+	libgstc

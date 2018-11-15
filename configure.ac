@@ -16,6 +16,9 @@ GJSON_REQUIRED=0.16.2
 dnl required version of libdaemon
 LIBD_REQUIRED=0.14
 
+dnl required version of jansson
+JANSSON_REQUIRED=2.8
+
 AC_CONFIG_SRCDIR([gstd/gstd.c])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIRS([m4])
@@ -138,6 +141,22 @@ PKG_CHECK_MODULES(LIBD, [
   ])
 ])
 
+PKG_CHECK_MODULES(JANSSON, [
+    jansson >= $JANSSON_REQUIRED
+  ], [
+    AC_SUBST(JANSSON_CFLAGS)
+    AC_SUBST(JANSSON_LIBS)
+  ], [
+  AC_MSG_ERROR([
+    Can't find janssonaemon development packages:
+
+      libjansson-dev >= $JANSSON_REQUIRED
+
+    Please make sure you have the necessary libjansson-dev
+    development headers installed.
+  ])
+])
+
 dnl allow the user to specify the location of the PID files
 default=${localstatedir}/run/gstd/
 AC_ARG_WITH([gstd-runstatedir],
@@ -173,8 +192,12 @@ AC_CONFIG_FILES([
 Makefile
 gstd/Makefile
 gst_client/Makefile
+libgstc/Makefile
+examples/Makefile
+examples/libgstc/Makefile
 tests/Makefile
 tests/gstd/Makefile
+tests/libgstc/Makefile
 docs/Makefile
 docs/reference/Makefile
 docs/reference/gstd/Makefile
