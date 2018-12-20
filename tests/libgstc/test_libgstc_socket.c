@@ -43,7 +43,7 @@ static gboolean
 mock_server_cb (GSocketService * service, GSocketConnection * connection,
     GObject * source_object, gpointer user_data)
 {
-  GError *error;
+  GError *error = NULL;
   GInputStream *istream =
       g_io_stream_get_input_stream (G_IO_STREAM (connection));
   GOutputStream *ostream =

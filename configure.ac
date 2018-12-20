@@ -17,7 +17,7 @@ dnl required version of libdaemon
 LIBD_REQUIRED=0.14
 
 dnl required version of jansson
-JANSSON_REQUIRED=2.8
+JANSSON_REQUIRED=2.7
 
 AC_CONFIG_SRCDIR([gstd/gstd.c])
 AC_CONFIG_HEADERS([config.h])
@@ -183,7 +183,7 @@ AC_COMPILE_IFELSE([AC_LANG_PROGRAM([ ], [ ])], [
 ], [
   AC_MSG_RESULT([no])
 ])
-                                                                                
+
 dnl =======================================================================
 dnl Finally, create Makefiles in all directories
 dnl =======================================================================
@@ -203,4 +203,3 @@ docs/reference/Makefile
 docs/reference/gstd/Makefile
 ])
 AC_OUTPUT
-
