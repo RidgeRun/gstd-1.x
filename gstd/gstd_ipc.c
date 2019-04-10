@@ -128,7 +128,7 @@ gstd_ipc_dispose (GObject * object)
 
   if (self->session)
     g_object_unref (self->session);
-
+    
   self->session = NULL;
 
   G_OBJECT_CLASS (gstd_ipc_parent_class)->dispose (object);

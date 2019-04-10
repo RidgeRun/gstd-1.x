@@ -24,7 +24,7 @@
 #include "gstd_property_string.h"
 
 /* Gstd Property debugging category */
-GST_DEBUG_CATEGORY_STATIC(gstd_property_string_debug);
+GST_DEBUG_CATEGORY_STATIC (gstd_property_string_debug);
 #define GST_CAT_DEFAULT gstd_property_string_debug
 
 #define GSTD_DEBUG_DEFAULT_LEVEL GST_LEVEL_INFO
@@ -34,36 +34,36 @@ G_DEFINE_TYPE (GstdPropertyString, gstd_property_string, GSTD_TYPE_PROPERTY)
 
 /* VTable */
 static void
-gstd_property_string_add_value (GstdProperty * self, GstdIFormatter *formatter,
-    GValue * value);
-static GstdReturnCode
-gstd_property_string_update (GstdObject * object, const gchar * arg);
+gstd_property_string_add_value (GstdProperty * self,
+    GstdIFormatter * formatter, GValue * value);
+static GstdReturnCode gstd_property_string_update (GstdObject * object,
+    const gchar * arg);
 
 static void
-gstd_property_string_class_init (GstdPropertyStringClass *klass)
+gstd_property_string_class_init (GstdPropertyStringClass * klass)
 {
   guint debug_color;
   GstdPropertyClass *pclass = GSTD_PROPERTY_CLASS (klass);
   GstdObjectClass *oclass = GSTD_OBJECT_CLASS (klass);
 
-  oclass->update = GST_DEBUG_FUNCPTR(gstd_property_string_update);
-  pclass->add_value = GST_DEBUG_FUNCPTR(gstd_property_string_add_value);
+  oclass->update = GST_DEBUG_FUNCPTR (gstd_property_string_update);
+  pclass->add_value = GST_DEBUG_FUNCPTR (gstd_property_string_add_value);
 
   /* Initialize debug category with nice colors */
   debug_color = GST_DEBUG_FG_BLACK | GST_DEBUG_BOLD | GST_DEBUG_BG_WHITE;
-  GST_DEBUG_CATEGORY_INIT (gstd_property_string_debug, "gstdpropertystring", debug_color,
-			   "Gstd Property String category");
+  GST_DEBUG_CATEGORY_INIT (gstd_property_string_debug, "gstdpropertystring",
+      debug_color, "Gstd Property String category");
 
 }
 
 static void
-gstd_property_string_init (GstdPropertyString *self)
+gstd_property_string_init (GstdPropertyString * self)
 {
-  GST_INFO_OBJECT(self, "Initializing property string");
+  GST_INFO_OBJECT (self, "Initializing property string");
 }
 
 static void
-gstd_property_string_add_value (GstdProperty * self, GstdIFormatter *formatter,
+gstd_property_string_add_value (GstdProperty * self, GstdIFormatter * formatter,
     GValue * value)
 {
   gstd_iformatter_set_value (formatter, value);
@@ -72,14 +72,14 @@ gstd_property_string_add_value (GstdProperty * self, GstdIFormatter *formatter,
 static GstdReturnCode
 gstd_property_string_update (GstdObject * object, const gchar * value)
 {
-  GstdProperty * prop;
+  GstdProperty *prop;
 
   g_return_val_if_fail (object, GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (value, GSTD_NULL_ARGUMENT);
 
   prop = GSTD_PROPERTY (object);
 
-  g_object_set (prop->target, GSTD_OBJECT_NAME(prop), value, NULL);
+  g_object_set (prop->target, GSTD_OBJECT_NAME (prop), value, NULL);
 
   return GSTD_EOK;
 }

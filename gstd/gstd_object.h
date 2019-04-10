@@ -71,7 +71,7 @@ struct _GstdObject
   GstdIUpdater *updater;
   GstdIDeleter *deleter;
 
-  GstdIFormatter * formatter;
+  GstdIFormatter *formatter;
 };
 
 #define GSTD_OBJECT_NAME(obj) (GSTD_OBJECT(obj)->name)
@@ -112,9 +112,9 @@ GstdReturnCode
 gstd_object_create (GstdObject * object, const gchar * name,
     const gchar * description);
 GstdReturnCode
-gstd_object_read (GstdObject * object, const gchar * name, GstdObject ** resource);
-GstdReturnCode
-gstd_object_update (GstdObject * object, const gchar *value);
+gstd_object_read (GstdObject * object, const gchar * name,
+    GstdObject ** resource);
+GstdReturnCode gstd_object_update (GstdObject * object, const gchar * value);
 GstdReturnCode gstd_object_delete (GstdObject * object, const gchar * name);
 GstdReturnCode gstd_object_to_string (GstdObject * object, gchar ** outstring);
 

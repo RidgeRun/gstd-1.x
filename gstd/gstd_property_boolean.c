@@ -25,7 +25,7 @@
 #include "gstd_property_boolean.h"
 
 /* Gstd Property debugging category */
-GST_DEBUG_CATEGORY_STATIC(gstd_property_boolean_debug);
+GST_DEBUG_CATEGORY_STATIC (gstd_property_boolean_debug);
 #define GST_CAT_DEFAULT gstd_property_boolean_debug
 
 #define GSTD_DEBUG_DEFAULT_LEVEL GST_LEVEL_INFO
@@ -35,38 +35,38 @@ G_DEFINE_TYPE (GstdPropertyBoolean, gstd_property_boolean, GSTD_TYPE_PROPERTY)
 
 /* VTable */
 static void
-gstd_property_boolean_add_value (GstdProperty * self, GstdIFormatter *formatter,
-    GValue * value);
-static GstdReturnCode
-gstd_property_boolean_update (GstdObject * object, const gchar * value);
+gstd_property_boolean_add_value (GstdProperty * self,
+    GstdIFormatter * formatter, GValue * value);
+static GstdReturnCode gstd_property_boolean_update (GstdObject * object,
+    const gchar * value);
 
 static void
-gstd_property_boolean_class_init (GstdPropertyBooleanClass *klass)
+gstd_property_boolean_class_init (GstdPropertyBooleanClass * klass)
 {
   guint debug_color;
   GstdPropertyClass *pclass = GSTD_PROPERTY_CLASS (klass);
   GstdObjectClass *oclass = GSTD_OBJECT_CLASS (klass);
 
-  oclass->update = GST_DEBUG_FUNCPTR(gstd_property_boolean_update);
-  pclass->add_value = GST_DEBUG_FUNCPTR(gstd_property_boolean_add_value);
+  oclass->update = GST_DEBUG_FUNCPTR (gstd_property_boolean_update);
+  pclass->add_value = GST_DEBUG_FUNCPTR (gstd_property_boolean_add_value);
 
   /* Initialize debug category with nice colors */
   debug_color = GST_DEBUG_FG_BLACK | GST_DEBUG_BOLD | GST_DEBUG_BG_WHITE;
-  GST_DEBUG_CATEGORY_INIT (gstd_property_boolean_debug, "gstdpropertyboolean", debug_color,
-			   "Gstd Property Boolean category");
+  GST_DEBUG_CATEGORY_INIT (gstd_property_boolean_debug, "gstdpropertyboolean",
+      debug_color, "Gstd Property Boolean category");
 
 }
 
 static void
-gstd_property_boolean_init (GstdPropertyBoolean *self)
+gstd_property_boolean_init (GstdPropertyBoolean * self)
 {
-  GST_INFO_OBJECT(self, "Initializing property boolean");
+  GST_INFO_OBJECT (self, "Initializing property boolean");
 }
 
 
 static void
-gstd_property_boolean_add_value (GstdProperty * self, GstdIFormatter *formatter,
-    GValue * value)
+gstd_property_boolean_add_value (GstdProperty * self,
+    GstdIFormatter * formatter, GValue * value)
 {
   gstd_iformatter_set_value (formatter, value);
 }
@@ -82,19 +82,17 @@ gstd_property_boolean_update (GstdObject * object, const gchar * value)
   g_return_val_if_fail (value, GSTD_NULL_ARGUMENT);
 
   prop = GSTD_PROPERTY (object);
-  
+
   if (0 == g_ascii_strcasecmp (value, "true") ||
-      0 == g_ascii_strcasecmp (value, "yes") ||
-      0 == g_strcmp0 (value, "1")) {
+      0 == g_ascii_strcasecmp (value, "yes") || 0 == g_strcmp0 (value, "1")) {
     bvalue = TRUE;
   } else if (0 == g_ascii_strcasecmp (value, "false") ||
-	     0 == g_ascii_strcasecmp (value, "no") ||
-	     0 == g_strcmp0 (value, "0")) {
+      0 == g_ascii_strcasecmp (value, "no") || 0 == g_strcmp0 (value, "0")) {
     bvalue = FALSE;
   } else {
     return GSTD_BAD_VALUE;
   }
 
-  g_object_set (prop->target, GSTD_OBJECT_NAME(prop), bvalue, NULL);
+  g_object_set (prop->target, GSTD_OBJECT_NAME (prop), bvalue, NULL);
   return ret;
 }

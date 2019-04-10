@@ -148,7 +148,7 @@ gstd_pipeline_class_init (GstdPipelineClass * klass)
   properties[PROP_STATE] =
       g_param_spec_object ("state", "State",
       "The state of the pipeline",
-      GSTD_TYPE_STATE,			   
+      GSTD_TYPE_STATE,
       G_PARAM_READWRITE |
       G_PARAM_STATIC_STRINGS | GSTD_PARAM_READ | GSTD_PARAM_UPDATE);
 
@@ -178,9 +178,9 @@ gstd_pipeline_init (GstdPipeline * self)
   self->elements = g_object_new (GSTD_TYPE_LIST, "name", "elements",
       "node-type", GSTD_TYPE_ELEMENT, "flags", GSTD_PARAM_READ, NULL);
 
-  gstd_object_set_reader (GSTD_OBJECT(self->elements),
+  gstd_object_set_reader (GSTD_OBJECT (self->elements),
       g_object_new (GSTD_TYPE_LIST_READER, NULL));
-  gstd_object_set_reader (GSTD_OBJECT(self),
+  gstd_object_set_reader (GSTD_OBJECT (self),
       g_object_new (GSTD_TYPE_PROPERTY_READER, NULL));
 }
 
@@ -236,11 +236,11 @@ gstd_pipeline_dispose (GObject * object)
 
   /* Stop the pipe if playing */
   if (self->state) {
-    gstd_object_update (GSTD_OBJECT(self->state), "NULL");
+    gstd_object_update (GSTD_OBJECT (self->state), "NULL");
     g_object_unref (self->state);
     self->state = NULL;
   }
-  
+
   if (self->description) {
     g_free (self->description);
     self->description = NULL;
@@ -265,7 +265,7 @@ gstd_pipeline_dispose (GObject * object)
     g_object_unref (self->elements);
     self->elements = NULL;
   }
-  
+
   G_OBJECT_CLASS (gstd_pipeline_parent_class)->dispose (object);
 }
 
@@ -322,7 +322,7 @@ gstd_pipeline_set_property (GObject * object,
       break;
     case PROP_STATE:
       if (self->state) {
-	g_object_unref (self->state);
+        g_object_unref (self->state);
       }
       self->state = g_value_get_object (value);
       break;
@@ -371,17 +371,17 @@ gstd_pipeline_create (GstdPipeline * self, const gchar * name,
   /* Single element descriptions (i.e.: playbin) aren't returned in a
      pipeline. This is a problem for us since we concepts like the bus
      which are directly related to a GstPipeline */
-  if (!GST_IS_PIPELINE(self->pipeline)) {
-    GstElement * element = self->pipeline;
-    self->pipeline = gst_pipeline_new (GST_OBJECT_NAME(element));
-    gst_bin_add (GST_BIN(self->pipeline), element);
+  if (!GST_IS_PIPELINE (self->pipeline)) {
+    GstElement *element = self->pipeline;
+    self->pipeline = gst_pipeline_new (GST_OBJECT_NAME (element));
+    gst_bin_add (GST_BIN (self->pipeline), element);
   }
 
   if (self->state) {
     g_object_unref (self->state);
   }
   self->state = gstd_state_new (self->pipeline);
-  
+
   /* If the user didn't provide a name or provided an empty name
    * assign the fallback using the idex */
   if (!name || name[0] == '\0') {
@@ -443,7 +443,7 @@ gstd_pipeline_fill_elements (GstdPipeline * self, GstElement * element)
 
         gstd_element = g_object_new (GSTD_TYPE_ELEMENT, "name",
             GST_OBJECT_NAME (gste), "gstelement", gste, NULL);
-        gstd_list_append_child (self->elements, GSTD_OBJECT(gstd_element));
+        gstd_list_append_child (self->elements, GSTD_OBJECT (gstd_element));
 
         g_value_reset (&item);
         break;

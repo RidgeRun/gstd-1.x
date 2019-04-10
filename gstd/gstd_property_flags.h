@@ -44,7 +44,7 @@ G_BEGIN_DECLS
 
 typedef struct _GstdPropertyFlags GstdPropertyFlags;
 typedef struct _GstdPropertyFlagsClass GstdPropertyFlagsClass;
-GType gstd_property_flags_get_type();
+GType gstd_property_flags_get_type ();
 
 
 struct _GstdPropertyFlags
@@ -56,7 +56,7 @@ struct _GstdPropertyFlags
 
 struct _GstdPropertyFlagsClass
 {
-    GstdPropertyClass parent_class;
+  GstdPropertyClass parent_class;
 };
 
 G_END_DECLS

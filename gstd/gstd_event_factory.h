@@ -21,7 +21,8 @@
 
 #include <gst/gst.h>
 
-GstEvent *gstd_event_factory_make (const gchar * name, const gchar * description);
+GstEvent *gstd_event_factory_make (const gchar * name,
+    const gchar * description);
 
 
 #endif //__GSTD_EVENT_FACTORY_H__

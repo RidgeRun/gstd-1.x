@@ -34,6 +34,7 @@ gstd_icreator_create (GstdICreator * self, const gchar * name,
 
   g_return_val_if_fail (self, GSTD_NULL_ARGUMENT);
 
-  return GSTD_ICREATOR_GET_INTERFACE (self)->create (self, name, description, out);
+  return GSTD_ICREATOR_GET_INTERFACE (self)->create (self, name, description,
+      out);
 
 }

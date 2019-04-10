@@ -1,3 +1,22 @@
+/*
+ * GStreamer Daemon - Gst Launch under steroids
+ * Copyright (c) 2015-2017 Ridgerun, LLC (http://www.ridgerun.com)
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA
+ */
+
 #ifdef HAVE_CONFIG_H
 #  include "config.h"
 #endif
@@ -6,6 +25,26 @@
 
 #include "gstd_session.h"
 
+const gchar *target_node[] = {
+  "/pipelines/p0",
+  "/pipelines/p0/elements",
+  "/pipelines/p0/elements/fakesrc0",
+  "/pipelines/p0/elements/fakesrc0/properties",
+  "/pipelines/p0/elements/fakesrc0/properties/format",
+  "/pipelines/p0/bus",
+  "/pipelines/p0/bus/timeout",
+  "/pipelines/p0/bus/types",
+  "/pipelines/p0/name",
+  "/pipelines/p0/description",
+  "/pipelines/p0/state",
+  "/pipelines/count",
+  "/debug",
+  "/debug/name",
+  "/debug/enable",
+  "/debug/color",
+  "/debug/threshold",
+  "/debug/flags"
+};
 
 GST_START_TEST (test_no_create)
 {
@@ -20,55 +59,23 @@ GST_START_TEST (test_no_create)
 
   ret = gstd_object_create (node, "p0", "fakesrc ! fakesink");
   fail_if (ret);
-  gst_object_unref(node);
+  gst_object_unref (node);
 
-  /* Test create at the pipeline level */
-  ret = gstd_get_by_uri (test_session, "/pipelines/p0", &node);
-  fail_if (ret);
-  fail_if (NULL == node);
+  int i;
+  /* Tests */
+  for (i = 0; i < sizeof(target_node)/sizeof(target_node[0]); i++) {
+    ret = gstd_get_by_uri (test_session, target_node[i], &node);
+    fail_if (ret);
+    fail_if (NULL == node);
 
-  ret = gstd_object_create (node, NULL, NULL);
-  fail_if (GSTD_NO_CREATE != ret);
-  gst_object_unref(node);
+    ret = gstd_object_create (node, NULL, NULL);
+    fail_if (GSTD_NO_CREATE != ret);
+    gst_object_unref (node);
+  }
 
-  /* Test create at the elements level */
-  ret = gstd_get_by_uri (test_session, "/pipelines/p0/elements", &node);
-  fail_if (ret);
-  fail_if (NULL == node);
-
-  ret = gstd_object_create (node, NULL, NULL);
-  fail_if (GSTD_NO_CREATE != ret);
-  gst_object_unref(node);
-
-  /* Test create at the element level */
-  ret = gstd_get_by_uri (test_session, "/pipelines/p0/elements/fakesrc0", &node);
-  fail_if (ret);
-  fail_if (NULL == node);
-
-  ret = gstd_object_create (node, NULL, NULL);
-  fail_if (GSTD_NO_CREATE != ret);
-  gst_object_unref(node);
-
-  /* Test create at the element properties level */
-  ret = gstd_get_by_uri (test_session, "/pipelines/p0/elements/fakesrc0/properties", &node);
-  fail_if (ret);
-  fail_if (NULL == node);
-
-  ret = gstd_object_create (node, NULL, NULL);
-  fail_if (GSTD_NO_CREATE != ret);
-  gst_object_unref(node);
-
-  /* Test create at the element properties level */
-  ret = gstd_get_by_uri (test_session, "/pipelines/p0/elements/fakesrc0/properties/format", &node);
-  fail_if (ret);
-  fail_if (NULL == node);
-
-  ret = gstd_object_create (node, NULL, NULL);
-  fail_if (GSTD_NO_CREATE != ret);
-
-  gst_object_unref(node);
-  gst_object_unref(test_session);
+  gst_object_unref (test_session);
 }
+
 GST_END_TEST;
 
 static Suite *

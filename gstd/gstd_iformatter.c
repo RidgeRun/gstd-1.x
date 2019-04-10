@@ -16,71 +16,71 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA
  */
- 
+
 #include "gstd_iformatter.h"
 
 G_DEFINE_INTERFACE (GstdIFormatter, gstd_iformatter, G_TYPE_OBJECT);
 
 
 void
-gstd_iformatter_begin_object (GstdIFormatter *self)
+gstd_iformatter_begin_object (GstdIFormatter * self)
 {
   g_return_if_fail (self);
-  GSTD_IFORMATTER_GET_INTERFACE (self)->begin_object  (self);
+  GSTD_IFORMATTER_GET_INTERFACE (self)->begin_object (self);
 }
 
 void
-gstd_iformatter_end_object (GstdIFormatter *self)
+gstd_iformatter_end_object (GstdIFormatter * self)
 {
   g_return_if_fail (self);
   GSTD_IFORMATTER_GET_INTERFACE (self)->end_object (self);
 }
 
 void
-gstd_iformatter_begin_array (GstdIFormatter *self)
+gstd_iformatter_begin_array (GstdIFormatter * self)
 {
   g_return_if_fail (self);
   GSTD_IFORMATTER_GET_INTERFACE (self)->begin_array (self);
 }
 
-void gstd_iformatter_end_array (GstdIFormatter *self)
+void
+gstd_iformatter_end_array (GstdIFormatter * self)
 {
   g_return_if_fail (self);
   GSTD_IFORMATTER_GET_INTERFACE (self)->end_array (self);
 }
 
 void
-gstd_iformatter_set_member_name (GstdIFormatter *self, const gchar * name)
+gstd_iformatter_set_member_name (GstdIFormatter * self, const gchar * name)
 {
   g_return_if_fail (self);
   GSTD_IFORMATTER_GET_INTERFACE (self)->set_member_name (self, name);
 }
 
 void
-gstd_iformatter_set_string_value (GstdIFormatter *self, const gchar * value)
+gstd_iformatter_set_string_value (GstdIFormatter * self, const gchar * value)
 {
   g_return_if_fail (self);
   GSTD_IFORMATTER_GET_INTERFACE (self)->set_string_value (self, value);
 }
 
 void
-gstd_iformatter_set_value (GstdIFormatter *self, GValue *value)
+gstd_iformatter_set_value (GstdIFormatter * self, const GValue * value)
 {
   g_return_if_fail (self);
   GSTD_IFORMATTER_GET_INTERFACE (self)->set_value (self, value);
 }
 
 void
-gstd_iformatter_generate (GstdIFormatter *self, gchar **outstring)
+gstd_iformatter_generate (GstdIFormatter * self, gchar ** outstring)
 {
-    g_return_if_fail (self);
-  
-    GSTD_IFORMATTER_GET_INTERFACE (self)->generate (self, outstring);
+  g_return_if_fail (self);
+
+  GSTD_IFORMATTER_GET_INTERFACE (self)->generate (self, outstring);
 }
 
 static void
-gstd_iformatter_default_init (GstdIFormatterInterface *iface)
+gstd_iformatter_default_init (GstdIFormatterInterface * iface)
 {
   /* Add properties and signals to the interface here */
 }
-

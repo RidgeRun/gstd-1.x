@@ -21,43 +21,142 @@
 #include "config.h"
 #endif
 
-#include <signal.h>
-#include <unistd.h>
 #include <stdlib.h>
 #include <gst/gst.h>
+#include <glib-unix.h>
 
 #include "gstd_session.h"
 #include "gstd_ipc.h"
 #include "gstd_tcp.h"
+#include "gstd_daemon.h"
+#include "gstd_log.h"
 
-#define GSTD_CLIENT_DEFAULT_PORT 5000
-
-/* GLib main loop, we need it global to access it through the SIGINT
-   handler */
-static GMainLoop *main_loop;
+static gboolean int_handler (gpointer user_data);
+static void ipc_add_option_groups (GstdIpc * ipc[], GType factory[],
+    guint num_ipcs, GOptionContext * context, GOptionGroup * groups[]);
+static gboolean ipc_start (GstdIpc * ipc[], guint num_ipcs,
+    GstdSession * session);
+static void ipc_stop (GstdIpc * ipc[], guint numipc);
+static void print_header (gboolean quiet);
 
 void
-int_handler (gint sig)
+print_header (gboolean quiet)
 {
-  g_return_if_fail (main_loop);
+  const gchar *header = "\nGstd version " PACKAGE_VERSION "\n"
+      "Copyright (C) 2015-2017 Ridgerun, LLC (http://www.ridgerun.com)\n\n"
+      "Log traces will be saved to %s.\nDetaching from parent process.";
+
+  if (!quiet) {
+    gchar *filename;
+    filename = gstd_log_get_current_gstd ();
+    GST_INFO (header, filename);
+    g_free (filename);
+  }
+}
+
+static gboolean
+int_handler (gpointer user_data)
+{
+  GMainLoop *main_loop;
+
+  g_return_val_if_fail (user_data, TRUE);
+
+  main_loop = (GMainLoop *) user_data;
 
   /* User has pressed CTRL-C, stop the main loop
      so the application closes itself */
   GST_INFO ("Interrupt received, shutting down...");
   g_main_loop_quit (main_loop);
+
+  return TRUE;
+}
+
+static void
+ipc_add_option_groups (GstdIpc * ipc[], GType factory[], guint num_ipcs,
+    GOptionContext * context, GOptionGroup * groups[])
+{
+  gint i;
+
+  g_return_if_fail (ipc);
+  g_return_if_fail (context);
+  g_return_if_fail (groups);
+
+  for (i = 0; i < num_ipcs; i++) {
+    ipc[i] = GSTD_IPC (g_object_new (factory[i], NULL));
+    gstd_ipc_get_option_group (ipc[i], &groups[i]);
+    g_option_context_add_group (context, groups[i]);
+  }
+}
+
+static gboolean
+ipc_start (GstdIpc * ipc[], guint num_ipcs, GstdSession * session)
+{
+  gboolean ipc_selected = FALSE;
+  gboolean ret = TRUE;
+  GstdReturnCode code;
+  gint i;
+
+  g_return_val_if_fail (ipc, FALSE);
+  g_return_val_if_fail (session, FALSE);
+
+  /* Verify if at leas one IPC mechanism was selected */
+  for (i = 0; i < num_ipcs; i++) {
+    g_object_get (G_OBJECT (ipc[i]), "enabled", &ipc_selected, NULL);
+
+    if (ipc_selected) {
+      break;
+    }
+  }
+
+  /* If no IPC was selected, default to TCP */
+  if (!ipc_selected) {
+    g_object_set (G_OBJECT (ipc[0]), "enabled", TRUE, NULL);
+  }
+
+  /* Run start for each IPC (each start method checks for the enabled flag) */
+  for (i = 0; i < num_ipcs; i++) {
+    code = gstd_ipc_start (ipc[i], session);
+    if (code) {
+      g_printerr ("Couldn't start IPC : (%s)\n", G_OBJECT_TYPE_NAME (ipc[i]));
+      ret = FALSE;
+    }
+  }
+
+  return ret;
+}
+
+static void
+ipc_stop (GstdIpc * ipc[], guint num_ipcs)
+{
+  gint i;
+
+  g_return_if_fail (ipc);
+
+  /* Run stop for each IPC */
+  for (i = 0; i < num_ipcs; i++) {
+    gstd_ipc_stop (ipc[i]);
+    g_object_unref (ipc[i]);
+  }
 }
 
 gint
 main (gint argc, gchar * argv[])
 {
+  GMainLoop *main_loop;
   GstdSession *session;
-  guint i;
-  gboolean version;
+  gboolean version = FALSE;;
+  gboolean kill = FALSE;
+  gboolean nodaemon = FALSE;
+  gboolean quiet = FALSE;
+  const gchar *gstdlogfile = NULL;
+  const gchar *gstlogfile = NULL;
+  gchar *pidfile = NULL;
   GError *error = NULL;
   GOptionContext *context;
   GOptionGroup *gstreamer_group;
-  gboolean ipc_selected = FALSE;
-  GstdReturnCode ret;
+  gint ret = EXIT_SUCCESS;
+  gchar *current_filename = NULL;
+
   /* Array to specify gstd how many IPCs are supported, 
    * IPCs should be added this array.
    */
@@ -73,93 +172,122 @@ main (gint argc, gchar * argv[])
     {"version", 'v', 0, G_OPTION_ARG_NONE, &version,
         "Print current gstd version", NULL}
     ,
+    {"kill", 'k', 0, G_OPTION_ARG_NONE, &kill,
+        "Kill a running gstd, if any", NULL}
+    ,
+    {"quiet", 'q', 0, G_OPTION_ARG_NONE, &quiet,
+        "Don't print any startup message", NULL}
+    ,
+    {"no-daemon", 'D', 0, G_OPTION_ARG_NONE, &nodaemon,
+        "Do not detach into a daemon", NULL}
+    ,
+    {"pid-path", 'f', 0, G_OPTION_ARG_FILENAME, &pidfile,
+        "Create gstd.pid file into path", NULL}
+    ,
+    {"gstd-log-filename", 'l', 0, G_OPTION_ARG_FILENAME, &gstdlogfile,
+        "Create gstd.log file to path", NULL}
+    ,
+    {"gst-log-filename", 'd', 0, G_OPTION_ARG_FILENAME, &gstlogfile,
+        "Create gst.log file to path", NULL}
+    ,
     {NULL}
   };
 
   /* Initialize default */
-  version = FALSE;
   context = g_option_context_new (" - gst-launch under steroids");
   g_option_context_add_main_entries (context, entries, NULL);
 
+  /* Initialize GStreamer */
   gstreamer_group = gst_init_get_option_group ();
   g_option_context_add_group (context, gstreamer_group);
 
-  /* Initialize GStreamer subsystem before calling anything else */
-  gst_init (&argc, &argv);
-
-  /* Install a handler for the interrupt signal */
-  signal (SIGINT, int_handler);
-
-  /* Starting the application's main loop, necessary for 
-     messaging and signaling subsystem */
-  GST_INFO ("Starting application...");
-  main_loop = g_main_loop_new (NULL, FALSE);
-
-  /*Create session */
-  session = gstd_session_new ("Session0");
-
   /* Read option group for each IPC */
-  for (i = 0; i < num_ipcs; i++) {
-    ipc_array[i] = GSTD_IPC (g_object_new (supported_ipcs[i], NULL));
-    gstd_ipc_get_option_group (ipc_array[i], &optiongroup_array[i]);
-    g_option_context_add_group (context, optiongroup_array[i]);
-  }
+  ipc_add_option_groups (ipc_array, supported_ipcs, num_ipcs, context,
+      optiongroup_array);
 
-  /*Parse the options before starting any IPC */
+  /* Parse the options before starting */
   if (!g_option_context_parse (context, &argc, &argv, &error)) {
     g_printerr ("%s\n", error->message);
     g_error_free (error);
     return EXIT_FAILURE;
   }
-
   g_option_context_free (context);
+
+  gstd_log_init (gstdlogfile, gstlogfile);
+  gstd_daemon_init (argc, argv, pidfile);
 
   /* Print the version and exit */
   if (version) {
-    g_print ("" PACKAGE_STRING "\n");
-    g_print ("Copyright (c) 2015 RigeRun Engineering\n");
-    return EXIT_SUCCESS;
+    goto out;
   }
 
-  /* If no IPC selected use tcp */
-  for (i = 0; i < num_ipcs; i++) {
-    g_object_get (G_OBJECT (ipc_array[i]), "enabled", &ipc_selected, NULL);
+  if (kill) {
+    if (gstd_daemon_stop ()) {
+      GST_INFO ("Gstd successfully stopped");
+    }
+    goto out;
+  }
 
-    if (ipc_selected) {
-      break;
+  if (nodaemon) {
+    print_header (quiet);
+  } else {
+    gboolean parent;
+
+    if (!gstd_daemon_start (&parent)) {
+      goto error;
+    }
+
+    /* Parent fork ends here */
+    if (parent) {
+      print_header (quiet);
+      goto out;
     }
   }
 
-  if (!ipc_selected) {
-    g_object_set (G_OBJECT (ipc_array[0]), "enabled", TRUE, NULL);
+  /*Create session */
+  session = gstd_session_new ("Session0");
+
+  /* Start IPC subsystem */
+  if (!ipc_start (ipc_array, num_ipcs, session)) {
+    goto error;
   }
 
-  /* Run start for each IPC (each start method checks for the enabled flag) */
-  for (i = 0; i < num_ipcs; i++) {
-    ret = gstd_ipc_start (ipc_array[i], session);
-    if (ret) {
-      g_printerr ("Couldn't start IPC : (%s)\n",
-          G_OBJECT_TYPE_NAME (ipc_array[i]));
-      return EXIT_FAILURE;
-    }
-  }
+  /* Starting the application's main loop, necessary for 
+     messaging and signaling subsystem */
+  main_loop = g_main_loop_new (NULL, FALSE);
 
   /* Install a handler for the interrupt signal */
+  g_unix_signal_add (SIGINT, int_handler, main_loop);
 
-  signal (SIGINT, int_handler);
-
+  GST_INFO ("Gstd started");
   g_main_loop_run (main_loop);
+
   /* Application shut down */
   g_main_loop_unref (main_loop);
   main_loop = NULL;
 
-  /* Run stop for each IPC */
-  for (i = 0; i < num_ipcs; i++) {
-    gstd_ipc_stop (ipc_array[i]);
-    g_object_unref (ipc_array[i]);
-  }
-  g_object_unref (session);
-  gst_deinit ();
+  /* Stop any IPC array */
+  ipc_stop (ipc_array, num_ipcs);
 
-  return GSTD_EOK;
+  /* Free Gstd session */
+  g_object_unref (session);
+
+  gst_deinit ();
+  gstd_log_deinit ();
+
+  goto out;
+
+error:
+  {
+    current_filename = gstd_log_get_current_gstd ();
+    GST_ERROR ("Unable to start Gstd. Check %s for more details.",
+        current_filename);
+    g_free (current_filename);
+    ret = EXIT_FAILURE;
+
+  }
+out:
+  {
+    return ret;
+  }
 }

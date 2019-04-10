@@ -59,13 +59,12 @@ gstd_object_create_default (GstdObject * object, const gchar * name,
     const gchar * description);
 static GstdReturnCode
 gstd_object_read_default (GstdObject *, const gchar *, GstdObject **);
-static GstdReturnCode
-gstd_object_update_default (GstdObject *, const gchar *);
+static GstdReturnCode gstd_object_update_default (GstdObject *, const gchar *);
 static GstdReturnCode
 gstd_object_delete_default (GstdObject * object, const gchar * name);
 static GstdReturnCode
 gstd_object_to_string_default (GstdObject * object, gchar ** outstring);
-void gstd_object_finalize( GObject *object);
+void gstd_object_finalize (GObject * object);
 
 GType
 gstd_object_flags_get_type (void)
@@ -131,9 +130,10 @@ gstd_object_init (GstdObject * self)
   self->formatter = g_object_new (GSTD_TYPE_JSON_BUILDER, NULL);
 }
 
-void gstd_object_finalize( GObject *object)
+void
+gstd_object_finalize (GObject * object)
 {
-  GstdObject *self = GSTD_OBJECT(object);
+  GstdObject *self = GSTD_OBJECT (object);
   GST_DEBUG_OBJECT (self, "finalize");
 
   /* Free formatter */
@@ -223,9 +223,10 @@ gstd_object_create_default (GstdObject * object, const gchar * name,
 }
 
 static GstdReturnCode
-gstd_object_read_default (GstdObject * self, const gchar * name, GstdObject ** resource)
+gstd_object_read_default (GstdObject * self, const gchar * name,
+    GstdObject ** resource)
 {
-  g_return_val_if_fail (GSTD_IS_OBJECT(self), GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (GSTD_IS_OBJECT (self), GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (resource, GSTD_NULL_ARGUMENT);
 
   g_return_val_if_fail (self->reader, GSTD_MISSING_INITIALIZATION);
@@ -236,7 +237,7 @@ gstd_object_read_default (GstdObject * self, const gchar * name, GstdObject ** r
 static GstdReturnCode
 gstd_object_update_default (GstdObject * self, const gchar * value)
 {
-  g_return_val_if_fail (GSTD_IS_OBJECT(self), GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (GSTD_IS_OBJECT (self), GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (value, GSTD_NULL_ARGUMENT);
 
   g_return_val_if_fail (self->updater, GSTD_MISSING_INITIALIZATION);
@@ -264,59 +265,52 @@ gstd_object_to_string_default (GstdObject * self, gchar ** outstring)
 {
   GParamSpec **properties;
   GValue value = G_VALUE_INIT;
-  GValue bool_value = G_VALUE_INIT;
   GValue flags = G_VALUE_INIT;
   gchar *sflags;
   guint n, i;
   const gchar *typename;
-  
+
   gstd_iformatter_begin_object (self->formatter);
-  gstd_iformatter_set_member_name (self->formatter,"properties");
+  gstd_iformatter_set_member_name (self->formatter, "properties");
   gstd_iformatter_begin_array (self->formatter);
-  
-  properties = g_object_class_list_properties(G_OBJECT_GET_CLASS(self), &n);
-  for (i=0; i<n; i++) {
+
+  properties = g_object_class_list_properties (G_OBJECT_GET_CLASS (self), &n);
+  for (i = 0; i < n; i++) {
     /* Describe each parameter using a structure */
     gstd_iformatter_begin_object (self->formatter);
 
-    gstd_iformatter_set_member_name (self->formatter,"name");
+    gstd_iformatter_set_member_name (self->formatter, "name");
 
     gstd_iformatter_set_string_value (self->formatter, properties[i]->name);
 
-    typename = g_type_name(properties[i]->value_type);
+    typename = g_type_name (properties[i]->value_type);
 
     g_value_init (&value, properties[i]->value_type);
-    g_object_get_property(G_OBJECT(self), properties[i]->name, &value);
+    g_object_get_property (G_OBJECT (self), properties[i]->name, &value);
 
-    gstd_iformatter_set_member_name (self->formatter,"value");
+    gstd_iformatter_set_member_name (self->formatter, "value");
     gstd_iformatter_set_value (self->formatter, &value);
 
-    gstd_iformatter_set_member_name (self->formatter, "param_spec");
+    gstd_iformatter_set_member_name (self->formatter, "param");
     /* Describe the parameter specs using a structure */
     gstd_iformatter_begin_object (self->formatter);
 
-    g_value_unset(&value);
+    g_value_unset (&value);
 
     g_value_init (&flags, GSTD_TYPE_PARAM_FLAGS);
     g_value_set_flags (&flags, properties[i]->flags);
-    sflags = g_strdup_value_contents(&flags);
-    g_value_unset(&flags);
+    sflags = g_strdup_value_contents (&flags);
+    g_value_unset (&flags);
 
-    gstd_iformatter_set_member_name (self->formatter, "blurb");
-    gstd_iformatter_set_string_value (self->formatter,properties[i]->_blurb);
+    gstd_iformatter_set_member_name (self->formatter, "description");
+    gstd_iformatter_set_string_value (self->formatter, properties[i]->_blurb);
 
     gstd_iformatter_set_member_name (self->formatter, "type");
-    gstd_iformatter_set_string_value (self->formatter,typename);
+    gstd_iformatter_set_string_value (self->formatter, typename);
 
     gstd_iformatter_set_member_name (self->formatter, "access");
-    gstd_iformatter_set_string_value (self->formatter,sflags);
+    gstd_iformatter_set_string_value (self->formatter, sflags);
 
-    gstd_iformatter_set_member_name (self->formatter, "construct");
-
-    g_value_init (&bool_value, G_TYPE_BOOLEAN);
-    g_value_set_boolean(&bool_value,GSTD_PARAM_IS_DELETE(properties[i]->flags));
-    gstd_iformatter_set_value (self->formatter, &bool_value);
-    g_value_unset(&bool_value);
     /* Close parameter specs structure */
     gstd_iformatter_end_object (self->formatter);
 
@@ -326,7 +320,7 @@ gstd_object_to_string_default (GstdObject * self, gchar ** outstring)
   }
   g_free (properties);
 
-  gstd_iformatter_end_array (self->formatter); 
+  gstd_iformatter_end_array (self->formatter);
   gstd_iformatter_end_object (self->formatter);
 
   gstd_iformatter_generate (self->formatter, outstring);
@@ -345,7 +339,8 @@ gstd_object_create (GstdObject * object, const gchar * name,
 }
 
 GstdReturnCode
-gstd_object_read (GstdObject * object, const gchar * property, GstdObject ** resource)
+gstd_object_read (GstdObject * object, const gchar * property,
+    GstdObject ** resource)
 {
   GstdReturnCode ret;
 

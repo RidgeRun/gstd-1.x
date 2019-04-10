@@ -28,6 +28,7 @@ libgstd_core_la_SOURCES = gstd_session.c		\
 			  gstd_property_int.c		\
 			  gstd_property_string.c	\
 			  gstd_property_boolean.c	\
+			  gstd_property_array.c		\
 			  gstd_iupdater.c		\
 			  gstd_no_updater.c		\
 			  gstd_property_enum.c		\
@@ -39,17 +40,33 @@ libgstd_core_la_SOURCES = gstd_session.c		\
 			  gstd_msg_type.c		\
 			  gstd_bus_msg_qos.c		\
 			  gstd_return_codes.c		\
-			  gstd_state.c
+			  gstd_state.c			\
+			  gstd_parser.c			\
+			  gstd_log.c			\
+			  gstd_bus_msg_stream_status.c  \
+			  gstd_bus_msg_element.c
 
-libgstd_core_la_CFLAGS = $(GST_CFLAGS) $(GIO_CFLAGS) $(GJSON_CFLAGS)
+libgstd_core_la_CFLAGS = $(GST_CFLAGS)					\
+			 $(GIO_CFLAGS)					\
+			 $(GJSON_CFLAGS)				\
+			 -DGSTD_LOG_STATE_DIR=\"$(gstdlogstatedir)\"	\
+			 -DGSTD_RUN_STATE_DIR=\"$(gstdrunstatedir)\"
+
 libgstd_core_la_LDFLAGS = $(GST_LIBS) $(GIO_LIBS) $(GJSON_LIBS)
 
 # Standalone application that uses libgstd-core
 bin_PROGRAMS = gstd
 
-gstd_SOURCES = gstd.c
-gstd_CFLAGS = $(GST_CFLAGS) $(GIO_CFLAGS) $(GJSON_CFLAGS)
-gstd_LDFLAGS = $(GST_LIBS) $(GIO_LIBS) $(GJSON_LIBS) -Wl,-rpath -Wl,$(libdir)
+gstd_SOURCES =  gstd.c gstd_daemon.c
+
+gstd_CFLAGS = $(GST_CFLAGS)					\
+	      $(GIO_CFLAGS)					\
+	      $(GJSON_CFLAGS)					\
+	      $(LIBD_CFLAGS)					\
+	      -DGSTD_LOG_STATE_DIR=\"$(gstdlogstatedir)\"	\
+	      -DGSTD_RUN_STATE_DIR=\"$(gstdrunstatedir)\"
+
+gstd_LDFLAGS = $(GST_LIBS) $(GIO_LIBS) $(GJSON_LIBS) $(LIBD_LIBS) -Wl,-rpath -Wl,$(libdir)
 gstd_LDADD = libgstd-core.la
 
 gstdincludedir = $(includedir)/gstd
@@ -78,6 +95,7 @@ gstdinclude_HEADERS = \
 		  gstd_property_int.h		\
 		  gstd_property_string.h	\
 		  gstd_property_boolean.h	\
+		  gstd_property_array.h         \
 		  gstd_iupdater.h		\
 		  gstd_no_updater.h		\
 		  gstd_property_enum.h		\
@@ -89,6 +107,17 @@ gstdinclude_HEADERS = \
 		  gstd_msg_reader.h		\
 		  gstd_msg_type.h		\
 		  gstd_bus_msg_qos.h		\
-		  gstd_state.h
+		  gstd_state.h			\
+		  gstd_parser.h			\
+		  gstd_log.h			\
+		  gstd_bus_msg_stream_status.h	\
+		  gstd_bus_msg_element.h
 
-noinst_HEADERS = 
+noinst_HEADERS = gstd_daemon.h
+
+# Create an open area for our pid and log files
+install-data-hook: $(DESTDIR)$(gstdrunstatedir) $(DESTDIR)$(gstdlogstatedir)
+
+$(DESTDIR)@gstdrunstatedir@ $(DESTDIR)@gstdlogstatedir@:
+	$(MKDIR_P) $@
+	chmod a+w $@

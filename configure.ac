@@ -2,7 +2,7 @@ dnl required version of autoconf
 AC_PREREQ([2.53])
 
 dnl Gstreamer's daemon package name and version
-AC_INIT([gstd],[0.6.3])
+AC_INIT([gstd],[0.7.0])
 
 dnl required version of gstreamer and gst-plugins-base
 GST_REQUIRED=1.0.0
@@ -12,6 +12,12 @@ GIO_REQUIRED=2.44.1
 
 dnl required version of gio
 GJSON_REQUIRED=0.16.2
+
+dnl required version of libdaemon
+LIBD_REQUIRED=0.14
+
+dnl required version of jansson
+JANSSON_REQUIRED=2.7
 
 AC_CONFIG_SRCDIR([gstd/gstd.c])
 AC_CONFIG_HEADERS([config.h])
@@ -29,6 +35,9 @@ AM_PROG_CC_C_O
 dnl required version of libtool
 LT_PREREQ([2.2.6])
 LT_INIT
+
+GSTD_API_VERSION=1.0
+AC_SUBST(GSTD_API_VERSION)
 
 dnl error out if we can't find pkg-config
 AC_CHECK_PROG(HAVE_PKGCONFIG, pkg-config, [ ], [
@@ -116,6 +125,53 @@ else
   AC_SUBST(READLINE_LIBS, $ax_cv_lib_readline)
 fi
 
+PKG_CHECK_MODULES(LIBD, [
+    libdaemon >= $LIBD_REQUIRED
+  ], [
+    AC_SUBST(LIBD_CFLAGS)
+    AC_SUBST(LIBD_LIBS)
+  ], [
+  AC_MSG_ERROR([
+    Can't find libdaemon development packages:
+
+      libdaemon-dev >= $LIBD_REQUIRED
+
+    Please make sure you have the necessary libdaemon-dev
+    development headers installed.
+  ])
+])
+
+PKG_CHECK_MODULES(JANSSON, [
+    jansson >= $JANSSON_REQUIRED
+  ], [
+    AC_SUBST(JANSSON_CFLAGS)
+    AC_SUBST(JANSSON_LIBS)
+  ], [
+  AC_MSG_ERROR([
+    Can't find janssonaemon development packages:
+
+      libjansson-dev >= $JANSSON_REQUIRED
+
+    Please make sure you have the necessary libjansson-dev
+    development headers installed.
+  ])
+])
+
+dnl allow the user to specify the location of the PID files
+default=${localstatedir}/run/gstd/
+AC_ARG_WITH([gstd-runstatedir],
+  [AS_HELP_STRING([--with-gstd-runstatedir],
+    [Specify the location of the gstd's PID file @<:@default=${default}@:>@])],
+  [AC_SUBST(gstdrunstatedir, [$with_gstd_runstatedir])],
+  [AC_SUBST(gstdrunstatedir, [$default])])
+
+dnl allow the user to specify the location of the log files
+default=${localstatedir}/log/gstd/
+AC_ARG_WITH([gstd-logstatedir],
+  [AS_HELP_STRING([--with-gstd-logstatedir],
+    [Specify the location of gstd's log files @<:@default=${default}@:>@])],
+  [AC_SUBST([gstdlogstatedir], [$with_gstd_logstatedir])],
+  [AC_SUBST([gstdlogstatedir], [$default])])
 
 dnl check if compiler understands -Wall (if yes, add -Wall to GST_CFLAGS)
 AC_MSG_CHECKING([to see if compiler understands -Wall])
@@ -127,7 +183,7 @@ AC_COMPILE_IFELSE([AC_LANG_PROGRAM([ ], [ ])], [
 ], [
   AC_MSG_RESULT([no])
 ])
-                                                                                
+
 dnl =======================================================================
 dnl Finally, create Makefiles in all directories
 dnl =======================================================================
@@ -135,12 +191,15 @@ dnl =======================================================================
 AC_CONFIG_FILES([
 Makefile
 gstd/Makefile
-gstd_client/Makefile
+gst_client/Makefile
+libgstc/Makefile
+examples/Makefile
+examples/libgstc/Makefile
 tests/Makefile
 tests/gstd/Makefile
+tests/libgstc/Makefile
 docs/Makefile
 docs/reference/Makefile
 docs/reference/gstd/Makefile
 ])
 AC_OUTPUT
-

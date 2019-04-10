@@ -1,5 +1,10 @@
 ACLOCAL_AMFLAGS=-I m4 -I .
 
-SUBDIRS=gstd gstd_client tests docs
+SUBDIRS=gstd		\
+	gst_client 	\
+	libgstc		\
+	tests		\
+	examples	\
+	docs
 
 EXTRA_DIST=autogen.sh

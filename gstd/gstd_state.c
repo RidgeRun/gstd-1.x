@@ -25,8 +25,9 @@
 #include <gst/gst.h>
 #include "gstd_state.h"
 
-enum {
-    N_PROPERTIES
+enum
+{
+  N_PROPERTIES
 };
 
 struct _GstdState
@@ -54,16 +55,15 @@ gstd_state_enum_get_type (void)
     {GST_STATE_PLAYING, "PLAYING", "playing"},
     {0, NULL, NULL}
   };
-  
+
   if (!state_enum_type) {
-    state_enum_type =
-        g_enum_register_static ("GstdStateEnum", state_types);
+    state_enum_type = g_enum_register_static ("GstdStateEnum", state_types);
   }
   return state_enum_type;
 }
 
 /* Gstd State debugging category */
-GST_DEBUG_CATEGORY_STATIC(gstd_state_debug);
+GST_DEBUG_CATEGORY_STATIC (gstd_state_debug);
 #define GST_CAT_DEFAULT gstd_state_debug
 
 #define GSTD_DEBUG_DEFAULT_LEVEL GST_LEVEL_INFO
@@ -73,41 +73,39 @@ GST_DEBUG_CATEGORY_STATIC(gstd_state_debug);
  * A wrapper for the conventional state
  */
 
-G_DEFINE_TYPE (GstdState, gstd_state, GSTD_TYPE_OBJECT)
+G_DEFINE_TYPE (GstdState, gstd_state, GSTD_TYPE_OBJECT);
 
 /* VTable */
 static GstdReturnCode
 gstd_state_to_string (GstdObject * obj, gchar ** outstring);
 static GstdReturnCode
 gstd_state_update (GstdObject * object, const gchar * sstate);
-static void
-gstd_state_dispose (GObject * obj);
-static GstState
-gstd_state_read (GstdState * state);
+static void gstd_state_dispose (GObject * obj);
+static GstState gstd_state_read (GstdState * state);
 
 static void
-gstd_state_class_init (GstdStateClass *klass)
+gstd_state_class_init (GstdStateClass * klass)
 {
   GObjectClass *oclass = G_OBJECT_CLASS (klass);
-  GstdObjectClass * gstdc = GSTD_OBJECT_CLASS (klass);
+  GstdObjectClass *gstdc = GSTD_OBJECT_CLASS (klass);
   guint debug_color;
 
   oclass->dispose = gstd_state_dispose;
-  
-  gstdc->to_string = GST_DEBUG_FUNCPTR(gstd_state_to_string);
+
+  gstdc->to_string = GST_DEBUG_FUNCPTR (gstd_state_to_string);
   gstdc->update = GST_DEBUG_FUNCPTR (gstd_state_update);
-  
+
   /* Initialize debug category with nice colors */
   debug_color = GST_DEBUG_FG_BLACK | GST_DEBUG_BOLD | GST_DEBUG_BG_WHITE;
   GST_DEBUG_CATEGORY_INIT (gstd_state_debug, "gstdstate", debug_color,
-			   "Gstd State category");
+      "Gstd State category");
 
 }
 
 static void
-gstd_state_init (GstdState *self)
+gstd_state_init (GstdState * self)
 {
-  GST_INFO_OBJECT(self, "Initializing state");
+  GST_INFO_OBJECT (self, "Initializing state");
   self->state = GST_STATE_NULL;
   self->target = NULL;
 }
@@ -115,7 +113,7 @@ gstd_state_init (GstdState *self)
 static GstdReturnCode
 gstd_state_to_string (GstdObject * obj, gchar ** outstring)
 {
-  GstdState * self;
+  GstdState *self;
   GValue value = G_VALUE_INIT;
   gchar *svalue;
   const gchar *typename;
@@ -123,15 +121,15 @@ gstd_state_to_string (GstdObject * obj, gchar ** outstring)
   g_return_val_if_fail (GSTD_IS_OBJECT (obj), GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (outstring, GSTD_NULL_ARGUMENT);
 
-  self = GSTD_STATE(obj);
+  self = GSTD_STATE (obj);
 
   /* Describe each parameter using a structure */
   gstd_iformatter_begin_object (obj->formatter);
 
-  gstd_iformatter_set_member_name (obj->formatter,"name");
-  gstd_iformatter_set_string_value (obj->formatter, GSTD_OBJECT_NAME(self));
+  gstd_iformatter_set_member_name (obj->formatter, "name");
+  gstd_iformatter_set_string_value (obj->formatter, GSTD_OBJECT_NAME (self));
 
-  gstd_iformatter_set_member_name (obj->formatter,"value");
+  gstd_iformatter_set_member_name (obj->formatter, "value");
 
   /* The state of the pipeline might have changed autonomously,
      refresh the value */
@@ -145,32 +143,27 @@ gstd_state_to_string (GstdObject * obj, gchar ** outstring)
   g_free (svalue);
   g_value_unset (&value);
 
-  gstd_iformatter_set_member_name (obj->formatter, "param_spec");
+  gstd_iformatter_set_member_name (obj->formatter, "param");
   /* Describe the parameter specs using a structure */
   gstd_iformatter_begin_object (obj->formatter);
 
-  gstd_iformatter_set_member_name (obj->formatter, "blurb");
-  gstd_iformatter_set_string_value (obj->formatter, "The state of the pipeline");
+  gstd_iformatter_set_member_name (obj->formatter, "description");
+  gstd_iformatter_set_string_value (obj->formatter,
+      "The state of the pipeline");
 
   typename = g_type_name (GSTD_TYPE_STATE_ENUM);
   gstd_iformatter_set_member_name (obj->formatter, "type");
-  gstd_iformatter_set_string_value (obj->formatter,typename);
+  gstd_iformatter_set_string_value (obj->formatter, typename);
 
   g_value_init (&value, GSTD_TYPE_PARAM_FLAGS);
   g_value_set_flags (&value, G_PARAM_READWRITE);
-  svalue = g_strdup_value_contents(&value);
+  svalue = g_strdup_value_contents (&value);
   g_value_unset (&value);
 
   gstd_iformatter_set_member_name (obj->formatter, "access");
   gstd_iformatter_set_string_value (obj->formatter, svalue);
 
   g_free (svalue);
-
-  gstd_iformatter_set_member_name (obj->formatter, "construct");
-  g_value_init (&value, G_TYPE_BOOLEAN);
-  g_value_set_boolean (&value, FALSE);
-  gstd_iformatter_set_value (obj->formatter, &value);
-  g_value_unset (&value);
 
   /* Close parameter specs structure */
   gstd_iformatter_end_object (obj->formatter);
@@ -186,7 +179,7 @@ gstd_state_to_string (GstdObject * obj, gchar ** outstring)
 static GstdReturnCode
 gstd_state_update (GstdObject * object, const gchar * sstate)
 {
-  GstdState * self;
+  GstdState *self;
   GstStateChangeReturn gstret;
   GValue value = G_VALUE_INIT;
   GstState state;
@@ -219,8 +212,8 @@ gstd_state_update (GstdObject * object, const gchar * sstate)
 GstdState *
 gstd_state_new (GstElement * target)
 {
-  GstdState * self;
-  
+  GstdState *self;
+
   g_return_val_if_fail (target, NULL);
 
   self = g_object_new (GSTD_TYPE_STATE, "name", "state", NULL);
@@ -232,12 +225,14 @@ gstd_state_new (GstElement * target)
 static void
 gstd_state_dispose (GObject * object)
 {
-  GstdState * self;
+  GstdState *self;
 
   self = GSTD_STATE (object);
 
   gst_object_unref (self->target);
   self->target = NULL;
+
+  G_OBJECT_CLASS (gstd_state_parent_class)->dispose (object);
 }
 
 static GstState

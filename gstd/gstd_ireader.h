@@ -38,13 +38,14 @@ struct _GstdIReaderInterface
 {
   GTypeInterface parent;
 
-  GstdReturnCode (*read) (GstdIReader * self, GstdObject * object, const gchar * name,
-      GstdObject ** out);
+  GstdReturnCode (*read) (GstdIReader * self, GstdObject * object,
+      const gchar * name, GstdObject ** out);
 };
 
 GType gstd_ireader_get_type (void);
 
-GstdReturnCode gstd_ireader_read (GstdIReader * self, GstdObject * object, const gchar * name, GstdObject **out);
+GstdReturnCode gstd_ireader_read (GstdIReader * self, GstdObject * object,
+    const gchar * name, GstdObject ** out);
 
 G_END_DECLS
 #endif // __GSTD_IREADER_H__

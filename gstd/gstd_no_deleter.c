@@ -25,7 +25,8 @@ GST_DEBUG_CATEGORY_STATIC (gstd_no_deleter_debug);
 
 #define GSTD_DEBUG_DEFAULT_LEVEL GST_LEVEL_INFO
 
-static GstdReturnCode gstd_no_deleter_delete (GstdIDeleter * iface, GstdObject * object);
+static GstdReturnCode gstd_no_deleter_delete (GstdIDeleter * iface,
+    GstdObject * object);
 
 typedef struct _GstdNoDeleterClass GstdNoDeleterClass;
 

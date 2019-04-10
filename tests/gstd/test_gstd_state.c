@@ -39,18 +39,19 @@ GST_START_TEST (test_success)
 
   ret = gstd_object_create (node, "p0", "fakesrc ! fakesink");
   fail_if (ret);
-  gst_object_unref(node);
+  gst_object_unref (node);
 
   ret = gstd_get_by_uri (test_session, "/pipelines/p0/state", &node);
   fail_if (ret);
   fail_if (NULL == node);
 
   ret = gstd_object_update (node, "playing");
-  gst_object_unref(node);
+  gst_object_unref (node);
   fail_if (ret);
 
-  gst_object_unref(test_session);
+  gst_object_unref (test_session);
 }
+
 GST_END_TEST;
 
 GST_START_TEST (test_failure)
@@ -66,18 +67,19 @@ GST_START_TEST (test_failure)
 
   ret = gstd_object_create (node, "p0", "fakesrc ! fakesink state-error=2");
   fail_if (ret);
-  gst_object_unref(node);
+  gst_object_unref (node);
 
   ret = gstd_get_by_uri (test_session, "/pipelines/p0/state", &node);
   fail_if (ret);
   fail_if (NULL == node);
 
   ret = gstd_object_update (node, "playing");
-  gst_object_unref(node);
+  gst_object_unref (node);
   fail_if (ret != GSTD_STATE_ERROR);
 
-  gst_object_unref(test_session);
+  gst_object_unref (test_session);
 }
+
 GST_END_TEST;
 
 static Suite *

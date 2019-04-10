@@ -25,7 +25,8 @@ GST_DEBUG_CATEGORY_STATIC (gstd_no_updater_debug);
 
 #define GSTD_DEBUG_DEFAULT_LEVEL GST_LEVEL_INFO
 
-static GstdReturnCode gstd_no_updater_update (GstdIUpdater * iface, GstdObject * object, const gchar * value);
+static GstdReturnCode gstd_no_updater_update (GstdIUpdater * iface,
+    GstdObject * object, const gchar * value);
 
 typedef struct _GstdNoUpdaterClass GstdNoUpdaterClass;
 
@@ -70,7 +71,8 @@ gstd_no_updater_init (GstdNoUpdater * self)
 }
 
 static GstdReturnCode
-gstd_no_updater_update (GstdIUpdater * iface, GstdObject * object, const gchar * value)
+gstd_no_updater_update (GstdIUpdater * iface, GstdObject * object,
+    const gchar * value)
 {
   GST_ERROR_OBJECT (iface, "This resource is not writable");
   return GSTD_NO_UPDATE;
