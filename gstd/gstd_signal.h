@@ -49,7 +49,9 @@ struct _GstdSignal
 {
   GstdObject parent;
 
+  /* properties */
   GObject *target;
+  gint64 timeout;
 };
 
 struct _GstdSignalClass
