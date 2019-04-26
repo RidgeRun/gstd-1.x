@@ -20,7 +20,7 @@
 #include "config.h"
 #endif
 
-#include "gstd_property_reader.h"
+#include "gstd_signal_reader.h"
 #include "gstd_signal.h"
 
 enum
@@ -103,7 +103,7 @@ gstd_signal_init (GstdSignal * self)
   self->timeout = DEFAULT_PROP_TIMEOUT;
 
   gstd_object_set_reader (GSTD_OBJECT (self),
-      g_object_new (GSTD_TYPE_PROPERTY_READER, NULL));
+      g_object_new (GSTD_TYPE_SIGNAL_READER, NULL));
 }
 
 static void
