@@ -148,6 +148,9 @@ static GstdClientCmd cmds[] = {
   {"list_properties", gstd_client_cmd_tcp,
         "List the properties of an element in a given pipeline",
       "list_properties <pipe> <elemement>"},
+  {"list_signals", gstd_client_cmd_tcp,
+      "List the signals of an element in a given pipeline",
+      "list_signals <pipe> <elemement>"},
 
   {"bus_read", gstd_client_cmd_tcp, "List the existing pipelines",
       "bus_read <pipe>"},
@@ -171,6 +174,13 @@ static GstdClientCmd cmds[] = {
   {"event_flush_stop", gstd_client_cmd_tcp,
       "Take the pipeline out from flushing mode",
       "event_flush_stop <pipe> <reset=true>"},
+
+  {"signal_connect", gstd_client_cmd_tcp, "Connect to signal and wait",
+      "signal_connect <pipe> <element> <signal>"},
+  {"signal_timeout", gstd_client_cmd_tcp,
+      "Apply a timeout for the signal waiting. -1: forever, 0: return immediately, "
+      "n: wait n microseconds",
+      "signal_timeout <pipe> <element> <signal> <timeout>"},
 
   {"debug_enable", gstd_client_cmd_tcp,
       "Enable/Disable GStreamer debug",
