@@ -53,7 +53,6 @@ G_DEFINE_TYPE (GstdSignal, gstd_signal, GSTD_TYPE_OBJECT);
 static void gstd_signal_get_property (GObject *, guint, GValue *, GParamSpec *);
 static void gstd_signal_set_property (GObject *, guint, const GValue *, GParamSpec *);
 static void gstd_signal_dispose (GObject *);
-static GstdReturnCode gstd_signal_to_string (GstdObject * obj, gchar ** outstring);
 
 static void
 gstd_signal_class_init (GstdSignalClass * klass)
@@ -172,48 +171,3 @@ gstd_signal_set_property (GObject * object,
       break;
   }
 }
-
-static GstdReturnCode
-gstd_signal_to_string (GstdObject * obj, gchar ** outstring)
-{
-  GSignalQuery *query = NULL;
-  GstdSignal *self;
-  const gchar *typename;
-  guint signal_id;
-  guint i;
-
-  g_return_val_if_fail (GSTD_IS_OBJECT (obj), GSTD_NULL_ARGUMENT);
-  g_return_val_if_fail (outstring, GSTD_NULL_ARGUMENT);
-
-  self = GSTD_SIGNAL (obj);
-
-  signal_id = g_signal_lookup (GSTD_OBJECT_NAME (self), G_OBJECT_TYPE (self->target));
-  query = g_new0 (GSignalQuery, 1);
-  g_signal_query(signal_id, query);
-
-  /* Describe each signal using a structure */
-  gstd_iformatter_begin_object (obj->formatter);
-
-  gstd_iformatter_set_member_name (obj->formatter, "name");
-  gstd_iformatter_set_string_value (obj->formatter, query->signal_name);
-
-  gstd_iformatter_set_member_name (obj->formatter, "arguments");
-  gstd_iformatter_begin_array(obj->formatter);
-
-  for (i = 0; i < query->n_params; i++) {
-    typename = g_type_name(query->param_types[i]);
-    gstd_iformatter_set_string_value(obj->formatter, typename);
-  }
-
-  gstd_iformatter_end_array(obj->formatter);
-
-  /* Close signal structure */
-  gstd_iformatter_end_object (obj->formatter);
-
-  gstd_iformatter_generate (obj->formatter, outstring);
-
-  g_free(query);
-
-  return GSTD_EOK;
-}
-
