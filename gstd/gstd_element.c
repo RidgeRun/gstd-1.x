@@ -233,8 +233,7 @@ gstd_element_get_property (GObject * object,
       g_value_set_object (value, self->element_properties);
       break;
     case PROP_SIGNALS:
-      GST_DEBUG_OBJECT (self, "Returning signals %p",
-          self->element_signals);
+      GST_DEBUG_OBJECT (self, "Returning signals %p", self->element_signals);
       g_value_set_object (value, self->element_signals);
       break;
     default:
@@ -457,16 +456,15 @@ gstd_element_fill_signals (GstdElement * self)
 
   g_return_val_if_fail (GSTD_IS_ELEMENT (self), GSTD_NULL_ARGUMENT);
 
-  GST_DEBUG_OBJECT (self, "Gathering \"%s\" signals",
-      GST_OBJECT_NAME (self));
+  GST_DEBUG_OBJECT (self, "Gathering \"%s\" signals", GST_OBJECT_NAME (self));
 
-  signals = g_signal_list_ids(G_OBJECT_TYPE(self->element), &n_signals);
+  signals = g_signal_list_ids (G_OBJECT_TYPE (self->element), &n_signals);
 
   for (i = 0; i < n_signals; ++i) {
-    query = g_new0(GSignalQuery, 1);
-    g_signal_query(signals[i], query);
+    query = g_new0 (GSignalQuery, 1);
+    g_signal_query (signals[i], query);
 
-    if (query->signal_flags & G_SIGNAL_ACTION){
+    if (query->signal_flags & G_SIGNAL_ACTION) {
       g_free (query);
       continue;
     }
@@ -476,7 +474,7 @@ gstd_element_fill_signals (GstdElement * self)
 
     gstd_list_append_child (self->element_signals, element_signal);
 
-    g_free(query);
+    g_free (query);
   }
 
   g_free (signals);
