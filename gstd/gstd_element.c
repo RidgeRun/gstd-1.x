@@ -304,8 +304,12 @@ gstd_element_internal_to_string (GstdElement * self, gchar ** outstring)
   GParamSpec **properties;
   GValue value = G_VALUE_INIT;
   GValue flags = G_VALUE_INIT;
+  guint *signals;
+  guint n_signals;
+  GSignalQuery *query = NULL;
+
   gchar *sflags;
-  guint n, i;
+  guint n, i, j;
   const gchar *typename;
 
   g_return_if_fail (GSTD_IS_OBJECT (self));
@@ -364,6 +368,45 @@ gstd_element_internal_to_string (GstdElement * self, gchar ** outstring)
   g_free (properties);
 
   gstd_iformatter_end_array (self->formatter);
+
+
+  gstd_iformatter_set_member_name (self->formatter, "element_signals");
+  gstd_iformatter_begin_array (self->formatter);
+
+  signals = g_signal_list_ids (G_OBJECT_TYPE (self->element), &n_signals);
+
+  for (i = 0; i < n_signals; ++i) {
+    query = g_new0 (GSignalQuery, 1);
+    g_signal_query (signals[i], query);
+
+    if (query->signal_flags & G_SIGNAL_ACTION) {
+      g_free (query);
+      continue;
+    }
+
+    /* Describe each signal using a structure */
+    gstd_iformatter_begin_object (self->formatter);
+
+    gstd_iformatter_set_member_name (self->formatter, "name");
+    gstd_iformatter_set_string_value (self->formatter, query->signal_name);
+
+    gstd_iformatter_set_member_name (self->formatter, "arguments");
+    gstd_iformatter_begin_array (self->formatter);
+    for (j = 0; j < query->n_params; j++) {
+      typename = g_type_name (query->param_types[j]);
+      gstd_iformatter_set_string_value (self->formatter, typename);
+    }
+    gstd_iformatter_end_array (self->formatter);
+
+    /* Close signal structure */
+    gstd_iformatter_end_object (self->formatter);
+
+    g_free (query);
+  }
+
+  g_free (signals);
+  gstd_iformatter_end_array (self->formatter);
+
   gstd_iformatter_end_object (self->formatter);
 
   gstd_iformatter_generate (self->formatter, outstring);
