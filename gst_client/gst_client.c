@@ -27,6 +27,7 @@
 #include <errno.h>
 #include <string.h>
 #include <gio/gio.h>
+#include <gio/gunixsocketaddress.h>
 
 #ifdef HAVE_LIBREADLINE
 #  if defined(HAVE_READLINE_READLINE_H)

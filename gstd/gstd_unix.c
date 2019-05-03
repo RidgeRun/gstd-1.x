@@ -24,6 +24,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <gst/gst.h>
+#include <gio/gunixsocketaddress.h>
 
 #include "gstd_ipc.h"
 #include "gstd_socket.h"

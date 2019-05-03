@@ -85,6 +85,22 @@ PKG_CHECK_MODULES(GIO, [
   ])
 ])
 
+PKG_CHECK_MODULES(GIO_UNIX, [
+    gio-unix-2.0              >= $GST_REQUIRED
+  ], [
+    AC_SUBST(GIO_UNIX_CFLAGS)
+    AC_SUBST(GIO_UNIX_LIBS)
+  ], [
+  AC_MSG_ERROR([
+    Can't find the following GIO-UNIX development packages:
+
+      gio-unix-2.0              >= $GIO_UNIX_REQUIRED
+
+    Please make sure you have the necessary GIO-UNIX-2.0
+    development headers installed.
+  ])
+])
+
 PKG_CHECK_MODULES(GJSON, [
     json-glib-1.0              >= $GJSON_REQUIRED
   ], [
