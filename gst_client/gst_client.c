@@ -56,7 +56,8 @@ extern gint read_history ();
 #endif /* HAVE_READLINE_HISTORY */
 
 /* cmdline defaults */
-#define GSTD_CLIENT_DEFAULT_ADDRESS "localhost"
+#define GSTD_CLIENT_DEFAULT_INET_ADDRESS "localhost"
+#define GSTD_CLIENT_DEFAULT_UNIX_ADDRESS "/tmp/gstd_default_unix_socket"
 #define GSTD_CLIENT_DEFAULT_PORT 5000
 
 typedef struct _GstdClientData GstdClientData;
@@ -74,6 +75,7 @@ struct _GstdClientCmd
 struct _GstdClientData
 {
   gboolean quiet;
+  gboolean use_unix;
   gchar *prompt;
   guint port;
   gchar *address;
@@ -277,6 +279,7 @@ main (gint argc, gchar * argv[])
   gboolean inter;
   gboolean launch;
   gboolean version;
+  gboolean use_unix;
   gchar *file;
   guint port;
   gchar *address;
@@ -300,7 +303,14 @@ main (gint argc, gchar * argv[])
     ,
     {"address", 'a', 0, G_OPTION_ARG_STRING, &address,
           "The IP address of the server (defaults to "
-          GSTD_CLIENT_DEFAULT_ADDRESS ")", "address"}
+          GSTD_CLIENT_DEFAULT_INET_ADDRESS ")", "address"}
+    ,
+    {"unix", 'u', 0, G_OPTION_ARG_NONE, &use_unix,
+          "Use unix socket", NULL}
+    ,
+    {"unix-path", 0, 0, G_OPTION_ARG_STRING, &address,
+          "The server unix path (defaults to "
+          GSTD_CLIENT_DEFAULT_UNIX_ADDRESS ")", "path"}
     ,
     {"version", 'v', 0, G_OPTION_ARG_NONE, &version,
           "Print current gstd-client version", NULL}
@@ -337,8 +347,13 @@ main (gint argc, gchar * argv[])
   }
   g_option_context_free (context);
 
-  if (!address)
-    address = g_strdup (GSTD_CLIENT_DEFAULT_ADDRESS);
+  if (!address) {
+    if (use_unix) {
+      address = g_strdup (GSTD_CLIENT_DEFAULT_UNIX_ADDRESS);
+    } else {
+      address = g_strdup (GSTD_CLIENT_DEFAULT_INET_ADDRESS);
+    }
+  }
 
   // Enter interactive only if no commands nor file has been set, or if the
   // user explicitely asked for it
@@ -359,6 +374,7 @@ main (gint argc, gchar * argv[])
   data->prompt = prompt;
   data->port = port;
   data->address = address;
+  data->use_unix = use_unix;
   data->client = g_socket_client_new ();
   data->con = NULL;
 
@@ -539,9 +555,23 @@ gstd_client_cmd_tcp (gchar * name, gchar * arg, GstdClientData * data)
 
   cmd = g_strconcat (name, " ", arg, NULL);
 
-  if (!data->con)
-    data->con = g_socket_client_connect_to_host (data->client,
-        data->address, data->port, NULL, &err);
+  if (!data->con) {
+    if (data->use_unix) {
+      GSocketAddress *socket_address;
+      g_socket_client_set_family (data->client,
+                                G_SOCKET_FAMILY_UNIX);
+      socket_address = g_unix_socket_address_new (data->address);
+
+      data->con = g_socket_client_connect (data->client,
+                           socket_address,
+                           NULL,
+                           &err);
+    } else {
+      data->con = g_socket_client_connect_to_host (data->client,
+          data->address, data->port, NULL, &err);
+    }
+  }
+
   if (err)
     goto error;
 

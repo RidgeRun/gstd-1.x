@@ -26,6 +26,7 @@
 #include <gst/gst.h>
 
 #include "gstd_ipc.h"
+#include "gstd_socket.h"
 #include "gstd_tcp.h"
 #include "gstd_parser.h"
 #include "gstd_element.h"
@@ -42,7 +43,7 @@ GST_DEBUG_CATEGORY_STATIC (gstd_tcp_debug);
 
 struct _GstdTcp
 {
-  GstdIpc parent;
+  GstdSocket parent;
   guint base_port;
   gchar *address;
   guint num_ports;
@@ -51,10 +52,10 @@ struct _GstdTcp
 
 struct _GstdTcpClass
 {
-  GstdIpcClass parent_class;
+  GstdSocketClass parent_class;
 };
 
-G_DEFINE_TYPE (GstdTcp, gstd_tcp, GSTD_TYPE_IPC);
+G_DEFINE_TYPE (GstdTcp, gstd_tcp, GSTD_TYPE_SOCKET);
 
 enum
 {
@@ -75,8 +76,9 @@ static void gstd_tcp_set_property (GObject *, guint, const GValue *,
     GParamSpec *);
 static void gstd_tcp_get_property (GObject *, guint, GValue *, GParamSpec *);
 static void gstd_tcp_dispose (GObject *);
+GstdReturnCode
+gstd_tcp_add_listener_address (GstdSocket * base, GSocketService ** service);
 gboolean gstd_tcp_init_get_option_group (GstdIpc * base, GOptionGroup ** group);
-static gboolean gstd_tcp_add_listeners(GSocketService *service, gchar * address, gint port, GError ** error);
 
 
 static void
@@ -84,14 +86,15 @@ gstd_tcp_class_init (GstdTcpClass * klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
   GstdIpcClass *gstdipc_class = GSTD_IPC_CLASS (klass);
+  GstdSocketClass* socket_class = GSTD_SOCKET_CLASS (klass);
   GParamSpec *properties[N_PROPERTIES] = { NULL, };
   guint debug_color;
   object_class->set_property = gstd_tcp_set_property;
   object_class->get_property = gstd_tcp_get_property;
-  gstdipc_class->start = GST_DEBUG_FUNCPTR (gstd_tcp_start);
-  gstdipc_class->stop = GST_DEBUG_FUNCPTR (gstd_tcp_stop);
   gstdipc_class->get_option_group =
       GST_DEBUG_FUNCPTR (gstd_tcp_init_get_option_group);
+  socket_class->add_listener_address =
+      GST_DEBUG_FUNCPTR (gstd_tcp_add_listener_address);
   object_class->dispose = gstd_tcp_dispose;
 
   properties[PROP_ADDRESS] =
@@ -134,12 +137,6 @@ static void
 gstd_tcp_init (GstdTcp * self)
 {
   GST_INFO_OBJECT (self, "Initializing gstd Tcp");
-  GstdIpc *base = GSTD_IPC (self);
-  self->base_port = GSTD_TCP_DEFAULT_PORT;
-  self->address = g_strdup(GSTD_TCP_DEFAULT_ADDRESS);
-  self->num_ports = GSTD_TCP_DEFAULT_NUM_PORTS;
-  self->service = NULL;
-  base->enabled = FALSE;
 }
 
 static void
@@ -212,93 +209,21 @@ gstd_tcp_set_property (GObject * object,
 static void
 gstd_tcp_dispose (GObject * object)
 {
-  GstdTcp *self = GSTD_TCP (object);
-
   GST_INFO_OBJECT (object, "Deinitializing gstd TCP");
-
-  if(self->address)
-    g_free(self->address);
-
-  if (self->service) {
-    self->service = NULL;
-  }
 
   G_OBJECT_CLASS (gstd_tcp_parent_class)->dispose (object);
 }
 
-
-
-static gboolean
-gstd_tcp_callback (GSocketService * service,
-    GSocketConnection * connection, GObject * source_object, gpointer user_data)
-{
-
-  GstdSession *session = GSTD_SESSION (user_data);
-  GInputStream *istream;
-  GOutputStream *ostream;
-  gint read;
-  const guint size = 1024*1024;
-  gchar *output = NULL;
-  gchar *response;
-  gchar *message;
-  GstdReturnCode ret;
-  const gchar *description = NULL;
-
-  g_return_val_if_fail (session, TRUE);
-
-  istream = g_io_stream_get_input_stream (G_IO_STREAM (connection));
-  ostream = g_io_stream_get_output_stream (G_IO_STREAM (connection));
-
-  message = g_malloc (size);
-
-  while (TRUE) {
-    read = g_input_stream_read (istream, message, size, NULL, NULL);
-
-    /* Was connection closed? */
-    if (read <= 0) {
-      break;
-    }
-    message[read] = '\0';
-
-    ret = gstd_parser_parse_cmd (session, message, &output); // in the parser
-
-    /* Prepend the code to the output */
-    description = gstd_return_code_to_string (ret);
-    response =
-      g_strdup_printf
-      ("{\n  \"code\" : %d,\n  \"description\" : \"%s\",\n  \"response\" : %s\n}",
-       ret, description, output ? output : "null");
-    g_free (output);
-    output = NULL;
-
-    read = g_output_stream_write (ostream, response, strlen (response) + 1, NULL, NULL);
-    if (read < 0) {
-      break;
-    }
-    g_free (response);
-  }
-
-  g_free (message);
-
-  return TRUE;
-}
-
 GstdReturnCode
-gstd_tcp_start (GstdIpc * base, GstdSession * session)
+gstd_tcp_add_listener_address (GstdSocket * base, GSocketService ** service)
 {
   guint debug_color;
   GError *error = NULL;
   GstdTcp *self = GSTD_TCP (base);
-  GSocketService **service;
   guint16 port = self->base_port;
-  gchar *address = self->address;
   guint i;
-  if (!base->enabled) {
-    GST_DEBUG_OBJECT (self, "TCP not enabled, skipping");
-    goto out;
-  }
 
-  GST_DEBUG_OBJECT (self, "Starting TCP");
+  GST_DEBUG_OBJECT (self, "Getting TCP Socket address");
 
   if (!gstd_tcp_debug) {
     /* Initialize debug category with nice colors */
@@ -306,63 +231,39 @@ gstd_tcp_start (GstdIpc * base, GstdSession * session)
     GST_DEBUG_CATEGORY_INIT (gstd_tcp_debug, "gstdtcp", debug_color,
         "Gstd TCP category");
   }
-  // Close any existing connection
-  gstd_tcp_stop (base);
 
-  service = &self->service;
   *service = g_threaded_socket_service_new (self->num_ports);
 
   for (i = 0; i < self->num_ports; i++) {
-    gstd_tcp_add_listeners(*service, address, port + i, &error);
+    GInetAddress *inet_address;
+    GSocketAddress *address;
+
+    inet_address = g_inet_address_new_any(G_SOCKET_FAMILY_IPV4);
+    address = g_inet_socket_address_new (inet_address, port + i);
+
+    g_object_unref (inet_address);
+
+    g_socket_listener_add_address (G_SOCKET_LISTENER (*service),
+                 address,
+                 G_SOCKET_TYPE_STREAM,
+                 G_SOCKET_PROTOCOL_DEFAULT,
+                 NULL,
+                 NULL,
+                 &error);
     if (error)
       goto noconnection;
   }
 
-  /* listen to the 'incoming' signal */
-  g_signal_connect (*service, "run", G_CALLBACK (gstd_tcp_callback), session);
-
-  /* start the socket service */
-  g_socket_service_start (*service);
-
-
-out:
   return GSTD_EOK;
 
 noconnection:
   {
-    GST_ERROR_OBJECT (session, "%s", error->message);
+    GST_ERROR_OBJECT (*service, "%s", error->message);
     g_printerr ("%s\n", error->message);
     g_error_free (error);
     return GSTD_NO_CONNECTION;
   }
 }
-
-GstdReturnCode
-gstd_tcp_stop (GstdIpc * base)
-{
-  GstdTcp *self = GSTD_TCP (base);
-  GSocketService **service;
-  GstdSession *session = base->session;
-
-  g_return_val_if_fail (session, GSTD_NULL_ARGUMENT);
-
-  GST_DEBUG_OBJECT (self, "Entering TCP stop ");
-  if (self->service) {
-    service = &self->service;
-    GSocketListener *listener = G_SOCKET_LISTENER (*service);
-    if (*service) {
-      GST_INFO_OBJECT (session, "Closing TCP connection for %s",
-          GSTD_OBJECT_NAME (session));
-      g_socket_listener_close (listener);
-      g_socket_service_stop (*service);
-      g_object_unref (*service);
-      *service = NULL;
-    }
-  }
-  return GSTD_EOK;
-}
-
-
 
 gboolean
 gstd_tcp_init_get_option_group (GstdIpc * base, GOptionGroup ** group)
@@ -392,27 +293,4 @@ gstd_tcp_init_get_option_group (GstdIpc * base, GOptionGroup ** group)
 
   g_option_group_add_entries (*group, tcp_args);
   return TRUE;
-}
-
-static gboolean
-gstd_tcp_add_listeners(GSocketService *service, gchar * address, gint port, GError ** error)
-{
-  GSocketAddress * sa;
-  gboolean ret = TRUE;
-
-  g_return_val_if_fail(service, FALSE);
-  g_return_val_if_fail(address, FALSE);
-  g_return_val_if_fail(error != NULL, FALSE);
-
-  sa = g_inet_socket_address_new_from_string(address, port);
-
-  if(g_socket_listener_add_address(G_SOCKET_LISTENER(service), sa,
-    G_SOCKET_TYPE_STREAM, G_SOCKET_PROTOCOL_TCP, NULL, NULL, error)
-      == FALSE ){
-    ret = FALSE;
-  }
-
-  g_object_unref(sa);
-
-  return ret;
 }
