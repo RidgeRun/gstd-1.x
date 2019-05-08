@@ -65,10 +65,6 @@ enum
 
 /* VTable */
 
-static gboolean
-gstd_unix_callback (GSocketService * service,
-    GSocketConnection * connection,
-    GObject * source_object, gpointer user_data);
 static void gstd_unix_set_property (GObject *, guint, const GValue *,
     GParamSpec *);
 static void gstd_unix_get_property (GObject *, guint, GValue *, GParamSpec *);
@@ -178,8 +174,9 @@ gstd_unix_dispose (GObject * object)
 
   GST_INFO_OBJECT (object, "Deinitializing gstd UNIX");
 
-  if (unlink(self->unix_path) != 0)
-    GST_ERROR_OBJECT ("Unable to delete UNIX path (%s)", errno);
+  if (unlink(self->unix_path) != 0) {
+    GST_ERROR_OBJECT (object, "Unable to delete UNIX path (%s)", strerror(errno));
+  }
 
   G_OBJECT_CLASS (gstd_unix_parent_class)->dispose (object);
 }

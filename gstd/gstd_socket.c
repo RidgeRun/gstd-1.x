@@ -100,7 +100,7 @@ gstd_socket_callback (GSocketService * service,
   GInputStream *istream;
   GOutputStream *ostream;
   gint read;
-  const guint size = 1024;
+  const guint size = 1024*1024;
   gchar *output = NULL;
   gchar *response;
   gchar *message;
@@ -114,31 +114,42 @@ gstd_socket_callback (GSocketService * service,
 
   message = g_malloc (size);
 
-  read = g_input_stream_read (istream, message, size, NULL, NULL);
-  message[read] = '\0';
+  while (TRUE) {
+    read = g_input_stream_read (istream, message, size, NULL, NULL);
 
-  ret = gstd_parser_parse_cmd (session, message, &output); // in the parser
-  g_free (message);
+    /* Was connection closed? */
+    if (read <= 0) {
+      break;
+    }
+    message[read] = '\0';
 
-  /* Prepend the code to the output */
-  description = gstd_return_code_to_string (ret);
-  response =
+    ret = gstd_parser_parse_cmd (session, message, &output); // in the parser
+
+    /* Prepend the code to the output */
+    description = gstd_return_code_to_string (ret);
+    response =
       g_strdup_printf
       ("{\n  \"code\" : %d,\n  \"description\" : \"%s\",\n  \"response\" : %s\n}",
-      ret, description, output ? output : "null");
-  g_free (output);
+       ret, description, output ? output : "null");
+    g_free (output);
+    output = NULL;
 
-  g_output_stream_write (ostream, response, strlen (response) + 1, NULL, NULL);
-  g_free (response);
+    read = g_output_stream_write (ostream, response, strlen (response) + 1, NULL, NULL);
+    if (read < 0) {
+      break;
+    }
+    g_free (response);
+  }
 
-  return FALSE;
+  g_free (message);
+
+  return TRUE;
 }
 
 GstdReturnCode
 gstd_socket_start (GstdIpc * base, GstdSession * session)
 {
   guint debug_color;
-  GError *error = NULL;
   GstdSocket *self = GSTD_SOCKET (base);
   GSocketService **service;
 

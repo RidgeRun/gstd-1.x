@@ -331,6 +331,7 @@ main (gint argc, gchar * argv[])
   port = GSTD_CLIENT_DEFAULT_PORT;
   address = NULL;
   quiet = FALSE;
+  use_unix = FALSE;
 
   //Did the user pass in a custom history?
   if (g_getenv (history_env)) {
@@ -564,7 +565,7 @@ gstd_client_cmd_tcp (gchar * name, gchar * arg, GstdClientData * data)
       socket_address = g_unix_socket_address_new (data->address);
 
       data->con = g_socket_client_connect (data->client,
-                           socket_address,
+                           (GSocketConnectable *) socket_address,
                            NULL,
                            &err);
     } else {
