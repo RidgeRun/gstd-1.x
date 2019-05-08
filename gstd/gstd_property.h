@@ -50,6 +50,7 @@ struct _GstdProperty
 {
   GstdObject parent;
 
+  GParamSpec *pspec;
   GObject *target;
 };
 

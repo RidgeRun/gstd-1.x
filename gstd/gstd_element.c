@@ -408,7 +408,8 @@ gstd_element_internal_to_string (GstdElement * self, gchar ** outstring)
 }
 
 static GstdReturnCode
-gstd_element_fill_properties (GstdElement * self)
+gstd_element_append_object_properties (GstObject * object,
+    GstdList * properties, GstElement * target, gchar * property_suffix)
 {
   GParamSpec **properties_array;
   guint n_properties;
@@ -416,27 +417,90 @@ gstd_element_fill_properties (GstdElement * self)
   GType type;
   GObjectClass *g_class;
   guint i;
-  g_class = G_OBJECT_GET_CLASS (self->element);
+  gchar *property_name;
 
-  g_return_val_if_fail (GSTD_IS_ELEMENT (self), GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (GST_IS_OBJECT (object), GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (properties, GSTD_NULL_ARGUMENT);
 
-  GST_DEBUG_OBJECT (self, "Gathering \"%s\" properties",
-      GST_OBJECT_NAME (self));
+  GST_DEBUG_OBJECT (target, "Gathering \"%s\" properties",
+      GST_OBJECT_NAME (object));
 
+  g_class = G_OBJECT_GET_CLASS (object);
   properties_array = g_object_class_list_properties (g_class, &n_properties);
 
   for (i = 0; i < n_properties; ++i) {
     type = gstd_element_property_get_type (properties_array[i]->value_type);
-    element_property = g_object_new (type, "name",
-        properties_array[i]->name, "target", self->element, NULL);
+    if (property_suffix)
+      property_name =
+          g_strconcat (property_suffix, properties_array[i]->name, NULL);
+    else
+      property_name = g_strdup (properties_array[i]->name);
 
-    gstd_list_append_child (self->element_properties, element_property);
+    element_property = g_object_new (type, "name",
+        property_name, "target", target, "pspec", properties_array[i], NULL);
+
+    g_free (property_name);
+    gstd_list_append_child (properties, element_property);
   }
 
+  g_free (property_suffix);
   g_free (properties_array);
 
   return GSTD_EOK;
 }
+
+static GstdReturnCode
+gstd_element_fill_child_properties (GstdElement * self, GstObject * element,
+    gchar * hierarchy)
+{
+  GObject *child;
+  guint count;
+  gint i;
+  gchar *suffix;
+
+  count = gst_child_proxy_get_children_count (GST_CHILD_PROXY (element));
+
+  GST_DEBUG_OBJECT (self, "%s has %d childrens", GST_OBJECT_NAME (element),
+      count);
+  if (!count)
+    goto out;
+
+  for (i = 0; i < count; i++) {
+    child = gst_child_proxy_get_child_by_index (GST_CHILD_PROXY (element), i);
+    if (!child)
+      continue;
+
+    if (hierarchy)
+      suffix = g_strconcat (hierarchy, GST_OBJECT_NAME (child), "::", NULL);
+    else
+      suffix = g_strdup_printf ("%s::", GST_OBJECT_NAME (child));
+
+    GST_DEBUG_OBJECT (self, "Child suffix %s", suffix);
+    gstd_element_fill_child_properties (self, GST_OBJECT (child), suffix);
+
+    gstd_element_append_object_properties (GST_OBJECT (child),
+        self->element_properties, GST_ELEMENT_CAST (child), suffix);
+
+    g_object_unref (child);
+  }
+
+out:
+  return GSTD_EOK;
+}
+
+static GstdReturnCode
+gstd_element_fill_properties (GstdElement * self)
+{
+
+  g_return_val_if_fail (GSTD_IS_ELEMENT (self), GSTD_NULL_ARGUMENT);
+
+  gstd_element_append_object_properties (GST_OBJECT (self->element),
+      self->element_properties, self->element, NULL);
+
+  gstd_element_fill_child_properties (self, GST_OBJECT (self->element), NULL);
+  return GSTD_EOK;
+}
+
 
 static GstdReturnCode
 gstd_element_fill_signals (GstdElement * self)
