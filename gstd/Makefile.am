@@ -44,7 +44,10 @@ libgstd_core_la_SOURCES = gstd_session.c		\
 			  gstd_parser.c			\
 			  gstd_log.c			\
 			  gstd_bus_msg_stream_status.c  \
-			  gstd_bus_msg_element.c
+			  gstd_bus_msg_element.c	\
+			  gstd_signal.c			\
+			  gstd_callback.c		\
+			  gstd_signal_reader.c
 
 libgstd_core_la_CFLAGS = $(GST_CFLAGS)					\
 			 $(GIO_CFLAGS)					\
@@ -111,7 +114,10 @@ gstdinclude_HEADERS = \
 		  gstd_parser.h			\
 		  gstd_log.h			\
 		  gstd_bus_msg_stream_status.h	\
-		  gstd_bus_msg_element.h
+		  gstd_bus_msg_element.h	\
+		  gstd_signal.h			\
+		  gstd_callback.h		\
+		  gstd_signal_reader.h
 
 noinst_HEADERS = gstd_daemon.h
 

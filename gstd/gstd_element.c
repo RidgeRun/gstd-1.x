@@ -40,12 +40,14 @@
 #include "gstd_property_enum.h"
 #include "gstd_property_array.h"
 #include "gstd_list_reader.h"
+#include "gstd_signal.h"
 
 enum
 {
   PROP_GSTELEMENT = 1,
   PROP_EVENT,
   PROP_PROPERTIES,
+  PROP_SIGNALS,
   N_PROPERTIES                  // NOT A PROPERTY
 };
 
@@ -81,6 +83,10 @@ struct _GstdElement
    */
   GstdList *element_properties;
 
+  /*
+   * The signals held by the element
+   */
+  GstdList *element_signals;
 };
 
 struct _GstdElementClass
@@ -100,6 +106,7 @@ static void gstd_element_dispose (GObject *);
 static GstdReturnCode gstd_element_to_string (GstdObject *, gchar **);
 void gstd_element_internal_to_string (GstdElement *, gchar **);
 static GstdReturnCode gstd_element_fill_properties (GstdElement * self);
+static GstdReturnCode gstd_element_fill_signals (GstdElement * self);
 static GType gstd_element_property_get_type (GType g_type);
 static void
 gstd_element_class_init (GstdElementClass * klass)
@@ -133,6 +140,13 @@ gstd_element_class_init (GstdElementClass * klass)
       GSTD_TYPE_LIST,
       G_PARAM_READABLE | G_PARAM_STATIC_STRINGS | GSTD_PARAM_READ);
 
+  properties[PROP_SIGNALS] =
+      g_param_spec_object ("signals",
+      "Signals",
+      "The signals of the element",
+      GSTD_TYPE_LIST,
+      G_PARAM_READABLE | G_PARAM_STATIC_STRINGS | GSTD_PARAM_READ);
+
   g_object_class_install_properties (object_class, N_PROPERTIES, properties);
 
   gstd_object_class->to_string = gstd_element_to_string;
@@ -159,8 +173,16 @@ gstd_element_init (GstdElement * self)
       GSTD_LIST (g_object_new (GSTD_TYPE_LIST, "name", "element_properties",
           "node-type", GSTD_TYPE_PROPERTY, "flags", GSTD_PARAM_READ, NULL));
 
+  self->element_signals =
+      GSTD_LIST (g_object_new (GSTD_TYPE_LIST, "name", "element_signals",
+          "node-type", GSTD_TYPE_SIGNAL, "flags", GSTD_PARAM_READ, NULL));
+
   gstd_object_set_reader (GSTD_OBJECT (self->element_properties),
       g_object_new (GSTD_TYPE_LIST_READER, NULL));
+
+  gstd_object_set_reader (GSTD_OBJECT (self->element_signals),
+      g_object_new (GSTD_TYPE_LIST_READER, NULL));
+
 }
 
 static void
@@ -183,6 +205,7 @@ gstd_element_dispose (GObject * object)
   /* Free formatter */
   g_object_unref (self->formatter);
   g_object_unref (self->element_properties);
+  g_object_unref (self->element_signals);
 
   G_OBJECT_CLASS (gstd_element_parent_class)->dispose (object);
 }
@@ -208,6 +231,10 @@ gstd_element_get_property (GObject * object,
       GST_DEBUG_OBJECT (self, "Returning properties %p",
           self->element_properties);
       g_value_set_object (value, self->element_properties);
+      break;
+    case PROP_SIGNALS:
+      GST_DEBUG_OBJECT (self, "Returning signals %p", self->element_signals);
+      g_value_set_object (value, self->element_signals);
       break;
     default:
       /* We don't have any other property... */
@@ -235,6 +262,7 @@ gstd_element_set_property (GObject * object,
           GST_OBJECT_NAME (self->element));
 
       gstd_element_fill_properties (self);
+      gstd_element_fill_signals (self);
       break;
     default:
       /* We don't have any other property... */
@@ -275,8 +303,11 @@ gstd_element_internal_to_string (GstdElement * self, gchar ** outstring)
   GParamSpec **properties;
   GValue value = G_VALUE_INIT;
   GValue flags = G_VALUE_INIT;
+  GSignalQuery *query = NULL;
+  GList *signal_list;
+
   gchar *sflags;
-  guint n, i;
+  guint n, i, j;
   const gchar *typename;
 
   g_return_if_fail (GSTD_IS_OBJECT (self));
@@ -335,6 +366,42 @@ gstd_element_internal_to_string (GstdElement * self, gchar ** outstring)
   g_free (properties);
 
   gstd_iformatter_end_array (self->formatter);
+
+  gstd_iformatter_set_member_name (self->formatter, "element_signals");
+  gstd_iformatter_begin_array (self->formatter);
+
+  signal_list = self->element_signals->list;
+  while (signal_list) {
+    guint signal_id;
+
+    signal_id = g_signal_lookup (GSTD_OBJECT_NAME (signal_list->data),
+        G_OBJECT_TYPE (self->element));
+    query = g_new0 (GSignalQuery, 1);
+    g_signal_query (signal_id, query);
+
+    /* Describe each signal using a structure */
+    gstd_iformatter_begin_object (self->formatter);
+
+    gstd_iformatter_set_member_name (self->formatter, "name");
+    gstd_iformatter_set_string_value (self->formatter, query->signal_name);
+
+    gstd_iformatter_set_member_name (self->formatter, "arguments");
+    gstd_iformatter_begin_array (self->formatter);
+    for (j = 0; j < query->n_params; j++) {
+      typename = g_type_name (query->param_types[j]);
+      gstd_iformatter_set_string_value (self->formatter, typename);
+    }
+    gstd_iformatter_end_array (self->formatter);
+
+    /* Close signal structure */
+    gstd_iformatter_end_object (self->formatter);
+
+    g_free (query);
+    signal_list = signal_list->next;
+  }
+
+  gstd_iformatter_end_array (self->formatter);
+
   gstd_iformatter_end_object (self->formatter);
 
   gstd_iformatter_generate (self->formatter, outstring);
@@ -367,6 +434,46 @@ gstd_element_fill_properties (GstdElement * self)
   }
 
   g_free (properties_array);
+
+  return GSTD_EOK;
+}
+
+static GstdReturnCode
+gstd_element_fill_signals (GstdElement * self)
+{
+  guint *signals;
+  guint n_signals;
+  GSignalQuery *query = NULL;
+  GstdObject *element_signal;
+  GType type;
+  GObjectClass *g_class;
+  guint i;
+  g_class = G_OBJECT_GET_CLASS (self->element);
+
+  g_return_val_if_fail (GSTD_IS_ELEMENT (self), GSTD_NULL_ARGUMENT);
+
+  GST_DEBUG_OBJECT (self, "Gathering \"%s\" signals", GST_OBJECT_NAME (self));
+
+  signals = g_signal_list_ids (G_OBJECT_TYPE (self->element), &n_signals);
+
+  for (i = 0; i < n_signals; ++i) {
+    query = g_new0 (GSignalQuery, 1);
+    g_signal_query (signals[i], query);
+
+    if (query->signal_flags & G_SIGNAL_ACTION) {
+      g_free (query);
+      continue;
+    }
+
+    element_signal = g_object_new (GSTD_TYPE_SIGNAL, "name",
+        query->signal_name, "target", self->element, NULL);
+
+    gstd_list_append_child (self->element_signals, element_signal);
+
+    g_free (query);
+  }
+
+  g_free (signals);
 
   return GSTD_EOK;
 }
