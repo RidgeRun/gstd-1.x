@@ -445,10 +445,7 @@ gstd_element_fill_signals (GstdElement * self)
   guint n_signals;
   GSignalQuery *query = NULL;
   GstdObject *element_signal;
-  GType type;
-  GObjectClass *g_class;
   guint i;
-  g_class = G_OBJECT_GET_CLASS (self->element);
 
   g_return_val_if_fail (GSTD_IS_ELEMENT (self), GSTD_NULL_ARGUMENT);
 

@@ -58,7 +58,6 @@ static void
 gstd_signal_class_init (GstdSignalClass * klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
-  GstdObjectClass *gstdc = GSTD_OBJECT_CLASS (klass);
   GParamSpec *properties[N_PROPERTIES] = { NULL, };
   guint debug_color;
 
