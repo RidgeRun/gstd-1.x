@@ -26,7 +26,7 @@
 #include "gstd_socket.h"
 
 G_BEGIN_DECLS
-#define GSTD_UNIX_DEFAULT_PATH  "/tmp/gstd_default_unix_socket"
+#define GSTD_UNIX_DEFAULT_BASE_NAME  "gstd_default_unix_socket"
 #define GSTD_UNIX_DEFAULT_NUM_PORTS  1
 
 #define GSTD_TYPE_UNIX \

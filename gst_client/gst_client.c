@@ -58,7 +58,7 @@ extern gint read_history ();
 
 /* cmdline defaults */
 #define GSTD_CLIENT_DEFAULT_INET_ADDRESS "localhost"
-#define GSTD_CLIENT_DEFAULT_UNIX_ADDRESS "/tmp/gstd_default_unix_socket"
+#define GSTD_CLIENT_DEFAULT_UNIX_BASE_NAME "gstd_default_unix_socket"
 #define GSTD_CLIENT_DEFAULT_PORT 5000
 #define GSTD_CLIENT_DEFAULT_UNIX_PORT 1
 
@@ -288,6 +288,10 @@ main (gint argc, gchar * argv[])
   guint unix_port;
   gchar *address;
   gchar **remaining;
+  gchar *default_unix_path;
+
+  default_unix_path = g_strdup_printf ("%s/%s", GSTD_RUN_STATE_DIR, GSTD_CLIENT_DEFAULT_UNIX_BASE_NAME);
+
   GOptionEntry entries[] = {
     {"quiet", 'q', 0, G_OPTION_ARG_NONE, &quiet, "Dont't print startup headers",
           NULL}
@@ -313,8 +317,8 @@ main (gint argc, gchar * argv[])
           "Use unix socket", NULL}
     ,
     {"unix-path", 0, 0, G_OPTION_ARG_STRING, &address,
-          "The server unix path (defaults to "
-          GSTD_CLIENT_DEFAULT_UNIX_ADDRESS ")", "path"}
+          "The server unix path (defaults to /usr/local/var/run/gstd/"
+          GSTD_CLIENT_DEFAULT_UNIX_BASE_NAME")", "path"}
     ,
     {"unix-port", 'e', 0, G_OPTION_ARG_INT, &unix_port,
           "Attach to the server through the given port (default 0)",
@@ -341,6 +345,8 @@ main (gint argc, gchar * argv[])
   quiet = FALSE;
   use_unix = FALSE;
 
+  g_free (default_unix_path);
+
   //Did the user pass in a custom history?
   if (g_getenv (history_env)) {
     history_full = g_strdup (g_getenv(history_env));
@@ -359,7 +365,7 @@ main (gint argc, gchar * argv[])
 
   if (!address) {
     if (use_unix) {
-      address = g_strdup (GSTD_CLIENT_DEFAULT_UNIX_ADDRESS);
+      address = g_strdup_printf ("%s/%s", GSTD_RUN_STATE_DIR, GSTD_CLIENT_DEFAULT_UNIX_BASE_NAME);
     } else {
       address = g_strdup (GSTD_CLIENT_DEFAULT_INET_ADDRESS);
     }

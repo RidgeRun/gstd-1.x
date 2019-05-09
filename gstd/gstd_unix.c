@@ -84,6 +84,7 @@ gstd_unix_class_init (GstdUnixClass * klass)
   GstdSocketClass* socket_class = GSTD_SOCKET_CLASS (klass);
   GParamSpec *properties[N_PROPERTIES] = { NULL, };
   guint debug_color;
+  gchar *default_path;
   object_class->set_property = gstd_unix_set_property;
   object_class->get_property = gstd_unix_get_property;
   gstdipc_class->get_option_group =
@@ -92,14 +93,16 @@ gstd_unix_class_init (GstdUnixClass * klass)
       GST_DEBUG_FUNCPTR (gstd_unix_add_listener_address);
   object_class->dispose = gstd_unix_dispose;
 
+  default_path = g_strdup_printf ("%s/%s", GSTD_RUN_STATE_DIR, GSTD_UNIX_DEFAULT_BASE_NAME);
   properties[PROP_UNIX_PATH] =
     g_param_spec_string ("unix-path",
                    "Unix path",
                    "The path used to create the unix socket address",
-                   GSTD_UNIX_DEFAULT_PATH,
+                   default_path,
                    G_PARAM_READWRITE |
                    G_PARAM_CONSTRUCT_ONLY | G_PARAM_STATIC_STRINGS |
                    GSTD_PARAM_READ);
+  g_free (default_path);
 
   properties[PROP_UNIX_NUM_PORTS] =
       g_param_spec_uint ("num-ports",
@@ -135,7 +138,10 @@ gstd_unix_init (GstdUnix * self)
 {
   GST_INFO_OBJECT (self, "Initializing gstd Unix");
 
-  gstd_unix_set_path(self, GSTD_UNIX_DEFAULT_PATH);
+  gchar *default_path;
+  default_path = g_strdup_printf ("%s/%s", GSTD_RUN_STATE_DIR, GSTD_UNIX_DEFAULT_BASE_NAME);
+  gstd_unix_set_path(self, default_path);
+  g_free (default_path);
   self->num_ports = GSTD_UNIX_DEFAULT_NUM_PORTS;
 
 }
@@ -274,7 +280,7 @@ gstd_unix_init_get_option_group (GstdIpc * base, GOptionGroup ** group)
         "Enable attach the server through given UNIX socket ", NULL}
     ,
     {"unix-path", 'b', 0, G_OPTION_ARG_STRING, &self->unix_path,
-          "Attach to the server using the given path (default /tmp/gstd_default_unix_socket)",
+          "Attach to the server using the given path (default /usr/var/run/gstd/gstd_default_unix_socket)",
         "unix-path"}
     ,
     {"unix-num-ports", 'c', 0, G_OPTION_ARG_INT, &self->num_ports,
