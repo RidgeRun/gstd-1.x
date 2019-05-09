@@ -70,7 +70,7 @@ static void gstd_unix_set_property (GObject *, guint, const GValue *,
 static void gstd_unix_get_property (GObject *, guint, GValue *, GParamSpec *);
 static void gstd_unix_dispose (GObject *);
 GstdReturnCode
-gstd_unix_add_listerner_address (GstdSocket * base, GSocketService ** service);
+gstd_unix_add_listener_address (GstdSocket * base, GSocketService ** service);
 gboolean gstd_unix_init_get_option_group (GstdIpc * base, GOptionGroup ** group);
 
 
@@ -87,7 +87,7 @@ gstd_unix_class_init (GstdUnixClass * klass)
   gstdipc_class->get_option_group =
       GST_DEBUG_FUNCPTR (gstd_unix_init_get_option_group);
   socket_class->add_listener_address =
-      GST_DEBUG_FUNCPTR (gstd_unix_add_listerner_address);
+      GST_DEBUG_FUNCPTR (gstd_unix_add_listener_address);
   object_class->dispose = gstd_unix_dispose;
 
   properties[PROP_UNIX_PATH] =
@@ -182,7 +182,7 @@ gstd_unix_dispose (GObject * object)
 }
 
 GstdReturnCode
-gstd_unix_add_listerner_address (GstdSocket * base, GSocketService ** service)
+gstd_unix_add_listener_address (GstdSocket * base, GSocketService ** service)
 {
   guint debug_color;
   GError *error = NULL;
