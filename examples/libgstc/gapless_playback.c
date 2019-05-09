@@ -66,7 +66,7 @@ main (int argc, char *argv[])
   const long start = 0;
   const int end_type = 1;
   const long end = -1;
-
+  int asprintf_ret;
   const char *pipe_name = "pipe";
   char *pipe_description;
   const char *pipe_description_template = "playbin uri=file://%s";
@@ -84,14 +84,17 @@ main (int argc, char *argv[])
   }
 
   video_name = argv[1];
-  asprintf (&pipe_description, pipe_description_template, video_name);
+  asprintf_ret = asprintf (&pipe_description, pipe_description_template, video_name);
+  if (-1 == asprintf_ret) {
+    goto free_client;
+  }
 
   ret = gstc_pipeline_create (client, pipe_name, pipe_description);
   if (GSTC_OK == ret) {
     printf ("Pipeline created successfully!\n");
   } else {
     fprintf (stderr, "Error creating pipeline: %d\n", ret);
-    goto free_client;
+    goto free_resources;
   }
 
   ret = gstc_pipeline_play (client, pipe_name);
@@ -144,8 +147,9 @@ pipeline_delete:
     goto free_client;
   }
 
-free_client:
+free_resources:
   free(pipe_description);
+free_client:
   gstc_client_free (client);
 
 out:
