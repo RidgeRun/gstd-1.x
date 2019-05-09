@@ -46,6 +46,7 @@ struct _GstdUnix
 {
   GstdSocket parent;
   gchar *unix_path;
+  guint num_ports;
   GSocketService *service;
 };
 
@@ -59,6 +60,7 @@ G_DEFINE_TYPE (GstdUnix, gstd_unix, GSTD_TYPE_SOCKET);
 enum
 {
   PROP_UNIX_PATH = 1,
+  PROP_UNIX_NUM_PORTS = 2,
   N_PROPERTIES                  // NOT A PROPERTY
 };
 
@@ -99,6 +101,16 @@ gstd_unix_class_init (GstdUnixClass * klass)
                    G_PARAM_CONSTRUCT_ONLY | G_PARAM_STATIC_STRINGS |
                    GSTD_PARAM_READ);
 
+  properties[PROP_UNIX_NUM_PORTS] =
+      g_param_spec_uint ("num-ports",
+      "Num Ports",
+      "The number of ports to open for the unix session, starting at unix-path",
+      0,
+      G_MAXINT,
+      GSTD_UNIX_DEFAULT_NUM_PORTS,
+      G_PARAM_READWRITE |
+      G_PARAM_CONSTRUCT_ONLY | G_PARAM_STATIC_STRINGS | GSTD_PARAM_READ);
+
   g_object_class_install_properties (object_class, N_PROPERTIES, properties);
 
   /* Initialize debug category with nice colors */
@@ -124,6 +136,7 @@ gstd_unix_init (GstdUnix * self)
   GST_INFO_OBJECT (self, "Initializing gstd Unix");
 
   gstd_unix_set_path(self, GSTD_UNIX_DEFAULT_PATH);
+  self->num_ports = GSTD_UNIX_DEFAULT_NUM_PORTS;
 
 }
 
@@ -139,7 +152,12 @@ gstd_unix_get_property (GObject * object,
       g_value_set_string (value, self->unix_path);
       break;
 
-    default:
+    case PROP_UNIX_NUM_PORTS:
+      GST_DEBUG_OBJECT (self, "Returning number-ports %u", self->num_ports);
+      g_value_set_uint (value, self->num_ports);
+      break;
+
+	  default:
       /* We don't have any other property... */
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
       break;
@@ -159,6 +177,13 @@ gstd_unix_set_property (GObject * object,
       gstd_unix_set_path(self, g_value_get_string (value));
       break;
 
+    case PROP_UNIX_NUM_PORTS:
+      GST_DEBUG_OBJECT (self, "Changing num-ports current value: %u",
+          self->num_ports);
+      self->num_ports = g_value_get_uint (value);
+      GST_DEBUG_OBJECT (self, "Value changed %u", self->num_ports);
+      break;
+
     default:
       /* We don't have any other property... */
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -172,12 +197,18 @@ gstd_unix_dispose (GObject * object)
 {
   GstdUnix *self = GSTD_UNIX (object);
   GstdIpc *parent = GSTD_IPC (object);
+  guint i;
 
   GST_INFO_OBJECT (object, "Deinitializing gstd UNIX");
 
   if (parent->enabled) {
-    if (unlink(self->unix_path) != 0) {
-      GST_ERROR_OBJECT (object, "Unable to delete UNIX path (%s)", strerror(errno));
+    for (i = 0; i < self->num_ports; i++) {
+      gchar * path_name = g_strdup_printf ("%s_%d", self->unix_path, i);
+
+      if (unlink(path_name) != 0) {
+        GST_ERROR_OBJECT (object, "Unable to delete UNIX path (%s)", strerror(errno));
+      }
+      g_free (path_name);
     }
   }
 
@@ -191,6 +222,7 @@ gstd_unix_add_listener_address (GstdSocket * base, GSocketService ** service)
   GError *error = NULL;
   GstdUnix *self = GSTD_UNIX (base);
   gchar* path = self->unix_path;
+  guint i;
 
   GST_DEBUG_OBJECT (self, "Getting UNIX Socket address");
 
@@ -201,22 +233,26 @@ gstd_unix_add_listener_address (GstdSocket * base, GSocketService ** service)
         "Gstd UNIX category");
   }
 
-  *service = g_threaded_socket_service_new (1);
+  *service = g_threaded_socket_service_new (self->num_ports);
 
-  GSocketAddress *address;
-  address = g_unix_socket_address_new (path);
+  for (i = 0; i < self->num_ports; i++) {
+    GSocketAddress *address;
+    gchar * path_name = g_strdup_printf ("%s_%d", path, i);
 
-  g_socket_listener_add_address (G_SOCKET_LISTENER (*service),
-               address,
-               G_SOCKET_TYPE_STREAM,
-               G_SOCKET_PROTOCOL_DEFAULT,
-               NULL,
-               NULL,
-               &error);
+    address = g_unix_socket_address_new (path_name);
+	  g_free (path_name);
 
-    if (error)
-      goto noconnection;
+    g_socket_listener_add_address (G_SOCKET_LISTENER (*service),
+                 address,
+                 G_SOCKET_TYPE_STREAM,
+                 G_SOCKET_PROTOCOL_DEFAULT,
+                 NULL,
+                 NULL,
+                 &error);
 
+      if (error)
+        goto noconnection;
+  }
   return GSTD_EOK;
 
 noconnection:
@@ -237,9 +273,13 @@ gstd_unix_init_get_option_group (GstdIpc * base, GOptionGroup ** group)
     {"enable-unix-protocol", 'u', 0, G_OPTION_ARG_NONE, &base->enabled,
         "Enable attach the server through given UNIX socket ", NULL}
     ,
-    {"unix-path", /*'p'*/ 0, 0, G_OPTION_ARG_STRING, &self->unix_path,
+    {"unix-path", 'b', 0, G_OPTION_ARG_STRING, &self->unix_path,
           "Attach to the server using the given path (default /tmp/gstd_default_unix_socket)",
         "unix-path"}
+    ,
+    {"unix-num-ports", 'c', 0, G_OPTION_ARG_INT, &self->num_ports,
+          "Number of ports to use starting at base-port (default 1)",
+        "unix-num-ports"}
     ,
     {NULL}
   };

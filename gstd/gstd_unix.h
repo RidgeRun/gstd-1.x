@@ -27,6 +27,8 @@
 
 G_BEGIN_DECLS
 #define GSTD_UNIX_DEFAULT_PATH  "/tmp/gstd_default_unix_socket"
+#define GSTD_UNIX_DEFAULT_NUM_PORTS  1
+
 #define GSTD_TYPE_UNIX \
   (gstd_unix_get_type())
 #define GSTD_UNIX(obj) \
