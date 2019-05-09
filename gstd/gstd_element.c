@@ -443,7 +443,6 @@ gstd_element_append_object_properties (GstObject * object,
     gstd_list_append_child (properties, element_property);
   }
 
-  g_free (property_suffix);
   g_free (properties_array);
 
   return GSTD_EOK;
@@ -481,6 +480,7 @@ gstd_element_fill_child_properties (GstdElement * self, GstObject * element,
     gstd_element_append_object_properties (GST_OBJECT (child),
         self->element_properties, GST_ELEMENT_CAST (child), suffix);
 
+    g_free (suffix);
     g_object_unref (child);
   }
 
