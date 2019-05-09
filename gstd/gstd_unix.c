@@ -171,11 +171,14 @@ static void
 gstd_unix_dispose (GObject * object)
 {
   GstdUnix *self = GSTD_UNIX (object);
+  GstdIpc *parent = GSTD_IPC (object);
 
   GST_INFO_OBJECT (object, "Deinitializing gstd UNIX");
 
-  if (unlink(self->unix_path) != 0) {
-    GST_ERROR_OBJECT (object, "Unable to delete UNIX path (%s)", strerror(errno));
+  if (parent->enabled) {
+    if (unlink(self->unix_path) != 0) {
+      GST_ERROR_OBJECT (object, "Unable to delete UNIX path (%s)", strerror(errno));
+    }
   }
 
   G_OBJECT_CLASS (gstd_unix_parent_class)->dispose (object);
