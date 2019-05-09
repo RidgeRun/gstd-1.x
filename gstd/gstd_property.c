@@ -26,10 +26,12 @@
 enum
 {
   PROP_TARGET = 1,
+  PROP_PSPEC,
   N_PROPERTIES
 };
 
 #define DEFAULT_PROP_TARGET NULL
+#define DEFAULT_PROP_PSPEC  NULL
 
 /* Gstd Property debugging category */
 GST_DEBUG_CATEGORY_STATIC (gstd_property_debug);
@@ -78,6 +80,12 @@ gstd_property_class_init (GstdPropertyClass * klass)
       G_PARAM_READWRITE |
       G_PARAM_CONSTRUCT_ONLY | G_PARAM_STATIC_STRINGS | GSTD_PARAM_READ);
 
+  properties[PROP_PSPEC] =
+      g_param_spec_pointer ("pspec",
+      "Property Specification",
+      "The property meta-specification associated with the property",
+      G_PARAM_READWRITE |
+      G_PARAM_CONSTRUCT_ONLY | G_PARAM_STATIC_STRINGS | GSTD_PARAM_READ);
 
   g_object_class_install_properties (object_class, N_PROPERTIES, properties);
 
@@ -98,6 +106,7 @@ gstd_property_init (GstdProperty * self)
 {
   GST_INFO_OBJECT (self, "Initializing property");
   self->target = DEFAULT_PROP_TARGET;
+  self->pspec = DEFAULT_PROP_PSPEC;
 }
 
 static void
@@ -112,6 +121,7 @@ gstd_property_dispose (GObject * object)
     self->target = NULL;
   }
 
+  self->pspec = NULL;
   G_OBJECT_CLASS (gstd_property_parent_class)->dispose (object);
 }
 
@@ -126,6 +136,10 @@ gstd_property_get_property (GObject * object,
       GST_DEBUG_OBJECT (self, "Returning property owner %p (%s)", self->target,
           GST_OBJECT_NAME (self->target));
       g_value_set_object (value, self->target);
+      break;
+    case PROP_PSPEC:
+      GST_DEBUG_OBJECT (self, "Returning property spec %p", self->pspec);
+      g_value_set_pointer (value, self->pspec);
       break;
     default:
       /* We don't have any other property... */
@@ -147,6 +161,10 @@ gstd_property_set_property (GObject * object,
       self->target = g_value_dup_object (value);
       GST_DEBUG_OBJECT (self, "Setting property owner %p (%s)", self->target,
           GST_OBJECT_NAME (self->target));
+      break;
+    case PROP_PSPEC:
+      self->pspec = g_value_get_pointer (value);
+      GST_DEBUG_OBJECT (self, "Setting property spec %p", self->pspec);
       break;
     default:
       /* We don't have any other property... */
@@ -171,8 +189,11 @@ gstd_property_to_string (GstdObject * obj, gchar ** outstring)
   self = GSTD_PROPERTY (obj);
   klass = GSTD_PROPERTY_GET_CLASS (self);
 
-  property = g_object_class_find_property (G_OBJECT_GET_CLASS (self->target),
-      GSTD_OBJECT_NAME (self));
+  if (self->pspec)
+    property = self->pspec;
+  else
+    property = g_object_class_find_property (G_OBJECT_GET_CLASS (self->target),
+        GSTD_OBJECT_NAME (self));
 
   /* Describe each parameter using a structure */
   gstd_iformatter_begin_object (obj->formatter);
@@ -250,8 +271,12 @@ gstd_property_update_default (GstdObject * object, const gchar * svalue)
 
   prop = GSTD_PROPERTY (object);
 
-  pspec = g_object_class_find_property (G_OBJECT_GET_CLASS (prop->target),
-      GSTD_OBJECT_NAME (prop));
+  if (prop->pspec) {
+    pspec = prop->pspec;
+  } else {
+    pspec = g_object_class_find_property (G_OBJECT_GET_CLASS (prop->target),
+        GSTD_OBJECT_NAME (prop));
+  }
 
   g_value_init (&value, pspec->value_type);
 
