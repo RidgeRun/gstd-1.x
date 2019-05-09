@@ -420,6 +420,7 @@ gstd_element_append_object_properties (GstObject * object,
   gchar *property_name;
 
   g_return_val_if_fail (GST_IS_OBJECT (object), GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (GST_IS_OBJECT (target), GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (properties, GSTD_NULL_ARGUMENT);
 
   GST_DEBUG_OBJECT (target, "Gathering \"%s\" properties",
