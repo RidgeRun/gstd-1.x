@@ -266,17 +266,17 @@ gstd_tcp_init_get_option_group (GstdIpc * base, GOptionGroup ** group)
     {"enable-tcp-protocol", 't', 0, G_OPTION_ARG_NONE, &base->enabled,
         "Enable attach the server through given TCP ports ", NULL}
     ,
-    {"address", 'a', 0, G_OPTION_ARG_STRING, &self->address,
+    {"tcp-address", 'a', 0, G_OPTION_ARG_STRING, &self->address,
           "Attach to the server starting through a given address (default 127.0.0.1)",
-        "address"}
+        "tcp-address"}
     ,
-    {"base-port", 'p', 0, G_OPTION_ARG_INT, &self->base_port,
+    {"tcp-base-port", 'p', 0, G_OPTION_ARG_INT, &self->base_port,
           "Attach to the server starting through a given port (default 5000)",
-        "base-port"}
+        "tcp-base-port"}
     ,
-    {"num-ports", 'n', 0, G_OPTION_ARG_INT, &self->num_ports,
+    {"tcp-num-ports", 'n', 0, G_OPTION_ARG_INT, &self->num_ports,
           "Number of ports to use starting at base-port (default 1)",
-        "num-ports"}
+        "tcp-num-ports"}
     ,
     {NULL}
   };
