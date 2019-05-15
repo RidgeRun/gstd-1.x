@@ -316,7 +316,7 @@ main (gint argc, gchar * argv[])
     {"unix", 'u', 0, G_OPTION_ARG_NONE, &use_unix,
           "Use unix socket", NULL}
     ,
-    {"unix-path", 'b', 0, G_OPTION_ARG_STRING, &address,
+    {"unix-base-path", 'b', 0, G_OPTION_ARG_STRING, &address,
           "The server unix path (defaults to /usr/local/var/run/gstd/"
           GSTD_CLIENT_DEFAULT_UNIX_BASE_NAME"), use 'unix-port' to specify the port number", "path"}
     ,

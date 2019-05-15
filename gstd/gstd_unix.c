@@ -279,7 +279,7 @@ gstd_unix_init_get_option_group (GstdIpc * base, GOptionGroup ** group)
     {"enable-unix-protocol", 'u', 0, G_OPTION_ARG_NONE, &base->enabled,
         "Enable attach the server through given UNIX socket ", NULL}
     ,
-    {"unix-path", 'b', 0, G_OPTION_ARG_STRING, &self->unix_path,
+    {"unix-base-path", 'b', 0, G_OPTION_ARG_STRING, &self->unix_path,
           "Attach to the server using the given path (default /usr/local/var/run/gstd/gstd_default_unix_socket), " \
         "a '_<port_number>' is appended to this path to create the ports, for instance if only one port is created, its path will be /usr/local/var/run/gstd/gstd_default_unix_socket_0",
         "unix-path"}
