@@ -237,7 +237,7 @@ gstd_unix_add_listener_address (GstdSocket * base, GSocketService ** service)
     gchar * path_name = g_strdup_printf ("%s_%d", path, i);
 
     address = g_unix_socket_address_new (path_name);
-	  g_free (path_name);
+    g_free (path_name);
 
     g_socket_listener_add_address (G_SOCKET_LISTENER (*service),
                  address,
