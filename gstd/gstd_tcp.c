@@ -72,7 +72,7 @@ static void gstd_tcp_set_property (GObject *, guint, const GValue *,
     GParamSpec *);
 static void gstd_tcp_get_property (GObject *, guint, GValue *, GParamSpec *);
 static void gstd_tcp_dispose (GObject *);
-GstdReturnCode
+static GstdReturnCode
 gstd_tcp_add_listener_address (GstdSocket * base, GSocketService ** service);
 gboolean gstd_tcp_init_get_option_group (GstdIpc * base, GOptionGroup ** group);
 static gboolean gstd_tcp_add_listeners(GSocketService *service, gchar * address, gint port, GError ** error);
