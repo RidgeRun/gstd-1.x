@@ -10,7 +10,10 @@ GST_REQUIRED=1.0.0
 dnl required version of gio
 GIO_REQUIRED=2.44.1
 
-dnl required version of gio
+dnl required version of gio-unix
+GIO_UNIX_REQUIRED=2.44.1
+
+dnl required version of gjson
 GJSON_REQUIRED=0.16.2
 
 dnl required version of libdaemon
@@ -86,7 +89,7 @@ PKG_CHECK_MODULES(GIO, [
 ])
 
 PKG_CHECK_MODULES(GIO_UNIX, [
-    gio-unix-2.0              >= $GST_REQUIRED
+    gio-unix-2.0              >= $GIO_UNIX_REQUIRED
   ], [
     AC_SUBST(GIO_UNIX_CFLAGS)
     AC_SUBST(GIO_UNIX_LIBS)
