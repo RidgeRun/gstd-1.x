@@ -60,7 +60,7 @@ extern gint read_history ();
 #define GSTD_CLIENT_DEFAULT_TCP_INET_ADDRESS "localhost"
 #define GSTD_CLIENT_DEFAULT_UNIX_BASE_NAME "gstd_default_unix_socket"
 #define GSTD_CLIENT_DEFAULT_TCP_PORT 5000
-#define GSTD_CLIENT_DEFAULT_UNIX_PORT 1
+#define GSTD_CLIENT_DEFAULT_UNIX_PORT 0
 
 typedef struct _GstdClientData GstdClientData;
 typedef struct _GstdClientCmd GstdClientCmd;
