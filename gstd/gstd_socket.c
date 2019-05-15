@@ -21,17 +21,9 @@
 #include "config.h"
 #endif
 
-#include <stdio.h>
 #include <string.h>
-#include <gst/gst.h>
 
-#include "gstd_ipc.h"
 #include "gstd_socket.h"
-#include "gstd_parser.h"
-#include "gstd_element.h"
-#include "gstd_pipeline_bus.h"
-#include "gstd_event_handler.h"
-
 
 /* Gstd SOCKET debugging category */
 GST_DEBUG_CATEGORY_STATIC (gstd_socket_debug);
