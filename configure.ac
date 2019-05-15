@@ -101,6 +101,10 @@ PKG_CHECK_MODULES(GIO_UNIX, [
 
     Please make sure you have the necessary GIO-UNIX-2.0
     development headers installed.
+
+    On debian/Ubuntu systems you will probably need to install the
+    'libglib2.0-dev' package.
+
   ])
 ])
 
