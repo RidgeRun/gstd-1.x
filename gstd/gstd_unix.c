@@ -255,7 +255,6 @@ gstd_unix_add_listener_address (GstdSocket * base, GSocketService ** service)
 noconnection:
   {
     GST_ERROR_OBJECT (*service, "%s", error->message);
-    g_printerr ("%s\n", error->message);
     g_error_free (error);
     return GSTD_NO_CONNECTION;
   }
