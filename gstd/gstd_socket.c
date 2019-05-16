@@ -153,7 +153,7 @@ gstd_socket_start (GstdIpc * base, GstdSession * session)
   service = &self->service;
 
  GstdReturnCode ret;
- ret = GSTD_SOCKET_GET_CLASS (self)->add_listener_address (self, service);
+ ret = GSTD_SOCKET_GET_CLASS (self)->create_socket_service (self, service);
 
  if(ret != GSTD_EOK)
   return ret;

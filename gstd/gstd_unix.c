@@ -52,7 +52,7 @@ G_DEFINE_TYPE (GstdUnix, gstd_unix, GSTD_TYPE_SOCKET);
 
 static void gstd_unix_dispose (GObject *);
 GstdReturnCode
-gstd_unix_add_listener_address (GstdSocket * base, GSocketService ** service);
+gstd_unix_create_socket_service (GstdSocket * base, GSocketService ** service);
 gboolean gstd_unix_init_get_option_group (GstdIpc * base, GOptionGroup ** group);
 
 
@@ -65,8 +65,8 @@ gstd_unix_class_init (GstdUnixClass * klass)
   guint debug_color;
   gstdipc_class->get_option_group =
       GST_DEBUG_FUNCPTR (gstd_unix_init_get_option_group);
-  socket_class->add_listener_address =
-      GST_DEBUG_FUNCPTR (gstd_unix_add_listener_address);
+  socket_class->create_socket_service =
+      GST_DEBUG_FUNCPTR (gstd_unix_create_socket_service);
   object_class->dispose = gstd_unix_dispose;
 
   /* Initialize debug category with nice colors */
@@ -123,7 +123,7 @@ gstd_unix_dispose (GObject * object)
 }
 
 GstdReturnCode
-gstd_unix_add_listener_address (GstdSocket * base, GSocketService ** service)
+gstd_unix_create_socket_service (GstdSocket * base, GSocketService ** service)
 {
   GError *error = NULL;
   GstdUnix *self = GSTD_UNIX (base);

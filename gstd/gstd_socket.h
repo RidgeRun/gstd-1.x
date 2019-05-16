@@ -49,7 +49,7 @@ struct _GstdSocketClass
 {
   GstdIpcClass parent_class;
 
-  GstdReturnCode (*add_listener_address) (GstdSocket *, GSocketService **);
+  GstdReturnCode (*create_socket_service) (GstdSocket *, GSocketService **);
 };
 
 GType gstd_socket_get_type ();

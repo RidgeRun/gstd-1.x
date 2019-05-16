@@ -61,7 +61,7 @@ G_DEFINE_TYPE (GstdTcp, gstd_tcp, GSTD_TYPE_SOCKET);
 
 static void gstd_tcp_dispose (GObject *);
 static GstdReturnCode
-gstd_tcp_add_listener_address (GstdSocket * base, GSocketService ** service);
+gstd_tcp_create_socket_service (GstdSocket * base, GSocketService ** service);
 gboolean gstd_tcp_init_get_option_group (GstdIpc * base, GOptionGroup ** group);
 static gboolean gstd_tcp_add_listeners(GSocketService *service, gchar * address, gint port, GError ** error);
 
@@ -75,8 +75,8 @@ gstd_tcp_class_init (GstdTcpClass * klass)
   guint debug_color;
   gstdipc_class->get_option_group =
       GST_DEBUG_FUNCPTR (gstd_tcp_init_get_option_group);
-  socket_class->add_listener_address =
-      GST_DEBUG_FUNCPTR (gstd_tcp_add_listener_address);
+  socket_class->create_socket_service =
+      GST_DEBUG_FUNCPTR (gstd_tcp_create_socket_service);
   object_class->dispose = gstd_tcp_dispose;
 
   /* Initialize debug category with nice colors */
@@ -108,7 +108,7 @@ gstd_tcp_dispose (GObject * object)
 }
 
 GstdReturnCode
-gstd_tcp_add_listener_address (GstdSocket * base, GSocketService ** service)
+gstd_tcp_create_socket_service (GstdSocket * base, GSocketService ** service)
 {
   GError *error = NULL;
   GstdTcp *self = GSTD_TCP (base);
