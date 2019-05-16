@@ -191,6 +191,9 @@ static GstdClientCmd cmds[] = {
   {"debug_color", gstd_client_cmd_tcp,
       "Enable/Disable colors in the debug logging",
       "debug_color <colors>"},
+  {"debug_reset", gstd_client_cmd_tcp,
+      "Enable/Disable debug threshold reset",
+      "debug_reset <reset>"},
 
   {NULL}
 };
