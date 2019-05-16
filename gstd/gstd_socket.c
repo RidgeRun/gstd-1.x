@@ -147,7 +147,7 @@ gstd_socket_start (GstdIpc * base, GstdSession * session)
 
   GST_DEBUG_OBJECT (self, "Starting SOCKET");
 
-  // Close any existing connection
+  /* Close any existing connection */
   gstd_socket_stop (base);
 
   service = &self->service;
