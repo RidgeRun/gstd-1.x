@@ -141,7 +141,6 @@ gstd_socket_callback (GSocketService * service,
 GstdReturnCode
 gstd_socket_start (GstdIpc * base, GstdSession * session)
 {
-  guint debug_color;
   GstdSocket *self = GSTD_SOCKET (base);
   GSocketService **service;
 
@@ -151,13 +150,6 @@ gstd_socket_start (GstdIpc * base, GstdSession * session)
   }
 
   GST_DEBUG_OBJECT (self, "Starting SOCKET");
-
-  if (!gstd_socket_debug) {
-    /* Initialize debug category with nice colors */
-    debug_color = GST_DEBUG_FG_BLACK | GST_DEBUG_BOLD | GST_DEBUG_BG_WHITE;
-    GST_DEBUG_CATEGORY_INIT (gstd_socket_debug, "gstdsocket", debug_color,
-        "Gstd SOCKET category");
-  }
 
   // Close any existing connection
   gstd_socket_stop (base);

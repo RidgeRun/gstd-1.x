@@ -215,20 +215,12 @@ gstd_unix_dispose (GObject * object)
 GstdReturnCode
 gstd_unix_add_listener_address (GstdSocket * base, GSocketService ** service)
 {
-  guint debug_color;
   GError *error = NULL;
   GstdUnix *self = GSTD_UNIX (base);
   gchar* path = self->unix_path;
   guint i;
 
   GST_DEBUG_OBJECT (self, "Getting UNIX Socket address");
-
-  if (!gstd_unix_debug) {
-    /* Initialize debug category with nice colors */
-    debug_color = GST_DEBUG_FG_BLACK | GST_DEBUG_BOLD | GST_DEBUG_BG_WHITE;
-    GST_DEBUG_CATEGORY_INIT (gstd_unix_debug, "gstdunix", debug_color,
-        "Gstd UNIX category");
-  }
 
   *service = g_threaded_socket_service_new (self->num_ports);
 
