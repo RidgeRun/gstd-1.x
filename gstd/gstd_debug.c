@@ -197,6 +197,11 @@ gstd_debug_get_property (GObject * object,
 static void
 gstd_debug_set_threshold (GstdDebug * self)
 {
+  /* If reset is set, clear all the categories to 0. We run this manually
+   * since the GStreamer gst_debug_set_threshold_from_string reset only clears
+   * the categories that weren't set explicitly. Otherwise the threshold will
+   * be appended to previously set thresholds
+   */
   if (self->reset)
     gst_debug_set_threshold_from_string ("*:0", TRUE);
 
