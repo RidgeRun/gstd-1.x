@@ -48,19 +48,8 @@ struct _GstdUnixClass
 
 G_DEFINE_TYPE (GstdUnix, gstd_unix, GSTD_TYPE_SOCKET);
 
-enum
-{
-  PROP_UNIX_PATH = 1,
-  PROP_UNIX_NUM_PORTS = 2,
-  N_PROPERTIES                  // NOT A PROPERTY
-};
-
-
 /* VTable */
 
-static void gstd_unix_set_property (GObject *, guint, const GValue *,
-    GParamSpec *);
-static void gstd_unix_get_property (GObject *, guint, GValue *, GParamSpec *);
 static void gstd_unix_dispose (GObject *);
 GstdReturnCode
 gstd_unix_add_listener_address (GstdSocket * base, GSocketService ** service);
@@ -73,39 +62,12 @@ gstd_unix_class_init (GstdUnixClass * klass)
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
   GstdIpcClass *gstdipc_class = GSTD_IPC_CLASS (klass);
   GstdSocketClass* socket_class = GSTD_SOCKET_CLASS (klass);
-  GParamSpec *properties[N_PROPERTIES] = { NULL, };
   guint debug_color;
-  gchar *default_path;
-  object_class->set_property = gstd_unix_set_property;
-  object_class->get_property = gstd_unix_get_property;
   gstdipc_class->get_option_group =
       GST_DEBUG_FUNCPTR (gstd_unix_init_get_option_group);
   socket_class->add_listener_address =
       GST_DEBUG_FUNCPTR (gstd_unix_add_listener_address);
   object_class->dispose = gstd_unix_dispose;
-
-  default_path = g_strdup_printf ("%s/%s", GSTD_RUN_STATE_DIR, GSTD_UNIX_DEFAULT_BASE_NAME);
-  properties[PROP_UNIX_PATH] =
-    g_param_spec_string ("unix-path",
-                   "Unix path",
-                   "The path used to create the unix socket address",
-                   default_path,
-                   G_PARAM_READWRITE |
-                   G_PARAM_CONSTRUCT_ONLY | G_PARAM_STATIC_STRINGS |
-                   GSTD_PARAM_READ);
-  g_free (default_path);
-
-  properties[PROP_UNIX_NUM_PORTS] =
-      g_param_spec_uint ("num-ports",
-      "Num Ports",
-      "The number of ports to open for the unix session, starting at unix-path",
-      0,
-      G_MAXINT,
-      GSTD_UNIX_DEFAULT_NUM_PORTS,
-      G_PARAM_READWRITE |
-      G_PARAM_CONSTRUCT_ONLY | G_PARAM_STATIC_STRINGS | GSTD_PARAM_READ);
-
-  g_object_class_install_properties (object_class, N_PROPERTIES, properties);
 
   /* Initialize debug category with nice colors */
   debug_color = GST_DEBUG_FG_BLACK | GST_DEBUG_BOLD | GST_DEBUG_BG_WHITE;
@@ -136,58 +98,6 @@ gstd_unix_init (GstdUnix * self)
   self->num_ports = GSTD_UNIX_DEFAULT_NUM_PORTS;
 
 }
-
-static void
-gstd_unix_get_property (GObject * object,
-    guint property_id, GValue * value, GParamSpec * pspec)
-{
-  GstdUnix *self = GSTD_UNIX (object);
-
-  switch (property_id) {
-    case PROP_UNIX_PATH:
-      GST_DEBUG_OBJECT (self, "Returning unix-path %s", self->unix_path);
-      g_value_set_string (value, self->unix_path);
-      break;
-
-    case PROP_UNIX_NUM_PORTS:
-      GST_DEBUG_OBJECT (self, "Returning number-ports %u", self->num_ports);
-      g_value_set_uint (value, self->num_ports);
-      break;
-
-	  default:
-      /* We don't have any other property... */
-      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
-      break;
-  }
-}
-
-static void
-gstd_unix_set_property (GObject * object,
-    guint property_id, const GValue * value, GParamSpec * pspec)
-{
-  GstdUnix *self = GSTD_UNIX (object);
-
-  switch (property_id) {
-    case PROP_UNIX_PATH:
-      GST_DEBUG_OBJECT (self, "Changing unix-path current value: %s",
-          self->unix_path);
-      gstd_unix_set_path(self, g_value_get_string (value));
-      break;
-
-    case PROP_UNIX_NUM_PORTS:
-      GST_DEBUG_OBJECT (self, "Changing num-ports current value: %u",
-          self->num_ports);
-      self->num_ports = g_value_get_uint (value);
-      GST_DEBUG_OBJECT (self, "Value changed %u", self->num_ports);
-      break;
-
-    default:
-      /* We don't have any other property... */
-      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
-      break;
-  }
-}
-
 
 static void
 gstd_unix_dispose (GObject * object)

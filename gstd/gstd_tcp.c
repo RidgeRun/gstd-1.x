@@ -57,20 +57,8 @@ struct _GstdTcpClass
 
 G_DEFINE_TYPE (GstdTcp, gstd_tcp, GSTD_TYPE_SOCKET);
 
-enum
-{
-  PROP_BASE_PORT = 1,
-  PROP_NUM_PORTS = 2,
-  PROP_ADDRESS = 3,
-  N_PROPERTIES                  // NOT A PROPERTY
-};
-
-
 /* VTable */
 
-static void gstd_tcp_set_property (GObject *, guint, const GValue *,
-    GParamSpec *);
-static void gstd_tcp_get_property (GObject *, guint, GValue *, GParamSpec *);
 static void gstd_tcp_dispose (GObject *);
 static GstdReturnCode
 gstd_tcp_add_listener_address (GstdSocket * base, GSocketService ** service);
@@ -84,45 +72,12 @@ gstd_tcp_class_init (GstdTcpClass * klass)
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
   GstdIpcClass *gstdipc_class = GSTD_IPC_CLASS (klass);
   GstdSocketClass* socket_class = GSTD_SOCKET_CLASS (klass);
-  GParamSpec *properties[N_PROPERTIES] = { NULL, };
   guint debug_color;
-  object_class->set_property = gstd_tcp_set_property;
-  object_class->get_property = gstd_tcp_get_property;
   gstdipc_class->get_option_group =
       GST_DEBUG_FUNCPTR (gstd_tcp_init_get_option_group);
   socket_class->add_listener_address =
       GST_DEBUG_FUNCPTR (gstd_tcp_add_listener_address);
   object_class->dispose = gstd_tcp_dispose;
-
-  properties[PROP_ADDRESS] =
-      g_param_spec_string ("base-address",
-      "Base Address",
-      "The address to start listening to",
-      GSTD_TCP_DEFAULT_ADDRESS,
-      G_PARAM_READWRITE |
-      G_PARAM_CONSTRUCT_ONLY | G_PARAM_STATIC_STRINGS | GSTD_PARAM_READ);
-
-  properties[PROP_BASE_PORT] =
-      g_param_spec_uint ("base-port",
-      "Base Port",
-      "The port to start listening to",
-      0,
-      G_MAXINT,
-      GSTD_TCP_DEFAULT_PORT,
-      G_PARAM_READWRITE |
-      G_PARAM_CONSTRUCT_ONLY | G_PARAM_STATIC_STRINGS | GSTD_PARAM_READ);
-
-  properties[PROP_NUM_PORTS] =
-      g_param_spec_uint ("num-ports",
-      "Num Ports",
-      "The number of ports to open for the tcp session, starting at base-port",
-      0,
-      G_MAXINT,
-      GSTD_TCP_DEFAULT_NUM_PORTS,
-      G_PARAM_READWRITE |
-      G_PARAM_CONSTRUCT_ONLY | G_PARAM_STATIC_STRINGS | GSTD_PARAM_READ);
-
-  g_object_class_install_properties (object_class, N_PROPERTIES, properties);
 
   /* Initialize debug category with nice colors */
   debug_color = GST_DEBUG_FG_BLACK | GST_DEBUG_BOLD | GST_DEBUG_BG_WHITE;
@@ -138,73 +93,6 @@ gstd_tcp_init (GstdTcp * self)
   self->address = g_strdup(GSTD_TCP_DEFAULT_ADDRESS);
   self->num_ports = GSTD_TCP_DEFAULT_NUM_PORTS;
 }
-
-static void
-gstd_tcp_get_property (GObject * object,
-    guint property_id, GValue * value, GParamSpec * pspec)
-{
-  GstdTcp *self = GSTD_TCP (object);
-
-  switch (property_id) {
-    case PROP_ADDRESS:
-      GST_DEBUG_OBJECT (self, "Returning base-address %s", self->address);
-      g_value_set_string (value, self->address);
-      break;
-    case PROP_BASE_PORT:
-      GST_DEBUG_OBJECT (self, "Returning base-port %u", self->base_port);
-      g_value_set_uint (value, self->base_port);
-      break;
-    case PROP_NUM_PORTS:
-      GST_DEBUG_OBJECT (self, "Returning number-ports %u", self->num_ports);
-      g_value_set_uint (value, self->num_ports);
-      break;
-
-    default:
-      /* We don't have any other property... */
-      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
-      break;
-  }
-}
-
-static void
-gstd_tcp_set_property (GObject * object,
-    guint property_id, const GValue * value, GParamSpec * pspec)
-{
-  GstdTcp *self = GSTD_TCP (object);
-
-  switch (property_id) {
-    case PROP_ADDRESS:
-      {
-      const gchar * address;
-      GST_DEBUG_OBJECT (self, "Changing base-port current value: %s",
-          self->address);
-
-      address = g_value_get_string (value);
-      g_free(self->address);
-      self->address = g_strdup(address);
-      GST_DEBUG_OBJECT (self, "Value changed %s", self->address);
-      break;
-      }
-    case PROP_BASE_PORT:
-      GST_DEBUG_OBJECT (self, "Changing base-port current value: %u",
-          self->base_port);
-      self->base_port = g_value_get_uint (value);
-      GST_DEBUG_OBJECT (self, "Value changed %u", self->base_port);
-      break;
-    case PROP_NUM_PORTS:
-      GST_DEBUG_OBJECT (self, "Changing num-ports current value: %u",
-          self->num_ports);
-      self->num_ports = g_value_get_uint (value);
-      GST_DEBUG_OBJECT (self, "Value changed %u", self->num_ports);
-      break;
-
-    default:
-      /* We don't have any other property... */
-      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
-      break;
-  }
-}
-
 
 static void
 gstd_tcp_dispose (GObject * object)
