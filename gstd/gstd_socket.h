@@ -54,11 +54,5 @@ struct _GstdSocketClass
 
 GType gstd_socket_get_type ();
 
-
-GstdReturnCode gstd_socket_start (GstdIpc * base, GstdSession * session);
-
-GstdReturnCode gstd_socket_stop (GstdIpc * base);
-
-
 G_END_DECLS
 #endif //__GSTD_SOCKET_H__

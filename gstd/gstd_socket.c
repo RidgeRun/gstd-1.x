@@ -40,7 +40,9 @@ gstd_socket_callback (GSocketService * service,
     GSocketConnection * connection,
     GObject * source_object, gpointer user_data);
 static void gstd_socket_dispose (GObject *);
-
+static GstdReturnCode
+gstd_socket_start (GstdIpc * base, GstdSession * session);
+static GstdReturnCode gstd_socket_stop (GstdIpc * base);
 
 static void
 gstd_socket_class_init (GstdSocketClass * klass)
@@ -138,7 +140,7 @@ gstd_socket_callback (GSocketService * service,
   return TRUE;
 }
 
-GstdReturnCode
+static GstdReturnCode
 gstd_socket_start (GstdIpc * base, GstdSession * session)
 {
   GstdSocket *self = GSTD_SOCKET (base);
@@ -172,7 +174,7 @@ out:
   return GSTD_EOK;
 }
 
-GstdReturnCode
+static GstdReturnCode
 gstd_socket_stop (GstdIpc * base)
 {
   GstdSocket *self = GSTD_SOCKET (base);
