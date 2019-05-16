@@ -72,13 +72,7 @@ gstd_socket_init (GstdSocket * self)
 static void
 gstd_socket_dispose (GObject * object)
 {
-  GstdSocket *self = GSTD_SOCKET (object);
-
   GST_INFO_OBJECT (object, "Deinitializing gstd SOCKET");
-
-  if (self->service) {
-    self->service = NULL;
-  }
 
   G_OBJECT_CLASS (gstd_socket_parent_class)->dispose (object);
 }
