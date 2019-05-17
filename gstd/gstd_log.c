@@ -32,7 +32,7 @@ GST_DEBUG_CATEGORY (gstd_debug);
 #define GSTD_LOG_NAME "gstd.log"
 #define GST_LOG_NAME "gst.log"
 #define GSTD_DEBUG_PREFIX "gstd"
-#define GSTD_DEBUG_LEVEL "INFO"
+#define GSTD_DEBUG_LEVEL "WARNING"
 
 static void
 gstd_log_proxy (GstDebugCategory * category, GstDebugLevel level,

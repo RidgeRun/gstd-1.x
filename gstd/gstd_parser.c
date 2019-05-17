@@ -88,7 +88,8 @@ static GstdReturnCode gstd_parser_debug_threshold (GstdSession *, gchar *, gchar
     gchar **);
 static GstdReturnCode gstd_parser_debug_color (GstdSession *, gchar *, gchar *,
     gchar **);
-
+static GstdReturnCode gstd_parser_debug_reset (GstdSession *, gchar *, gchar *,
+    gchar **);
 
 typedef GstdReturnCode GstdFunc (GstdSession *, gchar *, gchar *, gchar **);
 typedef struct _GstdCmd
@@ -132,6 +133,7 @@ static GstdCmd cmds[] = {
   {"debug_enable", gstd_parser_debug_enable},
   {"debug_threshold", gstd_parser_debug_threshold},
   {"debug_color", gstd_parser_debug_color},
+  {"debug_reset", gstd_parser_debug_reset},
 
   {NULL}
 };
@@ -770,6 +772,26 @@ gstd_parser_debug_color (GstdSession * session, gchar * action, gchar * colored,
   return ret;
 }
 
+
+static GstdReturnCode
+gstd_parser_debug_reset (GstdSession * session, gchar * action, gchar * reset,
+    gchar ** response)
+{
+  GstdReturnCode ret;
+  gchar *uri;
+
+  g_return_val_if_fail (GSTD_IS_SESSION (session), GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (response, GSTD_NULL_ARGUMENT);
+
+  check_argument (reset, GSTD_BAD_COMMAND);
+
+  uri = g_strdup_printf ("/debug/reset %s", reset);
+  ret = gstd_parser_parse_raw_cmd (session, "update", uri, response);
+
+  g_free (uri);
+
+  return ret;
+}
 
 
 static GstdReturnCode

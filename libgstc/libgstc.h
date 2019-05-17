@@ -178,12 +178,15 @@ GstcStatus gstc_client_ping(GstClient *client);
  * @threshold: the debug level takes a keyword and the debug level in the argument
  * recieving 0 as a level is equivalent to disabling debug
  * @colors: if non-zero ANSI color control escape sequences will be included in the debug output
+ * @reset: if non-zero the debug threshold will be cleared each time, otherwise threshold 
+ * is appended to previous threshold.
  *
  * Controls amount of GStreamer Daemon debug logging.  Typically the GStreamer Daemon debug log output is directed to the system log file.
  *
  * Returns: GstcStatus indicating success, daemon unreachable, daemon timeout
  */
-GstcStatus gstc_client_debug (GstClient *client, const char* threshold, const int colors);
+GstcStatus gstc_client_debug (GstClient *client, const char* threshold,
+    const int colors, const int reset);
 
 /**
  * gstc_pipeline_create:
