@@ -181,6 +181,8 @@ static GstdClientCmd cmds[] = {
       "Apply a timeout for the signal waiting. -1: forever, 0: return immediately, "
       "n: wait n microseconds",
       "signal_timeout <pipe> <element> <signal> <timeout>"},
+  {"signal_disconnect", gstd_client_cmd_tcp, "Disconnect from signal",
+      "signal_disconnect <pipe> <element> <signal>"},
 
   {"debug_enable", gstd_client_cmd_tcp,
       "Enable/Disable GStreamer debug",
