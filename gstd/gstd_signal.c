@@ -28,6 +28,7 @@ enum
   PROP_TARGET = 1,
   PROP_TIMEOUT,
   PROP_CALLBACK,
+  PROP_DISCONNECT,
   N_PROPERTIES
 };
 
@@ -74,15 +75,20 @@ gstd_signal_class_init (GstdSignalClass * klass)
       G_PARAM_CONSTRUCT_ONLY | G_PARAM_STATIC_STRINGS | GSTD_PARAM_READ);
 
   properties[PROP_TIMEOUT] =
-      g_param_spec_int64("timeout", "Timeout",
+      g_param_spec_int64 ("timeout", "Timeout",
       "The quantity of time that messages should be waited for, -1: infinity, "
       "0: no time, n: micro seconds to wait",
       DEFAULT_PROP_TIMEOUT_MIN, DEFAULT_PROP_TIMEOUT_MAX, DEFAULT_PROP_TIMEOUT,
       G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
   properties[PROP_CALLBACK] =
-      g_param_spec_object("callback", "Callback",
+      g_param_spec_object ("callback", "Callback",
       "The signal callback", GSTD_TYPE_OBJECT,
+      G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
+
+  properties[PROP_DISCONNECT] =
+      g_param_spec_boolean ("disconnect", "Disconnect",
+      "Stop waiting for signal", FALSE,
       G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
   g_object_class_install_properties (object_class, N_PROPERTIES, properties);

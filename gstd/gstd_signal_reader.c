@@ -40,6 +40,8 @@ void gstd_signal_marshal (GClosure * closure, GValue * return_value,
     guint n_param_values, const GValue * param_values,
     gpointer invocation_hint, gpointer marshar_data);
 
+static GstdReturnCode gstd_signal_reader_disconnect (GstdIReader * iface);
+
 static void gstd_signal_reader_dispose (GObject * object);
 
 typedef struct _GstdSignalReaderClass GstdSignalReaderClass;
@@ -50,7 +52,6 @@ struct _GstdSignalReader
 
   /* signal handling */
   GstdSignal *target;
-  gulong handler_id;
 
   /* wait for signal */
   GMutex signal_lock;
@@ -98,7 +99,6 @@ gstd_signal_reader_init (GstdSignalReader * self)
 {
   GST_INFO_OBJECT (self, "Initializing signal reader");
 
-  self->handler_id = 0;
   self->target = NULL;
 
   g_mutex_init (&self->signal_lock);
@@ -130,6 +130,8 @@ gstd_signal_reader_read (GstdIReader * iface, GstdObject * object,
    */
   if (!g_ascii_strcasecmp ("callback", name)) {
     ret = gstd_signal_reader_read_signal (iface, object, &resource);
+  } else if (!g_ascii_strcasecmp ("disconnect", name)) {
+    ret = gstd_signal_reader_disconnect (iface);
   } else {
     ret = parent_interface->read (iface, object, name, &resource);
   }
@@ -149,7 +151,7 @@ gstd_signal_reader_read_signal (GstdIReader * iface,
   GstdSignalReader *self = GSTD_SIGNAL_READER (iface);
   GObject *target;
   GClosure *closure;
-
+  gulong handler_id;
   guint64 timeout;
   guint64 end_time;
 
@@ -171,7 +173,7 @@ gstd_signal_reader_read_signal (GstdIReader * iface,
   /* connect to signal */
   closure = g_closure_new_simple (sizeof (GClosure), self);
   g_closure_set_marshal (closure, gstd_signal_marshal);
-  self->handler_id =
+  handler_id =
       g_signal_connect_closure (target, GSTD_OBJECT_NAME (object), closure,
       FALSE);
 
@@ -197,7 +199,7 @@ gstd_signal_reader_read_signal (GstdIReader * iface,
   self->callback = NULL;
 
 out:
-  g_signal_handler_disconnect (target, self->handler_id);
+  g_signal_handler_disconnect (target, handler_id);
   g_mutex_unlock (&self->signal_lock);
 
   return ret;
@@ -217,4 +219,21 @@ gstd_signal_marshal (GClosure * closure, GValue * return_value,
   self->waiting_signal = FALSE;
   g_cond_signal (&self->signal_call);
   g_mutex_unlock (&self->signal_lock);
+}
+
+static GstdReturnCode
+gstd_signal_reader_disconnect (GstdIReader * iface)
+{
+  GstdSignalReader *self;
+
+  g_return_val_if_fail (iface, GSTD_NULL_ARGUMENT);
+
+  self = GSTD_SIGNAL_READER (iface);
+
+  g_mutex_lock (&self->signal_lock);
+  self->waiting_signal = FALSE;
+  g_cond_broadcast (&self->signal_call);
+  g_mutex_unlock (&self->signal_lock);
+
+  return GSTD_EOK;
 }
