@@ -27,7 +27,6 @@
 
 #include "gstd_session.h"
 #include "gstd_ipc.h"
-#include "gstd_socket.h"
 #include "gstd_tcp.h"
 #include "gstd_unix.h"
 #include "gstd_daemon.h"

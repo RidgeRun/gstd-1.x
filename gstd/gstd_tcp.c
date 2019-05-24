@@ -26,7 +26,6 @@
 #include <gst/gst.h>
 
 #include "gstd_ipc.h"
-#include "gstd_socket.h"
 #include "gstd_tcp.h"
 #include "gstd_parser.h"
 #include "gstd_element.h"
