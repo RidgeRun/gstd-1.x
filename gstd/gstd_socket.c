@@ -143,7 +143,7 @@ static GstdReturnCode
 gstd_socket_start (GstdIpc * base, GstdSession * session)
 {
   GstdSocket *self = GSTD_SOCKET (base);
-  GSocketService **service;
+  GSocketService *service;
 
   if (!base->enabled) {
     GST_DEBUG_OBJECT (self, "SOCKET not enabled, skipping");
@@ -155,19 +155,19 @@ gstd_socket_start (GstdIpc * base, GstdSession * session)
   /* Close any existing connection */
   gstd_socket_stop (base);
 
-  service = &self->service;
+  service = self->service;
 
  GstdReturnCode ret;
- ret = GSTD_SOCKET_GET_CLASS (self)->create_socket_service (self, service);
+ ret = GSTD_SOCKET_GET_CLASS (self)->create_socket_service (self, &service);
 
  if(ret != GSTD_EOK)
   return ret;
 
   /* listen to the 'incoming' signal */
-  g_signal_connect (*service, "run", G_CALLBACK (gstd_socket_callback), session);
+  g_signal_connect (service, "run", G_CALLBACK (gstd_socket_callback), session);
 
   /* start the socket service */
-  g_socket_service_start (*service);
+  g_socket_service_start (service);
 
 out:
   return GSTD_EOK;
@@ -177,22 +177,22 @@ static GstdReturnCode
 gstd_socket_stop (GstdIpc * base)
 {
   GstdSocket *self = GSTD_SOCKET (base);
-  GSocketService **service;
+  GSocketService *service;
   GstdSession *session = base->session;
 
   g_return_val_if_fail (session, GSTD_NULL_ARGUMENT);
 
   GST_DEBUG_OBJECT (self, "Entering SOCKET stop ");
   if (self->service) {
-    service = &self->service;
-    GSocketListener *listener = G_SOCKET_LISTENER (*service);
-    if (*service) {
+    service = self->service;
+    GSocketListener *listener = G_SOCKET_LISTENER (service);
+    if (service) {
       GST_INFO_OBJECT (session, "Closing SOCKET connection for %s",
           GSTD_OBJECT_NAME (session));
       g_socket_listener_close (listener);
-      g_socket_service_stop (*service);
-      g_object_unref (*service);
-      *service = NULL;
+      g_socket_service_stop (service);
+      g_object_unref (service);
+      service = NULL;
     }
   }
   return GSTD_EOK;
