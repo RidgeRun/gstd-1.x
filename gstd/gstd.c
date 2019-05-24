@@ -28,10 +28,11 @@
 #include "gstd_session.h"
 #include "gstd_ipc.h"
 #include "gstd_tcp.h"
+#include "gstd_unix.h"
 #include "gstd_daemon.h"
 #include "gstd_log.h"
 
-static gboolean int_handler (gpointer user_data);
+static gboolean int_term_handler (gpointer user_data);
 static void ipc_add_option_groups (GstdIpc * ipc[], GType factory[],
     guint num_ipcs, GOptionContext * context, GOptionGroup * groups[]);
 static gboolean ipc_start (GstdIpc * ipc[], guint num_ipcs,
@@ -55,7 +56,7 @@ print_header (gboolean quiet)
 }
 
 static gboolean
-int_handler (gpointer user_data)
+int_term_handler (gpointer user_data)
 {
   GMainLoop *main_loop;
 
@@ -162,6 +163,7 @@ main (gint argc, gchar * argv[])
    */
   GType supported_ipcs[] = {
     GSTD_TYPE_TCP,
+    GSTD_TYPE_UNIX,
   };
 
   guint num_ipcs = (sizeof (supported_ipcs) / sizeof (GType));
@@ -257,7 +259,10 @@ main (gint argc, gchar * argv[])
   main_loop = g_main_loop_new (NULL, FALSE);
 
   /* Install a handler for the interrupt signal */
-  g_unix_signal_add (SIGINT, int_handler, main_loop);
+  g_unix_signal_add (SIGINT, int_term_handler, main_loop);
+
+  /* Install a handler for the termination signal */
+  g_unix_signal_add (SIGTERM, int_term_handler, main_loop);
 
   GST_INFO ("Gstd started");
   g_main_loop_run (main_loop);

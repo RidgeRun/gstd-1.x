@@ -23,6 +23,7 @@
 #include "gstd_return_codes.h"
 #include "gstd_session.h"
 #include "gstd_ipc.h"
+#include "gstd_socket.h"
 
 G_BEGIN_DECLS
 #define GSTD_TCP_DEFAULT_ADDRESS "127.0.0.1"
@@ -43,11 +44,6 @@ G_BEGIN_DECLS
 typedef struct _GstdTcp GstdTcp;
 typedef struct _GstdTcpClass GstdTcpClass;
 GType gstd_tcp_get_type ();
-
-
-GstdReturnCode gstd_tcp_start (GstdIpc * base, GstdSession * session);
-
-GstdReturnCode gstd_tcp_stop (GstdIpc * base);
 
 
 G_END_DECLS
