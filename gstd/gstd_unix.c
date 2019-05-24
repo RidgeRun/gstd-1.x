@@ -51,7 +51,7 @@ G_DEFINE_TYPE (GstdUnix, gstd_unix, GSTD_TYPE_SOCKET);
 /* VTable */
 
 static void gstd_unix_dispose (GObject *);
-GstdReturnCode
+static GstdReturnCode
 gstd_unix_create_socket_service (GstdSocket * base, GSocketService ** service);
 gboolean gstd_unix_init_get_option_group (GstdIpc * base, GOptionGroup ** group);
 
