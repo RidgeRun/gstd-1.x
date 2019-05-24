@@ -59,9 +59,9 @@ G_DEFINE_TYPE (GstdTcp, gstd_tcp, GSTD_TYPE_SOCKET);
 /* VTable */
 
 static void gstd_tcp_dispose (GObject *);
-static GstdReturnCode
-gstd_tcp_create_socket_service (GstdSocket * base, GSocketService ** service);
-gboolean gstd_tcp_init_get_option_group (GstdIpc * base, GOptionGroup ** group);
+static GstdReturnCode gstd_tcp_create_socket_service (GstdSocket * base,
+    GSocketService ** service);
+static gboolean gstd_tcp_init_get_option_group (GstdIpc * base, GOptionGroup ** group);
 static gboolean gstd_tcp_add_listeners(GSocketService *service, gchar * address, gint port, GError ** error);
 
 
