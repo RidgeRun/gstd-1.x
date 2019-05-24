@@ -288,9 +288,6 @@ main (gint argc, gchar * argv[])
   guint unix_port;
   gchar *address;
   gchar **remaining;
-  gchar *default_unix_path;
-
-  default_unix_path = g_strdup_printf ("%s/%s", GSTD_RUN_STATE_DIR, GSTD_CLIENT_DEFAULT_UNIX_BASE_NAME);
 
   GOptionEntry entries[] = {
     {"quiet", 'q', 0, G_OPTION_ARG_NONE, &quiet, "Dont't print startup headers",
@@ -344,8 +341,6 @@ main (gint argc, gchar * argv[])
   address = NULL;
   quiet = FALSE;
   use_unix = FALSE;
-
-  g_free (default_unix_path);
 
   //Did the user pass in a custom history?
   if (g_getenv (history_env)) {
