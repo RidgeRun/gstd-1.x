@@ -129,9 +129,11 @@ gstd_tcp_create_socket_service (GstdSocket * base, GSocketService ** service)
 
 noconnection:
   {
-    GST_ERROR_OBJECT (*service, "%s", error->message);
+    GST_ERROR_OBJECT (self, "%s", error->message);
     g_printerr ("%s\n", error->message);
     g_error_free (error);
+    g_socket_service_stop (*service);
+    *service = NULL;
     return GSTD_NO_CONNECTION;
   }
 }
