@@ -84,7 +84,7 @@ gstd_socket_callback (GSocketService * service,
     GSocketConnection * connection, GObject * source_object, gpointer user_data)
 {
 
-  GstdSession *session = GSTD_SESSION (user_data);
+  GstdSession *session;
   GInputStream *istream;
   GOutputStream *ostream;
   gint read;
@@ -95,7 +95,12 @@ gstd_socket_callback (GSocketService * service,
   GstdReturnCode ret;
   const gchar *description = NULL;
 
-  g_return_val_if_fail (session, TRUE);
+  g_return_val_if_fail (service, FALSE);
+  g_return_val_if_fail (connection, FALSE);
+  g_return_val_if_fail (user_data, FALSE);
+
+  session = GSTD_SESSION (user_data);
+  g_return_val_if_fail (session, FALSE);
 
   istream = g_io_stream_get_input_stream (G_IO_STREAM (connection));
   ostream = g_io_stream_get_output_stream (G_IO_STREAM (connection));
