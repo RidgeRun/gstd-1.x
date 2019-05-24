@@ -58,7 +58,7 @@ extern gint read_history ();
 
 /* cmdline defaults */
 #define GSTD_CLIENT_DEFAULT_TCP_INET_ADDRESS "localhost"
-#define GSTD_CLIENT_DEFAULT_UNIX_BASE_NAME "gstd_default_unix_socket"
+#define GSTD_CLIENT_DEFAULT_UNIX_BASE_NAME "gstd_unix_socket"
 #define GSTD_CLIENT_DEFAULT_TCP_PORT 5000
 #define GSTD_CLIENT_DEFAULT_UNIX_PORT 0
 
