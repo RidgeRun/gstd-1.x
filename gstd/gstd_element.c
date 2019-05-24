@@ -488,6 +488,9 @@ gstd_element_fill_child_properties (GstdElement * self, GstObject * element,
   gint i;
   gchar *suffix;
 
+  if (!GST_IS_CHILD_PROXY(element))
+    goto out;
+
   count = gst_child_proxy_get_children_count (GST_CHILD_PROXY (element));
 
   GST_DEBUG_OBJECT (self, "%s has %d childrens", GST_OBJECT_NAME (element),
