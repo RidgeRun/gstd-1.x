@@ -119,6 +119,11 @@ gstd_unix_dispose (GObject * object)
     }
   }
 
+  if (NULL != self->unix_path) {
+    g_free (self->unix_path);
+    self->unix_path = NULL;
+  }
+
   G_OBJECT_CLASS (gstd_unix_parent_class)->dispose (object);
 }
 
