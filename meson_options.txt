@@ -1,0 +1,13 @@
+# Feature options
+option('tests', type : 'feature', value : 'auto', yield : true, description : 'Enable tests')
+option('enable-gtk-doc', type : 'boolean', value : true, description : 'Use gtk-doc to build documentation')
+
+# String options
+option('with-gstd-runstatedir', type : 'string', value : '/var/run/gstd', description : 'Specify the location of the gstd\'s PID file')
+option('with-gstd-logstatedir', type : 'string', value : '/var/log/gstd', description : 'Specify the location of gstd\'s log files')
+
+# Common options
+option('package-name', type : 'string', yield : true,
+       description : 'Package name to use in plugins')
+option('package-origin', type : 'string', value : 'Unknown package origin', yield : true,
+       description : 'Package origin URL to use in plugins')
