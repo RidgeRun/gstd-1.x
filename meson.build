@@ -226,3 +226,4 @@ configure_file(output : 'config.h', configuration : cdata)
 # Enter to each subdirectory and execute the meson.build
 subdir('gstd')
 subdir('libgstc')
+subdir('gst_client')
