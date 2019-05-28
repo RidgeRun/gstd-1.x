@@ -217,6 +217,11 @@ endforeach
 
 # Gtk documentation
 gnome = import('gnome')
+# Imports pkgconfig module
+pkgconfig = import('pkgconfig')
 
 # Meson will generate a header file all the entries in the configuration data object
 configure_file(output : 'config.h', configuration : cdata)
+
+# Enter to each subdirectory and execute the meson.build
+subdir('gstd')
