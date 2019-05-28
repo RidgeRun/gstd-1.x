@@ -134,10 +134,11 @@ executable(exe_name,
   dependencies : [gstd_deps, lib_gstd_dep],
   c_args: gst_c_args,
 )
+lib_gstd_dir = meson.current_build_dir()
 
 ## Install gstd files
 # Install library headers
-install_headers(libgstd_header_files,install : false)
+#install_headers(libgstd_header_files)
 # Install run and log directories
 install_subdir('gstd',
   install_dir : get_option('prefix') + get_option('with-gstd-runstatedir'),

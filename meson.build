@@ -63,12 +63,9 @@ test_gstd_deps=[gst_base_dep, gio_unix_dep, json_glib_dep, libd_dep, jansson_dep
 lib_gstc_inc_dir = include_directories('libgstc')
 gstd_inc_dir = include_directories('gstd')
 
-
 gstd_run_state_dir = '-DGSTD_RUN_STATE_DIR="@0@"'.format(get_option('with-gstd-runstatedir'))
 gstd_log_state_dir = '-DGSTD_LOG_STATE_DIR="@0@"'.format(get_option('with-gstd-logstatedir'))
 
-
-#libjansson-dev
 
 # Define compiler args and include directories
 gst_c_args = ['-DHAVE_CONFIG_H',gstd_log_state_dir,gstd_run_state_dir]
@@ -79,7 +76,9 @@ apiversion = '1.0'
 
 # Define installation directories
 prefix = get_option('prefix')
-lib_install_dir = join_paths(get_option('prefix'), get_option('libdir'))
+lib_install_dir = get_option('libdir')
+# Internal installation directory
+lib_gstd_dir = []
 
 
 # Get an object returns describing a compiler
@@ -227,3 +226,4 @@ configure_file(output : 'config.h', configuration : cdata)
 subdir('gstd')
 subdir('libgstc')
 subdir('gst_client')
+subdir('tests')
