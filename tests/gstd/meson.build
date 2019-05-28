@@ -35,7 +35,6 @@ foreach t : gstd_tests
     # Create enviomen object to  stores information about the environment
     # variables set during tests.
     env = environment()
-    # env.set('GST_PLUGIN_PATH_1_0', meson.build_root() + '/gstd/:/usr/'+ lib_install_dir)
     env.set('GST_PLUGIN_PATH_1_0', lib_gstd_dir + ':' + plugins_dir)
     env.set('GST_PLUGIN_SYSTEM_PATH_1_0', '')
     env.set('CK_DEFAULT_TIMEOUT', '120')
