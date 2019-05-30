@@ -63,8 +63,8 @@ test_gstd_deps=[gst_base_dep, gio_unix_dep, json_glib_dep, libd_dep, jansson_dep
 lib_gstc_inc_dir = include_directories('libgstc')
 gstd_inc_dir = include_directories('gstd')
 
-gstd_run_state_dir = '-DGSTD_RUN_STATE_DIR="@0@"'.format(get_option('with-gstd-runstatedir'))
-gstd_log_state_dir = '-DGSTD_LOG_STATE_DIR="@0@"'.format(get_option('with-gstd-logstatedir'))
+gstd_run_state_dir = '-DGSTD_RUN_STATE_DIR="@0@"'.format(get_option('prefix') + get_option('with-gstd-runstatedir'))
+gstd_log_state_dir = '-DGSTD_LOG_STATE_DIR="@0@"'.format(get_option('prefix') + get_option('with-gstd-logstatedir'))
 
 
 # Define compiler args and include directories
