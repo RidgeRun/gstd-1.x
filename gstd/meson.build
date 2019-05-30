@@ -138,13 +138,19 @@ lib_gstd_dir = meson.current_build_dir()
 
 ## Install gstd files
 # Install library headers
-#install_headers(libgstd_header_files)
+# install_headers(libgstd_header_files)
 # Install run and log directories
 install_subdir('gstd',
   install_dir : get_option('prefix') + get_option('with-gstd-runstatedir'),
-  strip_directory : true
+  strip_directory : true,
+  install_mode : 'rwxrwxrwx',
 )
 install_subdir('gstd',
   install_dir : get_option('prefix') + get_option('with-gstd-logstatedir'),
-  strip_directory : true
+  strip_directory : true,
+  install_mode : 'rwxrwxrwx',
 )
+# Since install_subdir function doesn't change the mode of the directories installed
+# Run a script at install time to change the mode of the directories
+meson.add_install_script('gstd_chmod.sh',get_option('with-gstd-runstatedir'))
+meson.add_install_script('gstd_chmod.sh',get_option('with-gstd-logstatedir'))
