@@ -24,7 +24,6 @@ lib_gstc_tests = [
 ]
 
 # Define plugins path
-gst_dep = dependency('gstreamer-1.0')
 plugins_dir = gst_dep.get_pkgconfig_variable('pluginsdir')
 
 # Build and run tests

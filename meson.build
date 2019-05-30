@@ -19,7 +19,6 @@ gstd_version_is_dev = gstd_version_minor % 2 == 1 and gstd_version_micro < 90
 gst_dep       = dependency('gstreamer-1.0',      version : '>=1.0.0')
 gst_base_dep  = dependency('gstreamer-base-1.0', version : '>=1.0.0')
 gio_unix_dep  = dependency('gio-unix-2.0',       version : '>=2.44.1')
-
 json_glib_dep = dependency('json-glib-1.0',      version : '>=0.16.2')
 libd_dep      = dependency('libdaemon',          version : '>=0.14')
 jansson_dep   = dependency('jansson',            version : '>=2.7')
@@ -62,14 +61,12 @@ test_gstd_deps=[gst_base_dep, gio_unix_dep, json_glib_dep, libd_dep, jansson_dep
 # Define header directories
 lib_gstc_inc_dir = include_directories('libgstc')
 gstd_inc_dir = include_directories('gstd')
-
-gstd_run_state_dir = '-DGSTD_RUN_STATE_DIR="@0@"'.format(get_option('prefix') + get_option('with-gstd-runstatedir'))
-gstd_log_state_dir = '-DGSTD_LOG_STATE_DIR="@0@"'.format(get_option('prefix') + get_option('with-gstd-logstatedir'))
-
+configinc = include_directories('.')
 
 # Define compiler args and include directories
+gstd_run_state_dir = '-DGSTD_RUN_STATE_DIR="@0@"'.format(get_option('prefix') + get_option('with-gstd-runstatedir'))
+gstd_log_state_dir = '-DGSTD_LOG_STATE_DIR="@0@"'.format(get_option('prefix') + get_option('with-gstd-logstatedir'))
 gst_c_args = ['-DHAVE_CONFIG_H',gstd_log_state_dir,gstd_run_state_dir]
-configinc = include_directories('.')
 
 # Define gstreamer API version
 apiversion = '1.0'

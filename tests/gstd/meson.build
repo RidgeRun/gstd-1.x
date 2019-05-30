@@ -6,14 +6,12 @@ gstd_tests = [
   ['test_gstd_state.c'],
 ]
 
-
 # Add C Definitions for tests
 test_defines = [
   '-DTESTFILE="' + meson.current_source_dir() + '/meson.build"',
 ]
 
 # Define plugins path
-gst_dep = dependency('gstreamer-1.0')
 plugins_dir = gst_dep.get_pkgconfig_variable('pluginsdir')
 
 # Build and run tests
