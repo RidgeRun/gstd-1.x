@@ -60,6 +60,8 @@ struct _GstdSignalClass
 
 };
 
+void gstd_signal_disconnect (GstdSignal *self);
+
 G_END_DECLS
 
 #endif // __GSTD_SIGNAL_H__

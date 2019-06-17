@@ -41,6 +41,7 @@
 #include "gstd_property_array.h"
 #include "gstd_list_reader.h"
 #include "gstd_signal.h"
+#include "gstd_signal_list.h"
 
 enum
 {
@@ -176,7 +177,7 @@ gstd_element_init (GstdElement * self)
           "node-type", GSTD_TYPE_PROPERTY, "flags", GSTD_PARAM_READ, NULL));
 
   self->element_signals =
-      GSTD_LIST (g_object_new (GSTD_TYPE_LIST, "name", "element_signals",
+      GSTD_LIST (g_object_new (GSTD_TYPE_SIGNAL_LIST, "name", "element_signals",
           "node-type", GSTD_TYPE_SIGNAL, "flags", GSTD_PARAM_READ, NULL));
 
   gstd_object_set_reader (GSTD_OBJECT (self->element_properties),

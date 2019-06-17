@@ -40,8 +40,6 @@ void gstd_signal_marshal (GClosure * closure, GValue * return_value,
     guint n_param_values, const GValue * param_values,
     gpointer invocation_hint, gpointer marshar_data);
 
-static GstdReturnCode gstd_signal_reader_disconnect (GstdIReader * iface);
-
 static void gstd_signal_reader_dispose (GObject * object);
 
 typedef struct _GstdSignalReaderClass GstdSignalReaderClass;
@@ -221,7 +219,7 @@ gstd_signal_marshal (GClosure * closure, GValue * return_value,
   g_mutex_unlock (&self->signal_lock);
 }
 
-static GstdReturnCode
+GstdReturnCode
 gstd_signal_reader_disconnect (GstdIReader * iface)
 {
   GstdSignalReader *self;
