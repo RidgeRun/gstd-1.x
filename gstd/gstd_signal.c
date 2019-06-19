@@ -115,6 +115,8 @@ gstd_signal_dispose (GObject * object)
 {
   GstdSignal *self = GSTD_SIGNAL (object);
 
+  GST_INFO_OBJECT (self, "Disposing %s signal", GSTD_OBJECT_NAME (self));
+
   if (self->target) {
     g_object_unref (self->target);
     self->target = NULL;
@@ -175,4 +177,11 @@ gstd_signal_set_property (GObject * object,
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
       break;
   }
+}
+
+void gstd_signal_disconnect (GstdSignal *self)
+{
+  GstdIReader *reader = GSTD_OBJECT(self)->reader;
+
+  gstd_signal_reader_disconnect (reader);
 }

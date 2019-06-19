@@ -43,5 +43,7 @@ typedef struct _GstdSignalReader GstdSignalReader;
 
 GType gstd_signal_reader_get_type ();
 
+GstdReturnCode gstd_signal_reader_disconnect (GstdIReader * iface);
+
 G_END_DECLS
 #endif // __GSTD_SIGNAL_READER_H__
