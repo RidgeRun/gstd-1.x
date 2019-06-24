@@ -373,7 +373,7 @@ main (gint argc, gchar * argv[])
 
   if (version) {
     g_print ("" PACKAGE_STRING "\n");
-    g_print ("Copyright (c) 2015 RigeRun Engineering\n");
+    g_print ("Copyright (c) 2015 RidgeRun Engineering\n");
     return EXIT_SUCCESS;
   }
 
