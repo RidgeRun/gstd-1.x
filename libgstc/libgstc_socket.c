@@ -45,6 +45,8 @@
 #  define GSTC_MAX_RESPONSE_LENGTH 4096
 #endif
 
+#define NUMBER_OF_SOCKETS (1)
+
 static int create_new_socket ();
 static GstcStatus open_socket(GstcSocket *self);
 
@@ -132,8 +134,7 @@ gstc_socket_send (GstcSocket * self, const char *request, char **response,
     const int timeout)
 {
   int rv;
-  const int number_of_sockets = 1;
-  struct pollfd ufds[number_of_sockets];
+  struct pollfd ufds[NUMBER_OF_SOCKETS];
   GstcStatus ret;
 
   gstc_assert_and_ret_val (NULL != self, GSTC_NULL_ARGUMENT);
@@ -157,7 +158,7 @@ gstc_socket_send (GstcSocket * self, const char *request, char **response,
   ufds[0].fd = self->socket;
   ufds[0].events = POLLIN;
   
-  rv = poll (ufds, number_of_sockets, timeout);
+  rv = poll (ufds, NUMBER_OF_SOCKETS, timeout);
 
   /* Error ocurred in poll */
   if (rv == -1) {

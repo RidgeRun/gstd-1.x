@@ -27,6 +27,8 @@
 #include <string.h>
 #include <unistd.h>
 
+#define NUM_THREADS (3)
+
 void
 singleton_instantiation_test ()
 {
@@ -79,17 +81,16 @@ thread_safety_instantiation_test ()
 {
 
   gint reps = 10;
-  gint num_threads = 3;
   gint i, j, r;
-  GThread *threads[num_threads];
-  GstdSession *sessions[num_threads];
+  GThread *threads[NUM_THREADS];
+  GstdSession *sessions[NUM_THREADS];
 
   //We need at least 2 threads to test
-  g_assert_true (num_threads > 2);
+  g_assert_true (NUM_THREADS > 2);
 
   for (r = 0; r < reps; ++r) {
     //spawn threads
-    for (i = 0; i < num_threads; ++i) {
+    for (i = 0; i < NUM_THREADS; ++i) {
       threads[i] =
           g_thread_new ("thread", instantiate_session_singleton,
           (gpointer) & sessions[i]);
@@ -97,7 +98,7 @@ thread_safety_instantiation_test ()
 
     //wait for threads to finish
     g_thread_join (threads[0]);
-    for (j = 1; j < num_threads; ++j) {
+    for (j = 1; j < NUM_THREADS; ++j) {
       g_thread_join (threads[j]);
       //Check all singletons are the same
       g_print ("GstdSession ptr %d: %p, GstdSession ptr %d: %p \n", j - 1,
@@ -105,7 +106,7 @@ thread_safety_instantiation_test ()
       g_assert_true (sessions[j - 1] == sessions[j]);
       g_object_unref (sessions[j - 1]);
     }
-    g_object_unref (sessions[num_threads - 1]);
+    g_object_unref (sessions[NUM_THREADS - 1]);
   }
 }
 
