@@ -40,17 +40,17 @@ static gboolean ipc_start (GstdIpc * ipc[], guint num_ipcs,
 static void ipc_stop (GstdIpc * ipc[], guint numipc);
 static void print_header (gboolean quiet);
 
+#define GSTD_HEADER "\nGstd version " PACKAGE_VERSION "\n" \
+      "Copyright (C) 2015-2017 Ridgerun, LLC (http://www.ridgerun.com)\n\n" \
+      "Log traces will be saved to %s.\nDetaching from parent process." 
+
 void
 print_header (gboolean quiet)
 {
-  const gchar *header = "\nGstd version " PACKAGE_VERSION "\n"
-      "Copyright (C) 2015-2017 Ridgerun, LLC (http://www.ridgerun.com)\n\n"
-      "Log traces will be saved to %s.\nDetaching from parent process.";
-
   if (!quiet) {
     gchar *filename;
     filename = gstd_log_get_current_gstd ();
-    GST_INFO (header, filename);
+    GST_INFO (GSTD_HEADER, filename);
     g_free (filename);
   }
 }

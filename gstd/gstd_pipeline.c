@@ -53,6 +53,8 @@ GST_DEBUG_CATEGORY_STATIC (gstd_pipeline_debug);
 
 #define GSTD_DEBUG_DEFAULT_LEVEL GST_LEVEL_INFO
 
+#define FB_NAME "pipeline%d"
+
 /**
  * GstdPipeline:
  * A wrapper for the conventional pipeline
@@ -354,7 +356,6 @@ gstd_pipeline_create (GstdPipeline * self, const gchar * name,
     const gint index, const gchar * description)
 {
   GError *error;
-  const gchar *fbname = "pipeline%d";
   gchar *pipename;
   GstParseFlags flags;
 
@@ -385,7 +386,7 @@ gstd_pipeline_create (GstdPipeline * self, const gchar * name,
   /* If the user didn't provide a name or provided an empty name
    * assign the fallback using the idex */
   if (!name || name[0] == '\0') {
-    pipename = g_strdup_printf (fbname, index);
+    pipename = g_strdup_printf (FB_NAME, index);
   } else {
     pipename = g_strdup (name);
   }
