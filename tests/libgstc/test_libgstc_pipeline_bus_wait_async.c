@@ -34,7 +34,7 @@ pthread_mutex_t lock;
 int socket_send_wait_time = 0;
 
 static void
-setup ()
+setup (void)
 {
   const gchar *address = "";
   unsigned int port = 0;

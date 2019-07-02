@@ -29,7 +29,7 @@ static gboolean _reachable;
 static guint64 _proc_time;
 
 static void
-setup ()
+setup (void)
 {
   const gchar *address = "";
   unsigned int port = 0;

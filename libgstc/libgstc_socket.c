@@ -58,7 +58,7 @@ struct _GstcSocket
 };
 
 static int
-create_new_socket ()
+create_new_socket (void)
 {
   const int domain = AF_INET;
   const int type = SOCK_STREAM;

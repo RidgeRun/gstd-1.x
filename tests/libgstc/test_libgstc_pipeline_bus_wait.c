@@ -57,7 +57,7 @@ static const char *_expected_response_corrupted = "{\n\
 }";
 
 static void
-setup ()
+setup (void)
 {
   const gchar *address = "";
   unsigned int port = 0;

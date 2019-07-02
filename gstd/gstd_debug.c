@@ -82,7 +82,7 @@ static void gstd_debug_get_property (GObject *, guint, GValue *, GParamSpec *);
 static void gstd_debug_dispose (GObject *);
 
 gchar *
-debug_obtain_default_level ()
+debug_obtain_default_level (void)
 {
   gint level = gst_debug_get_default_threshold ();
   return g_strdup_printf ("%d", level);
@@ -271,7 +271,7 @@ gstd_debug_dispose (GObject * object)
 
 
 GstdDebug *
-gstd_debug_new ()
+gstd_debug_new (void)
 {
   return GSTD_DEBUG (g_object_new (GSTD_TYPE_DEBUG, NULL));
 }

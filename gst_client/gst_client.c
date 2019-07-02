@@ -218,7 +218,7 @@ sig_handler (gint signo)
 
 /* Customizing readline */
 static void
-init_readline ()
+init_readline (void)
 {
   /* Allow conditional parsing of the ~/.inputrc file */
   rl_readline_name = "Gstd";

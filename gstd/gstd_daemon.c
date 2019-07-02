@@ -120,7 +120,7 @@ out:
 }
 
 static gboolean
-gstd_daemon_start_parent ()
+gstd_daemon_start_parent (void)
 {
   gint iret;
   gboolean ret = FALSE;
@@ -144,7 +144,7 @@ gstd_daemon_start_parent ()
 }
 
 static gboolean
-gstd_daemon_start_child ()
+gstd_daemon_start_child (void)
 {
   gint retval = 0;
   gboolean ret;
@@ -177,7 +177,7 @@ out:
 }
 
 gboolean
-gstd_daemon_stop ()
+gstd_daemon_stop (void)
 {
   gboolean ret = FALSE;
   guint timeout = 5;
@@ -198,7 +198,7 @@ gstd_daemon_stop ()
 }
 
 static const gchar *
-gstd_daemon_pid ()
+gstd_daemon_pid (void)
 {
   static gchar *fn = NULL;
   gchar *filename;

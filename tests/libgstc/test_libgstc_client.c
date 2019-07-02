@@ -110,14 +110,14 @@ mock_malloc (size_t size)
 }
 
 void
-setup ()
+setup (void)
 {
   _use_mock_malloc = FALSE;
   _fail_socket = FALSE;
 }
 
 void
-teardown ()
+teardown (void)
 {
 }
 
