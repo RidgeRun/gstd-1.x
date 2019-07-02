@@ -68,17 +68,17 @@ typedef gint GstdClientCB (gchar *, gchar *, GstdClientData *);
 
 struct _GstdClientCmd
 {
-  gchar *name;
+  const gchar *name;
   GstdClientCB *func;
-  gchar *doc;
-  gchar *usage;
+  const gchar *doc;
+  const gchar *usage;
 };
 
 struct _GstdClientData
 {
   gboolean quiet;
   gboolean use_unix;
-  gchar *prompt;
+  const gchar *prompt;
   guint tcp_port;
   guint unix_port;
   gchar *address;
@@ -247,7 +247,7 @@ gstd_client_execute (gchar * line, GstdClientData * data)
   if (tokens[1])
     arg = g_strstrip (tokens[1]);
   else
-    arg = "";
+    arg = (gchar*)"";
 
   /* Find and execute the respective command */
   cmd = cmds;
@@ -271,7 +271,7 @@ main (gint argc, gchar * argv[])
   gchar *line;
   GError *error = NULL;
   GOptionContext *context;
-  gchar *prompt = "gstd> ";
+  const gchar *prompt = "gstd> ";
   const gchar *history = ".gstc_history";
   const gchar *history_env = "GSTC_HISTORY";
   gchar *history_full = NULL;
@@ -373,7 +373,7 @@ main (gint argc, gchar * argv[])
 
   if (version) {
     g_print ("" PACKAGE_STRING "\n");
-    g_print ("Copyright (c) 2015 RidgeRun Engineering\n");
+    g_print ("Copyright (c) 2015 RigeRun Engineering\n");
     return EXIT_SUCCESS;
   }
 
@@ -395,7 +395,7 @@ main (gint argc, gchar * argv[])
   signal (SIGINT, sig_handler);
 
   if (file && !quit) {
-    gstd_client_cmd_source ("source", file, data);
+    gstd_client_cmd_source ((gchar*)"source", file, data);
     g_free (file);
   }
 
@@ -459,7 +459,7 @@ static gchar *
 gstd_client_completer (const gchar * text, gint state)
 {
   static gint list_index, len;
-  gchar *name;
+  const gchar *name;
 
   /* If this is a new word to complete, initialize now.  This includes
      saving the length of TEXT for efficiency, and initializing the index

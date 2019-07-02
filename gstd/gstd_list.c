@@ -288,7 +288,7 @@ gstd_list_to_string (GstdObject * object, gchar ** outstring)
   gchar *acc;
   gchar *node;
   GList *list;
-  gchar *separator;
+  const gchar *separator;
 
   g_return_val_if_fail (GSTD_IS_OBJECT (object), GSTD_NULL_ARGUMENT);
   g_warn_if_fail (!*outstring);
