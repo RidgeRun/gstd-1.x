@@ -38,6 +38,8 @@
 
 #include "libgstc.h"
 
+#define PIPELINE_DESC_FORMAT "playbin uri=file://%s"
+
 static int running = 1;
 
 static void
@@ -69,7 +71,6 @@ main (int argc, char *argv[])
   int asprintf_ret;
   const char *pipe_name = "pipe";
   char *pipe_description;
-  const char *pipe_description_template = "playbin uri=file://%s";
   char *video_name;
 
   if (argc != 2) {
@@ -84,7 +85,7 @@ main (int argc, char *argv[])
   }
 
   video_name = argv[1];
-  asprintf_ret = asprintf (&pipe_description, pipe_description_template, video_name);
+  asprintf_ret = asprintf (&pipe_description, PIPELINE_DESC_FORMAT, video_name);
   if (-1 == asprintf_ret) {
     goto free_client;
   }
