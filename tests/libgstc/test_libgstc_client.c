@@ -21,6 +21,7 @@
 #include "libgstc.h"
 #include "libgstc_socket.h"
 #include "libgstc_assert.h"
+#include "libgstc_json.h"
 
 /* Mock implementation of a socket */
 typedef struct _GstcSocket

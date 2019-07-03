@@ -26,6 +26,7 @@
 #include "libgstc_socket.h"
 #include "libgstc_thread.h"
 #include "libgstc_assert.h"
+#include "libgstc_json.h"
 
 /* Test Fixture */
 static gchar _request[3][512];

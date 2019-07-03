@@ -81,7 +81,7 @@ gstd_debug_set_property (GObject *, guint, const GValue *, GParamSpec *);
 static void gstd_debug_get_property (GObject *, guint, GValue *, GParamSpec *);
 static void gstd_debug_dispose (GObject *);
 
-gchar *
+static gchar *
 debug_obtain_default_level (void)
 {
   gint level = gst_debug_get_default_threshold ();

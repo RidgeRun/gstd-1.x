@@ -29,7 +29,7 @@
 
 #define NUM_THREADS (3)
 
-void
+static void
 singleton_instantiation_test (void)
 {
   GstdSession *temp1 = NULL, *temp2 = NULL;
@@ -54,7 +54,7 @@ singleton_instantiation_test (void)
   g_free (name2);
 }
 
-void
+static void
 session_mem_leak_test (void)
 {
   gint reps = 10;
@@ -66,7 +66,7 @@ session_mem_leak_test (void)
 
 
 
-void *
+static void *
 instantiate_session_singleton (gpointer address)
 {
   GstdSession **sessionAdress = (GstdSession **) address;
@@ -76,7 +76,7 @@ instantiate_session_singleton (gpointer address)
   return NULL;
 }
 
-void
+static void
 thread_safety_instantiation_test (void)
 {
 
