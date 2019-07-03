@@ -65,8 +65,9 @@ gstd_session_constructor (GType type,
     guint n_construct_params, GObjectConstructParam * construct_params)
 {
   static GObject *the_session = NULL;
-  g_mutex_lock (&singleton_mutex);
   GObject *object = NULL;
+  g_mutex_lock (&singleton_mutex);
+
   if (the_session == NULL) {
     object =
         G_OBJECT_CLASS (gstd_session_parent_class)->constructor (type,
@@ -89,6 +90,7 @@ gstd_session_class_init (GstdSessionClass * klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
   GParamSpec *properties[N_PROPERTIES] = { NULL, };
+  guint debug_color;
 
   object_class->set_property = gstd_session_set_property;
   object_class->get_property = gstd_session_get_property;
@@ -120,7 +122,7 @@ gstd_session_class_init (GstdSessionClass * klass)
   g_object_class_install_properties (object_class, N_PROPERTIES, properties);
 
   /* Initialize debug category with nice colors */
-  guint debug_color = GST_DEBUG_FG_BLACK | GST_DEBUG_BOLD | GST_DEBUG_BG_WHITE;
+  debug_color = GST_DEBUG_FG_BLACK | GST_DEBUG_BOLD | GST_DEBUG_BG_WHITE;
   GST_DEBUG_CATEGORY_INIT (gstd_session_debug, "gstdsession", debug_color,
       "Gstd Session category");
 }

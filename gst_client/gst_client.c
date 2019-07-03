@@ -560,6 +560,7 @@ gstd_client_cmd_socket (gchar * name, gchar * arg, GstdClientData * data)
   GOutputStream *ostream;
   gchar buffer[1024 * 1024];
   gint read;
+  gchar * path_name;
 
   g_return_val_if_fail (name, -1);
   g_return_val_if_fail (arg, -1);
@@ -572,7 +573,7 @@ gstd_client_cmd_socket (gchar * name, gchar * arg, GstdClientData * data)
       GSocketAddress *socket_address;
       g_socket_client_set_family (data->client,
                                 G_SOCKET_FAMILY_UNIX);
-			gchar * path_name = g_strdup_printf ("%s_%d", data->address, data->unix_port);
+      path_name = g_strdup_printf ("%s_%d", data->address, data->unix_port);
       socket_address = g_unix_socket_address_new (path_name);
       g_free (path_name);
 

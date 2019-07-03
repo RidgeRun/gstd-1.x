@@ -51,6 +51,7 @@ GST_START_TEST (test_no_create)
   GstdObject *node;
   GstdReturnCode ret;
   GstdSession *test_session = gstd_session_new ("Test_session");
+  gint i;
 
   /* Create pipeline to test no create cases */
   ret = gstd_get_by_uri (test_session, "/pipelines", &node);
@@ -61,7 +62,6 @@ GST_START_TEST (test_no_create)
   fail_if (ret);
   gst_object_unref (node);
 
-  int i;
   /* Tests */
   for (i = 0; i < sizeof(target_node)/sizeof(target_node[0]); i++) {
     ret = gstd_get_by_uri (test_session, target_node[i], &node);

@@ -184,11 +184,11 @@ GST_START_TEST (test_pipeline_bus_wait_async_bus_didnt_respond)
   const gchar *expected[] = { "update /pipelines/pipe/bus/types eos",
     "update /pipelines/pipe/bus/timeout -1"
   };
+  struct timespec ts;
   /* Set the send command to wait for 1s before responding */
   socket_send_wait_time = 1;
 
   /* Mutex timeout 10ms */
-  struct timespec ts;
   clock_gettime (CLOCK_REALTIME, &ts);
   ts.tv_sec += 0;
   ts.tv_nsec += 10 * 1000000;

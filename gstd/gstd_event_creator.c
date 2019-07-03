@@ -81,6 +81,7 @@ gstd_event_creator_class_init (GstdEventCreatorClass * klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
   GParamSpec *properties[N_PROPERTIES] = { NULL, };
+  guint debug_color;
   object_class->set_property = gstd_event_creator_set_property;
 
   properties[PROP_RECEIVER] =
@@ -93,7 +94,7 @@ gstd_event_creator_class_init (GstdEventCreatorClass * klass)
   g_object_class_install_properties (object_class, N_PROPERTIES, properties);
 
   /* Initialize debug category with nice colors */
-  guint debug_color = GST_DEBUG_FG_BLACK | GST_DEBUG_BOLD | GST_DEBUG_BG_WHITE;
+  debug_color = GST_DEBUG_FG_BLACK | GST_DEBUG_BOLD | GST_DEBUG_BG_WHITE;
   GST_DEBUG_CATEGORY_INIT (gstd_event_creator_debug, "gstdeventcreator",
       debug_color, "Gstd Event Creator category");
 }

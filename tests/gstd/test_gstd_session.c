@@ -69,8 +69,8 @@ session_mem_leak_test (void)
 void *
 instantiate_session_singleton (gpointer address)
 {
-  g_print ("Array Adress: %p, ", address);
   GstdSession **sessionAdress = (GstdSession **) address;
+  g_print ("Array Adress: %p, ", address);
   *sessionAdress = gstd_session_new ("SessionTest");
   g_print ("GstdSession ptr: %p \n", *sessionAdress);
   return NULL;

@@ -63,8 +63,8 @@ gstd_socket_class_init (GstdSocketClass * klass)
 static void
 gstd_socket_init (GstdSocket * self)
 {
-  GST_INFO_OBJECT (self, "Initializing gstd Socket");
   GstdIpc *base = GSTD_IPC (self);
+  GST_INFO_OBJECT (self, "Initializing gstd Socket");
   self->service = NULL;
   base->enabled = FALSE;
 }

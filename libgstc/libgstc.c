@@ -414,6 +414,8 @@ gstc_client_debug (GstClient * client, const char *threshold,
     const int colors, const int reset)
 {
   GstcStatus ret;
+  const char * colored;
+  const char * reset_bool;
 
   gstc_assert_and_ret_val (NULL != client, GSTC_NULL_ARGUMENT);
   gstc_assert_and_ret_val (NULL != threshold, GSTC_NULL_ARGUMENT);
@@ -431,14 +433,14 @@ gstc_client_debug (GstClient * client, const char *threshold,
   }
 
   /* Enable the color in debug */
-  const char * colored = colors == 0 ? "false" : "true";
+  colored = colors == 0 ? "false" : "true";
   ret = gstc_cmd_update (client, "/debug/color", colored);
   if (ret != GSTC_OK) {
     return ret;
   }
 
   /* Set debug threshold reset */
-  const char * reset_bool = reset == 0 ? "false" : "true";
+  reset_bool = reset == 0 ? "false" : "true";
   ret = gstc_cmd_update (client, "/debug/reset", reset_bool);
   
   if (ret != GSTC_OK) {

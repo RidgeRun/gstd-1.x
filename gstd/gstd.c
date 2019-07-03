@@ -145,7 +145,7 @@ main (gint argc, gchar * argv[])
 {
   GMainLoop *main_loop;
   GstdSession *session;
-  gboolean version = FALSE;;
+  gboolean version = FALSE;
   gboolean kill = FALSE;
   gboolean nodaemon = FALSE;
   gboolean quiet = FALSE;

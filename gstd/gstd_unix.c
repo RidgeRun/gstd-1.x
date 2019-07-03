@@ -89,9 +89,9 @@ gstd_unix_set_path (GstdUnix * self, const gchar * path)
 static void
 gstd_unix_init (GstdUnix * self)
 {
+  gchar *default_path;
   GST_INFO_OBJECT (self, "Initializing gstd Unix");
 
-  gchar *default_path;
   default_path = g_strdup_printf ("%s/%s", GSTD_RUN_STATE_DIR, GSTD_UNIX_DEFAULT_BASE_NAME);
   gstd_unix_set_path(self, default_path);
   g_free (default_path);
