@@ -172,7 +172,6 @@ gboolean
 gstd_unix_init_get_option_group (GstdIpc * base, GOptionGroup ** group)
 {
   GstdUnix *self = GSTD_UNIX (base);
-  GST_DEBUG_OBJECT (self, "UNIX init group callback ");
   GOptionEntry unix_args[] = {
     {"enable-unix-protocol", 'u', 0, G_OPTION_ARG_NONE, &base->enabled,
         "Enable attach the server through given UNIX socket ", NULL}
@@ -188,6 +187,7 @@ gstd_unix_init_get_option_group (GstdIpc * base, GOptionGroup ** group)
     ,
     {NULL}
   };
+    GST_DEBUG_OBJECT (self, "UNIX init group callback ");
   *group = g_option_group_new ("gstd-unix", ("UNIX Options"),
       ("Show UNIX Options"), NULL, NULL);
 
