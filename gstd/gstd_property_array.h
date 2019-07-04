@@ -44,7 +44,7 @@ G_BEGIN_DECLS
 
 typedef struct _GstdPropertyArray GstdPropertyArray;
 typedef struct _GstdPropertyArrayClass GstdPropertyArrayClass;
-GType gstd_property_array_get_type();
+GType gstd_property_array_get_type(void);
 
 
 struct _GstdPropertyArray

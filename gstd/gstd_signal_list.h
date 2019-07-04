@@ -57,7 +57,7 @@ struct _GstdSignalListClass
   GstdListClass parent_class;
 };
 
-GType gstd_signal_list_get_type ();
+GType gstd_signal_list_get_type (void);
 
 G_END_DECLS
 #endif // __GSTD_SIGNAL_LIST_H__

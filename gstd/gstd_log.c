@@ -39,8 +39,8 @@ gstd_log_proxy (GstDebugCategory * category, GstDebugLevel level,
     const gchar * file, const gchar * function, gint line, GObject * object,
     GstDebugMessage * message, gpointer user_data) G_GNUC_NO_INSTRUMENT;
 
-static const gchar *gstd_log_get_gstd_default ();
-static const gchar *gstd_log_get_gst_default ();
+static const gchar *gstd_log_get_gstd_default (void);
+static const gchar *gstd_log_get_gst_default (void);
 static gchar *gstd_log_get_filename (const gchar * filename, const gchar * default_filename);
 
 static FILE *_gstdlog = NULL;

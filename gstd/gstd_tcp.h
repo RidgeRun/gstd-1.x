@@ -45,7 +45,7 @@ G_BEGIN_DECLS
   (G_TYPE_INSTANCE_GET_CLASS ((obj), GSTD_TYPE_TPC, GstdTcpClass))
 typedef struct _GstdTcp GstdTcp;
 typedef struct _GstdTcpClass GstdTcpClass;
-GType gstd_tcp_get_type ();
+GType gstd_tcp_get_type (void);
 
 
 G_END_DECLS

@@ -44,7 +44,7 @@ G_BEGIN_DECLS
 
 typedef struct _GstdBusMsg GstdBusMsg;
 typedef struct _GstdBusMsgClass GstdBusMsgClass;
-GType gstd_bus_msg_get_type ();
+GType gstd_bus_msg_get_type (void);
 
 struct _GstdBusMsg
 {

@@ -42,7 +42,7 @@ G_BEGIN_DECLS
   (G_TYPE_INSTANCE_GET_CLASS ((obj), GSTD_TYPE_NO_UPDATER, GstdNoUpdaterClass))
 typedef struct _GstdNoUpdater GstdNoUpdater;
 
-GType gstd_no_updater_get_type ();
+GType gstd_no_updater_get_type (void);
 
 G_END_DECLS
 #endif // __GSTD_NO_UPDATER_H__

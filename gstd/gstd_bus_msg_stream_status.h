@@ -42,7 +42,7 @@ G_BEGIN_DECLS
 
 typedef struct _GstdBusMsgStreamStatus GstdBusMsgStreamStatus;
 typedef struct _GstdBusMsgStreamStatusClass GstdBusMsgStreamStatusClass;
-GType gstd_bus_msg_stream_status_get_type ();
+GType gstd_bus_msg_stream_status_get_type (void);
 
 G_END_DECLS
 

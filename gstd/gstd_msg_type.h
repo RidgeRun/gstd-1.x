@@ -29,7 +29,7 @@ G_BEGIN_DECLS
  */
 #define GSTD_TYPE_MSG_TYPE (gstd_msg_type_get_type())
 
-GType gstd_msg_type_get_type ();
+GType gstd_msg_type_get_type (void);
 
 G_END_DECLS
 

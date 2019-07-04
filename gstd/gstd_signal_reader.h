@@ -41,7 +41,7 @@ G_BEGIN_DECLS
   (G_TYPE_INSTANCE_GET_CLASS ((obj), GSTD_TYPE_SIGNAL_READER, GstdSignalReaderClass))
 typedef struct _GstdSignalReader GstdSignalReader;
 
-GType gstd_signal_reader_get_type ();
+GType gstd_signal_reader_get_type (void);
 
 GstdReturnCode gstd_signal_reader_disconnect (GstdIReader * iface);
 

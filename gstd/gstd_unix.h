@@ -39,7 +39,7 @@ G_BEGIN_DECLS
   (G_TYPE_INSTANCE_GET_CLASS ((obj), GSTD_TYPE_TPC, GstdUnixClass))
 typedef struct _GstdUnix GstdUnix;
 typedef struct _GstdUnixClass GstdUnixClass;
-GType gstd_unix_get_type ();
+GType gstd_unix_get_type (void);
 
 
 G_END_DECLS

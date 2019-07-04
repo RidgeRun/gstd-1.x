@@ -42,7 +42,7 @@ G_BEGIN_DECLS
   (G_TYPE_INSTANCE_GET_CLASS ((obj), GSTD_TYPE_NO_READER, GstdNoReaderClass))
 typedef struct _GstdNoReader GstdNoReader;
 
-GType gstd_no_reader_get_type ();
+GType gstd_no_reader_get_type (void);
 
 G_END_DECLS
 #endif // __GSTD_NO_READER_H__

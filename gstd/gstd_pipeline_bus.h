@@ -40,7 +40,7 @@ G_BEGIN_DECLS
 typedef struct _GstdPipelineBus GstdPipelineBus;
 typedef struct _GstdPipelineBusClass GstdPipelineBusClass;
 
-GType gstd_pipeline_bus_get_type ();
+GType gstd_pipeline_bus_get_type (void);
 
 /**
  * gstd_pipeline_bus_new: (constructor)

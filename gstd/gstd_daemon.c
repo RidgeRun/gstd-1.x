@@ -37,9 +37,9 @@
 #include <libdaemon/dpid.h>
 #include <libdaemon/dexec.h>
 
-static gboolean gstd_daemon_start_parent ();
-static gboolean gstd_daemon_start_child ();
-static const gchar *gstd_daemon_pid ();
+static gboolean gstd_daemon_start_parent (void);
+static gboolean gstd_daemon_start_child (void);
+static const gchar *gstd_daemon_pid (void);
 static gchar *gstd_daemon_get_pid_filename (const gchar * filename);
 
 static gboolean _initialized = FALSE;

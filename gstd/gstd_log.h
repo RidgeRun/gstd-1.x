@@ -22,11 +22,11 @@
 
 #include <gst/gst.h>
 
-void gstd_log_init ();
-void gstd_log_deinit ();
+void gstd_log_init (const gchar * gstdfilename, const gchar * gstfilename);
+void gstd_log_deinit (void);
 
-gchar *gstd_log_get_current_gstd ();
-gchar *gstd_log_get_current_gst ();
+gchar *gstd_log_get_current_gstd (void);
+gchar *gstd_log_get_current_gst (void);
 
 /* A default category for every object not defining its own */
 GST_DEBUG_CATEGORY_EXTERN (gstd_debug);

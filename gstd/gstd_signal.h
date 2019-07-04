@@ -43,7 +43,7 @@ G_BEGIN_DECLS
 
 typedef struct _GstdSignal GstdSignal;
 typedef struct _GstdSignalClass GstdSignalClass;
-GType gstd_signal_get_type ();
+GType gstd_signal_get_type (void);
 
 struct _GstdSignal
 {

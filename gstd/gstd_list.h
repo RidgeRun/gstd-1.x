@@ -65,7 +65,7 @@ struct _GstdListClass
   GstdObjectClass parent_class;
 };
 
-GType gstd_list_get_type ();
+GType gstd_list_get_type (void);
 
 GstdObject *gstd_list_find_child (GstdList * self, const gchar * name);
 gboolean gstd_list_append_child (GstdList *, GstdObject * child);

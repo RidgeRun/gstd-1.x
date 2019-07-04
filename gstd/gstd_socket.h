@@ -52,7 +52,7 @@ struct _GstdSocketClass
   GstdReturnCode (*create_socket_service) (GstdSocket *, GSocketService **);
 };
 
-GType gstd_socket_get_type ();
+GType gstd_socket_get_type (void);
 
 G_END_DECLS
 #endif //__GSTD_SOCKET_H__
