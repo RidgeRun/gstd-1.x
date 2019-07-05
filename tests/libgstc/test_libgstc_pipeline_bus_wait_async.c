@@ -26,6 +26,7 @@
 #include "libgstc_socket.h"
 #include "libgstc_thread.h"
 #include "libgstc_assert.h"
+#include "libgstc_json.h"
 
 /* Test Fixture */
 static gchar _request[3][512];
@@ -34,7 +35,7 @@ pthread_mutex_t lock;
 int socket_send_wait_time = 0;
 
 static void
-setup ()
+setup (void)
 {
   const gchar *address = "";
   unsigned int port = 0;
@@ -184,11 +185,11 @@ GST_START_TEST (test_pipeline_bus_wait_async_bus_didnt_respond)
   const gchar *expected[] = { "update /pipelines/pipe/bus/types eos",
     "update /pipelines/pipe/bus/timeout -1"
   };
+  struct timespec ts;
   /* Set the send command to wait for 1s before responding */
   socket_send_wait_time = 1;
 
   /* Mutex timeout 10ms */
-  struct timespec ts;
   clock_gettime (CLOCK_REALTIME, &ts);
   ts.tv_sec += 0;
   ts.tv_nsec += 10 * 1000000;

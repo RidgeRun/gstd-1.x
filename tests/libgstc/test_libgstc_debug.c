@@ -30,7 +30,7 @@ static GstClient *_client;
 int request_count = 0;
 
 static void
-setup ()
+setup (void)
 {
   const gchar *address = "";
   unsigned int port = 0;

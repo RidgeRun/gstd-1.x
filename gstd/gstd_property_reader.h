@@ -42,7 +42,7 @@ G_BEGIN_DECLS
   (G_TYPE_INSTANCE_GET_CLASS ((obj), GSTD_TYPE_PROPERTY_READER, GstdPropertyReaderClass))
 typedef struct _GstdPropertyReader GstdPropertyReader;
 
-GType gstd_property_reader_get_type ();
+GType gstd_property_reader_get_type (void);
 
 typedef struct _GstdPropertyReaderClass GstdPropertyReaderClass;
 

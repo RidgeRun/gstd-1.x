@@ -63,8 +63,8 @@ gstd_socket_class_init (GstdSocketClass * klass)
 static void
 gstd_socket_init (GstdSocket * self)
 {
-  GST_INFO_OBJECT (self, "Initializing gstd Socket");
   GstdIpc *base = GSTD_IPC (self);
+  GST_INFO_OBJECT (self, "Initializing gstd Socket");
   self->service = NULL;
   base->enabled = FALSE;
 }
@@ -144,6 +144,7 @@ gstd_socket_start (GstdIpc * base, GstdSession * session)
 {
   GstdSocket *self = GSTD_SOCKET (base);
   GSocketService *service;
+  GstdReturnCode ret;
 
   if (!base->enabled) {
     GST_DEBUG_OBJECT (self, "SOCKET not enabled, skipping");
@@ -157,7 +158,6 @@ gstd_socket_start (GstdIpc * base, GstdSession * session)
 
   service = self->service;
 
- GstdReturnCode ret;
  ret = GSTD_SOCKET_GET_CLASS (self)->create_socket_service (self, &service);
 
  if(ret != GSTD_EOK)
@@ -179,13 +179,14 @@ gstd_socket_stop (GstdIpc * base)
   GstdSocket *self = GSTD_SOCKET (base);
   GSocketService *service;
   GstdSession *session = base->session;
+  GSocketListener *listener;
 
   g_return_val_if_fail (session, GSTD_NULL_ARGUMENT);
 
   GST_DEBUG_OBJECT (self, "Entering SOCKET stop ");
   if (self->service) {
     service = self->service;
-    GSocketListener *listener = G_SOCKET_LISTENER (service);
+    listener = G_SOCKET_LISTENER (service);
     if (service) {
       GST_INFO_OBJECT (session, "Closing SOCKET connection for %s",
           GSTD_OBJECT_NAME (session));

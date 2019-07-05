@@ -38,7 +38,7 @@ G_BEGIN_DECLS
   (G_TYPE_INSTANCE_GET_CLASS ((obj), GSTD_TYPE_DEBUG, GstdDebugClass))
 typedef struct _GstdDebug GstdDebug;
 typedef struct _GstdDebugClass GstdDebugClass;
-GType gstd_debug_get_type ();
+GType gstd_debug_get_type (void);
 
 /**
  * gstd_debug_new: (constructor)
@@ -48,7 +48,7 @@ GType gstd_debug_get_type ();
  * Returns: (transfer full) (nullable): A new #GstdDebug. Free after
  * usage using g_object_unref()
  */
-GstdDebug *gstd_debug_new ();
+GstdDebug *gstd_debug_new (void);
 
 
 #endif // __GSTD_DEBUG_H__

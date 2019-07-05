@@ -21,6 +21,7 @@
 #include "libgstc.h"
 #include "libgstc_socket.h"
 #include "libgstc_assert.h"
+#include "libgstc_json.h"
 
 /* Mock implementation of a socket */
 typedef struct _GstcSocket
@@ -110,14 +111,14 @@ mock_malloc (size_t size)
 }
 
 void
-setup ()
+setup (void)
 {
   _use_mock_malloc = FALSE;
   _fail_socket = FALSE;
 }
 
 void
-teardown ()
+teardown (void)
 {
 }
 

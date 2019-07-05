@@ -89,9 +89,9 @@ gstd_unix_set_path (GstdUnix * self, const gchar * path)
 static void
 gstd_unix_init (GstdUnix * self)
 {
+  gchar *default_path;
   GST_INFO_OBJECT (self, "Initializing gstd Unix");
 
-  gchar *default_path;
   default_path = g_strdup_printf ("%s/%s", GSTD_RUN_STATE_DIR, GSTD_UNIX_DEFAULT_BASE_NAME);
   gstd_unix_set_path(self, default_path);
   g_free (default_path);
@@ -172,7 +172,6 @@ gboolean
 gstd_unix_init_get_option_group (GstdIpc * base, GOptionGroup ** group)
 {
   GstdUnix *self = GSTD_UNIX (base);
-  GST_DEBUG_OBJECT (self, "UNIX init group callback ");
   GOptionEntry unix_args[] = {
     {"enable-unix-protocol", 'u', 0, G_OPTION_ARG_NONE, &base->enabled,
         "Enable attach the server through given UNIX socket ", NULL}
@@ -188,6 +187,7 @@ gstd_unix_init_get_option_group (GstdIpc * base, GOptionGroup ** group)
     ,
     {NULL}
   };
+    GST_DEBUG_OBJECT (self, "UNIX init group callback ");
   *group = g_option_group_new ("gstd-unix", ("UNIX Options"),
       ("Show UNIX Options"), NULL, NULL);
 

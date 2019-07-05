@@ -44,7 +44,7 @@ G_BEGIN_DECLS
 
 typedef struct _GstdJsonBuilder GstdJsonBuilder;
 
-GType gstd_json_builder_get_type ();
+GType gstd_json_builder_get_type (void);
 
 G_END_DECLS
 

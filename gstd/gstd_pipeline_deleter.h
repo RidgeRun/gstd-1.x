@@ -42,7 +42,7 @@ G_BEGIN_DECLS
   (G_TYPE_INSTANCE_GET_CLASS ((obj), GSTD_TYPE_PIPELINE_DELETER, GstdPipelineDeleterClass))
 typedef struct _GstdPipelineDeleter GstdPipelineDeleter;
 
-GType gstd_pipeline_deleter_get_type ();
+GType gstd_pipeline_deleter_get_type (void);
 
 G_END_DECLS
 #endif // __GSTD_PIPELINE_DELETER_H__

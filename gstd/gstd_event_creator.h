@@ -40,7 +40,7 @@ G_BEGIN_DECLS
 typedef struct _GstdEventCreator GstdEventCreator;
 typedef struct _GstdEventCreatorClass GstdEventCreatorClass;
 
-GType gstd_event_creator_get_type ();
+GType gstd_event_creator_get_type (void);
 
 G_END_DECLS
 #endif // __GSTD_EVENT_CREATOR_H__

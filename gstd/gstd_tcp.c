@@ -144,7 +144,6 @@ gboolean
 gstd_tcp_init_get_option_group (GstdIpc * base, GOptionGroup ** group)
 {
   GstdTcp *self = GSTD_TCP (base);
-  GST_DEBUG_OBJECT (self, "TCP init group callback ");
   GOptionEntry tcp_args[] = {
     {"enable-tcp-protocol", 't', 0, G_OPTION_ARG_NONE, &base->enabled,
         "Enable attach the server through given TCP ports ", NULL}
@@ -168,6 +167,7 @@ gstd_tcp_init_get_option_group (GstdIpc * base, GOptionGroup ** group)
     ,
     {NULL}
   };
+  GST_DEBUG_OBJECT (self, "TCP init group callback ");
   *group = g_option_group_new ("gstd-tcp", ("TCP Options"),
       ("Show TCP Options"), NULL, NULL);
 

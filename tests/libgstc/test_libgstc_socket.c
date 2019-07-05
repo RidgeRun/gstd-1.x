@@ -81,7 +81,7 @@ mock_server_thread (gpointer data)
 }
 
 static void
-mock_server_new ()
+mock_server_new (void)
 {
   GError *error = NULL;
   gint64 start_time;
@@ -118,7 +118,7 @@ mock_server_new ()
 }
 
 static void
-mock_server_free ()
+mock_server_free (void)
 {
   g_socket_service_stop (_mock_server);
   g_object_unref (_mock_server);
@@ -143,7 +143,7 @@ mock_malloc (gsize size)
 }
 
 void
-setup ()
+setup (void)
 {
   socket_delay = 0;
   _mock_malloc_oom = FALSE;
@@ -151,7 +151,7 @@ setup ()
 }
 
 void
-teardown ()
+teardown (void)
 {
   mock_server_free ();
 }

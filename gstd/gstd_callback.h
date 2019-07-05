@@ -42,7 +42,7 @@ G_BEGIN_DECLS
   (G_TYPE_INSTANCE_GET_CLASS ((obj), GSTD_TYPE_CALLBACK, GstdCallbackClass))
 typedef struct _GstdCallback GstdCallback;
 typedef struct _GstdCallbackClass GstdCallbackClass;
-GType gstd_callback_get_type ();
+GType gstd_callback_get_type (void);
 
 struct _GstdCallback
 {

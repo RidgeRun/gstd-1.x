@@ -40,17 +40,18 @@ static gboolean ipc_start (GstdIpc * ipc[], guint num_ipcs,
 static void ipc_stop (GstdIpc * ipc[], guint numipc);
 static void print_header (gboolean quiet);
 
+#define HEADER \
+      "\nGstd version " PACKAGE_VERSION "\n" \
+      "Copyright (C) 2015-2017 Ridgerun, LLC (http://www.ridgerun.com)\n\n" \
+      "Log traces will be saved to %s.\nDetaching from parent process."
+
 void
 print_header (gboolean quiet)
 {
-  const gchar *header = "\nGstd version " PACKAGE_VERSION "\n"
-      "Copyright (C) 2015-2017 Ridgerun, LLC (http://www.ridgerun.com)\n\n"
-      "Log traces will be saved to %s.\nDetaching from parent process.";
-
+  gchar *filename;
   if (!quiet) {
-    gchar *filename;
     filename = gstd_log_get_current_gstd ();
-    GST_INFO (header, filename);
+    GST_INFO (HEADER, filename);
     g_free (filename);
   }
 }
@@ -145,7 +146,7 @@ main (gint argc, gchar * argv[])
 {
   GMainLoop *main_loop;
   GstdSession *session;
-  gboolean version = FALSE;;
+  gboolean version = FALSE;
   gboolean kill = FALSE;
   gboolean nodaemon = FALSE;
   gboolean quiet = FALSE;
@@ -166,9 +167,9 @@ main (gint argc, gchar * argv[])
     GSTD_TYPE_UNIX,
   };
 
-  guint num_ipcs = (sizeof (supported_ipcs) / sizeof (GType));
-  GstdIpc *ipc_array[num_ipcs];
-  GOptionGroup *optiongroup_array[num_ipcs];
+  guint num_ipcs = (sizeof (supported_ipcs) / sizeof (GType));  
+  GstdIpc **ipc_array = g_malloc(num_ipcs * sizeof(GstdIpc*));
+  GOptionGroup **optiongroup_array = g_malloc(num_ipcs * sizeof(GOptionGroup*));
 
   GOptionEntry entries[] = {
     {"version", 'v', 0, G_OPTION_ARG_NONE, &version,
@@ -279,6 +280,9 @@ main (gint argc, gchar * argv[])
 
   gst_deinit ();
   gstd_log_deinit ();
+  
+  g_free(ipc_array);
+  g_free(optiongroup_array);
 
   goto out;
 
