@@ -46,6 +46,7 @@ struct _GstdTcp
   guint base_port;
   gchar *address;
   guint num_ports;
+  gint max_threads;
   GSocketService *service;
 };
 
@@ -91,6 +92,7 @@ gstd_tcp_init (GstdTcp * self)
   self->base_port = GSTD_TCP_DEFAULT_PORT;
   self->address = g_strdup(GSTD_TCP_DEFAULT_ADDRESS);
   self->num_ports = GSTD_TCP_DEFAULT_NUM_PORTS;
+  self->max_threads = GSTD_TCP_DEFAULT_MAX_THREADS;
 }
 
 static void
@@ -117,7 +119,7 @@ gstd_tcp_create_socket_service (GstdSocket * base, GSocketService ** service)
 
   GST_DEBUG_OBJECT (self, "Getting TCP Socket address");
 
-  *service = g_threaded_socket_service_new (self->num_ports);
+  *service = g_threaded_socket_service_new (self->max_threads);
 
   for (i = 0; i < self->num_ports; i++) {
     gstd_tcp_add_listeners(*service, address, port + i, &error);
@@ -158,6 +160,11 @@ gstd_tcp_init_get_option_group (GstdIpc * base, GOptionGroup ** group)
     {"tcp-num-ports", 'n', 0, G_OPTION_ARG_INT, &self->num_ports,
           "Number of ports to use starting at base-port (default 1)",
         "tcp-num-ports"}
+    ,
+    {"tcp-max-threads", 'm', 0, G_OPTION_ARG_INT, &self->max_threads,
+          "Max number of allowed threads to process simultaneous requests. -1 "
+          "means unlimited (default -1)",
+        "tcp-max-threads"}
     ,
     {NULL}
   };
