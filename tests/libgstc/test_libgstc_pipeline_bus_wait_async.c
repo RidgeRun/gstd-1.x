@@ -124,7 +124,7 @@ gstc_json_child_string (const char * json, const char * parent_name,
   return GSTC_OK;
 }
 
-GstcStatus
+static GstcStatus
 callback (GstClient * _client, const gchar * pipeline_name,
     const gchar * message_name, const long long timeout, char *message,
     gpointer user_data)
