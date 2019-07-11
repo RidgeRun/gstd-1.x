@@ -50,6 +50,7 @@ libgstd_src_files = [
   'gstd_bus_msg_stream_status.c',
   'gstd_bus_msg_element.c',
   'gstd_signal.c',
+  'gstd_signal_list.c',
   'gstd_callback.c',
   'gstd_signal_reader.c',
   'gstd_session.c',
