@@ -76,6 +76,7 @@ prefix = get_option('prefix')
 lib_install_dir = get_option('libdir')
 # Internal installation directory
 lib_gstd_dir = []
+lib_gstc_dir = []
 
 
 # Get an object returns describing a compiler
