@@ -61,6 +61,7 @@
 #define PIPELINE_EVENT_FORMAT                "/pipelines/%s/event"
 
 #define SEEK_FORMAT        "seek %f %d %d %d %lld %d %lld"
+#define STEP_FORMAT        "step %d %lld %f %d %d"
 #define FLUSH_STOP_FORMAT  "flush_stop %s"
 #define TIMEOUT_FORMAT  "%lli"
 
@@ -662,6 +663,36 @@ gstc_pipeline_seek(GstClient *client, const char *pipeline_name,
     return GSTC_OOM;
   }
   
+  ret = gstc_cmd_create (client, where, what);
+
+  free (where);
+  free (what);
+
+  return ret;
+}
+
+GstcStatus
+gstc_pipeline_step(GstClient *client, const char *pipeline_name,
+    int format, long long amount, double rate, int flush,
+    int intermediate)
+{
+  GstcStatus ret;
+  int asprintf_ret;
+  char *where;
+  char *what;
+
+  gstc_assert_and_ret_val (NULL != client, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != pipeline_name, GSTC_NULL_ARGUMENT);
+
+  asprintf_ret = asprintf (&where, PIPELINE_EVENT_FORMAT, pipeline_name);
+  if(asprintf_ret == PRINTF_ERROR) {
+    return GSTC_OOM;
+  }
+  asprintf_ret = asprintf (&what, STEP_FORMAT, format, amount, rate, flush, intermediate);
+  if(asprintf_ret == PRINTF_ERROR) {
+    return GSTC_OOM;
+  }
+
   ret = gstc_cmd_create (client, where, what);
 
   free (where);

@@ -35,6 +35,12 @@
 #define GSTD_EVENT_FACTORY_SEEK_STOP_TYPE_DEFAULT GST_SEEK_TYPE_SET
 #define GSTD_EVENT_FACTORY_SEEK_STOP_DEFAULT GST_CLOCK_TIME_NONE
 #define GSTD_EVENT_FACTORY_FLUSH_STOP_RESET_DEFAULT TRUE
+#define GSTD_EVENT_FACTORY_STEP_FORMAT_DEFAULT GST_FORMAT_BUFFERS
+#define GSTD_EVENT_FACTORY_STEP_AMOUNT_DEFAULT 1
+#define GSTD_EVENT_FACTORY_STEP_RATE_DEFAULT 1.0
+#define GSTD_EVENT_FACTORY_STEP_FLUSH_DEFAULT TRUE
+#define GSTD_EVENT_FACTORY_STEP_INTERMEDIATE_DEFAULT FALSE
+
 
 typedef enum _GstdEventType GstdEventType;
 
@@ -71,7 +77,9 @@ enum _GstdEventType
 
   GSTD_EVENT_SEEK = 14,
 
-  GSTD_EVENT_NAVIGATION = 15
+  GSTD_EVENT_NAVIGATION = 15,
+
+  GSTD_EVENT_STEP = 16
 };
 
 static gboolean gstd_ascii_to_gint64 (const gchar *, gint64 *);
@@ -79,6 +87,7 @@ static gboolean gstd_ascii_to_double (const gchar *, gdouble *);
 static gboolean gstd_ascii_to_boolean (const gchar *, gboolean *);
 GstdEventType gstd_event_factory_parse_event (const gchar *);
 static GstEvent *gstd_event_factory_make_seek_event (const gchar *);
+static GstEvent *gstd_event_factory_make_step_event (const gchar *);
 static GstEvent *gstd_event_factory_make_flush_stop_event (const gchar *);
 
 GstEvent *
@@ -104,6 +113,9 @@ gstd_event_factory_make (const gchar * name, const gchar * description)
       break;
     case GSTD_EVENT_FLUSH_STOP:
       event = gstd_event_factory_make_flush_stop_event (description);
+      break;
+    case GSTD_EVENT_STEP:
+      event = gstd_event_factory_make_step_event (description);
       break;
     default:
       event = NULL;
@@ -255,6 +267,79 @@ out:
 }
 
 static GstEvent *
+gstd_event_factory_make_step_event (const gchar * description)
+{
+  GstFormat format = GSTD_EVENT_FACTORY_STEP_FORMAT_DEFAULT;
+  guint64 amount = GSTD_EVENT_FACTORY_STEP_AMOUNT_DEFAULT;
+  gdouble rate = GSTD_EVENT_FACTORY_STEP_RATE_DEFAULT;
+  gboolean flush = GSTD_EVENT_FACTORY_STEP_FLUSH_DEFAULT;
+  gboolean intermediate = GSTD_EVENT_FACTORY_STEP_INTERMEDIATE_DEFAULT;
+  GstEvent *event = NULL;
+  gchar **tokens = NULL;
+  gint64 temp_format;
+  gint64 temp_flush;
+  gint64 temp_intermediate;
+
+  if (NULL != description) {
+    tokens = g_strsplit (description, " ", 5);
+  }
+
+  if (NULL == tokens || NULL == tokens[0]) {
+    goto fallback;
+  }
+
+  if (!gstd_ascii_to_gint64 (tokens[0], &temp_format)) {
+    goto out;
+  }
+  format = (GstFormat) temp_format;
+
+  if (NULL == tokens[1]) {
+    goto fallback;
+  }
+
+  if (!gstd_ascii_to_gint64 (tokens[1], &amount)) {
+    goto out;
+  }
+
+  if (NULL == tokens[2]) {
+    goto fallback;
+  }
+
+  if (!gstd_ascii_to_double (tokens[2], &rate)) {
+    goto out;
+  }
+
+  if (NULL == tokens[3]) {
+    goto fallback;
+  }
+
+  if (!gstd_ascii_to_gint64 (tokens[3], &temp_flush)) {
+    goto out;
+  }
+  flush = (gboolean) temp_flush;
+
+  if (NULL == tokens[4]) {
+    goto fallback;
+  }
+
+  if (!gstd_ascii_to_gint64 (tokens[4], &temp_intermediate)) {
+    goto out;
+  }
+  intermediate = (gboolean) temp_intermediate;
+
+fallback:
+  {
+    event =
+        gst_event_new_step (format, amount, rate, flush, intermediate);
+  }
+out:
+  {
+    g_strfreev (tokens);
+    return event;
+  }
+}
+
+static GstEvent *
 gstd_event_factory_make_flush_stop_event (const gchar * description)
 {
   gboolean reset_time = GSTD_EVENT_FACTORY_FLUSH_STOP_RESET_DEFAULT;
@@ -284,6 +369,8 @@ gstd_event_factory_parse_event (const gchar * name)
     ret = GSTD_EVENT_FLUSH_START;
   } else if (!strcmp (name, "flush-stop") || !strcmp (name, "flush_stop")) {
     ret = GSTD_EVENT_FLUSH_STOP;
+  } else if (!strcmp (name, "step")) {
+    ret = GSTD_EVENT_STEP;
   }
   return ret;
 }
