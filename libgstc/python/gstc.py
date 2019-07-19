@@ -299,3 +299,17 @@ class client(object):
         if value==None:
             self.logger.error("invalid value received")
         return value
+
+    def list_pipelines(self):
+        self.logger.info('Listing pipelines')
+        cmd_line = ['list_pipelines']
+        try:
+            jresult = self.socket_send(cmd_line)
+            result = json.loads(jresult)
+            if (result['code'] != 0):
+                self.logger.error('Pipelines list error: %s', result['description'])
+            return result['nodes']
+        except Exception:
+            self.logger.error('Pipelines list error')
+            traceback.print_exc()
+            return None
