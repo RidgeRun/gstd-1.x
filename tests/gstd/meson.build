@@ -14,6 +14,14 @@ test_defines = [
 # Define plugins path
 plugins_dir = gst_dep.get_pkgconfig_variable('pluginsdir')
 
+# Create environment object to  stores information about the environment
+# variables set during tests.
+# Define constant enviroment variable
+env = environment()
+env.set('GST_PLUGIN_SYSTEM_PATH_1_0', '')
+env.set('CK_DEFAULT_TIMEOUT', '120')
+env.set('GST_PLUGIN_PATH_1_0', lib_gstd_dir + ':' + plugins_dir)
+
 # Build and run tests
 foreach t : gstd_tests
   fname = t[0]
@@ -30,13 +38,10 @@ foreach t : gstd_tests
         link_with : link_with_libs,
         dependencies : [test_gstd_deps,lib_gstd_dep],
     )
-    # Create enviomen object to  stores information about the environment
-    # variables set during tests.
-    env = environment()
-    env.set('GST_PLUGIN_PATH_1_0', lib_gstd_dir + ':' + plugins_dir)
-    env.set('GST_PLUGIN_SYSTEM_PATH_1_0', '')
-    env.set('CK_DEFAULT_TIMEOUT', '120')
+
+    # Define enviroment variable
     env.set('GST_REGISTRY', '@0@/@1@.registry'.format(meson.current_build_dir(), test_name))
+
     # Run tests
     test(test_name, exe, env: env, timeout : 60)
   endif

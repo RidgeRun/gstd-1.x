@@ -30,6 +30,14 @@ lib_gstc_client = [
 # Define plugins path
 plugins_dir = gst_dep.get_pkgconfig_variable('pluginsdir')
 
+# Create environment object to  stores information about the environment
+# variables set during tests.
+# Define constant enviroment variable
+env = environment()
+env.set('GST_PLUGIN_SYSTEM_PATH_1_0', '')
+env.set('CK_DEFAULT_TIMEOUT', '120')
+env.set('GST_PLUGIN_PATH_1_0', lib_gstd_dir + ':' + plugins_dir)
+
 # Build and run tests
 foreach t : lib_gstc_tests
   fname = t[0]
@@ -49,12 +57,7 @@ foreach t : lib_gstc_tests
       include_directories : [configinc, lib_gstc_inc_dir],
       dependencies : [test_libgstc_deps,lib_gstc_dep],
   )
-  # Create enviomen object to  stores information about the environment
-  # variables set during tests.
-  env = environment()
-  env.set('GST_PLUGIN_PATH_1_0', lib_gstd_dir + ':' + plugins_dir)
-  env.set('GST_PLUGIN_SYSTEM_PATH_1_0', '')
-  env.set('CK_DEFAULT_TIMEOUT', '120')
+  # Define enviroment variable
   env.set('GST_REGISTRY', '@0@/@1@.registry'.format(meson.current_build_dir(), test_name))
   # Run tests
   test(test_name, exe, env: env, timeout : 60)
@@ -74,13 +77,10 @@ foreach files_list : lib_gstc_client
       include_directories : [configinc, lib_gstc_inc_dir],
       dependencies : [test_libgstc_deps],
   )
-  # Create enviomen object to  stores information about the environment
-  # variables set during tests.
-  env = environment()
-  env.set('GST_PLUGIN_PATH_1_0', lib_gstd_dir + ':' + plugins_dir)
-  env.set('GST_PLUGIN_SYSTEM_PATH_1_0', '')
-  env.set('CK_DEFAULT_TIMEOUT', '120')
+
+  # Define enviroment variable
   env.set('GST_REGISTRY', '@0@/@1@.registry'.format(meson.current_build_dir(), test_name))
+
   # Run tests
   test(test_name, exe, env: env, timeout : 60)
 
