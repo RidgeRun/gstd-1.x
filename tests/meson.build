@@ -1,4 +1,4 @@
-if not get_option('tests').disabled()
+if not get_option('enable-tests').disabled()
   subdir('gstd')
   subdir('libgstc')
 endif

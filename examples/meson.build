@@ -1,3 +1,3 @@
-if not get_option('examples').disabled()
+if not get_option('enable-examples').disabled()
   subdir('libgstc')
 endif

@@ -1,6 +1,6 @@
 # Feature options
-option('tests', type : 'feature', value : 'auto', yield : true, description : 'Build tests')
-option('examples', type : 'feature', value : 'auto', yield : true, description : 'Build examples')
+option('enable-tests', type : 'feature', value : 'auto', yield : true, description : 'Build tests')
+option('enable-examples', type : 'feature', value : 'auto', yield : true, description : 'Build examples')
 option('enable-gtk-doc', type : 'boolean', value : false, description : 'Use gtk-doc to build documentation')
 
 # String options
