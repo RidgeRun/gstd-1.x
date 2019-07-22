@@ -20,6 +20,7 @@
 #include "config.h"
 #endif
 
+#include <locale.h>
 #include <setjmp.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -329,6 +330,9 @@ main (gint argc, gchar * argv[])
     ,
     {NULL}
   };
+
+  /* Internationalization */
+  setlocale (LC_ALL, "");
 
   // Initialize default
   remaining = NULL;
