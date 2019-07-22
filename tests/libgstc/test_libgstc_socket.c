@@ -72,7 +72,7 @@ mock_server_cb (GSocketService * service, GSocketConnection * connection,
   return TRUE;
 }
 
-gpointer
+static gpointer
 mock_server_thread (gpointer data)
 {
   g_main_loop_run (_loop);
@@ -142,7 +142,7 @@ mock_malloc (gsize size)
   }
 }
 
-void
+static void
 setup (void)
 {
   socket_delay = 0;
@@ -150,7 +150,7 @@ setup (void)
   mock_server_new ();
 }
 
-void
+static void
 teardown (void)
 {
   mock_server_free ();
