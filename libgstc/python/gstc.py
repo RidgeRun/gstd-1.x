@@ -368,9 +368,9 @@ class client(object):
             traceback.print_exc()
             return None
 
-    def bus_read(self, pipe, filter):
+    def bus_filter(self, pipe, filter):
         self.logger.info('Reading bus of pipeline %s with filter %s', pipe, filter)
-        cmd_line = ['bus_read', pipe, filter]
+        cmd_line = ['bus_filter', pipe, filter]
         try:
             jresult = self.socket_send(cmd_line)
             result = json.loads(jresult)
