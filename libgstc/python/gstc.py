@@ -313,3 +313,230 @@ class client(object):
             self.logger.error('Pipelines list error')
             traceback.print_exc()
             return None
+
+    def list_elements(self, pipe):
+        self.logger.info('Listing elements of pipeline %s', pipe)
+        cmd_line = ['list_elements', pipe]
+        try:
+            jresult = self.socket_send(cmd_line)
+            result = json.loads(jresult)
+            if (result['code'] != 0):
+                self.logger.error('Elements list error: %s', result['description'])
+            return result['nodes']
+        except Exception:
+            self.logger.error('Elements list error')
+            traceback.print_exc()
+            return None
+
+    def list_properties(self, pipe, element):
+        self.logger.info('Listing properties of  element %s from pipeline %s', element, pipeline)
+        cmd_line = ['list_properties', pipe, element]
+        try:
+            jresult = self.socket_send(cmd_line)
+            result = json.loads(jresult)
+            if (result['code'] != 0):
+                self.logger.error('Properties list error: %s', result['description'])
+            return result['nodes']
+        except Exception:
+            self.logger.error('Properties list error')
+            traceback.print_exc()
+            return None
+
+    def list_signals(self, pipe, element):
+        self.logger.info('Listing signals of  element %s from pipeline %s', element, pipeline)
+        cmd_line = ['list_signals', pipe, element]
+        try:
+            jresult = self.socket_send(cmd_line)
+            result = json.loads(jresult)
+            if (result['code'] != 0):
+                self.logger.error('Signals list error: %s', result['description'])
+            return result['nodes']
+        except Exception:
+            self.logger.error('Signals list error')
+            traceback.print_exc()
+            return None
+
+    def bus_read(self, pipe):
+        self.logger.info('Reading bus of pipeline %s', pipe)
+        cmd_line = ['bus_read', pipe]
+        try:
+            jresult = self.socket_send(cmd_line)
+            result = json.loads(jresult)
+            return result
+        except Exception:
+            self.logger.error('Bus read error')
+            traceback.print_exc()
+            return None
+
+    def bus_read(self, pipe, filter):
+        self.logger.info('Reading bus of pipeline %s with filter %s', pipe, filter)
+        cmd_line = ['bus_read', pipe, filter]
+        try:
+            jresult = self.socket_send(cmd_line)
+            result = json.loads(jresult)
+            return result
+        except Exception:
+            self.logger.error('Bus read error')
+            traceback.print_exc()
+            return None
+
+    def bus_timeout(self, pipe, timeout):
+        self.logger.info('Reading bus of pipeline %s with timeout %s', pipe, timeout)
+        cmd_line = ['bus_timeout', pipe, timeout]
+        try:
+            jresult = self.socket_send(cmd_line)
+            result = json.loads(jresult)
+            return result
+        except Exception:
+            self.logger.error('Bus read error')
+            traceback.print_exc()
+            return None
+
+    def event_eos(self, pipe):
+        self.logger.info('Sending end-of-stream event to pipeline %s', pipe)
+        cmd_line = ['event_eos', pipe]
+        try:
+            jresult = self.socket_send(cmd_line)
+            result = json.loads(jresult)
+            if (result['code'] != 0):
+                self.logger.error('End-of-stream event error: %s', result['description'])
+            return result['code']
+        except Exception:
+            self.logger.error('End-of-stream event error')
+            traceback.print_exc()
+            return None
+
+    def event_seek (self, pipe, rate=1.0, format=3, flags=1, start_type=1, start=0, end_type=1, end=-1):
+        self.logger.info('Performing event seek in pipeline %s', pipe)
+        cmd_line = ['event_seek', pipe, rate, format, flags, start_type, start, end_type, end]
+        try:
+            jresult = self.socket_send(cmd_line)
+            result = json.loads(jresult)
+            if (result['code'] != 0):
+                self.logger.error('Event seek error: %s', result['description'])
+            return result['code']
+        except Exception:
+            self.logger.error('Event seek error')
+            traceback.print_exc()
+            return None
+
+    def event_flush_start(self, pipe):
+        self.logger.info('Putting pipeline %s in flushing mode', pipe)
+        cmd_line = ['event_flush_start', pipe]
+        try:
+            jresult = self.socket_send(cmd_line)
+            result = json.loads(jresult)
+            if (result['code'] != 0):
+                self.logger.error('Event flush start error: %s', result['description'])
+            return result['code']
+        except Exception:
+            self.logger.error('Event flush start error')
+            traceback.print_exc()
+            return None
+
+    def event_flush_stop(self, pipe, reset=True):
+        self.logger.info('Taking pipeline %s out of flushing mode', pipe)
+        cmd_line = ['event_flush_stop', pipe]
+        try:
+            jresult = self.socket_send(cmd_line)
+            result = json.loads(jresult)
+            if (result['code'] != 0):
+                self.logger.error('Event flush stop error: %s', result['description'])
+            return result['code']
+        except Exception:
+            self.logger.error('Event flush stop error')
+            traceback.print_exc()
+            return None
+
+    def signal_connect(self, pipe, element, signal):
+        self.logger.info('Connecting to signal %s of element %s from pipeline %s', signal, element, pipe)
+        cmd_line = ['signal_connect', pipe, element, signal]
+        try:
+            jresult = self.socket_send(cmd_line)
+            result = json.loads(jresult)
+            return result
+        except Exception:
+            self.logger.error('Signal connect error')
+            traceback.print_exc()
+            return None
+
+    def signal_timeout(self, pipe, element, signal, timeout):
+        self.logger.info('Connecting to signal %s of element %s from pipeline %s with timeout %s', signal, element, pipe, timeout)
+        cmd_line = ['signal_timeout', pipe, element, signal, timeout]
+        try:
+            jresult = self.socket_send(cmd_line)
+            result = json.loads(jresult)
+            return result
+        except Exception:
+            self.logger.error('Signal connect error')
+            traceback.print_exc()
+            return None
+
+    def signal_disconnect(self, pipe, element, signal):
+        self.logger.info('Disonnecting from signal %s of element %s from pipeline %s', signal, element, pipe)
+        cmd_line = ['signal_disconnect', pipe, element, signal]
+        try:
+            jresult = self.socket_send(cmd_line)
+            result = json.loads(jresult)
+            return result
+        except Exception:
+            self.logger.error('Signal disconnect error')
+            traceback.print_exc()
+            return None
+
+    def debug_enable(self, enable):
+        self.logger.info('Enabling/Disabling GStreamer debug')
+        cmd_line = ['debug_enable', enable]
+        try:
+            jresult = self.socket_send(cmd_line)
+            result = json.loads(jresult)
+            if (result['code'] != 0):
+                self.logger.error('Debug enable error: %s', result['description'])
+            return result['code']
+        except Exception:
+            self.logger.error('Debug enable error')
+            traceback.print_exc()
+            return None
+
+    def debug_threshold(self, threshold):
+        self.logger.info('Setting GStreamer debug threshold to %s', threshold)
+        cmd_line = ['debug_threshold', threshold]
+        try:
+            jresult = self.socket_send(cmd_line)
+            result = json.loads(jresult)
+            if (result['code'] != 0):
+                self.logger.error('Debug threshold error: %s', result['description'])
+            return result['code']
+        except Exception:
+            self.logger.error('Debug threshold error')
+            traceback.print_exc()
+            return None
+
+    def debug_color(self, colors):
+        self.logger.info('Enabling/Disabling GStreamer debug colors')
+        cmd_line = ['debug_color', color]
+        try:
+            jresult = self.socket_send(cmd_line)
+            result = json.loads(jresult)
+            if (result['code'] != 0):
+                self.logger.error('Debug colors error: %s', result['description'])
+            return result['code']
+        except Exception:
+            self.logger.error('Debug color error')
+            traceback.print_exc()
+            return None
+
+    def debug_reset(self, reset):
+        self.logger.info('Enabling/Disabling GStreamer debug threshold reset')
+        cmd_line = ['debug_reset', reset]
+        try:
+            jresult = self.socket_send(cmd_line)
+            result = json.loads(jresult)
+            if (result['code'] != 0):
+                self.logger.error('Debug reset error: %s', result['description'])
+            return result['code']
+        except Exception:
+            self.logger.error('Debug reset error')
+            traceback.print_exc()
+            return None
+
