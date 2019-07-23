@@ -20,14 +20,15 @@
 #include "config.h"
 #endif
 
-#include <setjmp.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <glib/gstdio.h>
 #include <errno.h>
-#include <string.h>
 #include <gio/gio.h>
 #include <gio/gunixsocketaddress.h>
+#include <glib/gstdio.h>
+#include <locale.h>
+#include <setjmp.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #ifdef HAVE_LIBREADLINE
 #  if defined(HAVE_READLINE_READLINE_H)
@@ -329,6 +330,9 @@ main (gint argc, gchar * argv[])
     ,
     {NULL}
   };
+
+  /* Internationalization */
+  setlocale (LC_ALL, "");
 
   // Initialize default
   remaining = NULL;
