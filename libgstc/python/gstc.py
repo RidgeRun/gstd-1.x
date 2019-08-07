@@ -314,9 +314,9 @@ class client(object):
             traceback.print_exc()
             return None
 
-    def list_elements(self, pipe):
-        self.logger.info('Listing elements of pipeline %s', pipe)
-        cmd_line = ['list_elements', pipe]
+    def list_elements(self, pipe_name):
+        self.logger.info('Listing elements of pipeline %s', pipe_name)
+        cmd_line = ['list_elements', pipe_name]
         try:
             jresult = self.socket_send(cmd_line)
             result = json.loads(jresult)
@@ -328,9 +328,9 @@ class client(object):
             traceback.print_exc()
             return None
 
-    def list_properties(self, pipe, element):
+    def list_properties(self, pipe_name, element):
         self.logger.info('Listing properties of  element %s from pipeline %s', element, pipeline)
-        cmd_line = ['list_properties', pipe, element]
+        cmd_line = ['list_properties', pipe_name, element]
         try:
             jresult = self.socket_send(cmd_line)
             result = json.loads(jresult)
@@ -342,9 +342,9 @@ class client(object):
             traceback.print_exc()
             return None
 
-    def list_signals(self, pipe, element):
+    def list_signals(self, pipe_name, element):
         self.logger.info('Listing signals of  element %s from pipeline %s', element, pipeline)
-        cmd_line = ['list_signals', pipe, element]
+        cmd_line = ['list_signals', pipe_name, element]
         try:
             jresult = self.socket_send(cmd_line)
             result = json.loads(jresult)
@@ -356,9 +356,9 @@ class client(object):
             traceback.print_exc()
             return None
 
-    def bus_read(self, pipe):
-        self.logger.info('Reading bus of pipeline %s', pipe)
-        cmd_line = ['bus_read', pipe]
+    def bus_read(self, pipe_name):
+        self.logger.info('Reading bus of pipeline %s', pipe_name)
+        cmd_line = ['bus_read', pipe_name]
         try:
             jresult = self.socket_send(cmd_line)
             result = json.loads(jresult)
@@ -368,33 +368,33 @@ class client(object):
             traceback.print_exc()
             return None
 
-    def bus_filter(self, pipe, filter):
-        self.logger.info('Reading bus of pipeline %s with filter %s', pipe, filter)
-        cmd_line = ['bus_filter', pipe, filter]
+    def bus_filter(self, pipe_name, filter):
+        self.logger.info('Reading bus of pipeline %s with filter %s', pipe_name, filter)
+        cmd_line = ['bus_filter', pipe_name, filter]
         try:
             jresult = self.socket_send(cmd_line)
             result = json.loads(jresult)
             return result
         except Exception:
-            self.logger.error('Bus read error')
+            self.logger.error('Bus filter error')
             traceback.print_exc()
             return None
 
-    def bus_timeout(self, pipe, timeout):
-        self.logger.info('Reading bus of pipeline %s with timeout %s', pipe, timeout)
-        cmd_line = ['bus_timeout', pipe, timeout]
+    def bus_timeout(self, pipe_name, timeout):
+        self.logger.info('Reading bus of pipeline %s with timeout %s', pipe_name, timeout)
+        cmd_line = ['bus_timeout', pipe_name, timeout]
         try:
             jresult = self.socket_send(cmd_line)
             result = json.loads(jresult)
             return result
         except Exception:
-            self.logger.error('Bus read error')
+            self.logger.error('Bus timeout error')
             traceback.print_exc()
             return None
 
-    def event_eos(self, pipe):
-        self.logger.info('Sending end-of-stream event to pipeline %s', pipe)
-        cmd_line = ['event_eos', pipe]
+    def event_eos(self, pipe_name):
+        self.logger.info('Sending end-of-stream event to pipeline %s', pipe_name)
+        cmd_line = ['event_eos', pipe_name]
         try:
             jresult = self.socket_send(cmd_line)
             result = json.loads(jresult)
@@ -406,9 +406,9 @@ class client(object):
             traceback.print_exc()
             return None
 
-    def event_seek (self, pipe, rate=1.0, format=3, flags=1, start_type=1, start=0, end_type=1, end=-1):
-        self.logger.info('Performing event seek in pipeline %s', pipe)
-        cmd_line = ['event_seek', pipe, rate, format, flags, start_type, start, end_type, end]
+    def event_seek (self, pipe_name, rate=1.0, format=3, flags=1, start_type=1, start=0, end_type=1, end=-1):
+        self.logger.info('Performing event seek in pipeline %s', pipe_name)
+        cmd_line = ['event_seek', pipe_name, rate, format, flags, start_type, start, end_type, end]
         try:
             jresult = self.socket_send(cmd_line)
             result = json.loads(jresult)
@@ -420,9 +420,9 @@ class client(object):
             traceback.print_exc()
             return None
 
-    def event_flush_start(self, pipe):
-        self.logger.info('Putting pipeline %s in flushing mode', pipe)
-        cmd_line = ['event_flush_start', pipe]
+    def event_flush_start(self, pipe_name):
+        self.logger.info('Putting pipeline %s in flushing mode', pipe_name)
+        cmd_line = ['event_flush_start', pipe_name]
         try:
             jresult = self.socket_send(cmd_line)
             result = json.loads(jresult)
@@ -434,9 +434,9 @@ class client(object):
             traceback.print_exc()
             return None
 
-    def event_flush_stop(self, pipe, reset=True):
-        self.logger.info('Taking pipeline %s out of flushing mode', pipe)
-        cmd_line = ['event_flush_stop', pipe]
+    def event_flush_stop(self, pipe_name, reset=True):
+        self.logger.info('Taking pipeline %s out of flushing mode', pipe_name)
+        cmd_line = ['event_flush_stop', pipe_name]
         try:
             jresult = self.socket_send(cmd_line)
             result = json.loads(jresult)
@@ -448,9 +448,9 @@ class client(object):
             traceback.print_exc()
             return None
 
-    def signal_connect(self, pipe, element, signal):
-        self.logger.info('Connecting to signal %s of element %s from pipeline %s', signal, element, pipe)
-        cmd_line = ['signal_connect', pipe, element, signal]
+    def signal_connect(self, pipe_name, element, signal):
+        self.logger.info('Connecting to signal %s of element %s from pipeline %s', signal, element, pipe_name)
+        cmd_line = ['signal_connect', pipe_name, element, signal]
         try:
             jresult = self.socket_send(cmd_line)
             result = json.loads(jresult)
@@ -460,21 +460,21 @@ class client(object):
             traceback.print_exc()
             return None
 
-    def signal_timeout(self, pipe, element, signal, timeout):
-        self.logger.info('Connecting to signal %s of element %s from pipeline %s with timeout %s', signal, element, pipe, timeout)
-        cmd_line = ['signal_timeout', pipe, element, signal, timeout]
+    def signal_timeout(self, pipe_name, element, signal, timeout):
+        self.logger.info('Connecting to signal %s of element %s from pipeline %s with timeout %s', signal, element, pipe_name, timeout)
+        cmd_line = ['signal_timeout', pipe_name, element, signal, timeout]
         try:
             jresult = self.socket_send(cmd_line)
             result = json.loads(jresult)
             return result
         except Exception:
-            self.logger.error('Signal connect error')
+            self.logger.error('Signal timeout error')
             traceback.print_exc()
             return None
 
-    def signal_disconnect(self, pipe, element, signal):
-        self.logger.info('Disonnecting from signal %s of element %s from pipeline %s', signal, element, pipe)
-        cmd_line = ['signal_disconnect', pipe, element, signal]
+    def signal_disconnect(self, pipe_name, element, signal):
+        self.logger.info('Disonnecting from signal %s of element %s from pipeline %s', signal, element, pipe_name)
+        cmd_line = ['signal_disconnect', pipe_name, element, signal]
         try:
             jresult = self.socket_send(cmd_line)
             result = json.loads(jresult)
