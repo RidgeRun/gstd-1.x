@@ -374,7 +374,7 @@ class client(object):
         try:
             jresult = self.socket_send(cmd_line)
             result = json.loads(jresult)
-            return result
+            return result['code']
         except Exception:
             self.logger.error('Bus filter error')
             traceback.print_exc()
