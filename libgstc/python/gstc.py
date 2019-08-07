@@ -281,7 +281,7 @@ class client(object):
             self.logger.warning("Socket result is not buf/str")
         return result['code']
 
-    def gstd_element_get(self, pipe_name, element, prop):
+    def element_get(self, pipe_name, element, prop):
         self.logger.info('Getting value of element %s %s property in pipeline %s', element, prop, pipe_name)
         cmd_line = ['element_get', pipe_name, "%s %s" % (element, prop) ]
         jresult = self.socket_send(cmd_line)
