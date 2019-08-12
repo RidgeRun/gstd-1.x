@@ -18,6 +18,13 @@ TESTS = \
 	test_libgstc_python_list_elements.py \
 	test_libgstc_python_list_pipelines.py \
 	test_libgstc_python_list_properties.py \
-	test_libgstc_python_list_signals.py
+	test_libgstc_python_list_signals.py \
+	test_libgstc_python_pipeline_create.py \
+	test_libgstc_python_pipeline_delete.py \
+	test_libgstc_python_pipeline_pause.py \
+	test_libgstc_python_pipeline_play.py \
+	test_libgstc_python_pipeline_stop.py \
+	test_libgstc_python_read.py \
+	test_libgstc_python_update.py
 
 export PYTHONPATH = $PYTHONPATH:$(top_srcdir)/libgstc/python
