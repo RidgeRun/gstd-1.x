@@ -4,6 +4,8 @@ import socket
 import subprocess
 import psutil
 import time
+import traceback
+import sys
 
 GSTD_PROCNAME = 'gstd'
 terminator = '\x00'.encode('utf-8')
@@ -52,19 +54,19 @@ class client(object):
         # Select to log in a file or console
         if logfile:
             # log in file
-            log = logging.FileHandler(logfile)
+            self.log = logging.FileHandler(logfile)
         else:
             # log in console
-            log = logging.StreamHandler()
+            self.log = logging.StreamHandler()
         # Set log format with colors
-        log.setFormatter(colorFormatter("%(asctime)22s  %(levelname)s    \t%(message)s"))
+        self.log.setFormatter(colorFormatter("%(asctime)22s  %(levelname)s    \t%(message)s"))
         # Set log level
         numeric_level = getattr(logging, loglevel.upper(), None)
         if isinstance(numeric_level, int):
-            log.setLevel(numeric_level)
+            self.log.setLevel(numeric_level)
         else:
-            log.setLevel(logging.ERROR)
-        self.logger.addHandler(log)
+            self.log.setLevel(logging.ERROR)
+        self.logger.addHandler(self.log)
 
         self.ip = ip
         self.port = port
@@ -84,6 +86,7 @@ class client(object):
         if (self.gstd_started):
             self.logger.info('Killing GStreamer Daemon process...')
             self.proc.kill()
+        self.logger.removeHandler(self.log)
 
     def socket_send(self, line):
         self.logger.debug('GSTD socket sending line: %s', line)
@@ -93,7 +96,9 @@ class client(object):
             s.send(' '.join(line).encode('utf-8'))
             data = recvall(s)
             data = data.decode('utf-8')
+            s.close()
         except socket.error:
+            s.close()
             self.logger.error('GSTD socket error')
             data = None
         self.logger.debug('GSTD socket received answer:\n %s', data)
