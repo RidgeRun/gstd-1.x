@@ -7,6 +7,7 @@ TESTS = \
 	test_libgstc_python_debug_color.py \
 	test_libgstc_python_debug_enable.py \
 	test_libgstc_python_debug_reset.py \
-	test_libgstc_python_debug_threshold.py
+	test_libgstc_python_debug_threshold.py \
+	test_libgstc_python_delete.py
 
 export PYTHONPATH = $PYTHONPATH:$(top_srcdir)/libgstc/python
