@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import unittest
 import gstc
-import os
 
 class TestGstcBusTimeoutMethods(unittest.TestCase):
     def setUp(self):

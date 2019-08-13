@@ -519,7 +519,7 @@ class client(object):
 
     def debug_color(self, colors):
         self.logger.info('Enabling/Disabling GStreamer debug colors')
-        cmd_line = ['debug_color', color]
+        cmd_line = ['debug_color', colors]
         try:
             jresult = self.socket_send(cmd_line)
             result = json.loads(jresult)
