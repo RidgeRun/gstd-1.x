@@ -374,7 +374,7 @@ class client(object):
             return None
 
     def bus_filter(self, pipe_name, filter):
-        self.logger.info('Reading bus of pipeline %s with filter %s', pipe_name, filter)
+        self.logger.info('Setting bus read filter of pipeline %s to %s', pipe_name, filter)
         cmd_line = ['bus_filter', pipe_name, filter]
         try:
             jresult = self.socket_send(cmd_line)
@@ -386,12 +386,12 @@ class client(object):
             return None
 
     def bus_timeout(self, pipe_name, timeout):
-        self.logger.info('Reading bus of pipeline %s with timeout %s', pipe_name, timeout)
+        self.logger.info('Setting bus read timeout of pipeline %s to %s', pipe_name, timeout)
         cmd_line = ['bus_timeout', pipe_name, timeout]
         try:
             jresult = self.socket_send(cmd_line)
             result = json.loads(jresult)
-            return result
+            return result['code']
         except Exception:
             self.logger.error('Bus timeout error')
             traceback.print_exc()
