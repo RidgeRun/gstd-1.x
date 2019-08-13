@@ -439,9 +439,9 @@ class client(object):
             traceback.print_exc()
             return None
 
-    def event_flush_stop(self, pipe_name, reset=True):
+    def event_flush_stop(self, pipe_name, reset='true'):
         self.logger.info('Taking pipeline %s out of flushing mode', pipe_name)
-        cmd_line = ['event_flush_stop', pipe_name]
+        cmd_line = ['event_flush_stop', pipe_name, reset]
         try:
             jresult = self.socket_send(cmd_line)
             result = json.loads(jresult)
