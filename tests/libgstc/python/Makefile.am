@@ -14,6 +14,10 @@ TESTS = \
 	test_libgstc_python_event_eos.py \
 	test_libgstc_python_event_flush_start.py \
 	test_libgstc_python_event_flush_stop.py \
-	test_libgstc_python_event_seek.py
+	test_libgstc_python_event_seek.py \
+	test_libgstc_python_list_elements.py \
+	test_libgstc_python_list_pipelines.py \
+	test_libgstc_python_list_properties.py \
+	test_libgstc_python_list_signals.py
 
 export PYTHONPATH = $PYTHONPATH:$(top_srcdir)/libgstc/python

@@ -313,7 +313,7 @@ class client(object):
             result = json.loads(jresult)
             if (result['code'] != 0):
                 self.logger.error('Pipelines list error: %s', result['description'])
-            return result['nodes']
+            return result['response']['nodes']
         except Exception:
             self.logger.error('Pipelines list error')
             traceback.print_exc()
@@ -327,35 +327,35 @@ class client(object):
             result = json.loads(jresult)
             if (result['code'] != 0):
                 self.logger.error('Elements list error: %s', result['description'])
-            return result['nodes']
+            return result['response']['nodes']
         except Exception:
             self.logger.error('Elements list error')
             traceback.print_exc()
             return None
 
     def list_properties(self, pipe_name, element):
-        self.logger.info('Listing properties of  element %s from pipeline %s', element, pipeline)
+        self.logger.info('Listing properties of  element %s from pipeline %s', element, pipe_name)
         cmd_line = ['list_properties', pipe_name, element]
         try:
             jresult = self.socket_send(cmd_line)
             result = json.loads(jresult)
             if (result['code'] != 0):
                 self.logger.error('Properties list error: %s', result['description'])
-            return result['nodes']
+            return result['response']['nodes']
         except Exception:
             self.logger.error('Properties list error')
             traceback.print_exc()
             return None
 
     def list_signals(self, pipe_name, element):
-        self.logger.info('Listing signals of  element %s from pipeline %s', element, pipeline)
+        self.logger.info('Listing signals of  element %s from pipeline %s', element, pipe_name)
         cmd_line = ['list_signals', pipe_name, element]
         try:
             jresult = self.socket_send(cmd_line)
             result = json.loads(jresult)
             if (result['code'] != 0):
                 self.logger.error('Signals list error: %s', result['description'])
-            return result['nodes']
+            return result['response']['nodes']
         except Exception:
             self.logger.error('Signals list error')
             traceback.print_exc()
