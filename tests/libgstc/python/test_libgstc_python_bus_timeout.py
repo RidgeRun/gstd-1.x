@@ -3,11 +3,9 @@ import unittest
 import gstc
 
 class TestGstcBusTimeoutMethods(unittest.TestCase):
-    def setUp(self):
-        self.gstd_client = gstc.client(loglevel='DEBUG')
-
     def test_bus_timeout_eos(self):
         pipeline = "videotestsrc name=v0 ! xvimagesink"
+        self.gstd_client = gstc.client(loglevel='DEBUG')
         self.assertEqual(self.gstd_client.pipeline_create ("p0", pipeline), 0)
         self.assertEqual(self.gstd_client.pipeline_play ("p0"), 0)
         self.assertEqual(self.gstd_client.event_eos("p0"), 0)
@@ -21,6 +19,7 @@ class TestGstcBusTimeoutMethods(unittest.TestCase):
 
     def test_bus_timeout_no_response(self):
         pipeline = "videotestsrc name=v0 ! xvimagesink"
+        self.gstd_client = gstc.client(loglevel='DEBUG')
         self.assertEqual(self.gstd_client.pipeline_create ("p0", pipeline), 0)
         self.assertEqual(self.gstd_client.pipeline_play ("p0"), 0)
         self.assertEqual(self.gstd_client.bus_timeout("p0", "10"), 0)

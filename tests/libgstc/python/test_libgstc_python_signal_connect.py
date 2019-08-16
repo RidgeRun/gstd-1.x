@@ -5,7 +5,7 @@ import gstc
 class TestGstcSignalConnectMethods(unittest.TestCase):
 
     def test_libgstc_python_signal_connect(self):
-        pipeline = "videotestsrc is-live=true ! identity sleep-time=10000000 signal-handoffs=true name=identity ! xvimagesink"
+        pipeline = "videotestsrc ! identity signal-handoffs=true name=identity ! xvimagesink"
         gstd_client = gstc.client(loglevel='DEBUG')
         self.assertEqual(gstd_client.pipeline_create ("p0", pipeline), 0)
         self.assertEqual(gstd_client.pipeline_play ("p0"), 0)

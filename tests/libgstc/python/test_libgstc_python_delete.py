@@ -3,11 +3,10 @@ import unittest
 import gstc
 
 class TestGstcDeleteMethods(unittest.TestCase):
-    def setUp(self):
-        self.gstd_client = gstc.client(loglevel='DEBUG')
 
     def test_delete_pipeline(self):
         pipeline = "videotestsrc name=v0 ! xvimagesink"
+        self.gstd_client = gstc.client(loglevel='DEBUG')
         ret = self.gstd_client.read("pipelines")
         initial_n_pipes = len(ret['response']['nodes'])
         self.assertEqual(self.gstd_client.create ("pipelines", "p0", pipeline), 0)
