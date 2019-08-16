@@ -5,7 +5,7 @@ import gstc
 class TestGstcReadMethods(unittest.TestCase):
 
     def test_libgstc_python_read(self):
-        pipeline = "videotestsrc name=v0 pattern=ball ! xvimagesink"
+        pipeline = "videotestsrc name=v0 pattern=ball ! fakesink"
         gstd_client = gstc.client(loglevel='DEBUG')
         self.assertEqual(gstd_client.pipeline_create ("p0", pipeline), 0)
         ret = gstd_client.read("pipelines/p0/elements/v0/properties/pattern")

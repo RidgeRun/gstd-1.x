@@ -5,7 +5,7 @@ import gstc
 class TestGstcPipelineStopMethods(unittest.TestCase):
 
     def test_libgstc_python_pipeline_stop(self):
-        pipeline = "videotestsrc name=v0 ! xvimagesink"
+        pipeline = "videotestsrc name=v0 ! fakesink"
         gstd_client = gstc.client(loglevel='DEBUG')
         self.assertEqual(gstd_client.pipeline_create ("p0", pipeline), 0)
         self.assertEqual(gstd_client.pipeline_play ("p0"), 0)

@@ -5,7 +5,7 @@ import gstc
 class TestGstcPipelineDeleteMethods(unittest.TestCase):
 
     def test_libgstc_python_pipeline_delete(self):
-        pipeline = "videotestsrc name=v0 ! xvimagesink"
+        pipeline = "videotestsrc name=v0 ! fakesink"
         gstd_client = gstc.client(loglevel='DEBUG')
         self.assertEqual(gstd_client.pipeline_create ("p0", pipeline), 0)
         ret_prev = gstd_client.read("pipelines")

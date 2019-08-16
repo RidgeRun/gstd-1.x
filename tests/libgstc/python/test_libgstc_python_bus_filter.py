@@ -5,7 +5,7 @@ import gstc
 class TestGstcBusFilterMethods(unittest.TestCase):
 
     def test_bus_filter_eos(self):
-        pipeline = "videotestsrc name=v0 ! xvimagesink"
+        pipeline = "videotestsrc name=v0 ! fakesink"
         self.gstd_client = gstc.client(loglevel='DEBUG')
         self.assertEqual(self.gstd_client.pipeline_create ("p0", pipeline), 0)
         self.assertEqual(self.gstd_client.pipeline_play ("p0"), 0)

@@ -5,7 +5,7 @@ import gstc
 class TestGstcListPipelinesMethods(unittest.TestCase):
 
     def test_list_pipelines(self):
-        pipeline = "videotestsrc name=v0 ! xvimagesink"
+        pipeline = "videotestsrc name=v0 ! fakesink"
         self.gstd_client = gstc.client(loglevel='DEBUG')
         initial_n_pipes = len(self.gstd_client.list_pipelines())
         self.assertEqual(self.gstd_client.create ("pipelines", "p0", pipeline), 0)
