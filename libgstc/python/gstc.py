@@ -46,7 +46,7 @@ class colorFormatter(logging.Formatter):
         return logging.Formatter.format(self, record)
 
 class client(object):
-    def __init__(self, ip='localhost', port=5000, logfile=None, loglevel='ERROR'):
+    def __init__(self, ip='localhost', port=5000, nports=1, logfile=None, loglevel='ERROR'):
         
         # Init the logger
         self.logger = logging.getLogger('GSTD')
@@ -70,10 +70,11 @@ class client(object):
 
         self.ip = ip
         self.port = port
+        self.nports = nports
         self.proc = None
         self.pipes = []
         self.gstd_started = False
-        self.logger.info('Starting GSTD instance with ip=%s port=%d logfile=%s loglevel=%s', self.ip, self.port, logfile, loglevel)
+        self.logger.info('Starting GSTD instance with ip=%s port=%d nports=%d logfile=%s loglevel=%s', self.ip, self.port, self.nports, logfile, loglevel)
         self.test_gstd()
 
     def __del__(self):
@@ -109,7 +110,7 @@ class client(object):
             gstd_bin = subprocess.check_output(['which',GSTD_PROCNAME])
             gstd_bin = gstd_bin.rstrip()
             self.logger.info('Startting GStreamer Daemon...')
-            subprocess.Popen([gstd_bin])
+            subprocess.Popen([gstd_bin, "-p", str(self.port), "-n", str(self.nports)])
             time.sleep(3)
             if self.test_gstd():
                 self.gstd_started = True
@@ -471,7 +472,7 @@ class client(object):
         try:
             jresult = self.socket_send(cmd_line)
             result = json.loads(jresult)
-            return result
+            return result ['code']
         except Exception:
             self.logger.error('Signal timeout error')
             traceback.print_exc()
@@ -483,7 +484,7 @@ class client(object):
         try:
             jresult = self.socket_send(cmd_line)
             result = json.loads(jresult)
-            return result
+            return result ['code']
         except Exception:
             self.logger.error('Signal disconnect error')
             traceback.print_exc()
