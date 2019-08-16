@@ -16,10 +16,9 @@ class TestGstcSignalDisconnectMethods(unittest.TestCase):
 
     def test_libgstc_python_signal_disconnect(self):
         global ret_val
-        pipeline = "videotestsrc is-live=true ! identity sleep-time=10000000 signal-handoffs=false name=identity ! xvimagesink"
-        gstd_client = gstc.client(loglevel='DEBUG', nports=2)
+        pipeline = "videotestsrc ! identity name=identity ! fakesink"
+        gstd_client = gstc.client(loglevel='DEBUG')
         self.assertEqual(gstd_client.pipeline_create ("p0", pipeline), 0)
-        self.assertEqual(gstd_client.pipeline_play ("p0"), 0)
         ret_thr = threading.Thread(target=signal_connect_test)
         ret_thr.start()
         time.sleep(1)
