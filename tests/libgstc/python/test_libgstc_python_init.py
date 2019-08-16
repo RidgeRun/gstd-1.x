@@ -2,8 +2,12 @@
 import unittest
 import gstc
 import os
+import subprocess
 
 class TestGstcInitMethods(unittest.TestCase):
+    def setUp(self):
+        subprocess.Popen(["gstd", "-p", "5000", "-n", "2"])
+
     def test_init(self):
         self.gstd_client = gstc.client()
 
