@@ -137,398 +137,162 @@ class client(object):
 
     def create(self, uri, property, value):
         self.logger.info('Creating property %s in uri %s with value "%s"', property, uri, value)
-        cmd_line = ['create', uri, property, value]
-        try:
-            jresult = self.socket_send(cmd_line)
-            result = json.loads(jresult)
-            if (result['code'] != 0):
-                self.logger.error('Uri create error: %s', result['description'])
-            return result['code']
-        except Exception:
-            self.logger.error('URI create error')
-            traceback.print_exc()
-            return None
+        result = self.send_cmd_line(['create', uri, property, value])
+        return result['code']
 
     def read(self, uri):
         self.logger.info('Reading uri %s', uri)
-        cmd_line = ['read', uri]
-        try:
-            jresult = self.socket_send(cmd_line)
-            result = json.loads(jresult)
-            return result
-        except Exception:
-            self.logger.error('URI read error')
-            traceback.print_exc()
-            return None
+        result = self.send_cmd_line(['read', uri])
+        return result
 
     def update(self, uri, value):
         self.logger.info('Updating uri %s with value "%s"', uri, value)
-        cmd_line = ['update', uri, value]
-        try:
-            jresult = self.socket_send(cmd_line)
-            result = json.loads(jresult)
-            if (result['code'] != 0):
-                self.logger.error('Uri update error: %s', result['description'])
-            return result['code']
-        except Exception:
-            self.logger.error('URI update error')
-            traceback.print_exc()
-            return None
+        result = self.send_cmd_line(['update', uri, value])
+        return result['code']
 
     def delete(self, uri, name):
         self.logger.info('Deleting name %s at uri "%s"', name, uri)
-        cmd_line = ['delete', uri, name]
-        try:
-            jresult = self.socket_send(cmd_line)
-            result = json.loads(jresult)
-            if (result['code'] != 0):
-                self.logger.error('Uri delete error: %s', result['description'])
-            return result['code']
-        except Exception:
-            self.logger.error('URI delete error')
-            traceback.print_exc()
-            return None
+        result = self.send_cmd_line(['delete', uri, name])
+        return result['code']
 
     def pipeline_create(self, pipe_name,  pipe_desc):
         self.logger.info('Creating pipeline %s with description "%s"', pipe_name, pipe_desc)
-        cmd_line = ['pipeline_create', pipe_name, pipe_desc]
-        try:
-            jresult = self.socket_send(cmd_line)
-            result = json.loads(jresult)
-            if (result['code'] != 0):
-                self.logger.error('Pipeline create error: %s', result['description'])
-            return result['code']
-        except Exception:
-            self.logger.error('Pipeline create error')
-            traceback.print_exc()
-            return None
+        result = self.send_cmd_line(['pipeline_create', pipe_name, pipe_desc])
+        return result['code']
 
     def pipeline_delete(self, pipe_name):
         self.logger.info('Deleting pipeline %s', pipe_name)
-        cmd_line = ['pipeline_delete', pipe_name]
-        try:
-            jresult = self.socket_send(cmd_line)
-            result = json.loads(jresult)
-            if (result['code'] != 0):
-                self.logger.error('Pipeline delete error: %s', result['description'])
-            return result['code']
-        except Exception:
-            self.logger.error('Pipeline delete error')
-            traceback.print_exc()
-            return None
+        result = self.send_cmd_line(['pipeline_delete', pipe_name])
+        return result['code']
 
     def pipeline_play(self, pipe_name):
         self.logger.info('Playing pipeline %s', pipe_name)
-        cmd_line = ['pipeline_play', pipe_name]
-        try:
-            jresult = self.socket_send(cmd_line)
-            result = json.loads(jresult)
-            if (result['code'] != 0):
-                self.logger.error('Pipeline play error: %s', result['description'])
-            return result['code']
-        except Exception:
-            self.logger.error('Pipeline play error')
-            traceback.print_exc()
-            return None
+        result = self.send_cmd_line(['pipeline_play', pipe_name])
+        return result['code']
 
     def pipeline_pause(self, pipe_name):
         self.logger.info('Pausing pipeline %s', pipe_name)
-        cmd_line = ['pipeline_pause', pipe_name]
-        try:
-            jresult = self.socket_send(cmd_line)
-            result = json.loads(jresult)
-            if (result['code'] != 0):
-                self.logger.error('Pipeline pause error: %s', result['description'])
-            return result['code']
-        except Exception:
-            self.logger.error('Pipeline pause error')
-            traceback.print_exc()
-            return None
+        result = self.send_cmd_line(['pipeline_pause', pipe_name])
+        return result['code']
 
     def pipeline_stop(self, pipe_name):
         self.logger.info('Stoping pipeline %s', pipe_name)
-        cmd_line = ['pipeline_stop', pipe_name]
-        try:
-            jresult = self.socket_send(cmd_line)
-            result = json.loads(jresult)
-            if (result['code'] != 0):
-                self.logger.error('Pipeline stop error: %s', result['description'])
-            return result['code']
-        except Exception:
-            self.logger.error('Pipeline stop error')
-            traceback.print_exc()
-            return None
+        result = self.send_cmd_line(['pipeline_stop', pipe_name])
+        return result['code']
 
     def element_set(self, pipe_name, element, prop, value):
         self.logger.info('Setting element %s %s property in pipeline %s to:%s', element, prop, pipe_name, value)
-        cmd_line = ['element_set', pipe_name, "%s %s %s" % (element, prop, value) ]
-        jresult = self.socket_send(cmd_line)
-        try:
-            result = json.loads(jresult)
-            if (result['code'] != 0):
-                self.logger.error('Element set error: %s', result['description'])
-        except KeyError:
-            self.logger.warning("The data did not contain a valid response")
-        except TypeError:
-            self.logger.warning("Socket result is not buf/str")
+        result = self.send_cmd_line(['element_set', pipe_name, "%s %s %s" % (element, prop, value) ])
         return result['code']
 
     def element_get(self, pipe_name, element, prop):
         self.logger.info('Getting value of element %s %s property in pipeline %s', element, prop, pipe_name)
-        cmd_line = ['element_get', pipe_name, "%s %s" % (element, prop) ]
-        jresult = self.socket_send(cmd_line)
-        try:
-            result = json.loads(jresult)
-            if (result['code'] != 0):
-                self.logger.error('Element get error: %s', result['description'])
-            value = result['response']['value']
-        except KeyError:
-            self.logger.warning("The data did not contain a valid response")
-            value = None
-        except TypeError:
-            self.logger.warning("Socket result is not buf/str")
-            value = None
-        if value==None:
-            self.logger.error("invalid value received")
-        return value
+        result = self.send_cmd_line(cmd_line = ['element_get', pipe_name, "%s %s" % (element, prop) ])
+        return result['response']['value']
 
     def list_pipelines(self):
         self.logger.info('Listing pipelines')
-        cmd_line = ['list_pipelines']
-        try:
-            jresult = self.socket_send(cmd_line)
-            result = json.loads(jresult)
-            if (result['code'] != 0):
-                self.logger.error('Pipelines list error: %s', result['description'])
-            return result['response']['nodes']
-        except Exception:
-            self.logger.error('Pipelines list error')
-            traceback.print_exc()
-            return None
+        result = self.send_cmd_line(cmd_line = ['list_pipelines'])
+        return result['response']['nodes']
 
     def list_elements(self, pipe_name):
         self.logger.info('Listing elements of pipeline %s', pipe_name)
-        cmd_line = ['list_elements', pipe_name]
-        try:
-            jresult = self.socket_send(cmd_line)
-            result = json.loads(jresult)
-            if (result['code'] != 0):
-                self.logger.error('Elements list error: %s', result['description'])
-            return result['response']['nodes']
-        except Exception:
-            self.logger.error('Elements list error')
-            traceback.print_exc()
-            return None
+        result = self.send_cmd_line(cmd_line = ['list_elements', pipe_name])
+        return result['response']['nodes']
 
     def list_properties(self, pipe_name, element):
         self.logger.info('Listing properties of  element %s from pipeline %s', element, pipe_name)
-        cmd_line = ['list_properties', pipe_name, element]
-        try:
-            jresult = self.socket_send(cmd_line)
-            result = json.loads(jresult)
-            if (result['code'] != 0):
-                self.logger.error('Properties list error: %s', result['description'])
-            return result['response']['nodes']
-        except Exception:
-            self.logger.error('Properties list error')
-            traceback.print_exc()
-            return None
+        result = self.send_cmd_line(['list_properties', pipe_name, element])
+        return result['response']['nodes']
 
     def list_signals(self, pipe_name, element):
         self.logger.info('Listing signals of  element %s from pipeline %s', element, pipe_name)
-        cmd_line = ['list_signals', pipe_name, element]
-        try:
-            jresult = self.socket_send(cmd_line)
-            result = json.loads(jresult)
-            if (result['code'] != 0):
-                self.logger.error('Signals list error: %s', result['description'])
-            return result['response']['nodes']
-        except Exception:
-            self.logger.error('Signals list error')
-            traceback.print_exc()
-            return None
+        result = self.send_cmd_line(['list_signals', pipe_name, element])
+        return result['response']['nodes']
 
     def bus_read(self, pipe_name):
         self.logger.info('Reading bus of pipeline %s', pipe_name)
-        cmd_line = ['bus_read', pipe_name]
-        try:
-            jresult = self.socket_send(cmd_line)
-            result = json.loads(jresult)
-            return result
-        except Exception:
-            self.logger.error('Bus read error')
-            traceback.print_exc()
-            return None
+        result = self.send_cmd_line(['bus_read', pipe_name])
+        return result
 
     def bus_filter(self, pipe_name, filter):
         self.logger.info('Setting bus read filter of pipeline %s to %s', pipe_name, filter)
-        cmd_line = ['bus_filter', pipe_name, filter]
-        try:
-            jresult = self.socket_send(cmd_line)
-            result = json.loads(jresult)
-            return result['code']
-        except Exception:
-            self.logger.error('Bus filter error')
-            traceback.print_exc()
-            return None
+        result = self.send_cmd_line(['bus_filter', pipe_name, filter])
+        return result['code']
 
     def bus_timeout(self, pipe_name, timeout):
         self.logger.info('Setting bus read timeout of pipeline %s to %s', pipe_name, timeout)
-        cmd_line = ['bus_timeout', pipe_name, timeout]
-        try:
-            jresult = self.socket_send(cmd_line)
-            result = json.loads(jresult)
-            return result['code']
-        except Exception:
-            self.logger.error('Bus timeout error')
-            traceback.print_exc()
-            return None
+        result = self.send_cmd_line(['bus_timeout', pipe_name, timeout])
+        return result['code']
 
     def event_eos(self, pipe_name):
         self.logger.info('Sending end-of-stream event to pipeline %s', pipe_name)
-        cmd_line = ['event_eos', pipe_name]
-        try:
-            jresult = self.socket_send(cmd_line)
-            result = json.loads(jresult)
-            if (result['code'] != 0):
-                self.logger.error('End-of-stream event error: %s', result['description'])
-            return result['code']
-        except Exception:
-            self.logger.error('End-of-stream event error')
-            traceback.print_exc()
-            return None
+        result = self.send_cmd_line(['event_eos', pipe_name])
+        return result['code']
 
     def event_seek (self, pipe_name, rate=1.0, format=3, flags=1, start_type=1, start=0, end_type=1, end=-1):
         self.logger.info('Performing event seek in pipeline %s', pipe_name)
-        cmd_line = ['event_seek', pipe_name, rate, format, flags, start_type, start, end_type, end]
-        try:
-            jresult = self.socket_send(cmd_line)
-            result = json.loads(jresult)
-            if (result['code'] != 0):
-                self.logger.error('Event seek error: %s', result['description'])
-            return result['code']
-        except Exception:
-            self.logger.error('Event seek error')
-            traceback.print_exc()
-            return None
+        result = self.send_cmd_line(['event_seek', pipe_name, rate, format, flags, start_type, start, end_type, end])
+        return result['code']
 
     def event_flush_start(self, pipe_name):
         self.logger.info('Putting pipeline %s in flushing mode', pipe_name)
-        cmd_line = ['event_flush_start', pipe_name]
-        try:
-            jresult = self.socket_send(cmd_line)
-            result = json.loads(jresult)
-            if (result['code'] != 0):
-                self.logger.error('Event flush start error: %s', result['description'])
-            return result['code']
-        except Exception:
-            self.logger.error('Event flush start error')
-            traceback.print_exc()
-            return None
+        result = self.send_cmd_line(['event_flush_start', pipe_name])
+        return result['code']
 
     def event_flush_stop(self, pipe_name, reset='true'):
         self.logger.info('Taking pipeline %s out of flushing mode', pipe_name)
-        cmd_line = ['event_flush_stop', pipe_name, reset]
-        try:
-            jresult = self.socket_send(cmd_line)
-            result = json.loads(jresult)
-            if (result['code'] != 0):
-                self.logger.error('Event flush stop error: %s', result['description'])
-            return result['code']
-        except Exception:
-            self.logger.error('Event flush stop error')
-            traceback.print_exc()
-            return None
+        result = self.send_cmd_line(['event_flush_stop', pipe_name, reset])
+        return result['code']
 
     def signal_connect(self, pipe_name, element, signal):
         self.logger.info('Connecting to signal %s of element %s from pipeline %s', signal, element, pipe_name)
-        cmd_line = ['signal_connect', pipe_name, element, signal]
-        try:
-            jresult = self.socket_send(cmd_line)
-            result = json.loads(jresult)
-            return result
-        except Exception:
-            self.logger.error('Signal connect error')
-            traceback.print_exc()
-            return None
+        result = self.send_cmd_line(['signal_connect', pipe_name, element, signal])
+        return result
 
     def signal_timeout(self, pipe_name, element, signal, timeout):
         self.logger.info('Connecting to signal %s of element %s from pipeline %s with timeout %s', signal, element, pipe_name, timeout)
-        cmd_line = ['signal_timeout', pipe_name, element, signal, timeout]
-        try:
-            jresult = self.socket_send(cmd_line)
-            result = json.loads(jresult)
-            return result ['code']
-        except Exception:
-            self.logger.error('Signal timeout error')
-            traceback.print_exc()
-            return None
+        result = self.send_cmd_line(['signal_timeout', pipe_name, element, signal, timeout])
+        return result['code']
 
     def signal_disconnect(self, pipe_name, element, signal):
         self.logger.info('Disonnecting from signal %s of element %s from pipeline %s', signal, element, pipe_name)
-        cmd_line = ['signal_disconnect', pipe_name, element, signal]
-        try:
-            jresult = self.socket_send(cmd_line)
-            result = json.loads(jresult)
-            return result ['code']
-        except Exception:
-            self.logger.error('Signal disconnect error')
-            traceback.print_exc()
-            return None
+        result = self.send_cmd_line(['signal_disconnect', pipe_name, element, signal])
+        return result['code']
 
     def debug_enable(self, enable):
         self.logger.info('Enabling/Disabling GStreamer debug')
-        cmd_line = ['debug_enable', enable]
-        try:
-            jresult = self.socket_send(cmd_line)
-            result = json.loads(jresult)
-            if (result['code'] != 0):
-                self.logger.error('Debug enable error: %s', result['description'])
-            return result['code']
-        except Exception:
-            self.logger.error('Debug enable error')
-            traceback.print_exc()
-            return None
+        result = self.send_cmd_line(['debug_enable', enable])
+        return result['code']
 
     def debug_threshold(self, threshold):
         self.logger.info('Setting GStreamer debug threshold to %s', threshold)
-        cmd_line = ['debug_threshold', threshold]
-        try:
-            jresult = self.socket_send(cmd_line)
-            result = json.loads(jresult)
-            if (result['code'] != 0):
-                self.logger.error('Debug threshold error: %s', result['description'])
-            return result['code']
-        except Exception:
-            self.logger.error('Debug threshold error')
-            traceback.print_exc()
-            return None
+        result = self.send_cmd_line(['debug_threshold', threshold])
+        return result['code']
 
     def debug_color(self, colors):
         self.logger.info('Enabling/Disabling GStreamer debug colors')
-        cmd_line = ['debug_color', colors]
-        try:
-            jresult = self.socket_send(cmd_line)
-            result = json.loads(jresult)
-            if (result['code'] != 0):
-                self.logger.error('Debug colors error: %s', result['description'])
-            return result['code']
-        except Exception:
-            self.logger.error('Debug color error')
-            traceback.print_exc()
-            return None
+        result = self.send_cmd_line(['debug_color', colors])
+        return result['code']
 
     def debug_reset(self, reset):
         self.logger.info('Enabling/Disabling GStreamer debug threshold reset')
-        cmd_line = ['debug_reset', reset]
+        result = self.send_cmd_line(['debug_reset', reset])
+        return result['code']
+
+    def send_cmd_line(self, cmd_line):
+        cmd = cmd_line[0]
         try:
             jresult = self.socket_send(cmd_line)
             result = json.loads(jresult)
             if (result['code'] != 0):
-                self.logger.error('Debug reset error: %s', result['description'])
-            return result['code']
+                self.logger.error(cmd, ' error: %s', result['description'])
+            return result
         except Exception:
-            self.logger.error('Debug reset error')
+            self.logger.error(cmd, ' error: %s', Exception)
             traceback.print_exc()
-            return None
-
+            return json.loads('{ "code":-1, "description":"Exception", "response":""}')
+        #~ except KeyError:
+            #~ self.logger.warning("The data did not contain a valid response")
+        #~ except TypeError:
+            #~ self.logger.warning("Socket result is not buf/str")
