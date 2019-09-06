@@ -11,5 +11,7 @@ class TestGstcElementSetMethods(unittest.TestCase):
         self.assertEqual(self.gstd_client.element_get ("p0", "v0", "pattern"), "Moving ball")
         self.assertEqual(self.gstd_client.element_set ("p0", "v0", "pattern", "bar"), 0)
         self.assertEqual(self.gstd_client.element_get ("p0", "v0", "pattern"), "Bar")
+        self.assertEqual(self.gstd_client.pipeline_delete ("p0"), 0)
+
 if __name__ == '__main__':
     unittest.main()

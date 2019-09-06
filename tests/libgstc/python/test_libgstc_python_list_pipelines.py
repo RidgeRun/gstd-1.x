@@ -11,5 +11,7 @@ class TestGstcListPipelinesMethods(unittest.TestCase):
         self.assertEqual(self.gstd_client.create ("pipelines", "p0", pipeline), 0)
         final_n_pipes = len(self.gstd_client.list_pipelines())
         self.assertEqual(final_n_pipes, initial_n_pipes+1)
+        self.assertEqual(self.gstd_client.pipeline_delete ("p0"), 0)
+
 if __name__ == '__main__':
     unittest.main()

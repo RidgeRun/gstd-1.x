@@ -11,6 +11,7 @@ class TestGstcEventFlushStartMethods(unittest.TestCase):
         self.assertEqual(self.gstd_client.pipeline_play ("p0"), 0)
         self.assertEqual(self.gstd_client.event_flush_start("p0"), 0)
         self.assertEqual(self.gstd_client.pipeline_stop ("p0"), 0)
+        self.assertEqual(self.gstd_client.pipeline_delete ("p0"), 0)
 
 if __name__ == '__main__':
     unittest.main()

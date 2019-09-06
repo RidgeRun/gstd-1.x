@@ -9,5 +9,7 @@ class TestGstcListSignalsMethods(unittest.TestCase):
         self.gstd_client = gstc.client(loglevel='DEBUG')
         self.assertEqual(self.gstd_client.pipeline_create ("p0", pipeline), 0)
         self.assertEqual(self.gstd_client.list_signals ("p0", "i0"), [{'name': 'handoff'}])
+        self.assertEqual(self.gstd_client.pipeline_delete ("p0"), 0)
+
 if __name__ == '__main__':
     unittest.main()

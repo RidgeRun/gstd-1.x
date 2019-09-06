@@ -17,5 +17,6 @@ class TestGstcDeleteMethods(unittest.TestCase):
         ret = self.gstd_client.read("pipelines")
         final_n_pipes = len(ret['response']['nodes'])
         self.assertEqual(final_n_pipes, initial_n_pipes)
+
 if __name__ == '__main__':
     unittest.main()

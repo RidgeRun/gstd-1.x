@@ -72,18 +72,12 @@ class client(object):
         self.port = port
         self.nports = nports
         self.proc = None
-        self.pipes = []
         self.gstd_started = False
         self.logger.info('Starting GSTD instance with ip=%s port=%d nports=%d logfile=%s loglevel=%s', self.ip, self.port, self.nports, logfile, loglevel)
         self.test_gstd()
 
     def __del__(self):
         self.logger.info('Destroying GSTD instance with ip=%s port=%d', self.ip, self.port)
-        self.logger.info('Deleting pipelines...')
-        while (self.pipes != []):
-            ret = self.pipeline_delete(self.pipes[0])
-            if (ret != 0):
-                self.pipes.pop(0)
         if (self.gstd_started):
             self.logger.info('Killing GStreamer Daemon process...')
             self.proc.kill()
@@ -147,9 +141,7 @@ class client(object):
         try:
             jresult = self.socket_send(cmd_line)
             result = json.loads(jresult)
-            if (result['code'] == 0 and uri == "pipelines"):
-                self.pipes.append(property)
-            else:
+            if (result['code'] != 0):
                 self.logger.error('Uri create error: %s', result['description'])
             return result['code']
         except Exception:
@@ -189,9 +181,7 @@ class client(object):
         try:
             jresult = self.socket_send(cmd_line)
             result = json.loads(jresult)
-            if (result['code'] == 0 and uri == "pipelines"):
-                self.pipes.remove(name)
-            else:
+            if (result['code'] != 0):
                 self.logger.error('Uri delete error: %s', result['description'])
             return result['code']
         except Exception:
@@ -205,9 +195,7 @@ class client(object):
         try:
             jresult = self.socket_send(cmd_line)
             result = json.loads(jresult)
-            if (result['code'] == 0):
-                self.pipes.append(pipe_name)
-            else:
+            if (result['code'] != 0):
                 self.logger.error('Pipeline create error: %s', result['description'])
             return result['code']
         except Exception:
@@ -221,9 +209,7 @@ class client(object):
         try:
             jresult = self.socket_send(cmd_line)
             result = json.loads(jresult)
-            if (result['code'] == 0):
-                self.pipes.remove(pipe_name)
-            else:
+            if (result['code'] != 0):
                 self.logger.error('Pipeline delete error: %s', result['description'])
             return result['code']
         except Exception:
