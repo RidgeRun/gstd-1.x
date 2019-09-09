@@ -18,15 +18,15 @@ class TestGstcSignalDisconnectMethods(unittest.TestCase):
         global ret_val
         pipeline = "videotestsrc ! identity name=identity ! fakesink"
         self.gstd_client = gstc.client(loglevel='DEBUG')
-        self.assertEqual(self.gstd_client.pipeline_create ("p0", pipeline), 0)
+        self.gstd_client.pipeline_create ("p0", pipeline)
         ret_thr = threading.Thread(target=signal_connect_test)
         ret_thr.start()
         time.sleep(1)
-        self.assertEqual(self.gstd_client.signal_disconnect("p0", "identity", "handoff"), 0)
+        self.gstd_client.signal_disconnect("p0", "identity", "handoff")
         time.sleep(1)
-        self.assertEqual(ret_val['response'], None)
-        self.assertEqual(self.gstd_client.pipeline_stop ("p0"), 0)
-        self.assertEqual(self.gstd_client.pipeline_delete ("p0"), 0)
+        self.assertEqual(ret_val, None)
+        self.gstd_client.pipeline_stop ("p0")
+        self.gstd_client.pipeline_delete ("p0")
 
 if __name__ == '__main__':
     unittest.main()

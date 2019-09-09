@@ -8,12 +8,12 @@ class TestGstcCreateMethods(unittest.TestCase):
         pipeline = "videotestsrc name=v0 ! fakesink"
         self.gstd_client = gstc.client(loglevel='DEBUG')
         ret = self.gstd_client.read("pipelines")
-        initial_n_pipes = len(ret['response']['nodes'])
-        self.assertEqual(self.gstd_client.create ("pipelines", "p0", pipeline), 0)
+        initial_n_pipes = len(ret['nodes'])
+        self.gstd_client.create ("pipelines", "p0", pipeline)
         ret = self.gstd_client.read("pipelines")
-        final_n_pipes = len(ret['response']['nodes'])
+        final_n_pipes = len(ret['nodes'])
         self.assertEqual(final_n_pipes, initial_n_pipes+1)
-        self.assertEqual(self.gstd_client.pipeline_delete ("p0"), 0)
+        self.gstd_client.pipeline_delete ("p0")
 
 if __name__ == '__main__':
     unittest.main()

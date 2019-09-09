@@ -45,6 +45,13 @@ class colorFormatter(logging.Formatter):
             record.levelname = "\033[1;" + COLORS[record.levelname] + record.levelname + "\033[0m"
         return logging.Formatter.format(self, record)
 
+class GstdError(Exception):
+    def __init__(self,*args,**kwargs):
+        Exception.__init__(self,*args,**kwargs)
+class GstcError(Exception):
+    def __init__(self,*args,**kwargs):
+        Exception.__init__(self,*args,**kwargs)
+
 class client(object):
     def __init__(self, ip='localhost', port=5000, nports=1, logfile=None, loglevel='ERROR'):
         
@@ -137,53 +144,44 @@ class client(object):
 
     def create(self, uri, property, value):
         self.logger.info('Creating property %s in uri %s with value "%s"', property, uri, value)
-        result = self.send_cmd_line(['create', uri, property, value])
-        return result['code']
+        self.send_cmd_line(['create', uri, property, value])
 
     def read(self, uri):
         self.logger.info('Reading uri %s', uri)
         result = self.send_cmd_line(['read', uri])
-        return result
+        return result['response']
 
     def update(self, uri, value):
         self.logger.info('Updating uri %s with value "%s"', uri, value)
-        result = self.send_cmd_line(['update', uri, value])
-        return result['code']
+        self.send_cmd_line(['update', uri, value])
 
     def delete(self, uri, name):
         self.logger.info('Deleting name %s at uri "%s"', name, uri)
-        result = self.send_cmd_line(['delete', uri, name])
-        return result['code']
+        self.send_cmd_line(['delete', uri, name])
 
     def pipeline_create(self, pipe_name,  pipe_desc):
         self.logger.info('Creating pipeline %s with description "%s"', pipe_name, pipe_desc)
-        result = self.send_cmd_line(['pipeline_create', pipe_name, pipe_desc])
-        return result['code']
+        self.send_cmd_line(['pipeline_create', pipe_name, pipe_desc])
 
     def pipeline_delete(self, pipe_name):
         self.logger.info('Deleting pipeline %s', pipe_name)
-        result = self.send_cmd_line(['pipeline_delete', pipe_name])
-        return result['code']
+        self.send_cmd_line(['pipeline_delete', pipe_name])
 
     def pipeline_play(self, pipe_name):
         self.logger.info('Playing pipeline %s', pipe_name)
-        result = self.send_cmd_line(['pipeline_play', pipe_name])
-        return result['code']
+        self.send_cmd_line(['pipeline_play', pipe_name])
 
     def pipeline_pause(self, pipe_name):
         self.logger.info('Pausing pipeline %s', pipe_name)
-        result = self.send_cmd_line(['pipeline_pause', pipe_name])
-        return result['code']
+        self.send_cmd_line(['pipeline_pause', pipe_name])
 
     def pipeline_stop(self, pipe_name):
         self.logger.info('Stoping pipeline %s', pipe_name)
-        result = self.send_cmd_line(['pipeline_stop', pipe_name])
-        return result['code']
+        self.send_cmd_line(['pipeline_stop', pipe_name])
 
     def element_set(self, pipe_name, element, prop, value):
         self.logger.info('Setting element %s %s property in pipeline %s to:%s', element, prop, pipe_name, value)
-        result = self.send_cmd_line(['element_set', pipe_name, "%s %s %s" % (element, prop, value) ])
-        return result['code']
+        self.send_cmd_line(['element_set', pipe_name, "%s %s %s" % (element, prop, value) ])
 
     def element_get(self, pipe_name, element, prop):
         self.logger.info('Getting value of element %s %s property in pipeline %s', element, prop, pipe_name)
@@ -213,86 +211,72 @@ class client(object):
     def bus_read(self, pipe_name):
         self.logger.info('Reading bus of pipeline %s', pipe_name)
         result = self.send_cmd_line(['bus_read', pipe_name])
-        return result
+        return result['response']
 
     def bus_filter(self, pipe_name, filter):
         self.logger.info('Setting bus read filter of pipeline %s to %s', pipe_name, filter)
-        result = self.send_cmd_line(['bus_filter', pipe_name, filter])
-        return result['code']
+        self.send_cmd_line(['bus_filter', pipe_name, filter])
 
     def bus_timeout(self, pipe_name, timeout):
         self.logger.info('Setting bus read timeout of pipeline %s to %s', pipe_name, timeout)
-        result = self.send_cmd_line(['bus_timeout', pipe_name, timeout])
-        return result['code']
+        self.send_cmd_line(['bus_timeout', pipe_name, timeout])
 
     def event_eos(self, pipe_name):
         self.logger.info('Sending end-of-stream event to pipeline %s', pipe_name)
-        result = self.send_cmd_line(['event_eos', pipe_name])
-        return result['code']
+        self.send_cmd_line(['event_eos', pipe_name])
 
-    def event_seek (self, pipe_name, rate=1.0, format=3, flags=1, start_type=1, start=0, end_type=1, end=-1):
+    def event_seek (self, pipe_name, rate='1.0', format='3', flags='1', start_type='1', start='0', end_type='1', end='-1'):
         self.logger.info('Performing event seek in pipeline %s', pipe_name)
-        result = self.send_cmd_line(['event_seek', pipe_name, rate, format, flags, start_type, start, end_type, end])
-        return result['code']
+        self.send_cmd_line(['event_seek', pipe_name, rate, format, flags, start_type, start, end_type, end])
 
     def event_flush_start(self, pipe_name):
         self.logger.info('Putting pipeline %s in flushing mode', pipe_name)
-        result = self.send_cmd_line(['event_flush_start', pipe_name])
-        return result['code']
+        self.send_cmd_line(['event_flush_start', pipe_name])
 
     def event_flush_stop(self, pipe_name, reset='true'):
         self.logger.info('Taking pipeline %s out of flushing mode', pipe_name)
-        result = self.send_cmd_line(['event_flush_stop', pipe_name, reset])
-        return result['code']
+        self.send_cmd_line(['event_flush_stop', pipe_name, reset])
 
     def signal_connect(self, pipe_name, element, signal):
         self.logger.info('Connecting to signal %s of element %s from pipeline %s', signal, element, pipe_name)
         result = self.send_cmd_line(['signal_connect', pipe_name, element, signal])
-        return result
+        return result['response']
 
     def signal_timeout(self, pipe_name, element, signal, timeout):
         self.logger.info('Connecting to signal %s of element %s from pipeline %s with timeout %s', signal, element, pipe_name, timeout)
-        result = self.send_cmd_line(['signal_timeout', pipe_name, element, signal, timeout])
-        return result['code']
+        self.send_cmd_line(['signal_timeout', pipe_name, element, signal, timeout])
 
     def signal_disconnect(self, pipe_name, element, signal):
         self.logger.info('Disonnecting from signal %s of element %s from pipeline %s', signal, element, pipe_name)
-        result = self.send_cmd_line(['signal_disconnect', pipe_name, element, signal])
-        return result['code']
+        self.send_cmd_line(['signal_disconnect', pipe_name, element, signal])
 
     def debug_enable(self, enable):
         self.logger.info('Enabling/Disabling GStreamer debug')
-        result = self.send_cmd_line(['debug_enable', enable])
-        return result['code']
+        self.send_cmd_line(['debug_enable', enable])
 
     def debug_threshold(self, threshold):
         self.logger.info('Setting GStreamer debug threshold to %s', threshold)
-        result = self.send_cmd_line(['debug_threshold', threshold])
-        return result['code']
+        self.send_cmd_line(['debug_threshold', threshold])
 
     def debug_color(self, colors):
         self.logger.info('Enabling/Disabling GStreamer debug colors')
-        result = self.send_cmd_line(['debug_color', colors])
-        return result['code']
+        self.send_cmd_line(['debug_color', colors])
 
     def debug_reset(self, reset):
         self.logger.info('Enabling/Disabling GStreamer debug threshold reset')
-        result = self.send_cmd_line(['debug_reset', reset])
-        return result['code']
+        self.send_cmd_line(['debug_reset', reset])
 
     def send_cmd_line(self, cmd_line):
         cmd = cmd_line[0]
         try:
             jresult = self.socket_send(cmd_line)
             result = json.loads(jresult)
-            if (result['code'] != 0):
-                self.logger.error(cmd, ' error: %s', result['description'])
-            return result
-        except Exception:
-            self.logger.error(cmd, ' error: %s', Exception)
+        except Exception as exception:
+            self.logger.error('%s error: %s', cmd, type(exception).__name__)
             traceback.print_exc()
-            return json.loads('{ "code":-1, "description":"Exception", "response":""}')
-        #~ except KeyError:
-            #~ self.logger.warning("The data did not contain a valid response")
-        #~ except TypeError:
-            #~ self.logger.warning("Socket result is not buf/str")
+            raise GstcError(type(exception).__name__)
+            return None
+        if (result['code'] != 0):
+            self.logger.error('%s error: %s', cmd, result['description'])
+            raise GstdError(result['description'])
+        return result
