@@ -1,32 +1,10 @@
 import json
 import logging
-import socket
-import subprocess
 import psutil
-import time
+import tcp
 import traceback
-import sys
 
 GSTD_PROCNAME = 'gstd'
-terminator = '\x00'.encode('utf-8')
-max_size = 8192
-def recvall(sock):
-    buf = b''
-    count = max_size
-    try:
-        while count:
-            newbuf = sock.recv(max_size//8)
-            if not newbuf: return None
-            if terminator in newbuf:
-                # this is the last item
-                buf += newbuf[:newbuf.find(terminator)]
-                break
-            else:
-                buf += newbuf
-                count -= len(newbuf)
-    except socket.error:
-        buf = json.dumps({"error":"socket error", "msg": traceback.format_exc(), "code": -1 })
-    return buf
 
 # Add color to logging output
 COLORS = {
@@ -48,12 +26,13 @@ class colorFormatter(logging.Formatter):
 class GstdError(Exception):
     def __init__(self,*args,**kwargs):
         Exception.__init__(self,*args,**kwargs)
+
 class GstcError(Exception):
     def __init__(self,*args,**kwargs):
         Exception.__init__(self,*args,**kwargs)
 
 class client(object):
-    def __init__(self, ip='localhost', port=5000, nports=1, logfile=None, loglevel='ERROR'):
+    def __init__(self, ip='localhost', port=5000, logfile=None, loglevel='ERROR'):
         
         # Init the logger
         self.logger = logging.getLogger('GSTD')
@@ -77,54 +56,13 @@ class client(object):
 
         self.ip = ip
         self.port = port
-        self.nports = nports
-        self.proc = None
-        self.gstd_started = False
-        self.logger.info('Starting GSTD instance with ip=%s port=%d nports=%d logfile=%s loglevel=%s', self.ip, self.port, self.nports, logfile, loglevel)
+        self.logger.info('Starting GStreamer Daemon Client with ip=%s port=%d logfile=%s loglevel=%s', self.ip, self.port, logfile, loglevel)
         self.test_gstd()
+        self.ipc = tcp.ipc(self.logger, self.ip, self.port)
 
     def __del__(self):
-        self.logger.info('Destroying GSTD instance with ip=%s port=%d', self.ip, self.port)
-        if (self.gstd_started):
-            self.logger.info('Killing GStreamer Daemon process...')
-            self.proc.kill()
+        self.logger.info('Destroying GStreamer Daemon Client with ip=%s port=%d', self.ip, self.port)
         self.logger.removeHandler(self.log)
-
-    def socket_send(self, line):
-        self.logger.debug('GSTD socket sending line: %s', line)
-        try:
-            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            s.connect((self.ip, self.port))
-            s.send(' '.join(line).encode('utf-8'))
-            data = recvall(s)
-            data = data.decode('utf-8')
-            s.close()
-        except socket.error:
-            s.close()
-            self.logger.error('GSTD socket error')
-            data = None
-        self.logger.debug('GSTD socket received answer:\n %s', data)
-        return data
-
-    def start_gstd(self):
-        try:
-            gstd_bin = subprocess.check_output(['which',GSTD_PROCNAME])
-            gstd_bin = gstd_bin.rstrip()
-            self.logger.info('Startting GStreamer Daemon...')
-            subprocess.Popen([gstd_bin, "-p", str(self.port), "-n", str(self.nports)])
-            time.sleep(3)
-            if self.test_gstd():
-                self.gstd_started = True
-                self.logger.info("GStreamer Daemon started successfully!")
-                return True
-            else:
-                self.logger.info("GStreamer Daemon did not start correctly...")
-                return False
-        except subprocess.CalledProcessError:
-            # Did not find gstd
-            self.logger.error("GStreamer Daemon is not running and it is not installed.")
-            self.logger.error("To get GStreamer Daemon, visit https://www.ridgerun.com/gstd.")
-        return False
 
     def test_gstd(self):
         if self.ip not in ['localhost', '127.0.0.1']:
@@ -132,14 +70,11 @@ class client(object):
             self.logger.warning("Assuming GSTD is running in the remote host at %s" % self.ip )
             return True
         for proc in psutil.process_iter():
-        # check whether the process name matches
+            # check whether the process name matches
             if proc.name() == GSTD_PROCNAME:
-                self.proc = proc
-        if self.proc or self.start_gstd():
-            # we already had gstd or were able to start it.
-            return True
+                return True
         else:
-            self.logger.error("GStreamer Daemon is not running and couldn't be started")
+            self.logger.error("GStreamer Daemon is not running")
             return False
 
     def create(self, uri, property, value):
@@ -269,7 +204,7 @@ class client(object):
     def send_cmd_line(self, cmd_line):
         cmd = cmd_line[0]
         try:
-            jresult = self.socket_send(cmd_line)
+            jresult = self.ipc.send(cmd_line)
             result = json.loads(jresult)
         except Exception as exception:
             self.logger.error('%s error: %s', cmd, type(exception).__name__)
