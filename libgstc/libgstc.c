@@ -181,7 +181,7 @@ gstc_cmd_create (GstClient * client, const char *where, const char *what)
 
   /* Concatenate pieces into request */
   asprintf_ret = asprintf (&request, CREATE_FORMAT, where, what);
-  if(asprintf_ret == PRINTF_ERROR) {
+  if (asprintf_ret == PRINTF_ERROR) {
     return GSTC_OOM;
   }
 
@@ -205,7 +205,7 @@ gstc_cmd_read (GstClient * client, const char *what, char **response,
 
   /* Concatenate pieces into request */
   asprintf_ret = asprintf (&request, READ_FORMAT, what);
-  if(asprintf_ret == PRINTF_ERROR) {
+  if (asprintf_ret == PRINTF_ERROR) {
     return GSTC_OOM;
   }
 
@@ -229,7 +229,7 @@ gstc_cmd_update (GstClient * client, const char *what, const char *how)
 
   /* Concatenate pieces into request */
   asprintf_ret = asprintf (&request, UPDATE_FORMAT, what, how);
-  if(asprintf_ret == PRINTF_ERROR) {
+  if (asprintf_ret == PRINTF_ERROR) {
     return GSTC_OOM;
   }
 
@@ -253,7 +253,7 @@ gstc_cmd_delete (GstClient * client, const char *where, const char *what)
 
   /* Concatenate pieces into request */
   asprintf_ret = asprintf (&request, DELETE_FORMAT, where, what);
-  if(asprintf_ret == PRINTF_ERROR) {
+  if (asprintf_ret == PRINTF_ERROR) {
     return GSTC_OOM;
   }
 
@@ -308,8 +308,10 @@ gstc_pipeline_create (GstClient * client, const char *pipeline_name,
   gstc_assert_and_ret_val (NULL != pipeline_name, GSTC_NULL_ARGUMENT);
   gstc_assert_and_ret_val (NULL != pipeline_desc, GSTC_NULL_ARGUMENT);
 
-  asprintf_ret = asprintf (&create_args, PIPELINE_CREATE_FORMAT, pipeline_name, pipeline_desc);
-  if(asprintf_ret == PRINTF_ERROR) {
+  asprintf_ret =
+      asprintf (&create_args, PIPELINE_CREATE_FORMAT, pipeline_name,
+      pipeline_desc);
+  if (asprintf_ret == PRINTF_ERROR) {
     return GSTC_OOM;
   }
 
@@ -346,7 +348,7 @@ gstc_cmd_change_state (GstClient * client, const char *pipe, const char *state)
   gstc_assert_and_ret_val (NULL != state, GSTC_NULL_ARGUMENT);
 
   asprintf_ret = asprintf (&resource, PIPELINE_STATE_FORMAT, pipe);
-  if(asprintf_ret == PRINTF_ERROR) {
+  if (asprintf_ret == PRINTF_ERROR) {
     return GSTC_OOM;
   }
 
@@ -414,8 +416,8 @@ gstc_client_debug (GstClient * client, const char *threshold,
     const int colors, const int reset)
 {
   GstcStatus ret;
-  const char * colored;
-  const char * reset_bool;
+  const char *colored;
+  const char *reset_bool;
 
   gstc_assert_and_ret_val (NULL != client, GSTC_NULL_ARGUMENT);
   gstc_assert_and_ret_val (NULL != threshold, GSTC_NULL_ARGUMENT);
@@ -442,7 +444,7 @@ gstc_client_debug (GstClient * client, const char *threshold,
   /* Set debug threshold reset */
   reset_bool = reset == 0 ? "false" : "true";
   ret = gstc_cmd_update (client, "/debug/reset", reset_bool);
-  
+
   if (ret != GSTC_OK) {
     return ret;
   }
@@ -469,8 +471,10 @@ gstc_element_get (GstClient * client, const char *pname,
 
   va_start (ap, format);
 
-  asprintf_ret = asprintf (&what, PIPELINE_ELEMENTS_PROPERTY_FORMAT, pname, element, property);
-  if(asprintf_ret == PRINTF_ERROR) {
+  asprintf_ret =
+      asprintf (&what, PIPELINE_ELEMENTS_PROPERTY_FORMAT, pname, element,
+      property);
+  if (asprintf_ret == PRINTF_ERROR) {
     return GSTC_OOM;
   }
 
@@ -508,12 +512,14 @@ gstc_element_set (GstClient * client, const char *pname,
 
   va_start (ap, format);
 
-  asprintf_ret = asprintf (&what, PIPELINE_ELEMENTS_PROPERTY_FORMAT, pname, element, parameter);
-  if(asprintf_ret == PRINTF_ERROR) {
+  asprintf_ret =
+      asprintf (&what, PIPELINE_ELEMENTS_PROPERTY_FORMAT, pname, element,
+      parameter);
+  if (asprintf_ret == PRINTF_ERROR) {
     return GSTC_OOM;
   }
   asprintf_ret = vasprintf (&how, format, ap);
-  if(asprintf_ret == PRINTF_ERROR) {
+  if (asprintf_ret == PRINTF_ERROR) {
     return GSTC_OOM;
   }
 
@@ -539,7 +545,7 @@ gstc_pipeline_flush_start (GstClient * client, const char *pipeline_name)
   gstc_assert_and_ret_val (NULL != pipeline_name, GSTC_NULL_ARGUMENT);
 
   asprintf_ret = asprintf (&where, PIPELINE_EVENT_FORMAT, pipeline_name);
-  if(asprintf_ret == PRINTF_ERROR) {
+  if (asprintf_ret == PRINTF_ERROR) {
     return GSTC_OOM;
   }
 
@@ -563,7 +569,7 @@ gstc_pipeline_flush_stop (GstClient * client, const char *pipeline_name,
   gstc_assert_and_ret_val (NULL != pipeline_name, GSTC_NULL_ARGUMENT);
 
   asprintf_ret = asprintf (&where, PIPELINE_EVENT_FORMAT, pipeline_name);
-  if(asprintf_ret == PRINTF_ERROR) {
+  if (asprintf_ret == PRINTF_ERROR) {
     return GSTC_OOM;
   }
 
@@ -572,7 +578,7 @@ gstc_pipeline_flush_stop (GstClient * client, const char *pipeline_name,
   } else {
     asprintf_ret = asprintf (&what, FLUSH_STOP_FORMAT, "false");
   }
-  if(asprintf_ret == PRINTF_ERROR) {
+  if (asprintf_ret == PRINTF_ERROR) {
     return GSTC_OOM;
   }
 
@@ -600,8 +606,10 @@ gstc_element_properties_list (GstClient * client,
   gstc_assert_and_ret_val (NULL != properties, GSTC_NULL_ARGUMENT);
   gstc_assert_and_ret_val (NULL != list_lenght, GSTC_NULL_ARGUMENT);
 
-  asprintf_ret = asprintf (&what, PIPELINE_ELEMENTS_PROPERTIES_FORMAT, pipeline_name, element);
-  if(asprintf_ret == PRINTF_ERROR) {
+  asprintf_ret =
+      asprintf (&what, PIPELINE_ELEMENTS_PROPERTIES_FORMAT, pipeline_name,
+      element);
+  if (asprintf_ret == PRINTF_ERROR) {
     return GSTC_OOM;
   }
 
@@ -629,7 +637,7 @@ gstc_pipeline_inject_eos (GstClient * client, const char *pipeline_name)
   const char *what = "eos";
 
   asprintf_ret = asprintf (&where, PIPELINE_EVENT_FORMAT, pipeline_name);
-  if(asprintf_ret == PRINTF_ERROR) {
+  if (asprintf_ret == PRINTF_ERROR) {
     return GSTC_OOM;
   }
 
@@ -641,7 +649,7 @@ gstc_pipeline_inject_eos (GstClient * client, const char *pipeline_name)
 }
 
 GstcStatus
-gstc_pipeline_seek(GstClient *client, const char *pipeline_name,
+gstc_pipeline_seek (GstClient * client, const char *pipeline_name,
     double rate, int format, int flags, int start_type, long long start,
     int stop_type, long long stop)
 {
@@ -649,19 +657,21 @@ gstc_pipeline_seek(GstClient *client, const char *pipeline_name,
   int asprintf_ret;
   char *where;
   char *what;
-  
+
   gstc_assert_and_ret_val (NULL != client, GSTC_NULL_ARGUMENT);
   gstc_assert_and_ret_val (NULL != pipeline_name, GSTC_NULL_ARGUMENT);
 
   asprintf_ret = asprintf (&where, PIPELINE_EVENT_FORMAT, pipeline_name);
-  if(asprintf_ret == PRINTF_ERROR) {
+  if (asprintf_ret == PRINTF_ERROR) {
     return GSTC_OOM;
   }
-  asprintf_ret = asprintf (&what, SEEK_FORMAT, rate, format, flags, start_type, start, stop_type, stop);
-  if(asprintf_ret == PRINTF_ERROR) {
+  asprintf_ret =
+      asprintf (&what, SEEK_FORMAT, rate, format, flags, start_type, start,
+      stop_type, stop);
+  if (asprintf_ret == PRINTF_ERROR) {
     return GSTC_OOM;
   }
-  
+
   ret = gstc_cmd_create (client, where, what);
 
   free (where);
@@ -685,7 +695,7 @@ gstc_pipeline_list_elements (GstClient * client,
   gstc_assert_and_ret_val (NULL != list_lenght, GSTC_NULL_ARGUMENT);
 
   asprintf_ret = asprintf (&what, PIPELINE_ELEMENTS_FORMAT, pipeline_name);
-  if(asprintf_ret == PRINTF_ERROR) {
+  if (asprintf_ret == PRINTF_ERROR) {
     return GSTC_OOM;
   }
 
@@ -719,11 +729,11 @@ gstc_bus_thread (void *user_data)
   GstClient *client = data->client;
 
   asprintf_ret = asprintf (&where, PIPELINE_BUS_MSG_FORMAT, pipeline_name);
-  if(asprintf_ret == PRINTF_ERROR) {
+  if (asprintf_ret == PRINTF_ERROR) {
     return NULL;
   }
 
-  /* -1 is used in this function so that the socket has an unlimited timeout */ 
+  /* -1 is used in this function so that the socket has an unlimited timeout */
   gstc_cmd_read (client, where, &response, -1);
   data->func (client, pipeline_name, message_name, timeout, response,
       data->user_data);
@@ -742,27 +752,34 @@ gstc_pipeline_bus_wait_async (GstClient * client,
     void *user_data)
 {
   int asprintf_ret;
-  GstcThread thread;
   GstcThreadData *data;
+  GstcThread thread;
   char *where_timeout;
   char *where_types;
   char *how_timeout;
   const char *what_timeout = "timeout";
   const char *what_types = "types";
+  GstcStatus ret = GSTC_OK;
 
-  asprintf_ret = asprintf (&where_timeout, PIPELINE_BUS_FORMAT, pipeline_name, what_timeout);
-  if(asprintf_ret == PRINTF_ERROR) {
-    return GSTC_OOM;
+  asprintf_ret =
+      asprintf (&where_timeout, PIPELINE_BUS_FORMAT, pipeline_name,
+      what_timeout);
+  if (asprintf_ret == PRINTF_ERROR) {
+    ret = GSTC_OOM;
+    goto out;
   }
 
   asprintf_ret = asprintf (&how_timeout, TIMEOUT_FORMAT, timeout);
-  if(asprintf_ret == PRINTF_ERROR) {
-    return GSTC_OOM;
+  if (asprintf_ret == PRINTF_ERROR) {
+    ret = GSTC_OOM;
+    goto free_where;
   }
 
-  asprintf_ret = asprintf (&where_types, PIPELINE_BUS_FORMAT, pipeline_name, what_types);
-  if(asprintf_ret == PRINTF_ERROR) {
-    return GSTC_OOM;
+  asprintf_ret =
+      asprintf (&where_types, PIPELINE_BUS_FORMAT, pipeline_name, what_types);
+  if (asprintf_ret == PRINTF_ERROR) {
+    ret = GSTC_OOM;
+    goto free_how;
   }
 
   gstc_cmd_update (client, where_types, message_name);
@@ -775,13 +792,18 @@ gstc_pipeline_bus_wait_async (GstClient * client,
   data->func = callback;
   data->user_data = user_data;
   data->timeout = timeout;
-  gstc_thread_new (&thread, gstc_bus_thread, data);
+  ret = gstc_thread_new (&thread, gstc_bus_thread, data);
 
-  free (where_timeout);
   free (where_types);
+
+free_how:
   free (how_timeout);
 
-  return GSTC_OK;
+free_where:
+  free (where_timeout);
+
+out:
+  return ret;
 }
 
 /*
@@ -820,6 +842,7 @@ gstc_pipeline_bus_wait_callback (GstClient * _client, const char *pipeline_name,
 
   return GSTC_OK;
 }
+
 #pragma GCC diagnostic pop
 
 GstcStatus
@@ -828,13 +851,17 @@ gstc_pipeline_bus_wait (GstClient * client,
     const long long timeout, char **message)
 {
   GstcSyncBusData data;
+  GstcStatus ret;
 
   gstc_cond_init (&(data.cond));
   gstc_mutex_init (&(data.mutex));
   data.waiting = 1;
 
-  gstc_pipeline_bus_wait_async (client, pipeline_name, message_name,
+  ret = gstc_pipeline_bus_wait_async (client, pipeline_name, message_name,
       timeout, gstc_pipeline_bus_wait_callback, &data);
+  if (GSTC_OK != ret) {
+    return ret;
+  }
 
   gstc_mutex_lock (&(data.mutex));
   while (1 == data.waiting) {
