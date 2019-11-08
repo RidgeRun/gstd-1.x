@@ -775,13 +775,18 @@ gstc_pipeline_bus_wait_async (GstClient * client,
   data->func = callback;
   data->user_data = user_data;
   data->timeout = timeout;
-  gstc_thread_new (&thread, gstc_bus_thread, data);
+  ret = gstc_thread_new (&data->thread, gstc_bus_thread, data);
 
-  free (where_timeout);
   free (where_types);
+
+free_how:
   free (how_timeout);
 
-  return GSTC_OK;
+free_where:
+  free (where_timeout);
+
+out:
+  return ret;
 }
 
 /*
@@ -828,13 +833,17 @@ gstc_pipeline_bus_wait (GstClient * client,
     const long long timeout, char **message)
 {
   GstcSyncBusData data;
+  GstcStatus ret;
 
   gstc_cond_init (&(data.cond));
   gstc_mutex_init (&(data.mutex));
   data.waiting = 1;
 
-  gstc_pipeline_bus_wait_async (client, pipeline_name, message_name,
+  ret = gstc_pipeline_bus_wait_async (client, pipeline_name, message_name,
       timeout, gstc_pipeline_bus_wait_callback, &data);
+  if (GSTC_OK != ret) {
+    return ret;
+  }
 
   gstc_mutex_lock (&(data.mutex));
   while (1 == data.waiting) {
