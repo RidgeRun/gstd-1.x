@@ -17,8 +17,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA
  */
 
-#ifndef __GSTD_BUS_MSG_INFO_H__
-#define __GSTD_BUS_MSG_INFO_H__
+#ifndef __GSTD_BUS_MSG_SIMPLE_H__
+#define __GSTD_BUS_MSG_SIMPLE_H__
 
 #include <glib-object.h>
 
@@ -27,23 +27,23 @@ G_BEGIN_DECLS
 /*
  * Type declaration.
  */
-#define GSTD_TYPE_BUS_MSG_INFO \
-  (gstd_bus_msg_info_get_type())
-#define GSTD_BUS_MSG_INFO(obj) \
-  (G_TYPE_CHECK_INSTANCE_CAST((obj),GSTD_TYPE_BUS_MSG_INFO,GstdBusMsgInfo))
-#define GSTD_BUS_MSG_INFO_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_CAST((klass),GSTD_TYPE_BUS_MSG_INFO,GstdBusMsgInfoClass))
-#define GSTD_IS_BUS_MSG_INFO(obj) \
-  (G_TYPE_CHECK_INSTANCE_TYPE((obj),GSTD_TYPE_BUS_MSG_INFO))
-#define GSTD_IS_BUS_MSG_INFO_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_TYPE((klass),GSTD_TYPE_BUS_MSG_INFO))
-#define GSTD_BUS_MSG_INFO_GET_CLASS(obj) \
-  (G_TYPE_INSTANCE_GET_CLASS ((obj), GSTD_TYPE_BUS_MSG_INFO, GstdBusMsgInfoClass))
+#define GSTD_TYPE_BUS_MSG_SIMPLE \
+  (gstd_bus_msg_simple_get_type())
+#define GSTD_BUS_MSG_SIMPLE(obj) \
+  (G_TYPE_CHECK_INSTANCE_CAST((obj),GSTD_TYPE_BUS_MSG_SIMPLE,GstdBusMsgSimple))
+#define GSTD_BUS_MSG_SIMPLE_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_CAST((klass),GSTD_TYPE_BUS_MSG_SIMPLE,GstdBusMsgSimpleClass))
+#define GSTD_IS_BUS_MSG_SIMPLE(obj) \
+  (G_TYPE_CHECK_INSTANCE_TYPE((obj),GSTD_TYPE_BUS_MSG_SIMPLE))
+#define GSTD_IS_BUS_MSG_SIMPLE_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_TYPE((klass),GSTD_TYPE_BUS_MSG_SIMPLE))
+#define GSTD_BUS_MSG_SIMPLE_GET_CLASS(obj) \
+  (G_TYPE_INSTANCE_GET_CLASS ((obj), GSTD_TYPE_BUS_MSG_SIMPLE, GstdBusMsgSimpleClass))
 
-typedef struct _GstdBusMsgInfo GstdBusMsgInfo;
-typedef struct _GstdBusMsgInfoClass GstdBusMsgInfoClass;
-GType gstd_bus_msg_info_get_type (void);
+typedef struct _GstdBusMsgSimple GstdBusMsgSimple;
+typedef struct _GstdBusMsgSimpleClass GstdBusMsgSimpleClass;
+GType gstd_bus_msg_simple_get_type (void);
 
 G_END_DECLS
 
-#endif // __GSTD_BUS_MSG_INFO_H__
+#endif // __GSTD_BUS_MSG_SIMPLE_H__
