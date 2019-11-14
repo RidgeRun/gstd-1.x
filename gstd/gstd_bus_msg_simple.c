@@ -22,54 +22,54 @@
 #endif
 
 #include "gstd_bus_msg.h"
-#include "gstd_bus_msg_info.h"
+#include "gstd_bus_msg_simple.h"
 
-/* Gstd Bus MsgInfo debugging category */
-GST_DEBUG_CATEGORY_STATIC (gstd_bus_msg_info_debug);
+/* Gstd Bus MsgSimple debugging category */
+GST_DEBUG_CATEGORY_STATIC (gstd_bus_msg_simple_debug);
 
-#define GST_CAT_DEFAULT gstd_bus_msg_info_debug
-#define GSTD_DEBUG_DEFAULT_LEVEL GST_LEVEL_INFO
+#define GST_CAT_DEFAULT gstd_bus_msg_simple_debug
+#define GSTD_DEBUG_DEFAULT_LEVEL GST_LEVEL_SIMPLE
 
 static GstdReturnCode
-gstd_bus_msg_info_to_string (GstdBusMsg * msg, GstdIFormatter * formatter,
+gstd_bus_msg_simple_to_string (GstdBusMsg * msg, GstdIFormatter * formatter,
     GstMessage * target);
 
-struct _GstdBusMsgInfo
+struct _GstdBusMsgSimple
 {
   GstdBusMsg parent;
 };
 
-struct _GstdBusMsgInfoClass
+struct _GstdBusMsgSimpleClass
 {
   GstdBusMsgClass parent_class;
 };
 
-G_DEFINE_TYPE (GstdBusMsgInfo, gstd_bus_msg_info, GSTD_TYPE_BUS_MSG)
+G_DEFINE_TYPE (GstdBusMsgSimple, gstd_bus_msg_simple, GSTD_TYPE_BUS_MSG)
 
-static void gstd_bus_msg_info_class_init (GstdBusMsgInfoClass * klass)
+static void gstd_bus_msg_simple_class_init (GstdBusMsgSimpleClass * klass)
 {
   GstdBusMsgClass *bmclass;
   guint debug_color;
 
   bmclass = GSTD_BUS_MSG_CLASS (klass);
 
-  bmclass->to_string = GST_DEBUG_FUNCPTR (gstd_bus_msg_info_to_string);
+  bmclass->to_string = GST_DEBUG_FUNCPTR (gstd_bus_msg_simple_to_string);
 
   /* Initialize debug category with nice colors */
   debug_color = GST_DEBUG_FG_BLACK | GST_DEBUG_BOLD | GST_DEBUG_BG_WHITE;
-  GST_DEBUG_CATEGORY_INIT (gstd_bus_msg_info_debug, "gstdbusmsginfo",
-      debug_color, "Gstd Bus Msg Info category");
+  GST_DEBUG_CATEGORY_INIT (gstd_bus_msg_simple_debug, "gstdbusmsgsimple",
+      debug_color, "Gstd Bus Msg Simple category");
 
 }
 
 static void
-gstd_bus_msg_info_init (GstdBusMsgInfo * self)
+gstd_bus_msg_simple_init (GstdBusMsgSimple * self)
 {
   GST_INFO_OBJECT (self, "Initializing bus info/error/warning message");
 }
 
 static GstdReturnCode
-gstd_bus_msg_info_to_string (GstdBusMsg * msg, GstdIFormatter * formatter,
+gstd_bus_msg_simple_to_string (GstdBusMsg * msg, GstdIFormatter * formatter,
     GstMessage * target)
 {
   GError *error;
@@ -89,21 +89,6 @@ gstd_bus_msg_info_to_string (GstdBusMsg * msg, GstdIFormatter * formatter,
     break;
   case GST_MESSAGE_INFO:
     gst_message_parse_info (target, &error, &debug);
-    break;
-  case GST_MESSAGE_CLOCK_PROVIDE:
-    gst_message_parse_clock_provide (target, &error, &debug);
-    break;
-  case GST_MESSAGE_STREAM_STATUS:
-    gst_message_parse_stream_status (target, &error, &debug);
-    break;
-  case GST_MESSAGE_SEGMENT_DONE:
-    gst_message_parse_segment_done (target, &error, &debug);
-    break;
-  case GST_MESSAGE_SEGMENT_START:
-    gst_message_parse_segment_start (target, &error, &debug);
-    break;
-  case GST_MESSAGE_TOC:
-    gst_message_parse_toc (target, &error, &debug);
     break;
   default:
     return GSTD_EVENT_ERROR;

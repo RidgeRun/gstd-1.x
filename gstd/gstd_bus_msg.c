@@ -22,7 +22,7 @@
 #endif
 
 #include "gstd_bus_msg.h"
-#include "gstd_bus_msg_info.h"
+#include "gstd_bus_msg_simple.h"
 #include "gstd_bus_msg_qos.h"
 #include "gstd_bus_msg_stream_status.h"
 #include "gstd_bus_msg_element.h"
@@ -95,12 +95,7 @@ gstd_bus_msg_factory_make (GstMessage * target)
     case (GST_MESSAGE_ERROR):
     case (GST_MESSAGE_WARNING):
     case (GST_MESSAGE_INFO):
-    case (GST_MESSAGE_CLOCK_PROVIDE):
-    case (GST_MESSAGE_STREAM_STATUS):
-    case (GST_MESSAGE_SEGMENT_DONE):
-    case (GST_MESSAGE_SEGMENT_START):
-    case (GST_MESSAGE_TOC):
-      msg = g_object_new (GSTD_TYPE_BUS_MSG_INFO, NULL);
+      msg = g_object_new (GSTD_TYPE_BUS_MSG_SIMPLE, NULL);
       break;
     case (GST_MESSAGE_QOS):
       msg = g_object_new (GSTD_TYPE_BUS_MSG_QOS, NULL);
