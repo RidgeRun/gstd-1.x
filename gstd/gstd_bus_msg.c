@@ -95,6 +95,11 @@ gstd_bus_msg_factory_make (GstMessage * target)
     case (GST_MESSAGE_ERROR):
     case (GST_MESSAGE_WARNING):
     case (GST_MESSAGE_INFO):
+    case (GST_MESSAGE_CLOCK_PROVIDE):
+    case (GST_MESSAGE_STREAM_STATUS):
+    case (GST_MESSAGE_SEGMENT_DONE):
+    case (GST_MESSAGE_SEGMENT_START):
+    case (GST_MESSAGE_TOC):
       msg = g_object_new (GSTD_TYPE_BUS_MSG_INFO, NULL);
       break;
     case (GST_MESSAGE_QOS):
