@@ -29,7 +29,7 @@ static gchar _request[512];
 static GstClient *_client;
 
 static void
-setup ()
+setup (void)
 {
   const gchar *address = "";
   unsigned int port = 0;

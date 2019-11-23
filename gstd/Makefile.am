@@ -44,10 +44,17 @@ libgstd_core_la_SOURCES = gstd_session.c		\
 			  gstd_parser.c			\
 			  gstd_log.c			\
 			  gstd_bus_msg_stream_status.c  \
-			  gstd_bus_msg_element.c
+			  gstd_bus_msg_element.c	\
+			  gstd_signal.c			\
+			  gstd_callback.c		\
+			  gstd_signal_reader.c		\
+			  gstd_socket.c			\
+			  gstd_unix.c			\
+			  gstd_signal_list.c
 
 libgstd_core_la_CFLAGS = $(GST_CFLAGS)					\
 			 $(GIO_CFLAGS)					\
+			 $(GIO_UNIX_CFLAGS)				\
 			 $(GJSON_CFLAGS)				\
 			 -DGSTD_LOG_STATE_DIR=\"$(gstdlogstatedir)\"	\
 			 -DGSTD_RUN_STATE_DIR=\"$(gstdrunstatedir)\"
@@ -61,12 +68,13 @@ gstd_SOURCES =  gstd.c gstd_daemon.c
 
 gstd_CFLAGS = $(GST_CFLAGS)					\
 	      $(GIO_CFLAGS)					\
+	      $(GIO_UNIX_CFLAGS)				\
 	      $(GJSON_CFLAGS)					\
 	      $(LIBD_CFLAGS)					\
 	      -DGSTD_LOG_STATE_DIR=\"$(gstdlogstatedir)\"	\
 	      -DGSTD_RUN_STATE_DIR=\"$(gstdrunstatedir)\"
 
-gstd_LDFLAGS = $(GST_LIBS) $(GIO_LIBS) $(GJSON_LIBS) $(LIBD_LIBS) -Wl,-rpath -Wl,$(libdir)
+gstd_LDFLAGS = $(GST_LIBS) $(GIO_LIBS) $(GIO_UNIX_LIBS) $(GJSON_LIBS) $(LIBD_LIBS) -Wl,-rpath -Wl,$(libdir)
 gstd_LDADD = libgstd-core.la
 
 gstdincludedir = $(includedir)/gstd
@@ -111,7 +119,8 @@ gstdinclude_HEADERS = \
 		  gstd_parser.h			\
 		  gstd_log.h			\
 		  gstd_bus_msg_stream_status.h	\
-		  gstd_bus_msg_element.h
+		  gstd_bus_msg_element.h	\
+		  gstd_signal_list.h
 
 noinst_HEADERS = gstd_daemon.h
 

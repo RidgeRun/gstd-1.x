@@ -39,7 +39,7 @@ G_BEGIN_DECLS
 typedef struct _GstdEventHandler GstdEventHandler;
 typedef struct _GstdEventHandlerClass GstdEventHandlerClass;
 
-GType gstd_event_handler_get_type ();
+GType gstd_event_handler_get_type (void);
 
 /**
  * gstd_event_handler_new: (constructor)

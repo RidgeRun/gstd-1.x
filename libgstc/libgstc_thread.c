@@ -39,11 +39,22 @@ GstcStatus
 gstc_thread_new (GstcThread * self, GstcThreadFunction func, void *user_data)
 {
   int ret;
+  pthread_attr_t attr;
 
   gstc_assert_and_ret_val (NULL != func, GSTC_NULL_ARGUMENT);
   gstc_assert_and_ret_val (NULL != self, GSTC_NULL_ARGUMENT);
 
-  ret = pthread_create (&(self->thread), NULL, func, user_data);
+  ret = pthread_attr_init (&attr);
+  if (ret) {
+    return GSTC_THREAD_ERROR;
+  }
+
+  ret = pthread_attr_setdetachstate (&attr, PTHREAD_CREATE_DETACHED);
+  if (ret) {
+    return GSTC_THREAD_ERROR;
+  }
+
+  ret = pthread_create (&(self->thread), &attr, func, user_data);
   if (ret) {
     return GSTC_THREAD_ERROR;
   }

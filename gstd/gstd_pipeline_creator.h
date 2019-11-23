@@ -42,7 +42,7 @@ G_BEGIN_DECLS
   (G_TYPE_INSTANCE_GET_CLASS ((obj), GSTD_TYPE_PIPELINE_CREATOR, GstdPipelineCreatorClass))
 typedef struct _GstdPipelineCreator GstdPipelineCreator;
 
-GType gstd_pipeline_creator_get_type ();
+GType gstd_pipeline_creator_get_type (void);
 
 G_END_DECLS
 #endif // __GSTD_PIPELINE_CREATOR_H__

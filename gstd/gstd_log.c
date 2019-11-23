@@ -32,15 +32,15 @@ GST_DEBUG_CATEGORY (gstd_debug);
 #define GSTD_LOG_NAME "gstd.log"
 #define GST_LOG_NAME "gst.log"
 #define GSTD_DEBUG_PREFIX "gstd"
-#define GSTD_DEBUG_LEVEL "INFO"
+#define GSTD_DEBUG_LEVEL "WARNING"
 
 static void
 gstd_log_proxy (GstDebugCategory * category, GstDebugLevel level,
     const gchar * file, const gchar * function, gint line, GObject * object,
     GstDebugMessage * message, gpointer user_data) G_GNUC_NO_INSTRUMENT;
 
-static const gchar *gstd_log_get_gstd_default ();
-static const gchar *gstd_log_get_gst_default ();
+static const gchar *gstd_log_get_gstd_default (void);
+static const gchar *gstd_log_get_gst_default (void);
 static gchar *gstd_log_get_filename (const gchar * filename, const gchar * default_filename);
 
 static FILE *_gstdlog = NULL;
@@ -88,7 +88,7 @@ gstd_log_init (const gchar * gstdfilename, const gchar * gstfilename)
 }
 
 void
-gstd_log_deinit ()
+gstd_log_deinit (void)
 {
   g_free (gstd_filename);
   g_free (gst_filename);
@@ -123,13 +123,13 @@ gstd_log_proxy (GstDebugCategory * category, GstDebugLevel level,
 }
 
 static const gchar *
-gstd_log_get_gstd_default ()
+gstd_log_get_gstd_default (void)
 {
   return GSTD_LOG_STATE_DIR GSTD_LOG_NAME;
 }
 
 static const gchar *
-gstd_log_get_gst_default ()
+gstd_log_get_gst_default (void)
 {
   return GSTD_LOG_STATE_DIR GST_LOG_NAME;
 }
@@ -150,13 +150,13 @@ gstd_log_get_filename (const gchar * filename, const gchar * default_filename)
 }
 
 gchar *
-gstd_log_get_current_gstd ()
+gstd_log_get_current_gstd (void)
 {
   return g_strdup (gstd_filename);
 }
 
 gchar *
-gstd_log_get_current_gst ()
+gstd_log_get_current_gst (void)
 {
   return g_strdup (gst_filename);
 }

@@ -2,7 +2,7 @@ dnl required version of autoconf
 AC_PREREQ([2.53])
 
 dnl Gstreamer's daemon package name and version
-AC_INIT([gstd],[0.7.2])
+AC_INIT([gstd],[0.8.0])
 
 dnl required version of gstreamer and gst-plugins-base
 GST_REQUIRED=1.0.0
@@ -10,7 +10,10 @@ GST_REQUIRED=1.0.0
 dnl required version of gio
 GIO_REQUIRED=2.44.1
 
-dnl required version of gio
+dnl required version of gio-unix
+GIO_UNIX_REQUIRED=2.44.1
+
+dnl required version of gjson
 GJSON_REQUIRED=0.16.2
 
 dnl required version of libdaemon
@@ -82,6 +85,26 @@ PKG_CHECK_MODULES(GIO, [
 
     Please make sure you have the necessary GIO-2.0
     development headers installed.
+  ])
+])
+
+PKG_CHECK_MODULES(GIO_UNIX, [
+    gio-unix-2.0              >= $GIO_UNIX_REQUIRED
+  ], [
+    AC_SUBST(GIO_UNIX_CFLAGS)
+    AC_SUBST(GIO_UNIX_LIBS)
+  ], [
+  AC_MSG_ERROR([
+    Can't find the following GIO-UNIX development packages:
+
+      gio-unix-2.0              >= $GIO_UNIX_REQUIRED
+
+    Please make sure you have the necessary GIO-UNIX-2.0
+    development headers installed.
+
+    On debian/Ubuntu systems you will probably need to install the
+    'libglib2.0-dev' package.
+
   ])
 ])
 

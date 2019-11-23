@@ -44,7 +44,7 @@ G_BEGIN_DECLS
 
 typedef struct _GstdPropertyBoolean GstdPropertyBoolean;
 typedef struct _GstdPropertyBooleanClass GstdPropertyBooleanClass;
-GType gstd_property_boolean_get_type ();
+GType gstd_property_boolean_get_type (void);
 
 
 struct _GstdPropertyBoolean

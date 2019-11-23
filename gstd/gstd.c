@@ -28,10 +28,11 @@
 #include "gstd_session.h"
 #include "gstd_ipc.h"
 #include "gstd_tcp.h"
+#include "gstd_unix.h"
 #include "gstd_daemon.h"
 #include "gstd_log.h"
 
-static gboolean int_handler (gpointer user_data);
+static gboolean int_term_handler (gpointer user_data);
 static void ipc_add_option_groups (GstdIpc * ipc[], GType factory[],
     guint num_ipcs, GOptionContext * context, GOptionGroup * groups[]);
 static gboolean ipc_start (GstdIpc * ipc[], guint num_ipcs,
@@ -39,23 +40,24 @@ static gboolean ipc_start (GstdIpc * ipc[], guint num_ipcs,
 static void ipc_stop (GstdIpc * ipc[], guint numipc);
 static void print_header (gboolean quiet);
 
+#define HEADER \
+      "\nGstd version " PACKAGE_VERSION "\n" \
+      "Copyright (C) 2015-2017 Ridgerun, LLC (http://www.ridgerun.com)\n\n" \
+      "Log traces will be saved to %s.\nDetaching from parent process."
+
 void
 print_header (gboolean quiet)
 {
-  const gchar *header = "\nGstd version " PACKAGE_VERSION "\n"
-      "Copyright (C) 2015-2017 Ridgerun, LLC (http://www.ridgerun.com)\n\n"
-      "Log traces will be saved to %s.\nDetaching from parent process.";
-
+  gchar *filename;
   if (!quiet) {
-    gchar *filename;
     filename = gstd_log_get_current_gstd ();
-    GST_INFO (header, filename);
+    GST_INFO (HEADER, filename);
     g_free (filename);
   }
 }
 
 static gboolean
-int_handler (gpointer user_data)
+int_term_handler (gpointer user_data)
 {
   GMainLoop *main_loop;
 
@@ -144,7 +146,7 @@ main (gint argc, gchar * argv[])
 {
   GMainLoop *main_loop;
   GstdSession *session;
-  gboolean version = FALSE;;
+  gboolean version = FALSE;
   gboolean kill = FALSE;
   gboolean nodaemon = FALSE;
   gboolean quiet = FALSE;
@@ -162,11 +164,12 @@ main (gint argc, gchar * argv[])
    */
   GType supported_ipcs[] = {
     GSTD_TYPE_TCP,
+    GSTD_TYPE_UNIX,
   };
 
-  guint num_ipcs = (sizeof (supported_ipcs) / sizeof (GType));
-  GstdIpc *ipc_array[num_ipcs];
-  GOptionGroup *optiongroup_array[num_ipcs];
+  guint num_ipcs = (sizeof (supported_ipcs) / sizeof (GType));  
+  GstdIpc **ipc_array = g_malloc(num_ipcs * sizeof(GstdIpc*));
+  GOptionGroup **optiongroup_array = g_malloc(num_ipcs * sizeof(GOptionGroup*));
 
   GOptionEntry entries[] = {
     {"version", 'v', 0, G_OPTION_ARG_NONE, &version,
@@ -257,7 +260,10 @@ main (gint argc, gchar * argv[])
   main_loop = g_main_loop_new (NULL, FALSE);
 
   /* Install a handler for the interrupt signal */
-  g_unix_signal_add (SIGINT, int_handler, main_loop);
+  g_unix_signal_add (SIGINT, int_term_handler, main_loop);
+
+  /* Install a handler for the termination signal */
+  g_unix_signal_add (SIGTERM, int_term_handler, main_loop);
 
   GST_INFO ("Gstd started");
   g_main_loop_run (main_loop);
@@ -274,6 +280,9 @@ main (gint argc, gchar * argv[])
 
   gst_deinit ();
   gstd_log_deinit ();
+  
+  g_free(ipc_array);
+  g_free(optiongroup_array);
 
   goto out;
 

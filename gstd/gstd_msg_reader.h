@@ -42,7 +42,7 @@ G_BEGIN_DECLS
   (G_TYPE_INSTANCE_GET_CLASS ((obj), GSTD_TYPE_MSG_READER, GstdMsgReaderClass))
 typedef struct _GstdMsgReader GstdMsgReader;
 
-GType gstd_msg_reader_get_type ();
+GType gstd_msg_reader_get_type (void);
 
 G_END_DECLS
 #endif // __GSTD_MSG_READER_H__

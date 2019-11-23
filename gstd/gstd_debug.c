@@ -35,8 +35,11 @@ enum
   PROP_COLOR,
   PROP_THRESHOLD,
   PROP_FLAGS,
+  PROP_RESET,
   N_PROPERTIES                  // NOT A PROPERTY
 };
+
+#define PROP_RESET_DEFAULT    TRUE
 
 struct _GstdDebug
 {
@@ -56,6 +59,12 @@ struct _GstdDebug
    * Current threshold level
    */
   gchar *threshold;
+
+  /*
+   * Enables/Disables debug reset
+   */
+  gboolean reset;
+
   GParamFlags flags;
 };
 
@@ -72,8 +81,8 @@ gstd_debug_set_property (GObject *, guint, const GValue *, GParamSpec *);
 static void gstd_debug_get_property (GObject *, guint, GValue *, GParamSpec *);
 static void gstd_debug_dispose (GObject *);
 
-gchar *
-debug_obtain_default_level ()
+static gchar *
+debug_obtain_default_level (void)
 {
   gint level = gst_debug_get_default_threshold ();
   return g_strdup_printf ("%d", level);
@@ -84,12 +93,12 @@ gstd_debug_class_init (GstdDebugClass * klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
   GParamSpec *properties[N_PROPERTIES] = { NULL, };
+  gchar *temp_threshold = debug_obtain_default_level ();
+  guint debug_color;
 
   object_class->set_property = gstd_debug_set_property;
   object_class->get_property = gstd_debug_get_property;
   object_class->dispose = gstd_debug_dispose;
-
-  gchar *temp_threshold = debug_obtain_default_level ();
 
   properties[PROP_ENABLE] =
       g_param_spec_boolean ("enable",
@@ -117,10 +126,16 @@ gstd_debug_class_init (GstdDebugClass * klass)
       GSTD_PARAM_READ | GSTD_PARAM_UPDATE,
       G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
+  properties[PROP_RESET] =
+      g_param_spec_boolean ("reset",
+      "Reset",
+      "Clear previously set debug thresholds ",
+      PROP_RESET_DEFAULT, G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
   g_object_class_install_properties (object_class, N_PROPERTIES, properties);
 
   /* Initialize debug category with nice colors */
-  guint debug_color = GST_DEBUG_FG_BLACK | GST_DEBUG_BOLD | GST_DEBUG_BG_WHITE;
+  debug_color = GST_DEBUG_FG_BLACK | GST_DEBUG_BOLD | GST_DEBUG_BG_WHITE;
   GST_DEBUG_CATEGORY_INIT (gstd_debug_cat, "gstddebug", debug_color,
       "Gstd debug category");
 
@@ -135,6 +150,7 @@ gstd_debug_init (GstdDebug * self)
   self->enable = gst_debug_is_active ();
   self->color = gst_debug_is_colored ();
   self->threshold = debug_obtain_default_level ();
+  self->reset = PROP_RESET_DEFAULT;
 
   gstd_object_set_reader (GSTD_OBJECT (self),
       g_object_new (GSTD_TYPE_PROPERTY_READER, NULL));
@@ -163,17 +179,33 @@ gstd_debug_get_property (GObject * object,
           self->threshold);
       g_value_set_string (value, self->threshold);
       break;
-
     case PROP_FLAGS:
       GST_DEBUG_OBJECT (self, "Returning flags %u", self->flags);
       g_value_set_flags (value, self->flags);
       break;
-
+    case PROP_RESET:
+      GST_WARNING_OBJECT (self, "Returning debug reset %d", self->reset);
+      g_value_set_boolean (value, self->reset);
+      break;
     default:
       /* We don't have any other property... */
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
       break;
   }
+}
+
+static void
+gstd_debug_set_threshold (GstdDebug * self)
+{
+  /* If reset is set, clear all the categories to 0. We run this manually
+   * since the GStreamer gst_debug_set_threshold_from_string reset only clears
+   * the categories that weren't set explicitly. Otherwise the threshold will
+   * be appended to previously set thresholds
+   */
+  if (self->reset)
+    gst_debug_set_threshold_from_string ("*:0", TRUE);
+
+  gst_debug_set_threshold_from_string (self->threshold, FALSE);
 }
 
 static void
@@ -191,7 +223,7 @@ gstd_debug_set_property (GObject * object,
        * set threshold value
        */
       if ((self->enable) && (self->threshold)) {
-        gst_debug_set_threshold_from_string (self->threshold, TRUE);
+        gstd_debug_set_threshold (self);
       }
       break;
     case PROP_COLOR:
@@ -210,8 +242,12 @@ gstd_debug_set_property (GObject * object,
        * value if debug is active
        */
       if (TRUE == gst_debug_is_active ()) {
-        gst_debug_set_threshold_from_string (self->threshold, TRUE);
+        gstd_debug_set_threshold (self);
       }
+      break;
+    case PROP_RESET:
+      self->reset = g_value_get_boolean (value);
+      GST_DEBUG_OBJECT (self, "Changing debug reset to %d", self->reset);
       break;
     default:
       /* We don't have any other property... */
@@ -235,7 +271,7 @@ gstd_debug_dispose (GObject * object)
 
 
 GstdDebug *
-gstd_debug_new ()
+gstd_debug_new (void)
 {
   return GSTD_DEBUG (g_object_new (GSTD_TYPE_DEBUG, NULL));
 }

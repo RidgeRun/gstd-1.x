@@ -44,7 +44,7 @@ G_BEGIN_DECLS
 
 typedef struct _GstdPropertyInt GstdPropertyInt;
 typedef struct _GstdPropertyIntClass GstdPropertyIntClass;
-GType gstd_property_int_get_type ();
+GType gstd_property_int_get_type (void);
 
 
 struct _GstdPropertyInt

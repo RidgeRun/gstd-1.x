@@ -172,6 +172,10 @@ gstd_event_factory_make_seek_event (const gchar * description)
   gint64 stop = GSTD_EVENT_FACTORY_SEEK_STOP_DEFAULT;
   GstEvent *event = NULL;
   gchar **tokens = NULL;
+  gint64 temp_format;
+  gint64 temp_flags;
+  gint64 temp_start_type;
+  gint64 temp_stop_type;
 
   if (NULL != description) {
     tokens = g_strsplit (description, " ", 7);
@@ -189,7 +193,6 @@ gstd_event_factory_make_seek_event (const gchar * description)
     goto fallback;
   }
 
-  gint64 temp_format;
   if (!gstd_ascii_to_gint64 (tokens[1], &temp_format)) {
     goto out;
   }
@@ -199,7 +202,6 @@ gstd_event_factory_make_seek_event (const gchar * description)
     goto fallback;
   }
 
-  gint64 temp_flags;
   if (!gstd_ascii_to_gint64 (tokens[2], &temp_flags)) {
     goto out;
   }
@@ -209,7 +211,6 @@ gstd_event_factory_make_seek_event (const gchar * description)
     goto fallback;
   }
 
-  gint64 temp_start_type;
   if (!gstd_ascii_to_gint64 (tokens[3], &temp_start_type)) {
     goto out;
   }
@@ -227,7 +228,6 @@ gstd_event_factory_make_seek_event (const gchar * description)
     goto fallback;
   }
 
-  gint64 temp_stop_type;
   if (!gstd_ascii_to_gint64 (tokens[5], &temp_stop_type)) {
     goto out;
   }

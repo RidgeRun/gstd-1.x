@@ -42,7 +42,7 @@ G_BEGIN_DECLS
 
 typedef struct _GstdBusMsgElement GstdBusMsgElement;
 typedef struct _GstdBusMsgElementClass GstdBusMsgElementClass;
-GType gstd_bus_msg_element_get_type ();
+GType gstd_bus_msg_element_get_type (void);
 
 G_END_DECLS
 

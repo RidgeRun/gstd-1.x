@@ -25,12 +25,12 @@
 #include "libgstc_assert.h"
 
 /* Test Fixture */
-static gchar _request[3][512];
+static gchar _request[4][512];
 static GstClient *_client;
 int request_count = 0;
 
 static void
-setup ()
+setup (void)
 {
   const gchar *address = "";
   unsigned int port = 0;
@@ -139,16 +139,19 @@ GST_START_TEST (test_debug_success_false_color)
   GstcStatus ret;
   const char *threshold = "*:2";
   const int color_enable = 0;
+  const int reset = 1;
   const gchar *expectedEnable = "update /debug/enable true";
   const gchar *expectedThreshold = "update /debug/threshold *:2";
   const gchar *expectedColor = "update /debug/color false";
+  const gchar *expectedReset = "update /debug/reset true";
 
-  ret = gstc_client_debug (_client, threshold, color_enable);
+  ret = gstc_client_debug (_client, threshold, color_enable, reset);
   assert_equals_int (GSTC_OK, ret);
 
   assert_equals_string (expectedEnable, _request[0]);
   assert_equals_string (expectedThreshold, _request[1]);
   assert_equals_string (expectedColor, _request[2]);
+  assert_equals_string (expectedReset, _request[3]);
 }
 
 GST_END_TEST;
@@ -158,16 +161,19 @@ GST_START_TEST (test_debug_success_true_color)
   GstcStatus ret;
   const char *threshold = "*:2";
   const int color_enable = 1;
+  const int reset = 1;
   const gchar *expectedEnable = "update /debug/enable true";
   const gchar *expectedThreshold = "update /debug/threshold *:2";
   const gchar *expectedColor = "update /debug/color true";
+  const gchar *expectedReset = "update /debug/reset true";
 
-  ret = gstc_client_debug (_client, threshold, color_enable);
+  ret = gstc_client_debug (_client, threshold, color_enable, reset);
   assert_equals_int (GSTC_OK, ret);
 
   assert_equals_string (expectedEnable, _request[0]);
   assert_equals_string (expectedThreshold, _request[1]);
   assert_equals_string (expectedColor, _request[2]);
+  assert_equals_string (expectedReset, _request[3]);
 }
 
 GST_END_TEST;
@@ -177,8 +183,9 @@ GST_START_TEST (test_null_client)
   GstcStatus ret;
   const char *threshold = "*:2";
   const int color_enable = 0;
+  const int reset = 1;
 
-  ret = gstc_client_debug (NULL, threshold, color_enable);
+  ret = gstc_client_debug (NULL, threshold, color_enable, reset);
   assert_equals_int (GSTC_NULL_ARGUMENT, ret);
 }
 
@@ -189,8 +196,9 @@ GST_START_TEST (test_null_threshold)
   GstcStatus ret;
   const char *threshold = NULL;
   const int color_enable = 0;
+  const int reset = 1;
 
-  ret = gstc_client_debug (_client, threshold, color_enable);
+  ret = gstc_client_debug (_client, threshold, color_enable, reset);
   assert_equals_int (GSTC_NULL_ARGUMENT, ret);
 }
 

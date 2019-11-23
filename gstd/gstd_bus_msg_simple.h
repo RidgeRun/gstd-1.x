@@ -42,7 +42,7 @@ G_BEGIN_DECLS
 
 typedef struct _GstdBusMsgSimple GstdBusMsgSimple;
 typedef struct _GstdBusMsgSimpleClass GstdBusMsgSimpleClass;
-GType gstd_bus_msg_simple_get_type ();
+GType gstd_bus_msg_simple_get_type (void);
 
 G_END_DECLS
 

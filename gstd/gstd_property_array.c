@@ -69,6 +69,7 @@ gstd_property_array_add_value (GstdProperty * self, GstdIFormatter * formatter,
 {
   GArray *garray;
   gfloat fvalue;
+  gint i;
   GValue val = G_VALUE_INIT;
 
   g_return_if_fail (self);
@@ -79,7 +80,7 @@ gstd_property_array_add_value (GstdProperty * self, GstdIFormatter * formatter,
   garray = (GArray *) g_value_get_boxed (value);
 
   gstd_iformatter_begin_array (formatter);
-  for (gint i = 0; i < garray->len; i++) {
+  for (i = 0; i < garray->len; i++) {
     fvalue = g_array_index (garray, gfloat, i);
     g_value_set_float (&val, fvalue);
     gstd_iformatter_set_value (formatter, &val);

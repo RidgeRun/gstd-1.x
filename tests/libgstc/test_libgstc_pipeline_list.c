@@ -22,13 +22,14 @@
 #include "libgstc.h"
 #include "libgstc_socket.h"
 #include "libgstc_assert.h"
+#include "libgstc_json.h"
 
 /* Test Fixture */
 static gchar _request[512];
 static GstClient *_client;
 
 static void
-setup ()
+setup (void)
 {
   const gchar *address = "";
   unsigned int port = 0;

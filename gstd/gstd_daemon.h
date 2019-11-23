@@ -52,6 +52,6 @@ gboolean gstd_daemon_start (gboolean * parent);
  * \return TRUE if the daemon was successfully closed, FALSE
  * otherwise.
  */
-gboolean gstd_daemon_stop ();
+gboolean gstd_daemon_stop (void);
 
 #endif // __GSTD_DAEMON_H__

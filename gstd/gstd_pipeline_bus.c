@@ -71,6 +71,7 @@ gstd_pipeline_bus_class_init (GstdPipelineBusClass * klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
   GParamSpec *properties[N_PROPERTIES] = { NULL, };
+  guint debug_color;
 
   object_class->set_property = gstd_pipeline_bus_set_property;
   object_class->get_property = gstd_pipeline_bus_get_property;
@@ -102,7 +103,7 @@ gstd_pipeline_bus_class_init (GstdPipelineBusClass * klass)
   g_object_class_install_properties (object_class, N_PROPERTIES, properties);
 
   /* Initialize debug category with nice colors */
-  guint debug_color = GST_DEBUG_FG_BLACK | GST_DEBUG_BOLD | GST_DEBUG_BG_WHITE;
+  debug_color = GST_DEBUG_FG_BLACK | GST_DEBUG_BOLD | GST_DEBUG_BG_WHITE;
   GST_DEBUG_CATEGORY_INIT (gstd_pipeline_bus_debug, "gstdpipelinebus",
       debug_color, "Gstd Pipeline Bus messages category");
 }
@@ -128,7 +129,7 @@ gstd_pipeline_bus_new (GstBus * bus)
   g_return_val_if_fail (bus, NULL);
 
   self = GSTD_PIPELINE_BUS (g_object_new (GSTD_TYPE_PIPELINE_BUS, NULL));
-  self->bus = bus;
+  self->bus = G_OBJECT(bus);
 
   return self;
 }

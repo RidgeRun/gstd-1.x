@@ -42,7 +42,7 @@ G_BEGIN_DECLS
   (G_TYPE_INSTANCE_GET_CLASS ((obj), GSTD_TYPE_LIST_READER, GstdListReaderClass))
 typedef struct _GstdListReader GstdListReader;
 
-GType gstd_list_reader_get_type ();
+GType gstd_list_reader_get_type (void);
 
 G_END_DECLS
 #endif // __GSTD_LIST_READER_H__

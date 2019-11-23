@@ -42,7 +42,7 @@ G_BEGIN_DECLS
   (G_TYPE_INSTANCE_GET_CLASS ((obj), GSTD_TYPE_PIPELINE, GstdPipelineClass))
 typedef struct _GstdPipeline GstdPipeline;
 typedef struct _GstdPipelineClass GstdPipelineClass;
-GType gstd_pipeline_get_type ();
+GType gstd_pipeline_get_type (void);
 
 GstdReturnCode gstd_pipeline_build (GstdPipeline * object);
 

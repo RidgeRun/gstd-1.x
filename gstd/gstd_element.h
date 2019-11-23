@@ -40,7 +40,7 @@ G_BEGIN_DECLS
   (G_TYPE_INSTANCE_GET_CLASS ((obj), GSTD_TYPE_ELEMENT, GstdElementClass))
 typedef struct _GstdElement GstdElement;
 typedef struct _GstdElementClass GstdElementClass;
-GType gstd_element_get_type ();
+GType gstd_element_get_type (void);
 
 G_END_DECLS
 #endif // __GSTD_ELEMENT_H__
