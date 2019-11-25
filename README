@@ -1,23 +1,24 @@
 GStreamer Daemon, also called gstd, is a GStreamer framework for
-controlling audio and video streaming using TCP connection
+controlling audio video streaming using TCP connection
 messages. Qt applications, web interfaces, and GStreamer element test
 suites show different ways the framework can be utilized. GStreamer
-Daemon is gst-launch on steroids where you can create a GStreamer
-pipeline, play, pause, change speed, skip around, and even change
-element parameter settings all while the pipeline is active.
+Daemon is gst-launch on steroids, where you can create a GStreamer
+pipeline, then play, pause, change speed, skip around, and even
+change element parameter settings while the pipeline is active.
 
 GStreamer Daemon is designed for production deployment, where the
-control logic runs in a separate process for the audio video streaming
-server. The control application can be written in any language, does
-not need to use gobject / glib, as long as data can be exchanged over
-a TCP connection. The control application can run on the same
+control logic runs in a separate process from the gstd audio video
+streaming server. The control application can be written in any language,
+does not need to use gobject / glib, as long as data can be exchanged
+over a TCP connection. The control application can run on the same
 processor (using localhost for the TCP destination) or a separate
 machine. Isolating the control logic from the streaming logic solves
-many difficult problems, from setting priorities to avoid audio drop
+many difficult problems, from setting priorities to avoiding audio drop
 out to having a working user interface if the streaming application
 encounters corrupt data. By separating the audio video streaming
 logic, it is easy to create automated A/V tests, extend a product's
 features to support remote control, and allow the control application
-the streaming daemon to be developed independently.
+to be developed independently from the streaming daemon logic.
 
-The official documentation is held in [RidgeRun Developer's Wiki.](http://developer.ridgerun.com/wiki/index.php?title=Gstd-1.0)
+The official documentation is held in [RidgeRun Developer's Wiki.]
+(http://developer.ridgerun.com/wiki/index.php?title=Gstd-1.0)
