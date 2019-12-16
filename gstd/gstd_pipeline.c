@@ -42,6 +42,7 @@ enum
   PROP_STATE,
   PROP_EVENT,
   PROP_POSITION,
+  PROP_DURATION,
   N_PROPERTIES                  // NOT A PROPERTY
 };
 
@@ -100,6 +101,11 @@ struct _GstdPipeline
    * Position of the media progress pipeline
    */
   gint64 position;
+
+  /**
+   * Duration of the media stream pipeline
+   */
+  gint64 duration;
 };
 
 struct _GstdPipelineClass
@@ -168,6 +174,14 @@ gstd_pipeline_class_init (GstdPipelineClass * klass)
    properties[PROP_POSITION] =
       g_param_spec_int64 ("position", "Position",
       "The query position of the pipeline",
+      -1, /* Min value (-1 is used to indicate error, normal range 0 to G_MAXINT64 */
+      G_MAXINT64,
+      0, /* Default value */
+      G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
+
+    properties[PROP_DURATION] =
+      g_param_spec_int64 ("duration", "Duration",
+      "The duration of the media stream pipeline",
       -1, /* Min value (-1 is used to indicate error, normal range 0 to G_MAXINT64 */
       G_MAXINT64,
       0, /* Default value */
@@ -286,6 +300,10 @@ gstd_pipeline_dispose (GObject * object)
     self->position = 0;
   }
 
+  if (self->duration) {
+    self->duration = 0;
+  }
+
   G_OBJECT_CLASS (gstd_pipeline_parent_class)->dispose (object);
 }
 
@@ -328,6 +346,16 @@ gstd_pipeline_get_property (GObject * object,
       GST_DEBUG_OBJECT (self, "Returning pipeline position %" GST_TIME_FORMAT,
           GST_TIME_ARGS (self->position));
       g_value_set_int64 (value, self->position);
+      break;
+    case PROP_DURATION:
+      if (!gst_element_query_duration (self->pipeline, GST_FORMAT_TIME, &self->duration)) {
+        /* if the query could not be performed. return -1 */
+        self->duration = -1;
+      }
+
+      GST_DEBUG_OBJECT (self, "Returning pipeline duration %" GST_TIME_FORMAT,
+          GST_TIME_ARGS (self->duration));
+      g_value_set_int64 (value, self->duration);
       break;
     default:
       /* We don't have any other property... */
