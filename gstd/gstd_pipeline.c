@@ -318,7 +318,6 @@ gstd_pipeline_get_property (GObject * object,
     case PROP_PIPELINE_BUS:
       GST_DEBUG_OBJECT (self, "Returning pipeline bus %p", self->pipeline_bus);
       g_value_set_object (value, self->pipeline_bus);
-      // g_value_set_object (value, self->elements);
       break;
     case PROP_STATE:
       GST_DEBUG_OBJECT (self, "Returning pipeline state %p", self->state);
