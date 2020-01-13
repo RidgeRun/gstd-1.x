@@ -174,17 +174,17 @@ gstd_pipeline_class_init (GstdPipelineClass * klass)
    properties[PROP_POSITION] =
       g_param_spec_int64 ("position", "Position",
       "The query position of the pipeline",
-      0, /* Min value */
+      G_GINT64_CONSTANT(0), /* Min value */
       G_MAXINT64,
-      0, /* Default value */
+      G_GINT64_CONSTANT(0), /* Default value */
       G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
     properties[PROP_DURATION] =
       g_param_spec_int64 ("duration", "Duration",
       "The duration of the media stream pipeline",
-      0, /* Min value */
+      G_GINT64_CONSTANT(0), /* Min value */
       G_MAXINT64,
-      0, /* Default value */
+      G_GINT64_CONSTANT(0), /* Default value */
       G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
   g_object_class_install_properties (object_class, N_PROPERTIES, properties);
@@ -332,7 +332,7 @@ gstd_pipeline_get_property (GObject * object,
     case PROP_POSITION:
       if (!gst_element_query_position (self->pipeline, GST_FORMAT_TIME, &self->position)) {
         /* if the query could not be performed. return 0 */
-        self->position = 0;
+        self->position = G_GINT64_CONSTANT(0);
       }
 
       GST_DEBUG_OBJECT (self, "Returning pipeline position %" GST_TIME_FORMAT,
@@ -342,7 +342,7 @@ gstd_pipeline_get_property (GObject * object,
     case PROP_DURATION:
       if (!gst_element_query_duration (self->pipeline, GST_FORMAT_TIME, &self->duration)) {
         /* if the query could not be performed. return 0 */
-        self->duration = 0;
+        self->duration = G_GINT64_CONSTANT(0);
       }
 
       GST_DEBUG_OBJECT (self, "Returning pipeline duration %" GST_TIME_FORMAT,
