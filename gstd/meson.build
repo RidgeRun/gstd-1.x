@@ -39,7 +39,7 @@ libgstd_src_files = [
   'gstd_property_flags.c',
   'gstd_event_handler.c',
   'gstd_bus_msg.c',
-  'gstd_bus_msg_info.c',
+  'gstd_bus_msg_simple.c',
   'gstd_msg_reader.c',
   'gstd_msg_type.c',
   'gstd_bus_msg_qos.c',
@@ -61,7 +61,7 @@ libgstd_src_files = [
 libgstd_header_files = [
   'gstd_bus_msg_element.h',
   'gstd_bus_msg.h',
-  'gstd_bus_msg_info.h',
+  'gstd_bus_msg_simple.h',
   'gstd_bus_msg_qos.h',
   'gstd_bus_msg_stream_status.h',
   'gstd_callback.h',
