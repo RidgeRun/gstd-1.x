@@ -32,9 +32,9 @@ import json
 import psutil
 import traceback
 
-from gstcerror import *
-from logger import *
-from tcp import *
+from pygstc.gstcerror import *
+from pygstc.logger import *
+from pygstc.tcp import *
 
 GSTD_PROCNAME = 'gstd'
 
@@ -111,7 +111,7 @@ class GstdClient(object):
     update(uri, value)
         Updates the resource at the given URI
     """
-    def __init__(self, ip='localhost', port=5000, logger=None):
+    def __init__(self, ip='localhost', port=5000, logger=None, timeout=0):
         """
         Initialize new GstdClient
 
@@ -135,6 +135,7 @@ class GstdClient(object):
                            % (self._ip, self._port))
         self._test_gstd()
         self._ipc = Ipc(self._logger, self._ip, self._port)
+        self._timeout = timeout
 
     def _send_cmd_line(self, cmd_line):
         """
@@ -159,7 +160,7 @@ class GstdClient(object):
         """
         cmd = cmd_line[0]
         try:
-            jresult = self._ipc.send(cmd_line)
+            jresult = self._ipc.send(cmd_line, timeout=self._timeout)
             result = json.loads(jresult)
         except Exception as exception:
             self._logger.error('%s error: %s' % (cmd,

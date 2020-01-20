@@ -124,6 +124,7 @@ class Ipc(object):
                         newbuf = sock.recv(self._socket_read_size)
                     else:
                         buf = None
+                        sock.close()
                         break
                 else:
                     newbuf = sock.recv(self._socket_read_size)
