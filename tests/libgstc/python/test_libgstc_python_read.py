@@ -32,13 +32,16 @@ OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
 import unittest
-import gstc
+
+from pygstc.gstc import *
+from pygstc.logger import *
 
 class TestGstcReadMethods(unittest.TestCase):
 
     def test_libgstc_python_read(self):
         pipeline = "videotestsrc name=v0 pattern=ball ! fakesink"
-        self.gstd_client = gstc.client(loglevel='DEBUG')
+        self.gstd_logger = CustomLogger("test_libgstc", loglevel='DEBUG')
+        self.gstd_client = GstdClient(logger=self.gstd_logger)
         self.gstd_client.pipeline_create ("p0", pipeline)
         ret = self.gstd_client.read("pipelines/p0/elements/v0/properties/pattern")
         self.assertEqual(ret['value'], "Moving ball")

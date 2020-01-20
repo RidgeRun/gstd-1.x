@@ -32,17 +32,21 @@ OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
 import unittest
-import gstc
+
+from pygstc.gstc import *
+from pygstc.logger import *
 
 class TestGstcListPropertiesMethods(unittest.TestCase):
 
     def test_list_properties(self):
         pipeline = "videotestsrc name=v0 ! identity name=i0 ! fakesink name=x0"
-        self.gstd_client = gstc.client(loglevel='DEBUG')
-        identity_properties = [{'name': 'name'}, {'name': 'parent'}, {'name': 'qos'}, {'name': 'sleep-time'}, {'name': 'error-after'}, {'name': 'drop-probability'}, {'name': 'drop-buffer-flags'}, {'name': 'datarate'}, {'name': 'silent'}, {'name': 'single-segment'}, {'name': 'last-message'}, {'name': 'dump'}, {'name': 'sync'}, {'name': 'check-imperfect-timestamp'}, {'name': 'check-imperfect-offset'}, {'name': 'signal-handoffs'}]
+        self.gstd_logger = CustomLogger("test_libgstc", loglevel='DEBUG')
+        self.gstd_client = GstdClient(logger=self.gstd_logger)
+        identity_properties = [{"name" : "name"}, {"name" : "parent"}, {"name" : "qos"}, {"name" : "sleep-time"}, {"name" : "error-after"}, {"name" : "drop-probability"}, {"name" : "drop-buffer-flags"}, {"name" : "datarate"}, {"name" : "silent"}, {"name" : "single-segment"}, {"name" : "last-message"}, {"name" : "dump"}, {"name" : "sync"}, {"name" : "ts-offset"}, {"name" : "check-imperfect-timestamp"}, {"name" : "check-imperfect-offset"}, {"name" : "signal-handoffs"}, {"name" : "drop-allocation"}]
         self.gstd_client.pipeline_create ("p0", pipeline)
         self.assertEqual(self.gstd_client.list_properties ("p0", "i0"), identity_properties)
         self.gstd_client.pipeline_delete ("p0")
+
 
 if __name__ == '__main__':
     unittest.main()

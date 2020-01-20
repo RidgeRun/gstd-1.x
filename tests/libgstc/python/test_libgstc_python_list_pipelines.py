@@ -32,13 +32,16 @@ OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
 import unittest
-import gstc
+
+from pygstc.gstc import *
+from pygstc.logger import *
 
 class TestGstcListPipelinesMethods(unittest.TestCase):
 
     def test_list_pipelines(self):
         pipeline = "videotestsrc name=v0 ! fakesink"
-        self.gstd_client = gstc.client(loglevel='DEBUG')
+        self.gstd_logger = CustomLogger("test_libgstc", loglevel='DEBUG')
+        self.gstd_client = GstdClient(logger=self.gstd_logger)
         initial_n_pipes = len(self.gstd_client.list_pipelines())
         self.gstd_client.create ("pipelines", "p0", pipeline)
         final_n_pipes = len(self.gstd_client.list_pipelines())
