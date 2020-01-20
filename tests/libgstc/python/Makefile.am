@@ -31,4 +31,4 @@ TESTS = \
 	test_libgstc_python_update.py \
 	test_libgstc_python_stop_gstd.py
 
-export PYTHONPATH = $PYTHONPATH:$(top_srcdir)/libgstc/python
+export PYTHONPATH = $PYTHONPATH:$(top_srcdir)/libgstc/pygstc
