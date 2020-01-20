@@ -35,15 +35,16 @@ from pygstc.gstc import *
 from pygstc.logger import *
 
 class TestGstcDebugResetMethods(unittest.TestCase):
+
     def test_debug_reset_true(self):
-        self.gstd_logger = CustomLogger("test_libgstc", loglevel='DEBUG')
+        self.gstd_logger = CustomLogger('test_libgstc', loglevel='DEBUG')
         self.gstd_client = GstdClient(logger=self.gstd_logger)
-        self.gstd_client.debug_reset("true")
+        self.gstd_client.debug_reset('true')
 
     def test_debug_reset_false(self):
-        self.gstd_logger = CustomLogger("test_libgstc", loglevel='DEBUG')
+        self.gstd_logger = CustomLogger('test_libgstc', loglevel='DEBUG')
         self.gstd_client = GstdClient(logger=self.gstd_logger)
-        self.gstd_client.debug_reset("false")
+        self.gstd_client.debug_reset('false')
 
 if __name__ == '__main__':
     unittest.main()

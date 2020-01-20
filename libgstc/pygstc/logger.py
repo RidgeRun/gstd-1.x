@@ -29,61 +29,67 @@
 # OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import logging
-import threading
 
 # Add color to logging output
+
 COLORS = {
     'WARNING': '33m',
     'INFO': '37m',
     'DEBUG': '34m',
     'CRITICAL': '35m',
-    'ERROR': '31m'
-}
+    'ERROR': '31m',
+    }
 
 """
 GSTC - ColorFormatter Class
 """
 
 class ColorFormatter(logging.Formatter):
+
     """
-    Custom implementation of logging Formater class
+    Custom implementation of logging Formater class.
 
     Methods
     ----------
     format(record)
         Formats the log and adds colors according to the log level
     """
+
     def __init__(self, msg):
         """
-        Initialize new ColorFormatter
+        Initialize new ColorFormatter.
 
         Parameters
         ----------
         msg : string
             Message to format
         """
+
         logging.Formatter.__init__(self, msg)
 
     def format(self, record):
         """
-        Formats the log and adds colors according to the log level
+        Formats the log and adds colors according to the log level.
 
         Parameters
         ----------
         record : string
             Message to format
         """
+
         if record.levelname in COLORS:
-            record.levelname = "\033[1;" + COLORS[record.levelname] + record.levelname + "\033[0m"
+            record.levelname = "\033[1;" + COLORS[record.levelname] \
+                + record.levelname + "\033[0m"
         return logging.Formatter.format(self, record)
 
 """
 GSTC - CustomLogger Class
 """
 
-class CustomLogger(object):
+class CustomLogger:
+
     """
-    Custom implementation of logging Logger class
+    Custom implementation of logging Logger class.
 
     Methods
     ----------
@@ -98,9 +104,15 @@ class CustomLogger(object):
     error(log)
         Logs an error level message
     """
-    def __init__(self, logname, logfile=None, loglevel='ERROR'):
+
+    def __init__(
+        self,
+        logname,
+        logfile=None,
+        loglevel='ERROR',
+        ):
         """
-        Initialize new CustomLogger
+        Initialize new CustomLogger.
 
         Parameters
         ----------
@@ -111,19 +123,31 @@ class CustomLogger(object):
         loglevel : string
             Level of the logger
         """
+
         # Init the logger
+
         self._logger = logging.getLogger(logname)
         self._logger.setLevel(logging.DEBUG)
+
         # Select to log in a file or console
+
         if logfile:
+
             # log in file
+
             self._log = logging.FileHandler(logfile)
         else:
+
             # log in console
+
             self._log = logging.StreamHandler()
+
         # Set log format with colors
-        self._log.setFormatter(ColorFormatter("%(asctime)22s  %(levelname)s    \t%(message)s"))
+
+        self._log.setFormatter(ColorFormatter('%(asctime)22s  %(levelname)s    \t%(message)s'))
+
         # Set log level
+
         numeric_level = getattr(logging, loglevel.upper(), None)
         if isinstance(numeric_level, int):
             self._log.setLevel(numeric_level)
@@ -135,72 +159,79 @@ class CustomLogger(object):
         """
         Destroy a CustomLogger
         """
+
         if self._log:
-            self._log .close()
-            self._logger.removeHandler(self._log )
-    
+            self._log.close()
+            self._logger.removeHandler(self._log)
+
     def warning(self, log):
         """
-        Logs a warning level message
+        Logs a warning level message.
 
         Parameters
         ----------
         log : string
             The message to log
         """
+
         return self._logger.warning(log)
-    
+
     def info(self, log):
         """
-        Logs an info level message
+        Logs an info level message.
 
         Parameters
         ----------
         log : string
             The message to log
         """
+
         return self._logger.info(log)
-    
+
     def debug(self, log):
         """
-        Logs a debug level message
+        Logs a debug level message.
 
         Parameters
         ----------
         log : string
             The message to log
         """
+
         return self._logger.debug(log)
-    
+
     def critical(self, log):
         """
-        Logs a critical level message
+        Logs a critical level message.
 
         Parameters
         ----------
         log : string
             The message to log
         """
+
         return self._logger.critical(log)
-    
+
     def error(self, log):
         """
-        Logs an error level message
+        Logs an error level message.
 
         Parameters
         ----------
         log : string
             The message to log
         """
+
         return self._logger.error(log)
 
 """
 GSTC - DummyLogger Class
 """
 
-class DummyLogger(object):
+class DummyLogger:
+
     """
-    Dummy implementation of the logging Logger that discards all logs
+    Dummy implementation of the logging Logger that discards all logs.
 
     Methods
     ----------
@@ -215,44 +246,52 @@ class DummyLogger(object):
     error(log)
         Discards the log
     """
+
     def __init__(self):
         """
-        Initialize DummyLogger
+        Initialize DummyLogger.
         """
+
         pass
 
     def __del__(self):
         """
-        Destroy DummyLogger
+        Destroy DummyLogger.
         """
+
         pass
-    
+
     def warning(self, log):
         """
-        Discards the log
+        Discards the log.
         """
+
         pass
-    
+
     def info(self, log):
         """
-        Discards the log
+        Discards the log.
         """
+
         pass
-    
+
     def debug(self, log):
         """
-        Discards the log
+        Discards the log.
         """
+
         pass
-    
+
     def critical(self, log):
         """
-        Discards the log
+        Discards the log.
         """
+
         pass
-    
+
     def error(self, log):
         """
-        Discards the log
+        Discards the log.
         """
+
         pass

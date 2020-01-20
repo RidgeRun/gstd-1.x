@@ -38,16 +38,16 @@ from pygstc.logger import *
 class TestGstcSignalTimeoutMethods(unittest.TestCase):
 
     def test_libgstc_python_signal_timeout(self):
-        pipeline = "videotestsrc ! identity name=identity ! fakesink"
-        self.gstd_logger = CustomLogger("test_libgstc", loglevel='DEBUG')
+        pipeline = 'videotestsrc ! identity name=identity ! fakesink'
+        self.gstd_logger = CustomLogger('test_libgstc', loglevel='DEBUG')
         self.gstd_client = GstdClient(logger=self.gstd_logger)
-        self.gstd_client.pipeline_create ("p0", pipeline)
-        self.gstd_client.signal_timeout("p0", "identity", "handoff", "1")
-        ret_con = self.gstd_client.signal_connect("p0", "identity", "handoff")
+        self.gstd_client.pipeline_create('p0', pipeline)
+        self.gstd_client.signal_timeout('p0', 'identity', 'handoff', '1')
+        ret_con = self.gstd_client.signal_connect('p0', 'identity',
+                'handoff')
         self.assertEqual(ret_con, None)
-        self.gstd_client.pipeline_stop ("p0")
-        self.gstd_client.pipeline_delete ("p0")
+        self.gstd_client.pipeline_stop('p0')
+        self.gstd_client.pipeline_delete('p0')
 
 if __name__ == '__main__':
     unittest.main()
-

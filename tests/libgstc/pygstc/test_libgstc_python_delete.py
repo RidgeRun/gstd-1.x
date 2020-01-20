@@ -37,17 +37,17 @@ from pygstc.logger import *
 class TestGstcDeleteMethods(unittest.TestCase):
 
     def test_delete_pipeline(self):
-        pipeline = "videotestsrc name=v0 ! fakesink"
-        self.gstd_logger = CustomLogger("test_libgstc", loglevel='DEBUG')
+        pipeline = 'videotestsrc name=v0 ! fakesink'
+        self.gstd_logger = CustomLogger('test_libgstc', loglevel='DEBUG')
         self.gstd_client = GstdClient(logger=self.gstd_logger)
-        ret = self.gstd_client.read("pipelines")
+        ret = self.gstd_client.read('pipelines')
         initial_n_pipes = len(ret['nodes'])
-        self.gstd_client.create ("pipelines", "p0", pipeline)
-        ret = self.gstd_client.read("pipelines")
+        self.gstd_client.create('pipelines', 'p0', pipeline)
+        ret = self.gstd_client.read('pipelines')
         final_n_pipes = len(ret['nodes'])
-        self.assertEqual(final_n_pipes, initial_n_pipes+1)
-        self.gstd_client.delete ("pipelines", "p0")
-        ret = self.gstd_client.read("pipelines")
+        self.assertEqual(final_n_pipes, initial_n_pipes + 1)
+        self.gstd_client.delete('pipelines', 'p0')
+        ret = self.gstd_client.read('pipelines')
         final_n_pipes = len(ret['nodes'])
         self.assertEqual(final_n_pipes, initial_n_pipes)
 

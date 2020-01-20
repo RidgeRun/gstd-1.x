@@ -35,15 +35,16 @@ from pygstc.gstc import *
 from pygstc.logger import *
 
 class TestGstcDebugEnableMethods(unittest.TestCase):
+
     def test_debug_enable_true(self):
-        self.gstd_logger = CustomLogger("test_libgstc", loglevel='DEBUG')
+        self.gstd_logger = CustomLogger('test_libgstc', loglevel='DEBUG')
         self.gstd_client = GstdClient(logger=self.gstd_logger)
-        self.gstd_client.debug_enable("true")
+        self.gstd_client.debug_enable('true')
 
     def test_debug_enable_false(self):
-        self.gstd_logger = CustomLogger("test_libgstc", loglevel='DEBUG')
+        self.gstd_logger = CustomLogger('test_libgstc', loglevel='DEBUG')
         self.gstd_client = GstdClient(logger=self.gstd_logger)
-        self.gstd_client.debug_enable("false")
+        self.gstd_client.debug_enable('false')
 
 if __name__ == '__main__':
     unittest.main()

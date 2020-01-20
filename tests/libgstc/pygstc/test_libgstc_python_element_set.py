@@ -37,14 +37,16 @@ from pygstc.logger import *
 class TestGstcElementSetMethods(unittest.TestCase):
 
     def test_element_set_property_value(self):
-        pipeline = "videotestsrc name=v0 pattern=ball ! fakesink"
-        self.gstd_logger = CustomLogger("test_libgstc", loglevel='DEBUG')
+        pipeline = 'videotestsrc name=v0 pattern=ball ! fakesink'
+        self.gstd_logger = CustomLogger('test_libgstc', loglevel='DEBUG')
         self.gstd_client = GstdClient(logger=self.gstd_logger)
-        self.gstd_client.pipeline_create ("p0", pipeline)
-        self.assertEqual(self.gstd_client.element_get ("p0", "v0", "pattern"), "Moving ball")
-        self.gstd_client.element_set ("p0", "v0", "pattern", "bar")
-        self.assertEqual(self.gstd_client.element_get ("p0", "v0", "pattern"), "Bar")
-        self.gstd_client.pipeline_delete ("p0")
+        self.gstd_client.pipeline_create('p0', pipeline)
+        self.assertEqual(self.gstd_client.element_get('p0', 'v0',
+                         'pattern'), 'Moving ball')
+        self.gstd_client.element_set('p0', 'v0', 'pattern', 'bar')
+        self.assertEqual(self.gstd_client.element_get('p0', 'v0',
+                         'pattern'), 'Bar')
+        self.gstd_client.pipeline_delete('p0')
 
 if __name__ == '__main__':
     unittest.main()

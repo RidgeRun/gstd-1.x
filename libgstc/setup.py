@@ -29,10 +29,7 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
 # OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from os import path
 from setuptools import setup, find_packages
-import setuptools.command.build_py
-import subprocess
 
 setup(
     name='pygstc',
@@ -43,18 +40,17 @@ setup(
     url='https://github.com/RidgeRun/gstd-1.x',
     author='RidgeRun',
     author_email='support@ridgerun.com',
-    packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests"]),
+    packages=find_packages(exclude=['*.tests', '*.tests.*', 'tests.*',
+                           'tests']),
     scripts=[],
-    classifiers=[
-        'Development Status :: 3 - Alpha',
-        'Programming Language :: Python :: 3.5',
-        'Programming Language :: Python :: 3.6',
-        'Programming Language :: Python :: 3.7',
-    ],
+    classifiers=['Development Status :: 3 - Alpha',
+                 'Programming Language :: Python :: 3.5',
+                 'Programming Language :: Python :: 3.6',
+                 'Programming Language :: Python :: 3.7'],
     python_requires='>=3.5',
     install_requires=[],
     command_options={},
     extras_require={},
-    package_data={},  
-    cmdclass={}
-)
+    package_data={},
+    cmdclass={},
+    )

@@ -31,13 +31,13 @@
 import json
 import select
 import socket
-import traceback
 
 """
 GSTC - Ipc Class
 """
 
-class Ipc(object):
+class Ipc:
+
     """
     Implementation of IPC that uses TCP sockets to communicate with GSTD
 
@@ -46,7 +46,15 @@ class Ipc(object):
     send(line, timeout)
         Creates a socket and sends a message through it
     """
-    def __init__(self, logger, ip, port, maxsize=None, terminator='\x00'.encode('utf-8')):
+
+    def __init__(
+        self,
+        logger,
+        ip,
+        port,
+        maxsize=None,
+        terminator='\x00'.encode('utf-8'),
+        ):
         """
         Initialize new Ipc
 
@@ -64,6 +72,7 @@ class Ipc(object):
         terminator : string
             Message terminator character
         """
+
         self._logger = logger
         self._ip = ip
         self._port = port
@@ -81,15 +90,23 @@ class Ipc(object):
             Message to send through the socket
         timeout : int
             Timeout in seconds to wait for a response. 0: infinite
+
+        Returns
+        -------
+        data : string
+            Decoded JSON string with the response
         """
-        self._logger.debug('GSTD socket sending line: %s' % (line))
+
+        self._logger.debug('GSTD socket sending line: %s' % line)
         try:
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             s.connect((self._ip, self._port))
             s.send(' '.join(line).encode('utf-8'))
             data = self._recvall(s, timeout)
             if not data:
-                return json.dumps({"error":"socket error", "description":"socket read error in " + str(' '.join(line)), "code": -1 })
+                return json.dumps({'error': 'socket error',
+                                  'description': 'socket read error in '
+                                   + str(' '.join(line)), 'code': -1})
             data = data.decode('utf-8')
             s.close()
         except socket.error:
@@ -108,7 +125,13 @@ class Ipc(object):
             The socket to poll
         timeout : int
             Timeout in seconds to wait for a response. 0: infinite
+
+        Returns
+        -------
+        buf : string
+            Raw socket response
         """
+
         buf = b''
         count = 0
         try:
@@ -116,7 +139,9 @@ class Ipc(object):
                 if self._maxsize:
                     if count >= self._maxsize:
                         break
-                #if timeout is set, perform non-blocking read
+
+                # if timeout is set, perform non-blocking read
+
                 if timeout:
                     sock.setblocking(0)
                     ready = select.select([sock], [], [], timeout)
@@ -132,7 +157,9 @@ class Ipc(object):
                         buf = None
                         break
                 if self._terminator in newbuf:
+
                     # this is the last item
+
                     buf += newbuf[:newbuf.find(self._terminator)]
                     break
                 else:

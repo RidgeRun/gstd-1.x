@@ -28,20 +28,22 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
 # OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import traceback
-
 """
 GSTC - GstdError Class
 """
 
 class GstdError(Exception):
-   """Raised when Gstd IPC fails"""
-   pass
+
+    """Raised when Gstd IPC fails"""
+
+    pass
 
 """
 GSTC - GstcError Class
 """
 
 class GstcError(Exception):
-   """Raised when the Gstd python client fails internally"""
-   pass
+
+    """Raised when the Gstd python client fails internally"""
+
+    pass
