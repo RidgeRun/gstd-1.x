@@ -32,15 +32,18 @@
 GSTC - GstdError Class
 """
 
+
 class GstdError(Exception):
 
     """Raised when Gstd IPC fails"""
 
     pass
 
+
 """
 GSTC - GstcError Class
 """
+
 
 class GstcError(Exception):
 

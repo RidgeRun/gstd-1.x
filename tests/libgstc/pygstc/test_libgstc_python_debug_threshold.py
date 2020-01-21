@@ -34,6 +34,7 @@ import unittest
 from pygstc.gstc import *
 from pygstc.logger import *
 
+
 class TestGstcDebugThresholdMethods(unittest.TestCase):
 
     def test_debug_threshold_none(self):
@@ -85,6 +86,7 @@ class TestGstcDebugThresholdMethods(unittest.TestCase):
         self.gstd_logger = CustomLogger('test_libgstc', loglevel='DEBUG')
         self.gstd_client = GstdClient(logger=self.gstd_logger)
         self.gstd_client.debug_threshold('9')
+
 
 if __name__ == '__main__':
     unittest.main()

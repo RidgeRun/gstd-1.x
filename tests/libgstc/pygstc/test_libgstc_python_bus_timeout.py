@@ -34,6 +34,7 @@ import unittest
 from pygstc.gstc import *
 from pygstc.logger import *
 
+
 class TestGstcBusTimeoutMethods(unittest.TestCase):
 
     def test_bus_timeout_eos(self):
@@ -61,6 +62,7 @@ class TestGstcBusTimeoutMethods(unittest.TestCase):
         self.assertEqual(ret, None)
         self.gstd_client.pipeline_stop('p0')
         self.gstd_client.pipeline_delete('p0')
+
 
 if __name__ == '__main__':
     unittest.main()

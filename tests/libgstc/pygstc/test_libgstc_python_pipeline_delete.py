@@ -34,6 +34,7 @@ import unittest
 from pygstc.gstc import *
 from pygstc.logger import *
 
+
 class TestGstcPipelineDeleteMethods(unittest.TestCase):
 
     def test_libgstc_python_pipeline_delete(self):
@@ -47,6 +48,7 @@ class TestGstcPipelineDeleteMethods(unittest.TestCase):
         ret_post = self.gstd_client.read('pipelines')
         len_post = len(ret_post['nodes'])
         self.assertTrue(len_prev > len_post)
+
 
 if __name__ == '__main__':
     unittest.main()

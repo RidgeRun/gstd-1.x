@@ -34,6 +34,7 @@ import unittest
 from pygstc.gstc import *
 from pygstc.logger import *
 
+
 class TestGstcEventFlushStopMethods(unittest.TestCase):
 
     def test_event_flush_stop(self):
@@ -45,6 +46,7 @@ class TestGstcEventFlushStopMethods(unittest.TestCase):
         self.gstd_client.event_flush_stop('p0')
         self.gstd_client.pipeline_stop('p0')
         self.gstd_client.pipeline_delete('p0')
+
 
 if __name__ == '__main__':
     unittest.main()

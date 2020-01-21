@@ -34,6 +34,7 @@ import unittest
 from pygstc.gstc import *
 from pygstc.logger import *
 
+
 class TestGstcEventSeekMethods(unittest.TestCase):
 
     def test_event_seek(self):
@@ -45,6 +46,7 @@ class TestGstcEventSeekMethods(unittest.TestCase):
         self.gstd_client.event_seek('p0')
         self.gstd_client.pipeline_stop('p0')
         self.gstd_client.pipeline_delete('p0')
+
 
 if __name__ == '__main__':
     unittest.main()

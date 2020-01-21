@@ -34,6 +34,7 @@ import unittest
 from pygstc.gstc import *
 from pygstc.logger import *
 
+
 class TestGstcListElementsMethods(unittest.TestCase):
 
     def test_list_elements(self):
@@ -44,6 +45,7 @@ class TestGstcListElementsMethods(unittest.TestCase):
         self.assertEqual(self.gstd_client.list_elements('p0'),
                          [{'name': 'x0'}, {'name': 'v0'}])
         self.gstd_client.pipeline_delete('p0')
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -34,6 +34,7 @@ import unittest
 from pygstc.gstc import *
 from pygstc.logger import *
 
+
 class TestGstcEventEosMethods(unittest.TestCase):
 
     def test_event_eos(self):
@@ -48,6 +49,7 @@ class TestGstcEventEosMethods(unittest.TestCase):
         self.assertEqual(ret['type'], 'eos')
         self.gstd_client.pipeline_stop('p0')
         self.gstd_client.pipeline_delete('p0')
+
 
 if __name__ == '__main__':
     unittest.main()

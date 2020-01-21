@@ -34,6 +34,7 @@ import unittest
 from pygstc.gstc import *
 from pygstc.logger import *
 
+
 class TestGstcListSignalsMethods(unittest.TestCase):
 
     def test_list_signals(self):
@@ -45,6 +46,7 @@ class TestGstcListSignalsMethods(unittest.TestCase):
         self.assertEqual(self.gstd_client.list_signals('p0', 'i0'),
                          [{'name': 'handoff'}])
         self.gstd_client.pipeline_delete('p0')
+
 
 if __name__ == '__main__':
     unittest.main()

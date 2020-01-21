@@ -34,6 +34,7 @@ import unittest
 from pygstc.gstc import *
 from pygstc.logger import *
 
+
 class TestGstcListPropertiesMethods(unittest.TestCase):
 
     def test_list_properties(self):
@@ -60,11 +61,12 @@ class TestGstcListPropertiesMethods(unittest.TestCase):
             {'name': 'check-imperfect-offset'},
             {'name': 'signal-handoffs'},
             {'name': 'drop-allocation'},
-            ]
+        ]
         self.gstd_client.pipeline_create('p0', pipeline)
         self.assertEqual(self.gstd_client.list_properties('p0', 'i0'),
                          identity_properties)
         self.gstd_client.pipeline_delete('p0')
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -34,6 +34,7 @@ import unittest
 from pygstc.gstc import *
 from pygstc.logger import *
 
+
 class TestGstcCreateMethods(unittest.TestCase):
 
     def test_create_pipeline(self):
@@ -47,6 +48,7 @@ class TestGstcCreateMethods(unittest.TestCase):
         final_n_pipes = len(ret['nodes'])
         self.assertEqual(final_n_pipes, initial_n_pipes + 1)
         self.gstd_client.pipeline_delete('p0')
+
 
 if __name__ == '__main__':
     unittest.main()

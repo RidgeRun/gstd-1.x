@@ -36,6 +36,7 @@ import unittest
 from pygstc.gstc import *
 from pygstc.logger import *
 
+
 class TestGstcInitMethods(unittest.TestCase):
 
     def setUp(self):
@@ -55,13 +56,14 @@ class TestGstcInitMethods(unittest.TestCase):
         num_lines_init = sum(1 for line in f)
         f.close()
         self.gstd_logger = CustomLogger('test_libgstc',
-                logfile='dummy.log', loglevel='DEBUG')
+                                        logfile='dummy.log', loglevel='DEBUG')
         self.gstd_client = GstdClient(logger=self.gstd_logger)
         f = open('dummy.log')
         num_lines_final = sum(1 for line in f)
         f.close()
         self.assertNotEqual(num_lines_init, num_lines_final)
         os.remove('dummy.log')
+
 
 if __name__ == '__main__':
     unittest.main()

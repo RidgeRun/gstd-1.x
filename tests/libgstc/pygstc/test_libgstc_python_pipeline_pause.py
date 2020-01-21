@@ -34,6 +34,7 @@ import unittest
 from pygstc.gstc import *
 from pygstc.logger import *
 
+
 class TestGstcPipelinePauseMethods(unittest.TestCase):
 
     def test_libgstc_python_pipeline_pause(self):
@@ -44,6 +45,7 @@ class TestGstcPipelinePauseMethods(unittest.TestCase):
         self.gstd_client.pipeline_play('p0')
         self.gstd_client.pipeline_pause('p0')
         self.gstd_client.pipeline_delete('p0')
+
 
 if __name__ == '__main__':
     unittest.main()

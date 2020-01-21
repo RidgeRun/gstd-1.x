@@ -36,6 +36,7 @@ import socket
 GSTC - Ipc Class
 """
 
+
 class Ipc:
 
     """
@@ -54,7 +55,7 @@ class Ipc:
         port,
         maxsize=None,
         terminator='\x00'.encode('utf-8'),
-        ):
+    ):
         """
         Initialize new Ipc
 
@@ -105,7 +106,7 @@ class Ipc:
             data = self._recvall(s, timeout)
             if not data:
                 return json.dumps({'error': 'socket error',
-                                  'description': 'socket read error in '
+                                   'description': 'socket read error in '
                                    + str(' '.join(line)), 'code': -1})
             data = data.decode('utf-8')
             s.close()

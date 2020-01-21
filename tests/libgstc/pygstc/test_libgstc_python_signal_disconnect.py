@@ -39,11 +39,13 @@ import os
 
 ret_val = ''
 
+
 def signal_connect_test():
     global ret_val
     gstd_logger = CustomLogger('test_libgstc', loglevel='DEBUG')
     gstd_client = GstdClient(logger=gstd_logger)
     ret_val = gstd_client.signal_connect('p0', 'identity', 'handoff')
+
 
 class TestGstcSignalDisconnectMethods(unittest.TestCase):
 
@@ -61,6 +63,7 @@ class TestGstcSignalDisconnectMethods(unittest.TestCase):
         self.assertEqual(ret_val, None)
         self.gstd_client.pipeline_stop('p0')
         self.gstd_client.pipeline_delete('p0')
+
 
 if __name__ == '__main__':
     unittest.main()

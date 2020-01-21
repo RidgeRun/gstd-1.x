@@ -38,11 +38,12 @@ COLORS = {
     'DEBUG': '34m',
     'CRITICAL': '35m',
     'ERROR': '31m',
-    }
+}
 
 """
 GSTC - ColorFormatter Class
 """
+
 
 class ColorFormatter(logging.Formatter):
 
@@ -82,9 +83,11 @@ class ColorFormatter(logging.Formatter):
                 + record.levelname + "\033[0m"
         return logging.Formatter.format(self, record)
 
+
 """
 GSTC - CustomLogger Class
 """
+
 
 class CustomLogger:
 
@@ -110,7 +113,7 @@ class CustomLogger:
         logname,
         logfile=None,
         loglevel='ERROR',
-        ):
+    ):
         """
         Initialize new CustomLogger.
 
@@ -144,7 +147,8 @@ class CustomLogger:
 
         # Set log format with colors
 
-        self._log.setFormatter(ColorFormatter('%(asctime)22s  %(levelname)s    \t%(message)s'))
+        self._log.setFormatter(ColorFormatter(
+            '%(asctime)22s  %(levelname)s    \t%(message)s'))
 
         # Set log level
 
@@ -224,9 +228,11 @@ class CustomLogger:
 
         return self._logger.error(log)
 
+
 """
 GSTC - DummyLogger Class
 """
+
 
 class DummyLogger:
 
