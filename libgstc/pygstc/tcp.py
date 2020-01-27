@@ -45,7 +45,7 @@ class Ipc:
     Methods
     ----------
     send(line, timeout)
-        Creates a socket and sends a message through it
+        Create a socket and sends a message through it
     """
 
     def __init__(
@@ -83,7 +83,7 @@ class Ipc:
 
     def send(self, line, timeout=0):
         """
-        Creates a socket and sends a message through it
+        Create a socket and sends a message through it
 
         Parameters
         ----------
@@ -118,7 +118,7 @@ class Ipc:
 
     def _recvall(self, sock, timeout):
         """
-        Waits for a response message from the socket
+        Wait for a response message from the socket
 
         Parameters
         ----------

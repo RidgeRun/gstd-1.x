@@ -60,7 +60,7 @@ class GstdClient:
         Apply a timeout for the bus polling. -1: forever, 0: return
         immediately, n: wait n nanoseconds
     create(uri, property, value)
-        Creates a resource at the given URI
+        Create a resource at the given URI
     debug_color(colors)
         Enable/Disable colors in the debug logging
     debug_enable(enable)
@@ -70,11 +70,11 @@ class GstdClient:
     debug_threshold(threshold)
         The debug filter to apply (as you would use with gst-launch)
     delete(uri, name)
-        Deletes the resource held at the given URI with the given name
+        Delete the resource held at the given URI with the given name
     element_get(pipe_name, element, prop)
         Queries a property in an element of a given pipeline
     element_set(pipe_name, element, prop, value)
-        Sets a property in an element of a given pipeline
+        Set a property in an element of a given pipeline
     event_eos(pipe_name)
         Send an end-of-stream event
     event_flush_start(pipe_name)
@@ -102,17 +102,17 @@ class GstdClient:
     list_signals(pipe_name, element)
         List the signals of an element in a given pipeline
     pipeline_create(pipe_name,  pipe_desc)
-        Creates a new pipeline based on the name and description
+        Create a new pipeline based on the name and description
     pipeline_delete(pipe_name)
-        Deletes the pipeline with the given name
+        Delete the pipeline with the given name
     pipeline_pause(pipe_name)
-        Sets the pipeline to paused
+        Set the pipeline to paused
     pipeline_play(pipe_name)
-        Sets the pipeline to playing
+        Set the pipeline to playing
     pipeline_stop(pipe_name)
-        Sets the pipeline to null
+        Set the pipeline to null
     read(uri)
-        Deletes the resource held at the given URI with the given name
+        Read the resource held at the given URI with the given name
     signal_connect(pipe_name, element, signal)
         Connect to signal and wait
     signal_disconnect(pipe_name, element, signal)
@@ -121,7 +121,7 @@ class GstdClient:
         Apply a timeout for the signal waiting. -1: forever, 0: return
         immediately, n: wait n microseconds
     update(uri, value)
-        Updates the resource at the given URI
+        Update the resource at the given URI
     """
 
     def __init__(
@@ -281,7 +281,7 @@ class GstdClient:
         value,
     ):
         """
-        Creates a resource at the given URI.
+        Create a resource at the given URI.
 
         Parameters
         ----------
@@ -361,7 +361,7 @@ class GstdClient:
 
     def delete(self, uri, name):
         """
-        Deletes the resource held at the given URI with the given name.
+        Delete the resource held at the given URI with the given name.
 
         Parameters
         ----------
@@ -413,7 +413,7 @@ class GstdClient:
         value,
     ):
         """
-        Sets a property in an element of a given pipeline.
+        Set a property in an element of a given pipeline.
 
         Parameters
         ----------
@@ -601,7 +601,7 @@ class GstdClient:
 
     def pipeline_create(self, pipe_name, pipe_desc):
         """
-        Creates a new pipeline based on the name and description.
+        Create a new pipeline based on the name and description.
 
         Parameters
         ----------
@@ -617,7 +617,7 @@ class GstdClient:
 
     def pipeline_delete(self, pipe_name):
         """
-        Deletes the pipeline with the given name.
+        Delete the pipeline with the given name.
 
         Parameters
         ----------
@@ -630,7 +630,7 @@ class GstdClient:
 
     def pipeline_pause(self, pipe_name):
         """
-        Sets the pipeline to paused.
+        Set the pipeline to paused.
 
         Parameters
         ----------
@@ -643,7 +643,7 @@ class GstdClient:
 
     def pipeline_play(self, pipe_name):
         """
-        Sets the pipeline to playing.
+        Set the pipeline to playing.
 
         Parameters
         ----------
@@ -656,7 +656,7 @@ class GstdClient:
 
     def pipeline_stop(self, pipe_name):
         """
-        Sets the pipeline to null.
+        Set the pipeline to null.
 
         Parameters
         ----------
@@ -669,7 +669,7 @@ class GstdClient:
 
     def read(self, uri):
         """
-        Deletes the resource held at the given URI with the given name.
+        Read the resource held at the given URI with the given name.
 
         Parameters
         ----------
@@ -773,7 +773,7 @@ class GstdClient:
 
     def update(self, uri, value):
         """
-        Updates the resource at the given URI.
+        Update the resource at the given URI.
 
         Parameters
         ----------
