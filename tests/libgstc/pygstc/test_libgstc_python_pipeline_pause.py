@@ -44,6 +44,8 @@ class TestGstcPipelinePauseMethods(unittest.TestCase):
         self.gstd_client.pipeline_create('p0', pipeline)
         self.gstd_client.pipeline_play('p0')
         self.gstd_client.pipeline_pause('p0')
+        self.assertEqual(self.gstd_client.read(
+            'pipelines/p0/state')['value'], 'PAUSED')
         self.gstd_client.pipeline_delete('p0')
 
 
