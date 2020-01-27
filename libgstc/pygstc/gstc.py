@@ -1,7 +1,7 @@
 # GStreamer Daemon - gst-launch on steroids
 # Python client library abstracting gstd interprocess communication
 
-# Copyright (c) 2015-2019 RidgeRun, LLC (http://www.ridgerun.com)
+# Copyright (c) 2015-2020 RidgeRun, LLC (http://www.ridgerun.com)
 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -260,15 +260,14 @@ class GstdClient:
 
     def bus_timeout(self, pipe_name, timeout):
         """
-        Apply a timeout for the bus polling. -1: forever, 0: return
-        immediately, n: wait n nanoseconds.
-
+        Apply a timeout for the bus polling.
         Parameters
         ----------
         pipe_name: string
             The name of the pipeline
         timeout: string
-            Timeout in nanosecons. -1: forever. 0: return
+            Timeout in nanosecons. -1: forever, 0: return
+            immediately, n: wait n nanoseconds.
         """
 
         self._logger.info('Setting bus read timeout of pipeline %s to %s'
@@ -489,19 +488,26 @@ class GstdClient:
         end='-1',
     ):
         """
-        Perform a seek in the given pipeline.
+        Perform a seek in the given pipeline
 
         Parameters
         ----------
         pipe_name: string
             The name of the pipeline
         rate: string
+            The new playback rate. Default value: '1.0'.
         format: string
+            The format of the seek values. Default value: '3'.
         flags: string
+            The optional seek flags. Default value: '1'.
         start_type: string
+            The type and flags for the new start position. Default value: '1'.
         start: string
+            The value of the new start position. Default value: '0'.
         end_type: string
+            The type and flags for the new end position. Default value: '1'.
         end: string
+            The value of the new end position. Default value: '-1'.
         """
 
         self._logger.info('Performing event seek in pipeline %s'
