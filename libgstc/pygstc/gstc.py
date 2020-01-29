@@ -28,6 +28,7 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
 # OF THE POSSIBILITY OF SUCH DAMAGE.
 
+import inspect
 import json
 import psutil
 import traceback
@@ -222,6 +223,41 @@ class GstdClient:
                 self._logger.error('GStreamer Daemon is not running')
                 return False
 
+    def _check_parameters(self, parameter_list, type_list):
+        """
+        Checks that every parameter in the parameter list corresponds to the
+        type in type_list. Then returns an array with the string conversion of
+        each value.
+
+        Parameters
+        ----------
+        parameter_list: list
+            The parameters to check and convert
+        type_list: list
+            List of types for each parameter
+
+        Returns
+        -------
+        parameter_string_list : list
+            List of string conversions of each parameter
+        """
+        parameter_string_list = []
+        for i, parameter in enumerate(parameter_list):
+            if not isinstance(parameter, type_list[i]):
+                raise GstcError(
+                    "%s error: Invalid type for parameter %i: %s. Function expects %s" %
+                    (inspect.stack()[1].function, i, parameter, type_list[i]))
+            if type_list[i] == str:
+                parameter_string_list += [parameter]
+            elif type_list[i] == bool:
+                if parameter:
+                    parameter_string_list += ['true']
+                else:
+                    parameter_string_list += ['false']
+            else:
+                parameter_string_list += [str(parameter)]
+        return parameter_string_list
+
     def bus_filter(self, pipe_name, filter):
         """
         Select the types of message to be read from the bus. Separate
@@ -237,7 +273,8 @@ class GstdClient:
 
         self._logger.info('Setting bus read filter of pipeline %s to %s'
                           % (pipe_name, filter))
-        self._send_cmd_line(['bus_filter', pipe_name, filter])
+        parameters = self._check_parameters([pipe_name, filter], [str, str])
+        self._send_cmd_line(['bus_filter'] + parameters)
 
     def bus_read(self, pipe_name):
         """
