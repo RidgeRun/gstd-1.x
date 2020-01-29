@@ -52,6 +52,8 @@ class GstdClient:
 
     Methods
     ----------
+    ping_gstd ()
+        Test if GSTD responds in the configured address and port
     bus_filter(pipe_name, filter)
         Select the types of message to be read from the bus. Separate
         with a '+', i.e.: eos+warning+error
@@ -154,9 +156,9 @@ class GstdClient:
         self._port = port
         self._logger.info('Starting GStreamer Daemon Client with ip=%s port=%d'
                           % (self._ip, self._port))
-        self._test_gstd()
         self._ipc = Ipc(self._logger, self._ip, self._port)
         self._timeout = timeout
+        self.ping_gstd()
 
     def _check_parameters(self, parameter_list, type_list):
         """
@@ -230,33 +232,28 @@ class GstdClient:
             raise GstdError(result['description'])
         return result
 
-    def _test_gstd(self):
+    def ping_gstd(self):
         """
-        Test if GSTD is running (only works for localhost)
+        Test if GSTD responds in the configured address and port
 
         Returns
         -------
         result : bool
-            Whether or not GSTD is running in localhost
+            Whether or not GSTD responds
         """
-
-        if self._ip not in ['localhost', '127.0.0.1']:
-
-            # bypass process check, we don't know how to start gstd remotely
-
-            self._logger.warning(
-                'Assuming GSTD is running in the remote host at %s' %
-                self._ip)
-            return True
-        for proc in psutil.process_iter():
-
-            # check whether the process name matches
-
-            if proc.name() == GSTD_PROCNAME:
-                return True
+        self._logger.info('Sending ping to GStreamer Daemon')
+        try:
+            jresult = self._ipc.send(['list_pipelines'], timeout=1)
+            result = json.loads(jresult)
+            if 'description' in result:
+                if result['description'] != "Success":
+                    raise Exception
             else:
-                self._logger.error('GStreamer Daemon is not running')
-                return False
+                raise Exception
+        except Exception as exception:
+            self._logger.error('GStreamer Daemon failed to respond')
+            return False
+        return True
 
     def bus_filter(self, pipe_name, filter):
         """
