@@ -40,12 +40,12 @@ class TestGstcDebugColorMethods(unittest.TestCase):
     def test_debug_color_true(self):
         self.gstd_logger = CustomLogger('test_libgstc', loglevel='DEBUG')
         self.gstd_client = GstdClient(logger=self.gstd_logger)
-        self.gstd_client.debug_color('true')
+        self.gstd_client.debug_color(True)
 
     def test_debug_color_false(self):
         self.gstd_logger = CustomLogger('test_libgstc', loglevel='DEBUG')
         self.gstd_client = GstdClient(logger=self.gstd_logger)
-        self.gstd_client.debug_color('false')
+        self.gstd_client.debug_color(False)
 
 
 if __name__ == '__main__':

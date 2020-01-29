@@ -158,6 +158,41 @@ class GstdClient:
         self._ipc = Ipc(self._logger, self._ip, self._port)
         self._timeout = timeout
 
+    def _check_parameters(self, parameter_list, type_list):
+        """
+        Checks that every parameter in the parameter list corresponds to the
+        type in type_list. Then returns an array with the string conversion of
+        each value.
+
+        Parameters
+        ----------
+        parameter_list: list
+            The parameters to check and convert
+        type_list: list
+            List of types for each parameter
+
+        Returns
+        -------
+        parameter_string_list : list
+            List of string conversions of each parameter
+        """
+        parameter_string_list = []
+        for i, parameter in enumerate(parameter_list):
+            if not isinstance(parameter, type_list[i]):
+                raise GstcError(
+                    "%s TypeError: parameter %i: expected %s, '%s found" %
+                    (inspect.stack()[1].function, i, type_list[i], type(parameter)))
+            if type_list[i] == str:
+                parameter_string_list += [parameter]
+            elif type_list[i] == bool:
+                if parameter:
+                    parameter_string_list += ['true']
+                else:
+                    parameter_string_list += ['false']
+            else:
+                parameter_string_list += [str(parameter)]
+        return parameter_string_list
+
     def _send_cmd_line(self, cmd_line):
         """
         Send a command using an abstract IPC and wait for the response.
@@ -223,41 +258,6 @@ class GstdClient:
                 self._logger.error('GStreamer Daemon is not running')
                 return False
 
-    def _check_parameters(self, parameter_list, type_list):
-        """
-        Checks that every parameter in the parameter list corresponds to the
-        type in type_list. Then returns an array with the string conversion of
-        each value.
-
-        Parameters
-        ----------
-        parameter_list: list
-            The parameters to check and convert
-        type_list: list
-            List of types for each parameter
-
-        Returns
-        -------
-        parameter_string_list : list
-            List of string conversions of each parameter
-        """
-        parameter_string_list = []
-        for i, parameter in enumerate(parameter_list):
-            if not isinstance(parameter, type_list[i]):
-                raise GstcError(
-                    "%s error: Invalid type for parameter %i: %s. Function expects %s" %
-                    (inspect.stack()[1].function, i, parameter, type_list[i]))
-            if type_list[i] == str:
-                parameter_string_list += [parameter]
-            elif type_list[i] == bool:
-                if parameter:
-                    parameter_string_list += ['true']
-                else:
-                    parameter_string_list += ['false']
-            else:
-                parameter_string_list += [str(parameter)]
-        return parameter_string_list
-
     def bus_filter(self, pipe_name, filter):
         """
         Select the types of message to be read from the bus. Separate
@@ -292,7 +292,8 @@ class GstdClient:
         """
 
         self._logger.info('Reading bus of pipeline %s' % pipe_name)
-        result = self._send_cmd_line(['bus_read', pipe_name])
+        parameters = self._check_parameters([pipe_name], [str])
+        result = self._send_cmd_line(['bus_read'] + parameters)
         return result['response']
 
     def bus_timeout(self, pipe_name, timeout):
@@ -302,14 +303,15 @@ class GstdClient:
         ----------
         pipe_name: string
             The name of the pipeline
-        timeout: string
+        timeout: int
             Timeout in nanosecons. -1: forever, 0: return
             immediately, n: wait n nanoseconds.
         """
 
         self._logger.info('Setting bus read timeout of pipeline %s to %s'
                           % (pipe_name, timeout))
-        self._send_cmd_line(['bus_timeout', pipe_name, timeout])
+        parameters = self._check_parameters([pipe_name, timeout], [str, int])
+        self._send_cmd_line(['bus_timeout'] + parameters)
 
     def create(
         self,
@@ -332,7 +334,9 @@ class GstdClient:
 
         self._logger.info('Creating property %s in uri %s with value "%s"'
                           % (property, uri, value))
-        self._send_cmd_line(['create', uri, property, value])
+        parameters = self._check_parameters(
+            [uri, property, value], [str, str, str])
+        self._send_cmd_line(['create'] + parameters)
 
     def debug_color(self, colors):
         """
@@ -340,12 +344,13 @@ class GstdClient:
 
         Parameters
         ----------
-        colors: string
-            Enable color in the debug: 'true' or 'false'
+        colors: boolean
+            Enable color in the debug
         """
 
         self._logger.info('Enabling/Disabling GStreamer debug colors')
-        self._send_cmd_line(['debug_color', colors])
+        parameters = self._check_parameters([colors], [bool])
+        self._send_cmd_line(['debug_color'] + parameters)
 
     def debug_enable(self, enable):
         """
@@ -353,12 +358,13 @@ class GstdClient:
 
         Parameters
         ----------
-        enable: string
-            Enable GStreamer debug: 'true' or 'false'
+        enable: boolean
+            Enable GStreamer debug
         """
 
         self._logger.info('Enabling/Disabling GStreamer debug')
-        self._send_cmd_line(['debug_enable', enable])
+        parameters = self._check_parameters([enable], [bool])
+        self._send_cmd_line(['debug_enable'] + parameters)
 
     def debug_reset(self, reset):
         """
@@ -366,12 +372,13 @@ class GstdClient:
 
         Parameters
         ----------
-        reset: string
-            Reset the debug threshold: 'true' or 'false'
+        reset: boolean
+            Reset the debug threshold
         """
 
         self._logger.info('Enabling/Disabling GStreamer debug threshold reset')
-        self._send_cmd_line(['debug_reset', reset])
+        parameters = self._check_parameters([reset], [bool])
+        self._send_cmd_line(['debug_reset'] + parameters)
 
     def debug_threshold(self, threshold):
         """
@@ -379,7 +386,7 @@ class GstdClient:
 
         Parameters
         ----------
-        threshold: string
+        threshold: int
             Debug threshold:
             0   none    No debug information is output.
             1   ERROR   Logs all fatal errors.
@@ -394,7 +401,8 @@ class GstdClient:
 
         self._logger.info('Setting GStreamer debug threshold to %s'
                           % threshold)
-        self._send_cmd_line(['debug_threshold', threshold])
+        parameters = self._check_parameters([threshold], [int])
+        self._send_cmd_line(['debug_threshold'] + parameters)
 
     def delete(self, uri, name):
         """
@@ -409,7 +417,8 @@ class GstdClient:
         """
 
         self._logger.info('Deleting name %s at uri "%s"' % (name, uri))
-        self._send_cmd_line(['delete', uri, name])
+        parameters = self._check_parameters([uri, name], [str, str])
+        self._send_cmd_line(['delete'] + parameters)
 
     def element_get(
         self,
@@ -438,8 +447,9 @@ class GstdClient:
         self._logger.info(
             'Getting value of element %s %s property in pipeline %s' %
             (element, prop, pipe_name))
-        result = self._send_cmd_line(cmd_line=['element_get',
-                                               pipe_name, element, prop])
+        parameters = self._check_parameters(
+            [pipe_name, element, prop], [str, str, str])
+        result = self._send_cmd_line(['element_get'] + parameters)
         return result['response']['value']
 
     def element_set(
@@ -466,8 +476,9 @@ class GstdClient:
 
         self._logger.info('Setting element %s %s property in pipeline %s to:%s'
                           % (element, prop, pipe_name, value))
-        self._send_cmd_line(['element_set', pipe_name, element, prop,
-                             value])
+        parameters = self._check_parameters(
+            [pipe_name, element, prop, value], [str, str, str, str])
+        self._send_cmd_line(['element_set'] + parameters)
 
     def event_eos(self, pipe_name):
         """
@@ -481,7 +492,8 @@ class GstdClient:
 
         self._logger.info('Sending end-of-stream event to pipeline %s'
                           % pipe_name)
-        self._send_cmd_line(['event_eos', pipe_name])
+        parameters = self._check_parameters([pipe_name], [str])
+        self._send_cmd_line(['event_eos'] + parameters)
 
     def event_flush_start(self, pipe_name):
         """
@@ -495,9 +507,10 @@ class GstdClient:
 
         self._logger.info('Putting pipeline %s in flushing mode'
                           % pipe_name)
-        self._send_cmd_line(['event_flush_start', pipe_name])
+        parameters = self._check_parameters([pipe_name], [str])
+        self._send_cmd_line(['event_flush_start'] + parameters)
 
-    def event_flush_stop(self, pipe_name, reset='true'):
+    def event_flush_stop(self, pipe_name, reset=True):
         """
         Take the pipeline out from flushing mode.
 
@@ -505,24 +518,25 @@ class GstdClient:
         ----------
         pipe_name: string
             The name of the pipeline
-        reset: string
-            Reset the event flush: 'true' or 'false'
+        reset: boolean
+            Reset the event flush
         """
 
         self._logger.info('Taking pipeline %s out of flushing mode'
                           % pipe_name)
-        self._send_cmd_line(['event_flush_stop', pipe_name, reset])
+        parameters = self._check_parameters([pipe_name, reset], [str, bool])
+        self._send_cmd_line(['event_flush_stop'] + parameters)
 
     def event_seek(
         self,
         pipe_name,
-        rate='1.0',
-        format='3',
-        flags='1',
-        start_type='1',
-        start='0',
-        end_type='1',
-        end='-1',
+        rate=1.0,
+        format=3,
+        flags=1,
+        start_type=1,
+        start=0,
+        end_type=1,
+        end=-1,
     ):
         """
         Perform a seek in the given pipeline
@@ -531,35 +545,29 @@ class GstdClient:
         ----------
         pipe_name: string
             The name of the pipeline
-        rate: string
-            The new playback rate. Default value: '1.0'.
-        format: string
-            The format of the seek values. Default value: '3'.
-        flags: string
-            The optional seek flags. Default value: '1'.
-        start_type: string
-            The type and flags for the new start position. Default value: '1'.
-        start: string
-            The value of the new start position. Default value: '0'.
-        end_type: string
-            The type and flags for the new end position. Default value: '1'.
-        end: string
-            The value of the new end position. Default value: '-1'.
+        rate: float
+            The new playback rate. Default value: 1.0.
+        format: int
+            The format of the seek values. Default value: 3.
+        flags: int
+            The optional seek flags. Default value: 1.
+        start_type: int
+            The type and flags for the new start position. Default value: 1.
+        start: int
+            The value of the new start position. Default value: 0.
+        end_type: int
+            The type and flags for the new end position. Default value: 1.
+        end: int
+            The value of the new end position. Default value: -1.
         """
 
         self._logger.info('Performing event seek in pipeline %s'
                           % pipe_name)
-        self._send_cmd_line([
-            'event_seek',
-            pipe_name,
-            rate,
-            format,
-            flags,
-            start_type,
-            start,
-            end_type,
-            end,
-        ])
+        parameters = self._check_parameters(
+            [
+                pipe_name, rate, format, flags, start_type, start, end_type, end], [
+                str, float, int, int, int, int, int, int])
+        self._send_cmd_line(['event_seek'] + parameters)
 
     def list_elements(self, pipe_name):
         """
@@ -577,8 +585,8 @@ class GstdClient:
         """
 
         self._logger.info('Listing elements of pipeline %s' % pipe_name)
-        result = self._send_cmd_line(cmd_line=['list_elements',
-                                               pipe_name])
+        parameters = self._check_parameters([pipe_name], [str])
+        result = self._send_cmd_line(['list_elements'] + parameters)
         return result['response']['nodes']
 
     def list_pipelines(self):
@@ -587,7 +595,7 @@ class GstdClient:
         """
 
         self._logger.info('Listing pipelines')
-        result = self._send_cmd_line(cmd_line=['list_pipelines'])
+        result = self._send_cmd_line(['list_pipelines'])
         return result['response']['nodes']
 
     def list_properties(self, pipe_name, element):
@@ -609,8 +617,8 @@ class GstdClient:
 
         self._logger.info('Listing properties of  element %s from pipeline %s'
                           % (element, pipe_name))
-        result = self._send_cmd_line(['list_properties', pipe_name,
-                                      element])
+        parameters = self._check_parameters([pipe_name, element], [str, str])
+        result = self._send_cmd_line(['list_properties'] + parameters)
         return result['response']['nodes']
 
     def list_signals(self, pipe_name, element):
@@ -632,8 +640,8 @@ class GstdClient:
 
         self._logger.info('Listing signals of  element %s from pipeline %s'
                           % (element, pipe_name))
-        result = self._send_cmd_line(['list_signals', pipe_name,
-                                      element])
+        parameters = self._check_parameters([pipe_name, element], [str, str])
+        result = self._send_cmd_line(['list_signals'] + parameters)
         return result['response']['nodes']
 
     def pipeline_create(self, pipe_name, pipe_desc):
@@ -650,7 +658,8 @@ class GstdClient:
 
         self._logger.info('Creating pipeline %s with description "%s"'
                           % (pipe_name, pipe_desc))
-        self._send_cmd_line(['pipeline_create', pipe_name, pipe_desc])
+        parameters = self._check_parameters([pipe_name, pipe_desc], [str, str])
+        self._send_cmd_line(['pipeline_create'] + parameters)
 
     def pipeline_delete(self, pipe_name):
         """
@@ -663,7 +672,8 @@ class GstdClient:
         """
 
         self._logger.info('Deleting pipeline %s' % pipe_name)
-        self._send_cmd_line(['pipeline_delete', pipe_name])
+        parameters = self._check_parameters([pipe_name], [str])
+        self._send_cmd_line(['pipeline_delete'] + parameters)
 
     def pipeline_pause(self, pipe_name):
         """
@@ -676,7 +686,8 @@ class GstdClient:
         """
 
         self._logger.info('Pausing pipeline %s' % pipe_name)
-        self._send_cmd_line(['pipeline_pause', pipe_name])
+        parameters = self._check_parameters([pipe_name], [str])
+        self._send_cmd_line(['pipeline_pause'] + parameters)
 
     def pipeline_play(self, pipe_name):
         """
@@ -689,7 +700,8 @@ class GstdClient:
         """
 
         self._logger.info('Playing pipeline %s' % pipe_name)
-        self._send_cmd_line(['pipeline_play', pipe_name])
+        parameters = self._check_parameters([pipe_name], [str])
+        self._send_cmd_line(['pipeline_play'] + parameters)
 
     def pipeline_stop(self, pipe_name):
         """
@@ -702,7 +714,8 @@ class GstdClient:
         """
 
         self._logger.info('Stoping pipeline %s' % pipe_name)
-        self._send_cmd_line(['pipeline_stop', pipe_name])
+        parameters = self._check_parameters([pipe_name], [str])
+        self._send_cmd_line(['pipeline_stop'] + parameters)
 
     def read(self, uri):
         """
@@ -720,7 +733,8 @@ class GstdClient:
         """
 
         self._logger.info('Reading uri %s' % uri)
-        result = self._send_cmd_line(['read', uri])
+        parameters = self._check_parameters([uri], [str])
+        result = self._send_cmd_line(['read'] + parameters)
         return result['response']
 
     def signal_connect(
@@ -750,8 +764,9 @@ class GstdClient:
         self._logger.info(
             'Connecting to signal %s of element %s from pipeline %s' %
             (signal, element, pipe_name))
-        result = self._send_cmd_line(['signal_connect', pipe_name,
-                                      element, signal])
+        parameters = self._check_parameters(
+            [pipe_name, element, signal], [str, str, str])
+        result = self._send_cmd_line(['signal_connect'] + parameters)
         return result['response']
 
     def signal_disconnect(
@@ -776,8 +791,9 @@ class GstdClient:
         self._logger.info(
             'Disonnecting from signal %s of element %s from pipeline %s' %
             (signal, element, pipe_name))
-        self._send_cmd_line(['signal_disconnect', pipe_name, element,
-                             signal])
+        parameters = self._check_parameters(
+            [pipe_name, element, signal], [str, str, str])
+        self._send_cmd_line(['signal_disconnect'] + parameters)
 
     def signal_timeout(
         self,
@@ -787,8 +803,7 @@ class GstdClient:
         timeout,
     ):
         """
-        Apply a timeout for the signal waiting. -1: forever, 0: return
-        immediately, n: wait n microseconds.
+        Apply a timeout for the signal waiting.
 
         Parameters
         ----------
@@ -798,15 +813,17 @@ class GstdClient:
             The name of the element
         signal: string
             The name of the signal
-        timeout: string
-            Timeout in nanosecons. -1: forever. 0: return
+        timeout: int
+            Timeout in nanosecons.  -1: forever, 0: return
+            immediately, n: wait n microseconds.
         """
 
         self._logger.info(
             'Connecting to signal %s of element %s from pipeline %s with timeout %s' %
             (signal, element, pipe_name, timeout))
-        self._send_cmd_line(['signal_timeout', pipe_name, element,
-                             signal, timeout])
+        parameters = self._check_parameters(
+            [pipe_name, element, signal, timeout], [str, str, str, int])
+        self._send_cmd_line(['signal_timeout'] + parameters)
 
     def update(self, uri, value):
         """
@@ -822,4 +839,5 @@ class GstdClient:
 
         self._logger.info('Updating uri %s with value "%s"' % (uri,
                                                                value))
-        self._send_cmd_line(['update', uri, value])
+        parameters = self._check_parameters([uri, value], [str, str])
+        self._send_cmd_line(['update'] + parameters)

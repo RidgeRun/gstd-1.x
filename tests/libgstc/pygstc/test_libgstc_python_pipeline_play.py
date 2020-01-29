@@ -29,6 +29,7 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
 # OF THE POSSIBILITY OF SUCH DAMAGE.
 
+import time
 import unittest
 
 from pygstc.gstc import *
@@ -43,8 +44,9 @@ class TestGstcPipelinePlayMethods(unittest.TestCase):
         self.gstd_client = GstdClient(logger=self.gstd_logger)
         self.gstd_client.pipeline_create('p0', pipeline)
         self.gstd_client.pipeline_play('p0')
+        time.sleep(0.1)
         self.assertIn(self.gstd_client.read('pipelines/p0/state')
-                      ['value'], ['READY', 'PLAYING'])
+                      ['value'], ['PLAYING'])
         self.gstd_client.pipeline_stop('p0')
         self.gstd_client.pipeline_delete('p0')
 

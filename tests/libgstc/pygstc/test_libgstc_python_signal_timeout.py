@@ -43,7 +43,7 @@ class TestGstcSignalTimeoutMethods(unittest.TestCase):
         self.gstd_logger = CustomLogger('test_libgstc', loglevel='DEBUG')
         self.gstd_client = GstdClient(logger=self.gstd_logger)
         self.gstd_client.pipeline_create('p0', pipeline)
-        self.gstd_client.signal_timeout('p0', 'identity', 'handoff', '1')
+        self.gstd_client.signal_timeout('p0', 'identity', 'handoff', 1)
         ret_con = self.gstd_client.signal_connect('p0', 'identity',
                                                   'handoff')
         self.assertEqual(ret_con, None)
