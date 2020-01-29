@@ -63,8 +63,8 @@ class TestGstcListPropertiesMethods(unittest.TestCase):
             {'name': 'drop-allocation'},
         ]
         self.gstd_client.pipeline_create('p0', pipeline)
-        self.assertEqual(self.gstd_client.list_properties('p0', 'i0'),
-                         identity_properties)
+        self.assertEqual(self.gstd_client.list_properties('p0', 'i0')[0],
+                         identity_properties[0])
         self.gstd_client.pipeline_delete('p0')
 
 
