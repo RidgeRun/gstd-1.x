@@ -1,17 +1,17 @@
 /*
  * GStreamer Daemon - Gst Launch under steroids
  * Copyright (c) 2015-2017 Ridgerun, LLC (http://www.ridgerun.com)
- * 
+ *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA
@@ -41,6 +41,8 @@ enum
   PROP_PIPELINE_BUS,
   PROP_STATE,
   PROP_EVENT,
+  PROP_POSITION,
+  PROP_DURATION,
   N_PROPERTIES                  // NOT A PROPERTY
 };
 
@@ -94,6 +96,16 @@ struct _GstdPipeline
    * The state of the GstPipeline
    */
   GstdState *state;
+
+  /**
+   * Position of the media progress pipeline
+   */
+  gint64 position;
+
+  /**
+   * Duration of the media stream pipeline
+   */
+  gint64 duration;
 };
 
 struct _GstdPipelineClass
@@ -158,6 +170,22 @@ gstd_pipeline_class_init (GstdPipelineClass * klass)
       g_param_spec_object ("event", "Event",
       "The event handler of the pipeline",
       GSTD_TYPE_EVENT_HANDLER, G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
+
+   properties[PROP_POSITION] =
+      g_param_spec_int64 ("position", "Position",
+      "The query position of the pipeline",
+      G_GINT64_CONSTANT(0), /* Min value */
+      G_MAXINT64,
+      G_GINT64_CONSTANT(0), /* Default value */
+      G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
+
+    properties[PROP_DURATION] =
+      g_param_spec_int64 ("duration", "Duration",
+      "The duration of the media stream pipeline",
+      G_GINT64_CONSTANT(0), /* Min value */
+      G_MAXINT64,
+      G_GINT64_CONSTANT(0), /* Default value */
+      G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
   g_object_class_install_properties (object_class, N_PROPERTIES, properties);
 
@@ -290,7 +318,6 @@ gstd_pipeline_get_property (GObject * object,
     case PROP_PIPELINE_BUS:
       GST_DEBUG_OBJECT (self, "Returning pipeline bus %p", self->pipeline_bus);
       g_value_set_object (value, self->pipeline_bus);
-      // g_value_set_object (value, self->elements);
       break;
     case PROP_STATE:
       GST_DEBUG_OBJECT (self, "Returning pipeline state %p", self->state);
@@ -300,6 +327,26 @@ gstd_pipeline_get_property (GObject * object,
       GST_DEBUG_OBJECT (self, "Returning event handler %p",
           self->event_handler);
       g_value_set_object (value, self->event_handler);
+      break;
+    case PROP_POSITION:
+      if (!gst_element_query_position (self->pipeline, GST_FORMAT_TIME, &self->position)) {
+        /* if the query could not be performed. return 0 */
+        self->position = G_GINT64_CONSTANT(0);
+      }
+
+      GST_DEBUG_OBJECT (self, "Returning pipeline position %" GST_TIME_FORMAT,
+          GST_TIME_ARGS (self->position));
+      g_value_set_int64 (value, self->position);
+      break;
+    case PROP_DURATION:
+      if (!gst_element_query_duration (self->pipeline, GST_FORMAT_TIME, &self->duration)) {
+        /* if the query could not be performed. return 0 */
+        self->duration = G_GINT64_CONSTANT(0);
+      }
+
+      GST_DEBUG_OBJECT (self, "Returning pipeline duration %" GST_TIME_FORMAT,
+          GST_TIME_ARGS (self->duration));
+      g_value_set_int64 (value, self->duration);
       break;
     default:
       /* We don't have any other property... */
@@ -337,14 +384,14 @@ gstd_pipeline_set_property (GObject * object,
 
 /**
  * Creates a new named pipeline based on the provided gst-launch
- * description. If no name is provided then a generic name will be 
+ * description. If no name is provided then a generic name will be
  * assigned.
  *
  * \param name A unique name to assign to the pipeline. If empty or
- * NULL, a unique name will be generated.  
- * \param description A gst-launch like description of the pipeline.  
- * \param newpipe A double pointer to hold the newly created GstdPipeline. 
- * It may be passed NULL to ignore output values. This pointer will be 
+ * NULL, a unique name will be generated.
+ * \param description A gst-launch like description of the pipeline.
+ * \param newpipe A double pointer to hold the newly created GstdPipeline.
+ * It may be passed NULL to ignore output values. This pointer will be
  * NULL in case of failure. Do not free this pointer!
  *
  * \return A GstdReturnCode with the return status.
