@@ -60,8 +60,8 @@ G_DEFINE_TYPE (GstdBusMsgStateChanged, gstd_bus_msg_state_changed,
 
   /* Initialize debug category with nice colors */
   debug_color = GST_DEBUG_FG_BLACK | GST_DEBUG_BOLD | GST_DEBUG_BG_WHITE;
-  GST_DEBUG_CATEGORY_INIT (gstd_bus_msg_state_changed_debug, "gstdbusmsgsimple",
-      debug_color, "Gstd Bus Msg Simple category");
+  GST_DEBUG_CATEGORY_INIT (gstd_bus_msg_state_changed_debug, "gstdbusmsgstatechanged",
+      debug_color, "Gstd Bus Msg State Changed category");
 
 }
 
