@@ -36,6 +36,7 @@ libgstd_core_la_SOURCES = gstd_session.c		\
 			  gstd_event_handler.c		\
 			  gstd_bus_msg.c		\
 			  gstd_bus_msg_simple.c		\
+			  gstd_bus_msg_state_changed.c	\
 			  gstd_msg_reader.c		\
 			  gstd_msg_type.c		\
 			  gstd_bus_msg_qos.c		\
@@ -112,6 +113,7 @@ gstdinclude_HEADERS = \
 		  gstd_event_creator.h		\
 		  gstd_bus_msg.h		\
 		  gstd_bus_msg_simple.h		\
+		  gstd_bus_msg_state_changed.h	\
 		  gstd_msg_reader.h		\
 		  gstd_msg_type.h		\
 		  gstd_bus_msg_qos.h		\
