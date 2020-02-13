@@ -49,6 +49,13 @@ class TestGstcCreateMethods(unittest.TestCase):
         self.assertEqual(final_n_pipes, initial_n_pipes + 1)
         self.gstd_client.pipeline_delete('p0')
 
+    def test_create_bad_pipeline(self):
+        pipeline = 'source sink'
+        self.gstd_logger = CustomLogger('test_libgstc', loglevel='DEBUG')
+        self.gstd_client = GstdClient(logger=self.gstd_logger)
+        with self.assertRaises(GstdError):
+            self.gstd_client.create('pipelines', 'p0', pipeline)
+
 
 if __name__ == '__main__':
     unittest.main()

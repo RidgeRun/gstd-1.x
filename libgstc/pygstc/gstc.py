@@ -87,13 +87,13 @@ class GstdClient:
     event_seek(
         self,
         pipe_name,
-        rate='1.0',
-        format='3',
-        flags='1',
-        start_type='1',
-        start='0',
-        end_type='1',
-        end='-1',
+        rate=1.0,
+        format=3,
+        flags=1,
+        start_type=1,
+        start=0,
+        end_type=1,
+        end=-1,
         )
         Perform a seek in the given pipeline
     list_elements(pipe_name)
@@ -141,7 +141,7 @@ class GstdClient:
         ----------
         ip : string
             IP where GSTD is running
-        port : string
+        port : int
             Port where GSTD is running
         logger : CustomLogger
             Custom logger where all log messages from this class are going
@@ -383,7 +383,7 @@ class GstdClient:
 
         Parameters
         ----------
-        threshold: int
+        threshold: string
             Debug threshold:
             0   none    No debug information is output.
             1   ERROR   Logs all fatal errors.
@@ -398,7 +398,7 @@ class GstdClient:
 
         self._logger.info('Setting GStreamer debug threshold to %s'
                           % threshold)
-        parameters = self._check_parameters([threshold], [int])
+        parameters = self._check_parameters([threshold], [str])
         self._send_cmd_line(['debug_threshold'] + parameters)
 
     def delete(self, uri, name):
