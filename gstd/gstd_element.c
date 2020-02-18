@@ -501,7 +501,7 @@ gstd_element_fill_child_properties (GstdElement * self, GstObject * element,
 
   for (i = 0; i < count; i++) {
     child = gst_child_proxy_get_child_by_index (GST_CHILD_PROXY (element), i);
-    if (!child)
+    if (!child || !GST_IS_OBJECT(child))
       continue;
 
     if (hierarchy)
