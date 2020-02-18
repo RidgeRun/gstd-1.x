@@ -221,6 +221,7 @@ examples/libgstc/Makefile
 tests/Makefile
 tests/gstd/Makefile
 tests/libgstc/Makefile
+tests/libgstc/pygstc/Makefile
 docs/Makefile
 docs/reference/Makefile
 docs/reference/gstd/Makefile

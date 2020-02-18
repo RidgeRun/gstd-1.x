@@ -139,3 +139,5 @@ libgstc_pipeline_element_get_SOURCES =		\
 	test_libgstc_element_get.c		\
 	$(top_srcdir)/libgstc/libgstc.c		\
 		$(COMMON_SOURCES)
+
+SUBDIRS = pygstc

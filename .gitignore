@@ -31,6 +31,7 @@ gtk-doc.m4
 libtool.orig
 gst_client/gst-client-1.0
 .clang_complete
+__pycache__
 
 # Tests
 tests/gstd/test_gstd_no_create
