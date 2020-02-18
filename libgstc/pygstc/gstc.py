@@ -266,6 +266,13 @@ class GstdClient:
             The name of the pipeline
         filter: string
             Filter to be applied to the bus. '+' reparated strings
+
+        Raises
+        ------
+        GstdError
+            Error is triggered when Gstd IPC fails
+        GstcError
+            Error is triggered when the Gstd python client fails internally
         """
 
         self._logger.info('Setting bus read filter of pipeline %s to %s'
@@ -281,6 +288,13 @@ class GstdClient:
         ----------
         pipe_name: string
             The name of the pipeline
+
+        Raises
+        ------
+        GstdError
+            Error is triggered when Gstd IPC fails
+        GstcError
+            Error is triggered when the Gstd python client fails internally
 
         Returns
         -------
@@ -303,6 +317,13 @@ class GstdClient:
         timeout: int
             Timeout in nanosecons. -1: forever, 0: return
             immediately, n: wait n nanoseconds.
+
+        Raises
+        ------
+        GstdError
+            Error is triggered when Gstd IPC fails
+        GstcError
+            Error is triggered when the Gstd python client fails internally
         """
 
         self._logger.info('Setting bus read timeout of pipeline %s to %s'
@@ -327,6 +348,13 @@ class GstdClient:
             The name of the property
         value: string
             The initial value to be set
+
+        Raises
+        ------
+        GstdError
+            Error is triggered when Gstd IPC fails
+        GstcError
+            Error is triggered when the Gstd python client fails internally
         """
 
         self._logger.info('Creating property %s in uri %s with value "%s"'
@@ -343,6 +371,13 @@ class GstdClient:
         ----------
         colors: boolean
             Enable color in the debug
+
+        Raises
+        ------
+        GstdError
+            Error is triggered when Gstd IPC fails
+        GstcError
+            Error is triggered when the Gstd python client fails internally
         """
 
         self._logger.info('Enabling/Disabling GStreamer debug colors')
@@ -357,6 +392,13 @@ class GstdClient:
         ----------
         enable: boolean
             Enable GStreamer debug
+
+        Raises
+        ------
+        GstdError
+            Error is triggered when Gstd IPC fails
+        GstcError
+            Error is triggered when the Gstd python client fails internally
         """
 
         self._logger.info('Enabling/Disabling GStreamer debug')
@@ -371,6 +413,13 @@ class GstdClient:
         ----------
         reset: boolean
             Reset the debug threshold
+
+        Raises
+        ------
+        GstdError
+            Error is triggered when Gstd IPC fails
+        GstcError
+            Error is triggered when the Gstd python client fails internally
         """
 
         self._logger.info('Enabling/Disabling GStreamer debug threshold reset')
@@ -394,6 +443,13 @@ class GstdClient:
             6   LOG     Logs all log messages.
             7   TRACE   Logs all trace messages.
             9   MEMDUMP Logs all memory dump messages.
+
+        Raises
+        ------
+        GstdError
+            Error is triggered when Gstd IPC fails
+        GstcError
+            Error is triggered when the Gstd python client fails internally
         """
 
         self._logger.info('Setting GStreamer debug threshold to %s'
@@ -411,6 +467,13 @@ class GstdClient:
             Resource identifier
         name: string
             The name of the resource to delete
+
+        Raises
+        ------
+        GstdError
+            Error is triggered when Gstd IPC fails
+        GstcError
+            Error is triggered when the Gstd python client fails internally
         """
 
         self._logger.info('Deleting name %s at uri "%s"' % (name, uri))
@@ -434,6 +497,13 @@ class GstdClient:
             The name of the element
         prop: string
             The name of the property
+
+        Raises
+        ------
+        GstdError
+            Error is triggered when Gstd IPC fails
+        GstcError
+            Error is triggered when the Gstd python client fails internally
 
         Returns
         -------
@@ -469,6 +539,13 @@ class GstdClient:
             The name of the property
         value: string
             The value to set
+
+        Raises
+        ------
+        GstdError
+            Error is triggered when Gstd IPC fails
+        GstcError
+            Error is triggered when the Gstd python client fails internally
         """
 
         self._logger.info('Setting element %s %s property in pipeline %s to:%s'
@@ -485,6 +562,13 @@ class GstdClient:
         ----------
         pipe_name: string
             The name of the pipeline
+
+        Raises
+        ------
+        GstdError
+            Error is triggered when Gstd IPC fails
+        GstcError
+            Error is triggered when the Gstd python client fails internally
         """
 
         self._logger.info('Sending end-of-stream event to pipeline %s'
@@ -500,6 +584,13 @@ class GstdClient:
         ----------
         pipe_name: string
             The name of the pipeline
+
+        Raises
+        ------
+        GstdError
+            Error is triggered when Gstd IPC fails
+        GstcError
+            Error is triggered when the Gstd python client fails internally
         """
 
         self._logger.info('Putting pipeline %s in flushing mode'
@@ -517,6 +608,13 @@ class GstdClient:
             The name of the pipeline
         reset: boolean
             Reset the event flush
+
+        Raises
+        ------
+        GstdError
+            Error is triggered when Gstd IPC fails
+        GstcError
+            Error is triggered when the Gstd python client fails internally
         """
 
         self._logger.info('Taking pipeline %s out of flushing mode'
@@ -556,6 +654,13 @@ class GstdClient:
             The type and flags for the new end position. Default value: 1.
         end: int
             The value of the new end position. Default value: -1.
+
+        Raises
+        ------
+        GstdError
+            Error is triggered when Gstd IPC fails
+        GstcError
+            Error is triggered when the Gstd python client fails internally
         """
 
         self._logger.info('Performing event seek in pipeline %s'
@@ -575,6 +680,13 @@ class GstdClient:
         pipe_name: string
             The name of the pipeline
 
+        Raises
+        ------
+        GstdError
+            Error is triggered when Gstd IPC fails
+        GstcError
+            Error is triggered when the Gstd python client fails internally
+
         Returns
         -------
         result : string
@@ -589,6 +701,18 @@ class GstdClient:
     def list_pipelines(self):
         """
         List the existing pipelines
+
+        Raises
+        ------
+        GstdError
+            Error is triggered when Gstd IPC fails
+        GstcError
+            Error is triggered when the Gstd python client fails internally
+
+        Returns
+        -------
+        result : string
+            List of pipelines
         """
 
         self._logger.info('Listing pipelines')
@@ -605,6 +729,13 @@ class GstdClient:
             The name of the pipeline
         element: string
             The name of the element
+
+        Raises
+        ------
+        GstdError
+            Error is triggered when Gstd IPC fails
+        GstcError
+            Error is triggered when the Gstd python client fails internally
 
         Returns
         -------
@@ -628,6 +759,13 @@ class GstdClient:
             The name of the pipeline
         element: string
             The name of the element
+
+        Raises
+        ------
+        GstdError
+            Error is triggered when Gstd IPC fails
+        GstcError
+            Error is triggered when the Gstd python client fails internally
 
         Returns
         -------
@@ -666,6 +804,13 @@ class GstdClient:
         ----------
         pipe_name: string
             The name of the pipeline
+
+        Raises
+        ------
+        GstdError
+            Error is triggered when Gstd IPC fails
+        GstcError
+            Error is triggered when the Gstd python client fails internally
         """
 
         self._logger.info('Deleting pipeline %s' % pipe_name)
@@ -680,6 +825,13 @@ class GstdClient:
         ----------
         pipe_name: string
             The name of the pipeline
+
+        Raises
+        ------
+        GstdError
+            Error is triggered when Gstd IPC fails
+        GstcError
+            Error is triggered when the Gstd python client fails internally
         """
 
         self._logger.info('Pausing pipeline %s' % pipe_name)
@@ -694,6 +846,13 @@ class GstdClient:
         ----------
         pipe_name: string
             The name of the pipeline
+
+        Raises
+        ------
+        GstdError
+            Error is triggered when Gstd IPC fails
+        GstcError
+            Error is triggered when the Gstd python client fails internally
         """
 
         self._logger.info('Playing pipeline %s' % pipe_name)
@@ -708,6 +867,13 @@ class GstdClient:
         ----------
         pipe_name: string
             The name of the pipeline
+
+        Raises
+        ------
+        GstdError
+            Error is triggered when Gstd IPC fails
+        GstcError
+            Error is triggered when the Gstd python client fails internally
         """
 
         self._logger.info('Stoping pipeline %s' % pipe_name)
@@ -722,6 +888,13 @@ class GstdClient:
         ----------
         uri: string
             Resource identifier
+
+        Raises
+        ------
+        GstdError
+            Error is triggered when Gstd IPC fails
+        GstcError
+            Error is triggered when the Gstd python client fails internally
 
         Returns
         -------
@@ -751,6 +924,13 @@ class GstdClient:
             The name of the element
         signal: string
             The name of the signal
+
+        Raises
+        ------
+        GstdError
+            Error is triggered when Gstd IPC fails
+        GstcError
+            Error is triggered when the Gstd python client fails internally
 
         Returns
         -------
@@ -783,6 +963,13 @@ class GstdClient:
             The name of the element
         signal: string
             The name of the signal
+
+        Raises
+        ------
+        GstdError
+            Error is triggered when Gstd IPC fails
+        GstcError
+            Error is triggered when the Gstd python client fails internally
         """
 
         self._logger.info(
@@ -813,6 +1000,13 @@ class GstdClient:
         timeout: int
             Timeout in nanosecons.  -1: forever, 0: return
             immediately, n: wait n microseconds.
+
+        Raises
+        ------
+        GstdError
+            Error is triggered when Gstd IPC fails
+        GstcError
+            Error is triggered when the Gstd python client fails internally
         """
 
         self._logger.info(
@@ -832,6 +1026,13 @@ class GstdClient:
             Resource identifier
         value: string
             The value to set
+
+        Raises
+        ------
+        GstdError
+            Error is triggered when Gstd IPC fails
+        GstcError
+            Error is triggered when the Gstd python client fails internally
         """
 
         self._logger.info('Updating uri %s with value "%s"' % (uri,
