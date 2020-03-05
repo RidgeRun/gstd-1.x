@@ -42,8 +42,8 @@ static void print_header (gboolean quiet);
 
 #define HEADER \
       "\nGstd version " PACKAGE_VERSION "\n" \
-      "Copyright (C) 2015-2017 Ridgerun, LLC (http://www.ridgerun.com)\n\n" \
-      "Log traces will be saved to %s.\nDetaching from parent process."
+      "Copyright (C) 2015-2020 RidgeRun (https://www.ridgerun.com)\n\n" \
+      "Log traces will be saved to %s.\n"
 
 void
 print_header (gboolean quiet)
@@ -51,7 +51,7 @@ print_header (gboolean quiet)
   gchar *filename;
   if (!quiet) {
     filename = gstd_log_get_current_gstd ();
-    GST_INFO (HEADER, filename);
+    g_print (HEADER, filename);
     g_free (filename);
   }
 }
@@ -221,6 +221,7 @@ main (gint argc, gchar * argv[])
 
   /* Print the version and exit */
   if (version) {
+    print_header(quiet);
     goto out;
   }
 
@@ -243,6 +244,7 @@ main (gint argc, gchar * argv[])
     /* Parent fork ends here */
     if (parent) {
       print_header (quiet);
+      g_print("Detaching from parent process.\n");
       goto out;
     }
   }
