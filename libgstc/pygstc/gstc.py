@@ -30,7 +30,6 @@
 
 import inspect
 import json
-import psutil
 import traceback
 
 from pygstc.gstcerror import *
