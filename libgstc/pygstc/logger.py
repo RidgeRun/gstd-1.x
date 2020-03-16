@@ -96,6 +96,9 @@ class CustomLogger:
 
     Methods
     ----------
+    set_handler(handler)
+        Changes the default file or console handler to a custom one passed as a
+        parameter.
     warning(log)
         Logs a warning level message
     info(log)

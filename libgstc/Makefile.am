@@ -20,4 +20,4 @@ noinst_HEADERS = \
 	libgstc_thread.h
 
 install-am:
-	@sudo -H pip install .
+	@sudo -H pip3 install .
