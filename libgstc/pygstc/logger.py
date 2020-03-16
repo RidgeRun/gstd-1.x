@@ -154,9 +154,10 @@ class CustomLogger:
 
         numeric_level = getattr(logging, loglevel.upper(), None)
         if isinstance(numeric_level, int):
-            self._log.setLevel(numeric_level)
+            self._log_level = numeric_level
         else:
-            self._log.setLevel(logging.ERROR)
+            self._log_level = logging.ERROR
+        self._log.setLevel(self._log_level)
         self._logger.addHandler(self._log)
 
     def __del__(self):
@@ -167,6 +168,30 @@ class CustomLogger:
         if self._log:
             self._log.close()
             self._logger.removeHandler(self._log)
+
+    def set_handler(self, handler):
+        """
+        Changes the default file or console handler to a custom one passed as a
+        parameter.
+
+        Parameters
+        ----------
+        handler : object
+            The logging handler to use
+        """
+
+        # Remove the previous handler
+
+        self._log.close()
+        self._logger.removeHandler(self._log)
+
+        # Add the new handler
+
+        self._log = handler
+        self._log.setFormatter(ColorFormatter(
+            '%(asctime)22s  %(levelname)s    \t%(message)s'))
+        self._log.setLevel(self._log_level)
+        self._logger.addHandler(self._log)
 
     def warning(self, log):
         """
