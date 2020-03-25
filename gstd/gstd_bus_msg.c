@@ -1,6 +1,6 @@
 /*
  * GStreamer Daemon - Gst Launch under steroids
- * Copyright (c) 2015-2017 Ridgerun, LLC (http://www.ridgerun.com)
+ * Copyright (c) 2015-2020 Ridgerun, LLC (http://www.ridgerun.com)
  * 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -22,10 +22,11 @@
 #endif
 
 #include "gstd_bus_msg.h"
-#include "gstd_bus_msg_simple.h"
-#include "gstd_bus_msg_qos.h"
-#include "gstd_bus_msg_stream_status.h"
 #include "gstd_bus_msg_element.h"
+#include "gstd_bus_msg_qos.h"
+#include "gstd_bus_msg_simple.h"
+#include "gstd_bus_msg_state_changed.h"
+#include "gstd_bus_msg_stream_status.h"
 
 /* Gstd Bus Msg debugging category */
 GST_DEBUG_CATEGORY_STATIC (gstd_bus_msg_debug);
@@ -105,6 +106,9 @@ gstd_bus_msg_factory_make (GstMessage * target)
       break;
     case (GST_MESSAGE_ELEMENT):
       msg = g_object_new (GSTD_TYPE_BUS_MSG_ELEMENT, NULL);
+      break;
+    case (GST_MESSAGE_STATE_CHANGED):
+      msg = g_object_new (GSTD_TYPE_BUS_MSG_STATE_CHANGED, NULL);
       break;
     default:
       msg = g_object_new (GSTD_TYPE_BUS_MSG, NULL);

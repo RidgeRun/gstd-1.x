@@ -2,7 +2,7 @@ dnl required version of autoconf
 AC_PREREQ([2.53])
 
 dnl Gstreamer's daemon package name and version
-AC_INIT([gstd],[0.8.0])
+AC_INIT([gstd],[0.9.0])
 
 dnl required version of gstreamer and gst-plugins-base
 GST_REQUIRED=1.0.0
@@ -221,6 +221,7 @@ examples/libgstc/Makefile
 tests/Makefile
 tests/gstd/Makefile
 tests/libgstc/Makefile
+tests/libgstc/pygstc/Makefile
 docs/Makefile
 docs/reference/Makefile
 docs/reference/gstd/Makefile
