@@ -1,15 +1,13 @@
 #!/usr/bin/make -f
 
-DEB_DH_AUTORECONF_ARGS += --as-needed
-
-CFLAGS += -Wno-error
-CXXFLAGS += -Wno-error
-LDFLAGS += -Wl,-z,defs -Wl,-O1 -Wl,--as-needed
-DEB_MAKE_CHECK_TARGET = check || true
-
-# See debhelper(7) (uncomment to enable)
-# output every command that modifies files on the build system.
-#export DH_VERBOSE = 1
+export DEB_BUILD_OPTIONS := nocheck
+export DEB_DH_AUTORECONF_ARGS += --as-needed
 
 %:
-	dh $@ 
+	dh $@ --with autoreconf,systemd
+
+override_dh_systemd_enable:
+	dh_systemd_enable --name=init-gstd
+
+override_dh_systemd_start:
+	dh_systemd_start --name=init-gstd --no-start
