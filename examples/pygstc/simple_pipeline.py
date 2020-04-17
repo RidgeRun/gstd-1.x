@@ -16,7 +16,7 @@ def printError():
     print("To stop run: python3 simple_pipeline.py slow_motion")
 
 if(len(sys.argv) > 1):
-  if(sys.argv[1]=="play"):
+  if(sys.argv[1]=="create"):
 
     FILE_SOURCE = sys.argv[2]
     #pipeline is the string with the pipeline description
@@ -24,10 +24,11 @@ if(len(sys.argv) > 1):
 
     #Following instructions create and play the pipeline
     gstd_client.pipeline_create ("p0", pipeline)
-    gstd_client.pipeline_play ("p0")
     
+  elif(sys.argv[1]== "play"):
+    gstd_client.pipeline_play ("p0")
     print("Playing")
-  
+
   # Check this 
   # reverse and slow motion restart the pipeline
   elif(sys.argv[1]== "reverse"):
