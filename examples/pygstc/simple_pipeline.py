@@ -39,9 +39,15 @@ if(len(sys.argv) > 1):
     gstd_client.event_seek("p0", rate=0.5, format=3, flags=1, start_type=1, start=0, end_type=1, end=-1)
     print("Playing in slow motion")
 
+  elif(sys.argv[1]== "pause"):
+    gstd_client.pipeline_pause ("p0")
+    print("Pipeline paused")
+
   elif(sys.argv[1]== "stop"):
-    #Following instructions stop and delete the pipeline
     gstd_client.pipeline_stop ("p0")
+    print("Pipeline stoped")
+
+  elif(sys.argv[1]== "delete"):
     gstd_client.pipeline_delete ("p0")
     print("Pipeline deleted")
 
