@@ -1,0 +1,9 @@
+[Unit]
+Description=GstD systemd service to generate folders for run-time variable data and log files.
+
+[Service]
+Type=oneshot
+ExecStart=/bin/echo 'GstD systemd init'
+
+[Install]
+WantedBy=multi-user.target
