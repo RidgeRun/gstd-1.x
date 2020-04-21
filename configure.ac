@@ -246,5 +246,6 @@ docs/Makefile
 docs/reference/Makefile
 docs/reference/gstd/Makefile
 systemd/Makefile
+systemd/gstd:systemd/gstd.in
 ])
 AC_OUTPUT
