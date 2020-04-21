@@ -51,6 +51,18 @@ if(len(sys.argv) > 1):
     gstd_client.pipeline_delete ("p0")
     print("Pipeline deleted")
 
+  elif(sys.argv[1] == "read_bus"):
+    # timeout in nanoseconds or forever
+    gstd_client.bus_timeout("p0", -1)
+    resp = gstd_client.bus_read("p0")
+    print(resp)
+
+  elif(sys.argv[1] == "read_eof"):
+    # Serach EOF and react
+    gstd_client.bus_filter("p0", "error+eos")
+    resp = gstd_client.bus_read("p0")
+    print(resp)
+
   else:
     printError()
 else:
