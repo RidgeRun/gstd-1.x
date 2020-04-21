@@ -69,6 +69,11 @@ if(len(sys.argv) > 1):
     resp = gstd_client.bus_read("p0")
     print(resp)
 
+  elif(sys.argv[1] == "set_res" and len(sys.argv) == 4):
+    width = sys.argv[2]
+    height = sys.argv[3]
+    gstd_client.element_set("p0", "cf", "caps", "video/x-raw,width="+width+",height="+height+"")
+
   else:
     printError()
 else:
