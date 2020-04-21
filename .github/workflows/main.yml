@@ -2,7 +2,7 @@ name: gstd CI
 
 on:
   push:
-    branches: [ master dev* feature/* feature/pygstc-extra-features ]
+    branches: [ master dev* feature/* ]
   pull_request:
     branches: [ master dev* feature/* ]
 
