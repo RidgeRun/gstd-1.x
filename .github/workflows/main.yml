@@ -1,0 +1,22 @@
+name: gstd CI
+
+on:
+  push:
+    branches: [ master dev* feature/* feature/pygstc-extra-features ]
+  pull_request:
+    branches: [ master dev* feature/* ]
+
+jobs:
+  build:
+    runs-on: ubuntu-18.04
+    container: ridgerun/ubuntu1804-gstd:v0.1
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: generate
+      run: ./autogen.sh
+    - name: make
+      run: make
+    - name: make check
+      run: make check
