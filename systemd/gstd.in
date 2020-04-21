@@ -1,0 +1,39 @@
+#!/bin/sh
+
+manage_dir()
+{
+    dir="$1";
+    mode="$2";
+    user="$3";
+
+    #Create directory if not created yet
+    mkdir -p $dir;
+    if [ $? -ne 0 ]; then
+        echo "GstD init: Error, cannot create directory $dir" 1>&2;
+        exit 1
+    fi
+
+    #Set the owner
+    chown "$user" "$dir";
+    if [ $? -ne 0 ]; then
+        echo "GstD init: Error, cannot change $dir owner to $user:$group" 1>&2;
+        exit 1
+    fi
+
+    #Set the permissions
+    chmod "$mode" "$dir";
+    if [ $? -ne 0 ]; then
+        echo "GstD init: Error, cannot change $dir permissions to $mode" 1>&2;
+        exit 1
+    fi
+}
+
+directories=(@gstdrunstatedir@ @gstdlogstatedir@)
+
+#Manage pid and log directories
+for d in ${directories[@]}; do
+    manage_dir "$d" 644 root
+done
+
+#Start gstd
+gstd;
