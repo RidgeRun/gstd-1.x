@@ -1,0 +1,33 @@
+name: gstd CI
+
+on:
+  push:
+    branches:
+      - master
+      - dev*
+      - feature/add-ci
+  pull_request:
+    branches:
+      - dev*
+
+jobs:
+  build:
+    runs-on: ubuntu-18.04
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: dependecies
+      run: |
+        sudo apt update
+        sudo apt install automake libtool pkg-config libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev
+        sudo apt install libglib2.0-dev libjson-glib-dev gtk-doc-tools libreadline-dev libncursesw5-dev
+        sudo apt install libdaemon-dev libjansson-dev python3-pip python3-setuptools
+
+    - name: generate
+      run: ./autogen.sh
+    - name: make
+      run: make
+    - name: make install
+      run: sudo make install
+    - name: make check
+      run: make check
