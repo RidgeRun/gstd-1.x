@@ -200,6 +200,18 @@ AC_ARG_WITH([gstd-logstatedir],
   [AC_SUBST([gstdlogstatedir], [$with_gstd_logstatedir])],
   [AC_SUBST([gstdlogstatedir], [$default])])
 
+dnl allow the user to disable systemd or specify systemd service file location
+AC_ARG_WITH(systemd,
+  AS_HELP_STRING([--with-systemd@<:@=DIR@:>@], [Install systemd service files @<:@to DIR if specified@:>@]),
+  [ systemd=true; systemd_path="$with_systemd" ],
+  [ systemd=true; systemd_path=$($PKG_CONFIG --variable=systemdsystemunitdir systemd) ])
+
+AS_IF([test "x$with_systemd" = "xyes"], [systemd_path=$($PKG_CONFIG --variable=systemdsystemunitdir systemd)],
+      [AS_IF([test "x$with_systemd" = "xno"], [systemd=false])])
+
+AC_SUBST(systemd_path, $systemd_path)
+AM_CONDITIONAL(WITH_SYSTEMD, test "$systemd" = true)
+
 dnl check if compiler understands -Wall (if yes, add -Wall to GST_CFLAGS)
 AC_MSG_CHECKING([to see if compiler understands -Wall])
 save_CFLAGS="$CFLAGS"
@@ -233,5 +245,6 @@ tests/libgstc/python/Makefile
 docs/Makefile
 docs/reference/Makefile
 docs/reference/gstd/Makefile
+systemd/Makefile
 ])
 AC_OUTPUT
