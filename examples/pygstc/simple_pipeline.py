@@ -10,17 +10,23 @@ gstd_logger = CustomLogger('simple_pipeline', loglevel='DEBUG')
 gstd_client = GstdClient(logger=gstd_logger)
 
 def printError():
-    print("To play run: python3 simple_pipeline.py play VIDEO_PATH")
+    print("To play run: python3 simple_pipeline.py create VIDEO_PATH")
+    print("To play run: python3 simple_pipeline.py play")
+    print("To play run: python3 simple_pipeline.py paused")
     print("To stop run: python3 simple_pipeline.py stop")
     print("To stop run: python3 simple_pipeline.py reverse")
     print("To stop run: python3 simple_pipeline.py slow_motion")
-
+    print("To stop run: python3 simple_pipeline.py delete")
+    print("To stop run: python3 simple_pipeline.py read_bus")
+    print("To stop run: python3 simple_pipeline.py read_eof")
+    print("To stop run: python3 simple_pipeline.py set_res $WIDTH $HEIGHT")
 if(len(sys.argv) > 1):
   if(sys.argv[1]=="create"):
 
     FILE_SOURCE = sys.argv[2]
     #pipeline is the string with the pipeline description
-    pipeline = "playbin uri=file:"+FILE_SOURCE
+    pipeline = "filesrc location="+FILE_SOURCE+" ! decodebin ! videoconvert ! \
+      videoscale ! capsfilter name=cf ! xvimagesink"
 
     #Following instructions create and play the pipeline
     gstd_client.pipeline_create ("p0", pipeline)
