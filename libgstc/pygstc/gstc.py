@@ -879,6 +879,33 @@ class GstdClient:
         parameters = self._check_parameters([pipe_name], [str])
         self._send_cmd_line(['pipeline_stop'] + parameters)
 
+    def pipeline_get_graph(self, pipe_name):
+        """
+        Get the pipeline graph.
+
+        Parameters
+        ----------
+        pipe_name: string
+            The name of the pipeline
+
+        Raises
+        ------
+        GstdError
+            Error is triggered when Gstd IPC fails
+        GstcError
+            Error is triggered when the Gstd python client fails internally
+
+        Returns
+        -------
+        result : string
+            Pipeline graph in GraphViz dot format
+        """
+
+        self._logger.info('Getting the pipeline %s graph' % pipe_name)
+        parameters = self._check_parameters([pipe_name], [str])
+        result = self._send_cmd_line(['pipeline_get_graph'] + parameters)
+        return result
+
     def read(self, uri):
         """
         Read the resource held at the given URI with the given name.
