@@ -10,16 +10,17 @@ gstd_logger = CustomLogger('simple_pipeline', loglevel='DEBUG')
 gstd_client = GstdClient(logger=gstd_logger)
 
 def printError():
-    print("To play run: python3 simple_pipeline.py create VIDEO_PATH")
+    print("To play run: python3 simple_pipeline.py create $VIDEO_PATH")
     print("To play run: python3 simple_pipeline.py play")
-    print("To play run: python3 simple_pipeline.py paused")
+    print("To pause run: python3 simple_pipeline.py pause")
     print("To stop run: python3 simple_pipeline.py stop")
-    print("To stop run: python3 simple_pipeline.py reverse")
-    print("To stop run: python3 simple_pipeline.py slow_motion")
+    print("To reverse play run: python3 simple_pipeline.py reverse")
+    print("To play slow run: python3 simple_pipeline.py slow_motion")
     print("To stop run: python3 simple_pipeline.py delete")
-    print("To stop run: python3 simple_pipeline.py read_bus")
-    print("To stop run: python3 simple_pipeline.py read_eof")
-    print("To stop run: python3 simple_pipeline.py set_res $WIDTH $HEIGHT")
+    print("To read the bus run: python3 simple_pipeline.py read_bus")
+    print("To filter by EOF and read run: python3 simple_pipeline.py read_eof")
+    print("To change resolution run: python3 simple_pipeline.py set_res $WIDTH $HEIGHT")
+
 if(len(sys.argv) > 1):
   if(sys.argv[1]=="create"):
 
