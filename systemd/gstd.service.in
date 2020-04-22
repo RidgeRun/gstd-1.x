@@ -2,8 +2,9 @@
 Description=GstD systemd service to generate folders for run-time variable data and log files.
 
 [Service]
-Type=oneshot
-ExecStart=/bin/echo 'GstD systemd init'
+Type=forking
+ExecStart=@prefix@/libexec/gstd/gstd
+ExecStop=@prefix@/bin/gstd -k
 
 [Install]
 WantedBy=multi-user.target
