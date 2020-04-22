@@ -25,6 +25,8 @@ jobs:
 
     - name: generate
       run: ./autogen.sh
+    - name: configure
+      run: ./configure
     - name: make
       run: make
     - name: make install
