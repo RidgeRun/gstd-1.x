@@ -1,3 +1,6 @@
+#The software contained in this file is free and unencumbered software released into the public domain.
+#Anyone is free to use the software contained in this file as they choose, including incorporating
+#it into proprietary software.
 import time
 import sys
 from pygstc.gstc import *
@@ -7,7 +10,7 @@ from pygstc.logger import *
 gstd_logger = CustomLogger('simple_pipeline', loglevel='DEBUG')
 
 #Create the client with the logger
-gstd_client = GstdClient(logger=gstd_logger)
+gstc = GstdClient(logger=gstd_logger)
 
 def printError():
     print("To play run: python3 simple_pipeline.py create $VIDEO_PATH")
@@ -30,50 +33,49 @@ if(len(sys.argv) > 1):
       videoscale ! capsfilter name=cf ! xvimagesink"
 
     #Following instructions create and play the pipeline
-    gstd_client.pipeline_create ("p0", pipeline)
-    
-  elif(sys.argv[1]== "play"):
-    gstd_client.pipeline_play ("p0")
-    print("Playing")
+    gstc.pipeline_create("p0", pipeline)
 
-  # Check this 
-  # reverse and slow motion restart the pipeline
+  elif(sys.argv[1]== "play"):
+    gstc.pipeline_play("p0")
+    print("Playing")
+  
+  #Reverse and slow motion restart the pipeline
   elif(sys.argv[1]== "reverse"):
-    gstd_client.event_seek("p0", rate=-1.0, format=3, flags=1, start_type=1, start=0, end_type=1, end=-1)
+    gstc.event_seek("p0", rate=-1.0, format=3, flags=1, start_type=1, start=0, end_type=1, end=-1)
     print("Playing in reverse")
 
   elif(sys.argv[1]== "slow_motion"):
-    gstd_client.event_seek("p0", rate=0.5, format=3, flags=1, start_type=1, start=0, end_type=1, end=-1)
+    gstc.event_seek("p0", rate=0.5, format=3, flags=1, start_type=1, start=0, end_type=1, end=-1)
     print("Playing in slow motion")
 
   elif(sys.argv[1]== "pause"):
-    gstd_client.pipeline_pause ("p0")
+    gstc.pipeline_pause("p0")
     print("Pipeline paused")
 
   elif(sys.argv[1]== "stop"):
-    gstd_client.pipeline_stop ("p0")
+    gstc.pipeline_stop("p0")
     print("Pipeline stoped")
 
   elif(sys.argv[1]== "delete"):
-    gstd_client.pipeline_delete ("p0")
+    gstc.pipeline_delete ("p0")
     print("Pipeline deleted")
 
   elif(sys.argv[1] == "read_bus"):
-    # timeout in nanoseconds or forever
-    gstd_client.bus_timeout("p0", -1)
-    resp = gstd_client.bus_read("p0")
+    #Timeout in nanoseconds or forever
+    gstc.bus_timeout("p0", -1)
+    resp = gstc.bus_read("p0")
     print(resp)
 
   elif(sys.argv[1] == "read_eof"):
-    # Serach EOF and react
-    gstd_client.bus_filter("p0", "error+eos")
-    resp = gstd_client.bus_read("p0")
+    #Serach EOF and react
+    gstc.bus_filter("p0", "error+eos")
+    resp = gstc.bus_read("p0")
     print(resp)
 
   elif(sys.argv[1] == "set_res" and len(sys.argv) == 4):
     width = sys.argv[2]
     height = sys.argv[3]
-    gstd_client.element_set("p0", "cf", "caps", "video/x-raw,width="+width+",height="+height+"")
+    gstc.element_set("p0", "cf", "caps", "video/x-raw,width="+width+",height="+height+"")
 
   else:
     printError()
