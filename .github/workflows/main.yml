@@ -4,10 +4,10 @@ on:
   push:
     branches:
       - master
-      - dev*
+      - develop
   pull_request:
     branches:
-      - dev*
+      - develop
 
 jobs:
   build:
@@ -26,13 +26,13 @@ jobs:
       run: ./autogen.sh
     - name: configure
       run: ./configure
-    - name: make
+    - name: Compile
       run: make
-    - name: make install
-      run: sudo make install
-    - name: make check
+    - name: Checks
       run: make check
-    - name: listP
+    - name: Install
+      run: sudo make install
+    - name: List Pipelines Verification
       run: |
-        gstd -D &
+        gstd
         gstd-client list_pipelines
