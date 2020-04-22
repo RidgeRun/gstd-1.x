@@ -204,9 +204,9 @@ dnl allow the user to disable systemd or specify systemd service file location
 AC_ARG_WITH(systemd,
   AS_HELP_STRING([--with-systemd@<:@=DIR@:>@], [Install systemd service files @<:@to DIR if specified@:>@]),
   [ systemd=true; systemd_path="$with_systemd" ],
-  [ systemd=true; systemd_path=$($PKG_CONFIG --variable=systemdsystemunitdir systemd) ])
+  [ systemd=true; systemd_path=${sysconfdir}/systemd/system/])
 
-AS_IF([test "x$with_systemd" = "xyes"], [systemd_path=$($PKG_CONFIG --variable=systemdsystemunitdir systemd)],
+AS_IF([test "x$with_systemd" = "xyes"], [systemd_path=${sysconfdir}/systemd/system/],
       [AS_IF([test "x$with_systemd" = "xno"], [systemd=false])])
 
 AC_SUBST(systemd_path, $systemd_path)
