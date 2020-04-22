@@ -6,6 +6,7 @@ option('enable-gtk-doc', type : 'boolean', value : false, description : 'Use gtk
 # String options
 option('with-gstd-runstatedir', type : 'string', value : '/var/run/gstd', description : 'Specify the location of the gstd\'s PID file')
 option('with-gstd-logstatedir', type : 'string', value : '/var/log/gstd', description : 'Specify the location of gstd\'s log files')
+option('with-systemd', type : 'string', value : '${sysconfdir}/systemd/system', description : 'Specify the location of gstd.service file')
 
 # Common options
 option('package-name', type : 'string', yield : true,
