@@ -33,3 +33,7 @@ jobs:
       run: sudo make install
     - name: make check
       run: make check
+    - name: listP
+      run: |
+        sudo make install
+        gstd-client list_pipelines
