@@ -392,6 +392,24 @@ gstc_pipeline_stop (GstClient * client, const char *pipeline_name)
   return gstc_cmd_change_state (client, pipeline_name, state);
 }
 
+GstcStatus
+gstc_pipeline_get_graph (GstClient * client, const char *pipeline_name, char **response)
+{
+
+  GstcStatus ret;
+
+  char uri[sizeof("/pipelines/%s/graph") + sizeof(pipeline_name)];
+
+  gstc_assert_and_ret_val (NULL != client, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != pipeline_name, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != response, GSTC_NULL_ARGUMENT);
+
+  sprintf(uri, "/pipelines/%s/graph",pipeline_name);
+  ret = gstc_cmd_read (client, uri, &*response, client->timeout);
+
+  return ret;
+}
+
 void
 gstc_client_free (GstClient * client)
 {

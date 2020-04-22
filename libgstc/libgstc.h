@@ -275,6 +275,19 @@ GstcStatus
 gstc_pipeline_stop(GstClient *client, const char *pipeline_name);
 
 /**
+ * gstc_pipeline_get_graph:
+ * @client: The client returned by gstc_client_new()
+ * @pipeline_name: Name assoicated with the pipeline
+ * @response: Pipeline graph description
+ * Attempts to get the graph of pieline.
+ *
+ * Returns: GstcStatus indicating success, daemon unreachable, daemon
+ * timeout, bad pipeline name, unable to change pipeline state
+ */
+GstcStatus
+gstc_pipeline_get_graph(GstClient *client, const char *pipeline_name, char **response);
+
+/**
  * gstc_element_get:
  * @client: The client returned by gstc_client_new()
  * @pname: Name associated with the pipeline
