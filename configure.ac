@@ -212,6 +212,18 @@ AS_IF([test "x$with_systemd" = "xyes"], [systemd_path=$($PKG_CONFIG --variable=s
 AC_SUBST(systemd_path, $systemd_path)
 AM_CONDITIONAL(WITH_SYSTEMD, test "$systemd" = true)
 
+dnl allow the user to enable init.d
+AC_ARG_WITH(initd,
+  AS_HELP_STRING([--with-initd@<:@=DIR@:>@], [Install init.d script @<:@to DIR if specified@:>@]),
+  [ initd=true; initd_path="$with_initd" ],
+  [ initd=false ])
+
+AS_IF([test "x$with_initd" = "xyes"], [initd_path=${sysconfdir}/init.d],
+      [AS_IF([test "x$with_initd" = "xno"], [initd=false])])
+
+AC_SUBST(initd_path, $initd_path)
+AM_CONDITIONAL(WITH_INITD, test "$initd" = true)
+
 dnl check if compiler understands -Wall (if yes, add -Wall to GST_CFLAGS)
 AC_MSG_CHECKING([to see if compiler understands -Wall])
 save_CFLAGS="$CFLAGS"

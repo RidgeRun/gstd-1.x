@@ -28,12 +28,22 @@ manage_dir()
     fi
 }
 
-directories=(@gstdrunstatedir@ @gstdlogstatedir@)
 
-#Manage pid and log directories
-for d in ${directories[@]}; do
-    manage_dir "$d" 666 root
-done
+case "$1" in
+    start)
+        directories=(@gstdrunstatedir@ @gstdlogstatedir@)
 
-#Start gstd
-gstd;
+        #Manage pid and log directories
+        for d in ${directories[@]}; do
+            manage_dir "$d" 666 root
+        done
+
+        #Start gstd
+        gstd;
+        ;;
+    stop)
+        gstd -k;
+        ;;
+    *)
+        echo "$0 {start|stop}"
+esac

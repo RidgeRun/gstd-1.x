@@ -3,8 +3,8 @@ Description=GstD systemd service to generate folders for run-time variable data 
 
 [Service]
 Type=forking
-ExecStart=@prefix@/libexec/gstd/gstd
-ExecStop=@prefix@/bin/gstd -k
+ExecStart=@prefix@/libexec/gstd/gstd start
+ExecStop=@prefix@/libexec/gstd/gstd stop
 
 [Install]
 WantedBy=multi-user.target
