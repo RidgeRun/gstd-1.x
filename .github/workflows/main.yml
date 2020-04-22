@@ -15,16 +15,16 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: dependecies
+    - name: Dependecies
       run: |
         sudo apt update
         sudo apt install automake libtool pkg-config libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev
         sudo apt install libglib2.0-dev libjson-glib-dev gtk-doc-tools libreadline-dev libncursesw5-dev
         sudo apt install libdaemon-dev libjansson-dev python3-pip python3-setuptools
 
-    - name: generate
+    - name: Generate
       run: ./autogen.sh
-    - name: configure
+    - name: Configure
       run: ./configure
     - name: Compile
       run: make

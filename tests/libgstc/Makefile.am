@@ -140,4 +140,5 @@ libgstc_pipeline_element_get_SOURCES =		\
 	$(top_srcdir)/libgstc/libgstc.c		\
 		$(COMMON_SOURCES)
 
-SUBDIRS = pygstc
+# FIXME Disable pygstc checks
+#SUBDIRS = pygstc
