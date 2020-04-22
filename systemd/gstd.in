@@ -32,7 +32,7 @@ directories=(@gstdrunstatedir@ @gstdlogstatedir@)
 
 #Manage pid and log directories
 for d in ${directories[@]}; do
-    manage_dir "$d" 644 root
+    manage_dir "$d" 666 root
 done
 
 #Start gstd
