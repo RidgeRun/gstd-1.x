@@ -6,6 +6,6 @@ SUBDIRS=gstd		\
 	tests		\
 	examples	\
 	docs        \
-	systemd
+	init
 
 EXTRA_DIST=autogen.sh

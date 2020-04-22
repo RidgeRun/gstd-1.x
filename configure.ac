@@ -241,8 +241,8 @@ tests/libgstc/pygstc/Makefile
 docs/Makefile
 docs/reference/Makefile
 docs/reference/gstd/Makefile
-systemd/Makefile
-systemd/gstd:systemd/gstd.in
-systemd/gstd.service:systemd/gstd.service.in
+init/Makefile
+init/gstd:init/gstd.in
+init/gstd.service:init/gstd.service.in
 ])
 AC_OUTPUT
