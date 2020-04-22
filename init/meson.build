@@ -35,3 +35,23 @@ if systemd_dir != 'no'
    install_dir: systemd_dir
    )
 endif
+
+if get_option('enable-initd')
+
+   # Generate init file
+   init_file = configure_file(
+   input: 'gstd.in',
+   output: 'gstd',
+   configuration: cdata
+   )
+
+   # Install init script
+   initd_dir = get_option('with-gstd-initddir')
+   if initd_dir == '${sysconfdir}/init.d'
+      initd_dir = get_option('sysconfdir') + '/init.d'
+   endif
+   install_data(init_file,
+   install_dir: initd_dir,
+   install_mode: 'r-xr-xr-x'
+   )
+endif
