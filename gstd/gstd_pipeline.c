@@ -182,7 +182,7 @@ gstd_pipeline_class_init (GstdPipelineClass * klass)
       g_param_spec_string ("graph", "Graph",
       "The pipeline graph on GraphViz dot format",
       GSTD_PIPELINE_DEFAULT_GRAPH,
-      G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | GSTD_PARAM_READ);
+      G_PARAM_STATIC_STRINGS | GSTD_PARAM_READ);
 
    properties[PROP_POSITION] =
       g_param_spec_int64 ("position", "Position",
@@ -399,8 +399,9 @@ gstd_pipeline_set_property (GObject * object,
       self->state = g_value_get_object (value);
       break;
     case PROP_GRAPH:
-      if (self->graph)
+      if (self->graph){
         g_free (self->graph);
+      }
       self->graph = g_value_dup_string (value);
       GST_INFO_OBJECT (self, "Changed graph to \"%s\"",
           self->graph);
