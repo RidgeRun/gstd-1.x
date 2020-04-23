@@ -39,10 +39,10 @@ case "$1" in
         done
 
         #Start gstd
-        gstd;
+        @prefix@/bin/gstd;
         ;;
     stop)
-        gstd -k;
+        @prefix@/bin/gstd -k;
         ;;
     *)
         echo "$0 {start|stop}"
