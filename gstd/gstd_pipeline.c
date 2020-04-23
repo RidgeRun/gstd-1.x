@@ -398,14 +398,6 @@ gstd_pipeline_set_property (GObject * object,
       }
       self->state = g_value_get_object (value);
       break;
-    case PROP_GRAPH:
-      if (self->graph){
-        g_free (self->graph);
-      }
-      self->graph = g_value_dup_string (value);
-      GST_INFO_OBJECT (self, "Changed graph to \"%s\"",
-          self->graph);
-      break;
     default:
       /* We don't have any other property... */
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
