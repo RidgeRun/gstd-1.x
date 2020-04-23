@@ -7,7 +7,7 @@ from pygstc.gstc import *
 from pygstc.logger import *
 
 #Create a custom logger with loglevel=DEBUG
-gstd_logger = CustomLogger('simple_pipeline', loglevel='DEBUG')
+gstd_logger = CustomLogger('simple_playback', loglevel='DEBUG')
 
 #Create the client with the logger
 gstc = GstdClient(logger=gstd_logger)
@@ -30,7 +30,7 @@ if(len(sys.argv) > 1):
     FILE_SOURCE = sys.argv[2]
     #pipeline is the string with the pipeline description
     pipeline = "filesrc location="+FILE_SOURCE+" ! decodebin ! videoconvert ! \
-      videoscale ! capsfilter name=cf ! xvimagesink"
+      videoscale ! capsfilter name=cf ! autovideosink"
 
     #Following instructions create and play the pipeline
     gstc.pipeline_create("p0", pipeline)
