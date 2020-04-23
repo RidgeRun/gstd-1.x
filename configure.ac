@@ -200,29 +200,37 @@ AC_ARG_WITH([gstd-logstatedir],
   [AC_SUBST([gstdlogstatedir], [$with_gstd_logstatedir])],
   [AC_SUBST([gstdlogstatedir], [$default])])
 
-dnl allow the user to disable systemd or specify systemd service file location
-AC_ARG_WITH(systemd,
-  AS_HELP_STRING([--with-systemd@<:@=DIR@:>@], [Install systemd service files @<:@to DIR if specified@:>@]),
-  [ systemd=true; systemd_path="$with_systemd" ],
-  [ systemd=true; systemd_path=${sysconfdir}/systemd/system/])
+dnl allow the user to disable systemd gstd.service install
+AC_ARG_ENABLE(systemd,
+  AS_HELP_STRING([--disable-systemd], [Disable install of systemd gstd.service]),
+  [ systemd=false ],
+  [ systemd=true ])
 
-AS_IF([test "x$with_systemd" = "xyes"], [systemd_path=${sysconfdir}/systemd/system/],
-      [AS_IF([test "x$with_systemd" = "xno"], [systemd=false])])
-
-AC_SUBST(systemd_path, $systemd_path)
 AM_CONDITIONAL(WITH_SYSTEMD, test "$systemd" = true)
 
-dnl allow the user to enable init.d
-AC_ARG_WITH(initd,
-  AS_HELP_STRING([--with-initd@<:@=DIR@:>@], [Install init.d script @<:@to DIR if specified@:>@]),
-  [ initd=true; initd_path="$with_initd" ],
+dnl allow the user to specify systemd gstd.service file location
+default=${sysconfdir}/systemd/system/
+AC_ARG_WITH([gstd-systemddir],
+  AS_HELP_STRING([--with-gstd-systemddir@<:@=DIR@:>@],
+  [Install systemd gstd.service @<:@to DIR if specified@:>@, otherwise defaults to ${sysconfdir}/systemd/system/]),
+  [AC_SUBST([gstdsystemddir], [$with_gstd_systemddir])],
+  [AC_SUBST([gstdsystemddir], [$default])])
+
+dnl allow the user to enable init script install
+AC_ARG_ENABLE(initd,
+  AS_HELP_STRING([--enable-initd], [Enable install of init script]),
+  [ initd=true ],
   [ initd=false ])
 
-AS_IF([test "x$with_initd" = "xyes"], [initd_path=${sysconfdir}/init.d],
-      [AS_IF([test "x$with_initd" = "xno"], [initd=false])])
-
-AC_SUBST(initd_path, $initd_path)
 AM_CONDITIONAL(WITH_INITD, test "$initd" = true)
+
+dnl allow the user to specify init script location
+default=${sysconfdir}/init.d/
+AC_ARG_WITH([gstd-initddir],
+  AS_HELP_STRING([--with-gstd-initddir@<:@=DIR@:>@],
+  [Install init script @<:@to DIR if specified@:>@, otherwise defaults to ${sysconfdir}/init.d/]),
+  [AC_SUBST([gstdinitddir], [$with_gstd_initddir])],
+  [AC_SUBST([gstdinitddir], [$default])])
 
 dnl check if compiler understands -Wall (if yes, add -Wall to GST_CFLAGS)
 AC_MSG_CHECKING([to see if compiler understands -Wall])
