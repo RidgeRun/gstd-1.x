@@ -44,12 +44,14 @@ enum
   PROP_POSITION,
   PROP_DURATION,
   PROP_GRAPH,
+  PROP_VERBOSE,
   N_PROPERTIES                  // NOT A PROPERTY
 };
 
 #define GSTD_PIPELINE_DEFAULT_DESCRIPTION NULL
 #define GSTD_PIPELINE_DEFAULT_STATE GSTD_PIPELINE_NULL
 #define GSTD_PIPELINE_DEFAULT_GRAPH NULL
+#define GSTD_PIPELINE_DEFAULT_VERBOSE 0
 
 /* Gstd Pipeline debugging category */
 GST_DEBUG_CATEGORY_STATIC (gstd_pipeline_debug);
@@ -109,10 +111,15 @@ struct _GstdPipeline
    */
   gint64 duration;
 
-    /**
+  /**
    * Pipeline graph with GraphViz dot format
    */
   gchar* graph;
+ 
+  /**
+   * Verbose state 
+   */
+  gboolean verbose;
 };
 
 struct _GstdPipelineClass
@@ -198,6 +205,11 @@ gstd_pipeline_class_init (GstdPipelineClass * klass)
       G_MAXINT64,
       G_GINT64_CONSTANT(0), /* Default value */
       G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
+
+  properties[PROP_VERBOSE] =
+      g_param_spec_boolean ("verbose", "Verbose",
+      "Verbose state",
+      GSTD_PIPELINE_DEFAULT_VERBOSE, G_PARAM_READWRITE | GSTD_PARAM_READ);
 
   g_object_class_install_properties (object_class, N_PROPERTIES, properties);
 
@@ -351,6 +363,12 @@ gstd_pipeline_get_property (GObject * object,
       g_value_set_string (value, gst_debug_bin_to_dot_data(GST_BIN(self->pipeline),
           GST_DEBUG_GRAPH_SHOW_ALL));
       break;
+
+    case PROP_VERBOSE:
+      GST_DEBUG_OBJECT (self, "Returning verbose handler %d", self->verbose);
+      g_value_set_boolean (value, self->verbose );
+      break;
+
     case PROP_POSITION:
       if (!gst_element_query_position (self->pipeline, GST_FORMAT_TIME, &self->position)) {
         /* if the query could not be performed. return 0 */
@@ -397,6 +415,12 @@ gstd_pipeline_set_property (GObject * object,
         g_object_unref (self->state);
       }
       self->state = g_value_get_object (value);
+      break;
+    case PROP_VERBOSE:
+      if (self->verbose) {
+        self->verbose = 0;
+      }
+      self->verbose = g_value_get_boolean (value);
       break;
     default:
       /* We don't have any other property... */
