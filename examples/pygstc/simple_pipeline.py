@@ -14,8 +14,8 @@ def printError():
     print("To reverse play run: python3 simple_pipeline.py reverse")
     print("To play slow run: python3 simple_pipeline.py slow_motion")
     print("To stop run: python3 simple_pipeline.py delete")
-    print("To read messages from the GStreamer Daemon: python3 simple_pipeline.py read_gstd")
-    print("To read filtered messages from the GStreamer Daemon: python3 simple_pipeline.py read_f_gstd")
+    print("To read messages from the GStreamer Daemon: python3 simple_pipeline.py read_msg")
+    print("To read filtered messages from the GStreamer Daemon: python3 simple_pipeline.py read_f_msg")
     print("To change resolution run: python3 simple_pipeline.py set_res $WIDTH $HEIGHT")
 
 
@@ -67,13 +67,13 @@ else:
         gstc.pipeline_delete ("p0")
         print("Pipeline deleted")
 
-      elif(sys.argv[1] == "read_gstd"):
+      elif(sys.argv[1] == "read_msg"):
         #Timeout in nanoseconds or forever
         gstc.bus_timeout("p0", -1)
         resp = gstc.bus_read("p0")
         print(resp)
 
-      elif(sys.argv[1] == "read_f_gstd"):
+      elif(sys.argv[1] == "read_f_msg"):
         #Serach EOF and react
         gstc.bus_filter("p0", "error+eos")
         resp = gstc.bus_read("p0")
