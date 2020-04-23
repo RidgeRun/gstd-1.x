@@ -243,6 +243,9 @@ AC_COMPILE_IFELSE([AC_LANG_PROGRAM([ ], [ ])], [
   AC_MSG_RESULT([no])
 ])
 
+dnl determine if build is cross-compile
+AM_CONDITIONAL([CROSSCOMPILE], [test x$host = x$build])
+
 dnl =======================================================================
 dnl Finally, create Makefiles in all directories
 dnl =======================================================================

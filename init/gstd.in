@@ -7,7 +7,7 @@ manage_dir()
     user="$3";
 
     #Create directory if not created yet
-    mkdir -p $dir;
+    mkdir -p "$dir";
     if [ $? -ne 0 ]; then
         echo "GstD init: Error, cannot create directory $dir" 1>&2;
         exit 1
@@ -28,10 +28,12 @@ manage_dir()
     fi
 }
 
+gstdrunstatedir=@gstdrunstatedir@
+gstdlogstatedir=@gstdlogstatedir@
 
 case "$1" in
     start)
-        directories=(@gstdrunstatedir@ @gstdlogstatedir@)
+        directories=("$gstdrunstatedir" "$gstdlogstatedir")
 
         #Manage pid and log directories
         for d in ${directories[@]}; do
