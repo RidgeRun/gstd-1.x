@@ -34,6 +34,8 @@ if systemd_enabled
    endif
    install_data(service_file,
    install_dir: systemd_dir)
+
+   meson.add_install_script('gstd.service_enable.sh', systemd_dir)
 endif
 
 if initd_enabled
