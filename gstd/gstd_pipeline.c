@@ -181,8 +181,7 @@ gstd_pipeline_class_init (GstdPipelineClass * klass)
   properties[PROP_GRAPH] =
       g_param_spec_string ("graph", "Graph",
       "The pipeline graph on GraphViz dot format",
-      GSTD_PIPELINE_DEFAULT_GRAPH,
-      G_PARAM_STATIC_STRINGS | GSTD_PARAM_READ);
+      GSTD_PIPELINE_DEFAULT_GRAPH, G_PARAM_STATIC_STRINGS | GSTD_PARAM_READ);
 
    properties[PROP_POSITION] =
       g_param_spec_int64 ("position", "Position",
@@ -349,7 +348,8 @@ gstd_pipeline_get_property (GObject * object,
     case PROP_GRAPH:
       GST_DEBUG_OBJECT (self, "Returning graph handler %p",
           self->graph);
-      g_value_set_string(value, gst_debug_bin_to_dot_data(GST_BIN(self->pipeline), GST_DEBUG_GRAPH_SHOW_ALL));
+      g_value_set_string (value, gst_debug_bin_to_dot_data(GST_BIN(self->pipeline),
+          GST_DEBUG_GRAPH_SHOW_ALL));
       break;
     case PROP_POSITION:
       if (!gst_element_query_position (self->pipeline, GST_FORMAT_TIME, &self->position)) {
