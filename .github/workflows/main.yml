@@ -1,0 +1,38 @@
+name: gstd CI
+
+on:
+  push:
+    branches:
+      - master
+      - develop
+  pull_request:
+    branches:
+      - develop
+
+jobs:
+  build:
+    runs-on: ubuntu-18.04
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Dependecies
+      run: |
+        sudo apt update
+        sudo apt install automake libtool pkg-config libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev
+        sudo apt install libglib2.0-dev libjson-glib-dev gtk-doc-tools libreadline-dev libncursesw5-dev
+        sudo apt install libdaemon-dev libjansson-dev python3-pip python3-setuptools
+
+    - name: Generate
+      run: ./autogen.sh
+    - name: Configure
+      run: ./configure CFLAGS=-Werror
+    - name: Compile
+      run: make
+    - name: Checks
+      run: make check
+    - name: Install
+      run: sudo make install
+    - name: List Pipelines Verification
+      run: |
+        gstd
+        gstd-client list_pipelines
