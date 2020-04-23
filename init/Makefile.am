@@ -6,6 +6,9 @@ systemd_service_DATA = gstd.service
 #Install init script
 systemd_initdir = @prefix@/libexec/gstd/
 systemd_init_SCRIPTS = gstd
+
+install-data-hook:
+	./gstd.service_enable.sh ${systemd_servicedir}
 endif
 
 if WITH_INITD
