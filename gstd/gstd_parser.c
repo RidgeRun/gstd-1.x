@@ -1,17 +1,17 @@
 /*
  * GStreamer Daemon - Gst Launch under steroids
  * Copyright (c) 2015-2017 Ridgerun, LLC (http://www.ridgerun.com)
- * 
+ *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA
@@ -52,6 +52,8 @@ static GstdReturnCode gstd_parser_pipeline_pause (GstdSession *, gchar *,
 static GstdReturnCode gstd_parser_pipeline_stop (GstdSession *, gchar *,
     gchar *, gchar **);
 static GstdReturnCode gstd_parser_pipeline_graph (GstdSession *, gchar *,
+    gchar *, gchar **);
+static GstdReturnCode gstd_parser_pipeline_verbose (GstdSession *, gchar *,
     gchar *, gchar **);
 static GstdReturnCode gstd_parser_element_set (GstdSession *, gchar *,
     gchar *, gchar **);
@@ -113,6 +115,7 @@ static GstdCmd cmds[] = {
   {"pipeline_pause", gstd_parser_pipeline_pause},
   {"pipeline_stop", gstd_parser_pipeline_stop},
   {"pipeline_get_graph", gstd_parser_pipeline_graph},
+  {"pipeline_get_verbose", gstd_parser_pipeline_verbose},
 
   {"element_set", gstd_parser_element_set},
   {"element_get", gstd_parser_element_get},
@@ -434,6 +437,30 @@ gstd_parser_pipeline_graph (GstdSession * session, gchar * action, gchar * args,
   uri = g_strdup_printf ("/pipelines/%s/graph", args);
   ret = gstd_parser_parse_raw_cmd (session, (gchar *) "read", uri, response);
   g_free (uri);
+
+  return ret;
+}
+
+static GstdReturnCode
+gstd_parser_pipeline_verbose (GstdSession * session, gchar * action, gchar * args,
+    gchar ** response)
+{
+  GstdReturnCode ret;
+  gchar *uri;
+  gchar **tokens;
+
+  g_return_val_if_fail (GSTD_IS_SESSION (session), GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (args, GSTD_NULL_ARGUMENT);
+
+  tokens = g_strsplit (args, " ", 2);
+  check_argument (tokens[0], GSTD_BAD_COMMAND);
+  check_argument (tokens[1], GSTD_BAD_COMMAND);
+
+  uri = g_strdup_printf ("/pipelines/%s/verbose %s", tokens[0], tokens[1]);
+  ret = gstd_parser_parse_raw_cmd (session, (gchar *) "update", uri, response);
+
+  g_free (uri);
+  g_strfreev (tokens);
 
   return ret;
 }
