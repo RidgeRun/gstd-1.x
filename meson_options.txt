@@ -2,12 +2,13 @@
 option('enable-tests', type : 'feature', value : 'auto', yield : true, description : 'Build tests')
 option('enable-examples', type : 'feature', value : 'auto', yield : true, description : 'Build examples')
 option('enable-gtk-doc', type : 'boolean', value : false, description : 'Use gtk-doc to build documentation')
-option('enable-initd', type : 'boolean', value : false, description : 'Enable systemd gstd.service install')
+option('enable-systemd', type : 'boolean', value : true, description : 'Enable systemd gstd.service install')
+option('enable-initd', type : 'boolean', value : false, description : 'Enable init script install')
 
 # String options
 option('with-gstd-runstatedir', type : 'string', value : '/var/run/gstd', description : 'Specify the location of the gstd\'s PID file')
 option('with-gstd-logstatedir', type : 'string', value : '/var/log/gstd', description : 'Specify the location of gstd\'s log files')
-option('with-systemd', type : 'string', value : '${sysconfdir}/systemd/system', description : 'Specify the location of gstd.service file')
+option('with-gstd-systemddir', type : 'string', value : '${sysconfdir}/systemd/system', description : 'Specify the location of gstd.service file')
 option('with-gstd-initddir', type : 'string', value : '${sysconfdir}/init.d', description : 'Specify the location of gstd init script')
 
 # Common options
