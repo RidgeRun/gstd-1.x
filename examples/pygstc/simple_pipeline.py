@@ -6,12 +6,6 @@ import sys
 from pygstc.gstc import *
 from pygstc.logger import *
 
-#Create a custom logger with loglevel=DEBUG
-gstd_logger = CustomLogger('simple_playback', loglevel='DEBUG')
-
-#Create the client with the logger
-gstc = GstdClient(logger=gstd_logger)
-
 def printError():
     print("To play run: python3 simple_pipeline.py create $VIDEO_PATH")
     print("To play run: python3 simple_pipeline.py play")
@@ -24,60 +18,71 @@ def printError():
     print("To filter by EOF and read run: python3 simple_pipeline.py read_eof")
     print("To change resolution run: python3 simple_pipeline.py set_res $WIDTH $HEIGHT")
 
-if(len(sys.argv) > 1):
-  if(sys.argv[1]=="create"):
 
-    FILE_SOURCE = sys.argv[2]
-    #pipeline is the string with the pipeline description
-    pipeline = "filesrc location="+FILE_SOURCE+" ! decodebin ! videoconvert ! \
-      videoscale ! capsfilter name=cf ! autovideosink"
+#Create a custom logger with loglevel=DEBUG
+gstd_logger = CustomLogger('simple_playback', loglevel='DEBUG')
 
-    #Following instructions create and play the pipeline
-    gstc.pipeline_create("p0", pipeline)
-
-  elif(sys.argv[1]== "play"):
-    gstc.pipeline_play("p0")
-    print("Playing")
-  
-  #Reverse and slow motion restart the pipeline
-  elif(sys.argv[1]== "reverse"):
-    gstc.event_seek("p0", rate=-1.0, format=3, flags=1, start_type=1, start=0, end_type=1, end=-1)
-    print("Playing in reverse")
-
-  elif(sys.argv[1]== "slow_motion"):
-    gstc.event_seek("p0", rate=0.5, format=3, flags=1, start_type=1, start=0, end_type=1, end=-1)
-    print("Playing in slow motion")
-
-  elif(sys.argv[1]== "pause"):
-    gstc.pipeline_pause("p0")
-    print("Pipeline paused")
-
-  elif(sys.argv[1]== "stop"):
-    gstc.pipeline_stop("p0")
-    print("Pipeline stoped")
-
-  elif(sys.argv[1]== "delete"):
-    gstc.pipeline_delete ("p0")
-    print("Pipeline deleted")
-
-  elif(sys.argv[1] == "read_bus"):
-    #Timeout in nanoseconds or forever
-    gstc.bus_timeout("p0", -1)
-    resp = gstc.bus_read("p0")
-    print(resp)
-
-  elif(sys.argv[1] == "read_eof"):
-    #Serach EOF and react
-    gstc.bus_filter("p0", "error+eos")
-    resp = gstc.bus_read("p0")
-    print(resp)
-
-  elif(sys.argv[1] == "set_res" and len(sys.argv) == 4):
-    width = sys.argv[2]
-    height = sys.argv[3]
-    gstc.element_set("p0", "cf", "caps", "video/x-raw,width="+width+",height="+height+"")
-
-  else:
-    printError()
+#Create the client with the logger
+try:
+  gstc = GstdClient(logger=gstd_logger)
+  gstc.list_pipelines()
+except:
+  print("Error: The GstdClient could not be created")
 else:
-    printError()
+  if(len(sys.argv) > 1):
+    if(sys.argv[1]=="create"):
+
+      FILE_SOURCE = sys.argv[2]
+      #pipeline is the string with the pipeline description
+      pipeline = "filesrc location="+FILE_SOURCE+" ! decodebin ! videoconvert ! \
+        videoscale ! capsfilter name=cf ! autovideosink"
+
+      #Following instructions create and play the pipeline
+      gstc.pipeline_create("p0", pipeline)
+
+    elif(sys.argv[1]== "play"):
+      gstc.pipeline_play("p0")
+      print("Playing")
+
+    #Reverse and slow motion restart the pipeline
+    elif(sys.argv[1]== "reverse"):
+      gstc.event_seek("p0", rate=-1.0, format=3, flags=1, start_type=1, start=0, end_type=1, end=-1)
+      print("Playing in reverse")
+
+    elif(sys.argv[1]== "slow_motion"):
+      gstc.event_seek("p0", rate=0.5, format=3, flags=1, start_type=1, start=0, end_type=1, end=-1)
+      print("Playing in slow motion")
+
+    elif(sys.argv[1]== "pause"):
+      gstc.pipeline_pause("p0")
+      print("Pipeline paused")
+
+    elif(sys.argv[1]== "stop"):
+      gstc.pipeline_stop("p0")
+      print("Pipeline stoped")
+
+    elif(sys.argv[1]== "delete"):
+      gstc.pipeline_delete ("p0")
+      print("Pipeline deleted")
+
+    elif(sys.argv[1] == "read_bus"):
+      #Timeout in nanoseconds or forever
+      gstc.bus_timeout("p0", -1)
+      resp = gstc.bus_read("p0")
+      print(resp)
+
+    elif(sys.argv[1] == "read_eof"):
+      #Serach EOF and react
+      gstc.bus_filter("p0", "error+eos")
+      resp = gstc.bus_read("p0")
+      print(resp)
+
+    elif(sys.argv[1] == "set_res" and len(sys.argv) == 4):
+      width = sys.argv[2]
+      height = sys.argv[3]
+      gstc.element_set("p0", "cf", "caps", "video/x-raw,width="+width+",height="+height+"")
+
+    else:
+      printError()
+  else:
+      printError()
