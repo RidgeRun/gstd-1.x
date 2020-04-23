@@ -25,7 +25,7 @@ jobs:
     - name: Generate
       run: ./autogen.sh
     - name: Configure
-      run: ./configure
+      run: ./configure CFLAGS=-Werror
     - name: Compile
       run: make
     - name: Checks
