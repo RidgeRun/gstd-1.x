@@ -1,5 +1,16 @@
 #!/bin/sh
 
+### BEGIN INIT INFO
+# Provides: GstD
+# Required-Start: $local_fs $remote_fs
+# Required-Stop: $local_fs $remote_fs
+# Default-Start:  5
+# Default-Stop: 0 6
+# Short-Description: start and stop GstD
+# Description: Gstreamer Daemon is a framework for
+#              controlling audio and video streaming
+### END INIT INFO
+
 manage_dir()
 {
     dir="$1";
