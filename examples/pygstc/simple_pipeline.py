@@ -6,92 +6,109 @@ import sys
 from pygstc.gstc import GstcError, GstdError, GstdClient
 from pygstc.logger import CustomLogger
 
-def printError():
-    print("To play run: python3 simple_pipeline.py create $VIDEO_PATH")
-    print("To play run: python3 simple_pipeline.py play")
-    print("To pause run: python3 simple_pipeline.py pause")
-    print("To stop run: python3 simple_pipeline.py stop")
-    print("To reverse play run: python3 simple_pipeline.py reverse")
-    print("To play slow run: python3 simple_pipeline.py slow_motion")
-    print("To stop run: python3 simple_pipeline.py delete")
-    print("To read messages from the GStreamer Daemon: python3 simple_pipeline.py read_msg")
-    print("To read filtered messages from the GStreamer Daemon: python3 simple_pipeline.py read_f_msg")
-    print("To change resolution run: python3 simple_pipeline.py set_res $WIDTH $HEIGHT")
+class GstcPlayer:
 
+  def __init__(self):
+    #Create a custom logger with loglevel=DEBUG
+    self.gstd_logger = CustomLogger('simple_playback', loglevel='DEBUG')
+    #Create the client with the logger
+    self.gstc = GstdClient(logger=self.gstd_logger)
+    self.pipeline = "fakesrc ! fakesink"
 
-#Create a custom logger with loglevel=DEBUG
-gstd_logger = CustomLogger('simple_playback', loglevel='DEBUG')
+    #Check if pipe is already created
+    if ( self.pipe_exists("p0")):
+      self.gstc.pipeline_delete("p0")
 
-#Create the client with the logger
-try:
-  gstc = GstdClient(logger=gstd_logger)
-  gstc.list_pipelines()
-except:
-  print("Error: The GstdClient could not be created")
-else:
-  try:
-    if(len(sys.argv) > 1):
-      status = 0
-      if(sys.argv[1]=="create"):
-
-        FILE_SOURCE = sys.argv[2]
-        #pipeline is the string with the pipeline description
-        pipeline = "filesrc location="+FILE_SOURCE+" ! decodebin ! videoconvert ! \
+  def openFile(self, videoPath):
+    #Create pipeline object
+    self.pipeline = "filesrc location="+videoPath+" ! decodebin ! videoconvert ! \
           videoscale ! capsfilter name=cf ! autovideosink"
 
-        #Following instructions create and play the pipeline
-        gstc.pipeline_create("p0", pipeline)
+  def playVideo(self):
+    print("Playing")
+    if (self.pipe_exists("p0")):
+      self.gstc.pipeline_delete("p0")
 
-      elif(sys.argv[1]== "play"):
-        gstc.pipeline_play("p0")
-        print("Playing")
+    self.gstc.pipeline_create("p0", self.pipeline)
+    print(self.gstc.list_pipelines())
+    self.gstc.pipeline_play("p0")
 
-      #Reverse and slow motion restart the pipeline
-      elif(sys.argv[1]== "reverse"):
-        gstc.event_seek("p0", rate=-1.0, format=3, flags=1, start_type=1, start=0, end_type=1, end=-1)
-        print("Playing in reverse")
+  def pauseVideo(self):
+    print("Playing")
+    self.gstc.pipeline_pause("p0")
 
-      elif(sys.argv[1]== "slow_motion"):
-        gstc.event_seek("p0", rate=0.5, format=3, flags=1, start_type=1, start=0, end_type=1, end=-1)
-        print("Playing in slow motion")
+  def continueVideo(self):
+    print("Playing")
+    self.gstc.pipeline_play("p0")
 
-      elif(sys.argv[1]== "pause"):
-        gstc.pipeline_pause("p0")
-        print("Pipeline paused")
+  def stopVideo(self):
+    print("Playing")
+    self.gstc.pipeline_stop("p0")
+    self.gstc.pipeline_delete("p0")
 
-      elif(sys.argv[1]== "stop"):
-        gstc.pipeline_stop("p0")
-        print("Pipeline stoped")
+  def set_res(self, width, height):
+    #self.gstc.pipeline_pause("p0")
+    self.gstc.element_set("p0", "cf", "caps", "video/x-raw,width="+width+",height="+height+"")
+    #self.gstc.pipeline_play("p0")
 
-      elif(sys.argv[1]== "delete"):
-        gstc.pipeline_delete ("p0")
-        print("Pipeline deleted")
-
-      elif(sys.argv[1] == "read_msg"):
-        #Timeout in nanoseconds or forever
-        gstc.bus_timeout("p0", -1)
-        resp = gstc.bus_read("p0")
-        print(resp)
-
-      elif(sys.argv[1] == "read_f_msg"):
-        #Serach EOF and react
-        gstc.bus_filter("p0", "error+eos")
-        resp = gstc.bus_read("p0")
-        print(resp)
-
-      elif(sys.argv[1] == "set_res" and len(sys.argv) == 4):
-        width = sys.argv[2]
-        height = sys.argv[3]
-        gstc.element_set("p0", "cf", "caps", "video/x-raw,width="+width+",height="+height+"")
-
-      else:
-        status = -1
+  def pipe_exists(self, pipe_name):
+    #Check if pipe is already created
+    existing_pipes = self.gstc.list_pipelines()
+    if (existing_pipes == []):
+      ret = False
+    elif( existing_pipes[0]['name'] == pipe_name):
+      ret = True
     else:
-        status = -1
-  except GstdError:
-    print("GstdError: Gstd IPC failed")
-  except GstcError:
-    print("GstcError: Gstd python client failed")
+      ret = False
+    return ret
 
-if (status == -1):
+  def printUsage(self):
+    print("play: To play and run")
+    print("pause: To pause the video")
+    print("continue: To continue after paused")
+    print("stop: To stop and close the playing")
+    print("set_res $WIDTH $HEIGHT: To change the video resolution")
+
+def printError():
+  print("To use run: python3 simple_pipeline.py $VIDEO_PATH")
+
+
+print("Sample PyGstC Video Player")
+
+if(len(sys.argv) != 2):
   printError()
+  sys.exit(0)
+
+try:
+  myPlayer = GstcPlayer()
+  myPlayer.openFile(sys.argv[1])
+  myPlayer.playVideo()
+  action = 0
+
+  while (action != "exit"):
+
+    if (action=="play"):
+      myPlayer.playVideo()
+    elif (action=="pause"):
+      myPlayer.pauseVideo()
+    elif (action=="continue"):
+      myPlayer.continueVideo()
+    elif (action=="stop"):
+      myPlayer.stopVideo()
+    #elif (action=="set_speed"):
+    #elif (action=="jump_to"):
+    elif (action=="set_res"):
+      myPlayer.set_res("900", "900")
+    else:
+      myPlayer.printUsage()
+
+    #TODO react to messages from the bus
+
+    action = input("Command\n")
+
+except GstdError:
+  print("GstdError: Gstd IPC failed")
+except GstcError:
+  print("GstcError: Gstd python client failed")
+else:
+  print("PyGstc Video Player ended successfully")
