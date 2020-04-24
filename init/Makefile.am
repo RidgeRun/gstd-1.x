@@ -21,4 +21,7 @@ if WITH_INITD
 #Install the script
 initd_scriptdir = @gstdinitddir@
 initd_script_SCRIPTS = gstd
+
+install-data-hook:
+	./gstd.init_enable.sh ${initd_scriptdir}
 endif
