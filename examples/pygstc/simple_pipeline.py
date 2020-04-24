@@ -3,8 +3,8 @@
 #it into proprietary software.
 import time
 import sys
-from pygstc.gstc import *
-from pygstc.logger import *
+from pygstc.gstc import GstcError, GstdError, GstdClient
+from pygstc.logger import CustomLogger
 
 def printError():
     print("To play run: python3 simple_pipeline.py create $VIDEO_PATH")
