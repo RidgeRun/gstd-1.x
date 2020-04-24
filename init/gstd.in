@@ -7,7 +7,7 @@ manage_dir()
     user="$3";
 
     #Create directory if not created yet
-    mkdir -p "$dir";
+    mkdir -m "$mode" -p "$dir";
     if [ $? -ne 0 ]; then
         echo "GstD init: Error, cannot create directory $dir" 1>&2;
         exit 1
@@ -19,15 +19,9 @@ manage_dir()
         echo "GstD init: Error, cannot change $dir owner to $user:$group" 1>&2;
         exit 1
     fi
-
-    #Set the permissions
-    chmod "$mode" "$dir";
-    if [ $? -ne 0 ]; then
-        echo "GstD init: Error, cannot change $dir permissions to $mode" 1>&2;
-        exit 1
-    fi
 }
 
+prefix=@prefix@
 gstdrunstatedir=@gstdrunstatedir@
 gstdlogstatedir=@gstdlogstatedir@
 
@@ -37,7 +31,7 @@ case "$1" in
 
         #Manage pid and log directories
         for d in ${directories[@]}; do
-            manage_dir "$d" 666 root
+            manage_dir "$d" 766 root
         done
 
         #Start gstd
