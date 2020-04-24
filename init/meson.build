@@ -48,4 +48,6 @@ if initd_enabled
    install_data(init_file,
    install_dir: initd_dir,
    install_mode: 'r-xr-xr-x')
+
+   meson.add_install_script('gstd.init_enable.sh', initd_dir)
 endif
