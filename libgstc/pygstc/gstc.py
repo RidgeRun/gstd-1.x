@@ -906,6 +906,30 @@ class GstdClient:
         result = self._send_cmd_line(['pipeline_get_graph'] + parameters)
         return result
 
+    def pipeline_verbose(self, pipe_name, value):
+        """
+        Set the pipeline verbose mode.
+
+        Parameters
+        ----------
+        pipe_name: string
+            The name of the pipeline
+        value: boolean
+            True or False to activate or deactivate
+ 
+        Raises
+        ------
+        GstdError
+            Error is triggered when Gstd IPC fails
+        GstcError
+            Error is triggered when the Gstd python client fails internally
+        """
+
+        self._logger.info('Setting the pipeline %s verbose mode to %r' % (pipe_name,value))
+        parameters = self._check_parameters([pipe_name,value], [str,bool])
+        self._send_cmd_line(['pipeline_verbose'] + parameters)
+
+
     def read(self, uri):
         """
         Read the resource held at the given URI with the given name.
