@@ -22,7 +22,7 @@
 
 #include <gst/gst.h>
 
-void gstd_log_init (const gchar * gstdfilename, const gchar * gstfilename);
+gboolean gstd_log_init (const gchar * gstdfilename, const gchar * gstfilename);
 void gstd_log_deinit (void);
 
 gchar *gstd_log_get_current_gstd (void);

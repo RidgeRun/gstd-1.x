@@ -216,7 +216,10 @@ main (gint argc, gchar * argv[])
   }
   g_option_context_free (context);
 
-  gstd_log_init (gstdlogfile, gstlogfile);
+  if (!gstd_log_init (gstdlogfile, gstlogfile)) {
+    ret = EXIT_FAILURE;
+    goto out;
+  }
   gstd_daemon_init (argc, argv, pidfile);
 
   /* Print the version and exit */
