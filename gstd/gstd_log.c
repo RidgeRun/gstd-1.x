@@ -49,10 +49,13 @@ static FILE *_gstlog = NULL;
 static gchar *gstd_filename;
 static gchar *gst_filename;
 
-void
+gboolean
 gstd_log_init (const gchar * gstdfilename, const gchar * gstfilename)
 {
   gint debug_color;
+  gboolean ret = TRUE;
+  gchar *err_filename;
+  gchar *err_msg;
 
   if (_gstdlog) {
     return;
@@ -64,7 +67,8 @@ gstd_log_init (const gchar * gstdfilename, const gchar * gstfilename)
 
   if (!_gstdlog) {
     g_printerr ("Unable to open Gstd log file: %s\n", g_strerror (errno));
-    return;
+    err_filename = gstd_filename;
+    goto error;
   }
 
   gst_filename =
@@ -73,7 +77,8 @@ gstd_log_init (const gchar * gstdfilename, const gchar * gstfilename)
 
   if (!_gstlog) {
     g_printerr ("Unable to open Gst log file: %s\n", g_strerror (errno));
-    return;
+    err_filename = gst_filename;
+    goto error;
   }
 
   /* Turn on up to info for gstd debug */
@@ -86,6 +91,29 @@ gstd_log_init (const gchar * gstdfilename, const gchar * gstfilename)
   /* Initialize debug category with nice colors */
   debug_color = GST_DEBUG_FG_BLACK | GST_DEBUG_BOLD | GST_DEBUG_BG_WHITE;
   GST_DEBUG_CATEGORY_INIT (gstd_debug, "gstd", debug_color, "Gstd category");
+  goto out;
+
+error:
+  {
+    switch (errno) {
+      case EACCES:
+        err_msg = "User must have write permissions to %s.\n";
+        break;
+      case ENOENT:
+        err_msg = "Directory %s does not exist, please create it.\n";
+        break;
+      default:
+        err_msg = "Unknown error to access %s.\n";
+        break;
+    }
+    g_printerr(err_msg, dirname(err_filename));
+    ret = FALSE;
+  }
+
+out:
+  {
+    return ret;
+  }
 }
 
 void
