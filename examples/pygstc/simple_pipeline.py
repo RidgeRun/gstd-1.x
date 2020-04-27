@@ -35,16 +35,19 @@ class GstcPlayer:
 
   def pauseVideo(self):
     print("Playing")
-    self.gstc.pipeline_pause("p0")
+    if (self.pipe_exists("p0")):
+      self.gstc.pipeline_pause("p0")
 
   def continueVideo(self):
     print("Playing")
-    self.gstc.pipeline_play("p0")
+    if (self.pipe_exists("p0")):
+      self.gstc.pipeline_play("p0")
 
   def stopVideo(self):
-    print("Playing")
-    self.gstc.pipeline_stop("p0")
-    self.gstc.pipeline_delete("p0")
+    print("Stop")
+    if (self.pipe_exists("p0")):
+      self.gstc.pipeline_stop("p0")
+      self.gstc.pipeline_delete("p0")
 
   def set_res(self, width, height):
     #self.gstc.pipeline_pause("p0")
