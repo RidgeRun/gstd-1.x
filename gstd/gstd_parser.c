@@ -115,7 +115,7 @@ static GstdCmd cmds[] = {
   {"pipeline_pause", gstd_parser_pipeline_pause},
   {"pipeline_stop", gstd_parser_pipeline_stop},
   {"pipeline_get_graph", gstd_parser_pipeline_graph},
-  {"pipeline_get_verbose", gstd_parser_pipeline_verbose},
+  {"pipeline_verbose", gstd_parser_pipeline_verbose},
 
   {"element_set", gstd_parser_element_set},
   {"element_get", gstd_parser_element_get},
