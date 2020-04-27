@@ -43,11 +43,13 @@ enum
   PROP_EVENT,
   PROP_POSITION,
   PROP_DURATION,
+  PROP_GRAPH,
   N_PROPERTIES                  // NOT A PROPERTY
 };
 
 #define GSTD_PIPELINE_DEFAULT_DESCRIPTION NULL
 #define GSTD_PIPELINE_DEFAULT_STATE GSTD_PIPELINE_NULL
+#define GSTD_PIPELINE_DEFAULT_GRAPH NULL
 
 /* Gstd Pipeline debugging category */
 GST_DEBUG_CATEGORY_STATIC (gstd_pipeline_debug);
@@ -106,6 +108,11 @@ struct _GstdPipeline
    * Duration of the media stream pipeline
    */
   gint64 duration;
+
+    /**
+   * Pipeline graph with GraphViz dot format
+   */
+  gchar* graph;
 };
 
 struct _GstdPipelineClass
@@ -171,6 +178,11 @@ gstd_pipeline_class_init (GstdPipelineClass * klass)
       "The event handler of the pipeline",
       GSTD_TYPE_EVENT_HANDLER, G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
+  properties[PROP_GRAPH] =
+      g_param_spec_string ("graph", "Graph",
+      "The pipeline graph on GraphViz dot format",
+      GSTD_PIPELINE_DEFAULT_GRAPH, G_PARAM_STATIC_STRINGS | GSTD_PARAM_READ);
+
    properties[PROP_POSITION] =
       g_param_spec_int64 ("position", "Position",
       "The query position of the pipeline",
@@ -204,6 +216,7 @@ gstd_pipeline_init (GstdPipeline * self)
   self->event_handler = NULL;
   self->pipeline_bus = NULL;
   self->state = NULL;
+  self->graph = NULL;
 
   self->elements = g_object_new (GSTD_TYPE_LIST, "name", "elements",
       "node-type", GSTD_TYPE_ELEMENT, "flags", GSTD_PARAM_READ, NULL);
@@ -296,6 +309,10 @@ gstd_pipeline_dispose (GObject * object)
     self->elements = NULL;
   }
 
+  if (self->graph) {
+    g_object_unref (self->graph);
+    self->graph = NULL;
+  }
   G_OBJECT_CLASS (gstd_pipeline_parent_class)->dispose (object);
 }
 
@@ -327,6 +344,12 @@ gstd_pipeline_get_property (GObject * object,
       GST_DEBUG_OBJECT (self, "Returning event handler %p",
           self->event_handler);
       g_value_set_object (value, self->event_handler);
+      break;
+    case PROP_GRAPH:
+      GST_DEBUG_OBJECT (self, "Returning graph handler %p",
+          self->graph);
+      g_value_set_string (value, gst_debug_bin_to_dot_data(GST_BIN(self->pipeline),
+          GST_DEBUG_GRAPH_SHOW_ALL));
       break;
     case PROP_POSITION:
       if (!gst_element_query_position (self->pipeline, GST_FORMAT_TIME, &self->position)) {

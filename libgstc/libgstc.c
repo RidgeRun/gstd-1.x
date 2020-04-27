@@ -53,6 +53,7 @@
 
 #define PIPELINE_CREATE_FORMAT               "%s %s"
 #define PIPELINE_STATE_FORMAT                "/pipelines/%s/state"
+#define PIPELINE_GRAPH_FORMAT                "/pipelines/%s/graph"
 #define PIPELINE_BUS_FORMAT                  "/pipelines/%s/bus/%s"
 #define PIPELINE_BUS_MSG_FORMAT              "/pipelines/%s/bus/message"
 #define PIPELINE_ELEMENTS_FORMAT             "/pipelines/%s/elements/"
@@ -390,6 +391,34 @@ gstc_pipeline_stop (GstClient * client, const char *pipeline_name)
   gstc_assert_and_ret_val (NULL != pipeline_name, GSTC_NULL_ARGUMENT);
 
   return gstc_cmd_change_state (client, pipeline_name, state);
+}
+
+GstcStatus
+gstc_pipeline_get_graph (GstClient * client, const char *pipeline_name, char **response)
+{
+
+  GstcStatus ret;
+  int asprintf_ret;
+  char *what;
+
+  gstc_assert_and_ret_val (NULL != client, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != pipeline_name, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != response, GSTC_NULL_ARGUMENT);
+
+  asprintf_ret = asprintf (&what, PIPELINE_GRAPH_FORMAT, pipeline_name);
+  if (asprintf_ret == PRINTF_ERROR) {
+    return GSTC_OOM;
+  }
+
+  ret = gstc_cmd_read (client, what, response, client->timeout);
+  if (GSTC_OK != ret) {
+    goto out;
+  }
+
+out:
+  free (what);
+
+  return ret;
 }
 
 void

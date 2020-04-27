@@ -51,6 +51,8 @@ static GstdReturnCode gstd_parser_pipeline_pause (GstdSession *, gchar *,
     gchar *, gchar **);
 static GstdReturnCode gstd_parser_pipeline_stop (GstdSession *, gchar *,
     gchar *, gchar **);
+static GstdReturnCode gstd_parser_pipeline_graph (GstdSession *, gchar *,
+    gchar *, gchar **);
 static GstdReturnCode gstd_parser_element_set (GstdSession *, gchar *,
     gchar *, gchar **);
 static GstdReturnCode gstd_parser_element_get (GstdSession *, gchar *,
@@ -77,16 +79,16 @@ static GstdReturnCode gstd_parser_event_flush_start (GstdSession *, gchar *,
     gchar *, gchar **);
 static GstdReturnCode gstd_parser_event_flush_stop (GstdSession *, gchar *,
     gchar *, gchar **);
-static GstdReturnCode gstd_parser_signal_connect (GstdSession *, gchar *, gchar *,
-    gchar **);
-static GstdReturnCode gstd_parser_signal_timeout (GstdSession *, gchar *, gchar *,
-    gchar **);
-static GstdReturnCode gstd_parser_signal_disconnect (GstdSession *, gchar *, gchar *,
-    gchar **);
+static GstdReturnCode gstd_parser_signal_connect (GstdSession *, gchar *,
+    gchar *, gchar **);
+static GstdReturnCode gstd_parser_signal_timeout (GstdSession *, gchar *,
+    gchar *, gchar **);
+static GstdReturnCode gstd_parser_signal_disconnect (GstdSession *, gchar *,
+    gchar *, gchar **);
 static GstdReturnCode gstd_parser_debug_enable (GstdSession *, gchar *, gchar *,
     gchar **);
-static GstdReturnCode gstd_parser_debug_threshold (GstdSession *, gchar *, gchar *,
-    gchar **);
+static GstdReturnCode gstd_parser_debug_threshold (GstdSession *, gchar *,
+    gchar *, gchar **);
 static GstdReturnCode gstd_parser_debug_color (GstdSession *, gchar *, gchar *,
     gchar **);
 static GstdReturnCode gstd_parser_debug_reset (GstdSession *, gchar *, gchar *,
@@ -110,6 +112,7 @@ static GstdCmd cmds[] = {
   {"pipeline_play", gstd_parser_pipeline_play},
   {"pipeline_pause", gstd_parser_pipeline_pause},
   {"pipeline_stop", gstd_parser_pipeline_stop},
+  {"pipeline_get_graph", gstd_parser_pipeline_graph},
 
   {"element_set", gstd_parser_element_set},
   {"element_get", gstd_parser_element_get},
@@ -161,7 +164,7 @@ gstd_parser_parse_raw_cmd (GstdSession * session, gchar * action, gchar * args,
 
   // Alias the empty string to the base
   if (!uri)
-    uri = (gchar*)"/";
+    uri = (gchar *) "/";
 
   ret = gstd_get_by_uri (session, uri, &node);
   if (ret || NULL == node) {
@@ -191,7 +194,8 @@ out:
 }
 
 GstdReturnCode
-gstd_parser_parse_cmd (GstdSession * session, const gchar * cmd, gchar ** response)
+gstd_parser_parse_cmd (GstdSession * session, const gchar * cmd,
+    gchar ** response)
 {
   gchar **tokens;
   gchar *action, *args;
@@ -332,8 +336,8 @@ gstd_parser_delete (GstdSession * session, GstdObject * obj, gchar * args,
 
 
 static GstdReturnCode
-gstd_parser_pipeline_create (GstdSession * session, gchar * action, gchar * args,
-    gchar ** response)
+gstd_parser_pipeline_create (GstdSession * session, gchar * action,
+    gchar * args, gchar ** response)
 {
   GstdReturnCode ret;
   gchar *uri;
@@ -342,7 +346,7 @@ gstd_parser_pipeline_create (GstdSession * session, gchar * action, gchar * args
 
   uri = g_strdup_printf ("/pipelines %s", args ? args : "");
 
-  ret = gstd_parser_parse_raw_cmd (session, (gchar*)"create", uri, response);
+  ret = gstd_parser_parse_raw_cmd (session, (gchar *) "create", uri, response);
 
   g_free (uri);
 
@@ -350,8 +354,8 @@ gstd_parser_pipeline_create (GstdSession * session, gchar * action, gchar * args
 }
 
 static GstdReturnCode
-gstd_parser_pipeline_delete (GstdSession * session, gchar * action, gchar * args,
-    gchar ** response)
+gstd_parser_pipeline_delete (GstdSession * session, gchar * action,
+    gchar * args, gchar ** response)
 {
   GstdReturnCode ret;
   gchar *uri;
@@ -360,7 +364,7 @@ gstd_parser_pipeline_delete (GstdSession * session, gchar * action, gchar * args
   g_return_val_if_fail (args, GSTD_NULL_ARGUMENT);
 
   uri = g_strdup_printf ("/pipelines %s", args);
-  ret = gstd_parser_parse_raw_cmd (session, (gchar*)"delete", uri, response);
+  ret = gstd_parser_parse_raw_cmd (session, (gchar *) "delete", uri, response);
   g_free (uri);
 
   return ret;
@@ -377,7 +381,7 @@ gstd_parser_pipeline_play (GstdSession * session, gchar * action, gchar * args,
   g_return_val_if_fail (args, GSTD_NULL_ARGUMENT);
 
   uri = g_strdup_printf ("/pipelines/%s/state playing", args);
-  ret = gstd_parser_parse_raw_cmd (session, (gchar*)"update", uri, response);
+  ret = gstd_parser_parse_raw_cmd (session, (gchar *) "update", uri, response);
   g_free (uri);
 
   return ret;
@@ -394,7 +398,7 @@ gstd_parser_pipeline_pause (GstdSession * session, gchar * action, gchar * args,
   g_return_val_if_fail (args, GSTD_NULL_ARGUMENT);
 
   uri = g_strdup_printf ("/pipelines/%s/state paused", args);
-  ret = gstd_parser_parse_raw_cmd (session, (gchar*)"update", uri, response);
+  ret = gstd_parser_parse_raw_cmd (session, (gchar *) "update", uri, response);
   g_free (uri);
 
   return ret;
@@ -411,7 +415,24 @@ gstd_parser_pipeline_stop (GstdSession * session, gchar * action, gchar * args,
   g_return_val_if_fail (args, GSTD_NULL_ARGUMENT);
 
   uri = g_strdup_printf ("/pipelines/%s/state null", args);
-  ret = gstd_parser_parse_raw_cmd (session, (gchar*)"update", uri, response);
+  ret = gstd_parser_parse_raw_cmd (session, (gchar *) "update", uri, response);
+  g_free (uri);
+
+  return ret;
+}
+
+static GstdReturnCode
+gstd_parser_pipeline_graph (GstdSession * session, gchar * action, gchar * args,
+    gchar ** response)
+{
+  GstdReturnCode ret;
+  gchar *uri;
+
+  g_return_val_if_fail (GSTD_IS_SESSION (session), GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (args, GSTD_NULL_ARGUMENT);
+
+  uri = g_strdup_printf ("/pipelines/%s/graph", args);
+  ret = gstd_parser_parse_raw_cmd (session, (gchar *) "read", uri, response);
   g_free (uri);
 
   return ret;
@@ -436,7 +457,7 @@ gstd_parser_element_set (GstdSession * session, gchar * action, gchar * args,
 
   uri = g_strdup_printf ("/pipelines/%s/elements/%s/properties/%s %s",
       tokens[0], tokens[1], tokens[2], tokens[3]);
-  ret = gstd_parser_parse_raw_cmd (session, (gchar*)"update", uri, response);
+  ret = gstd_parser_parse_raw_cmd (session, (gchar *) "update", uri, response);
 
   g_free (uri);
   g_strfreev (tokens);
@@ -462,7 +483,7 @@ gstd_parser_element_get (GstdSession * session, gchar * action, gchar * args,
 
   uri = g_strdup_printf ("/pipelines/%s/elements/%s/properties/%s",
       tokens[0], tokens[1], tokens[2]);
-  ret = gstd_parser_parse_raw_cmd (session, (gchar*)"read", uri, response);
+  ret = gstd_parser_parse_raw_cmd (session, (gchar *) "read", uri, response);
 
   g_free (uri);
   g_strfreev (tokens);
@@ -480,7 +501,7 @@ gstd_parser_list_pipelines (GstdSession * session, gchar * action, gchar * args,
   g_return_val_if_fail (GSTD_IS_SESSION (session), GSTD_NULL_ARGUMENT);
 
   uri = g_strdup_printf ("/pipelines");
-  ret = gstd_parser_parse_raw_cmd (session, (gchar*)"read", uri, response);
+  ret = gstd_parser_parse_raw_cmd (session, (gchar *) "read", uri, response);
   g_free (uri);
 
   return ret;
@@ -497,15 +518,15 @@ gstd_parser_list_elements (GstdSession * session, gchar * action, gchar * args,
   g_return_val_if_fail (args, GSTD_NULL_ARGUMENT);
 
   uri = g_strdup_printf ("/pipelines/%s/elements/", args);
-  ret = gstd_parser_parse_raw_cmd (session, (gchar*)"read", uri, response);
+  ret = gstd_parser_parse_raw_cmd (session, (gchar *) "read", uri, response);
   g_free (uri);
 
   return ret;
 }
 
 static GstdReturnCode
-gstd_parser_list_properties (GstdSession * session, gchar * action, gchar * args,
-    gchar ** response)
+gstd_parser_list_properties (GstdSession * session, gchar * action,
+    gchar * args, gchar ** response)
 {
   GstdReturnCode ret;
   gchar *uri;
@@ -521,7 +542,7 @@ gstd_parser_list_properties (GstdSession * session, gchar * action, gchar * args
   uri =
       g_strdup_printf ("/pipelines/%s/elements/%s/properties", tokens[0],
       tokens[1]);
-  ret = gstd_parser_parse_raw_cmd (session, (gchar*)"read", uri, response);
+  ret = gstd_parser_parse_raw_cmd (session, (gchar *) "read", uri, response);
 
   g_free (uri);
   g_strfreev (tokens);
@@ -547,7 +568,7 @@ gstd_parser_list_signals (GstdSession * session, gchar * action, gchar * args,
   uri =
       g_strdup_printf ("/pipelines/%s/elements/%s/signals", tokens[0],
       tokens[1]);
-  ret = gstd_parser_parse_raw_cmd (session, (gchar*)"read", uri, response);
+  ret = gstd_parser_parse_raw_cmd (session, (gchar *) "read", uri, response);
 
   g_free (uri);
   g_strfreev (tokens);
@@ -567,7 +588,7 @@ gstd_parser_bus_read (GstdSession * session, gchar * action,
   g_return_val_if_fail (response, GSTD_NULL_ARGUMENT);
 
   uri = g_strdup_printf ("/pipelines/%s/bus/message", pipeline);
-  ret = gstd_parser_parse_raw_cmd (session, (gchar*)"read", uri, response);
+  ret = gstd_parser_parse_raw_cmd (session, (gchar *) "read", uri, response);
 
   g_free (uri);
 
@@ -591,7 +612,7 @@ gstd_parser_bus_filter (GstdSession * session, gchar * action,
   check_argument (tokens[1], GSTD_BAD_COMMAND);
 
   uri = g_strdup_printf ("/pipelines/%s/bus/types %s", tokens[0], tokens[1]);
-  ret = gstd_parser_parse_raw_cmd (session, (gchar*)"update", uri, response);
+  ret = gstd_parser_parse_raw_cmd (session, (gchar *) "update", uri, response);
 
   g_free (uri);
   g_strfreev (tokens);
@@ -616,7 +637,7 @@ gstd_parser_bus_timeout (GstdSession * session, gchar * action, gchar * args,
   check_argument (tokens[1], GSTD_BAD_COMMAND);
 
   uri = g_strdup_printf ("/pipelines/%s/bus/timeout %s", tokens[0], tokens[1]);
-  ret = gstd_parser_parse_raw_cmd (session, (gchar*)"update", uri, response);
+  ret = gstd_parser_parse_raw_cmd (session, (gchar *) "update", uri, response);
 
   g_free (uri);
   g_strfreev (tokens);
@@ -636,7 +657,7 @@ gstd_parser_event_eos (GstdSession * session, gchar * action, gchar * pipeline,
   g_return_val_if_fail (response, GSTD_NULL_ARGUMENT);
 
   uri = g_strdup_printf ("/pipelines/%s/event eos", pipeline);
-  ret = gstd_parser_parse_raw_cmd (session, (gchar*)"create", uri, response);
+  ret = gstd_parser_parse_raw_cmd (session, (gchar *) "create", uri, response);
 
   g_free (uri);
 
@@ -660,7 +681,7 @@ gstd_parser_event_seek (GstdSession * session, gchar * action, gchar * args,
   // We don't check for the second token since we want to allow defaults
 
   uri = g_strdup_printf ("/pipelines/%s/event seek %s", tokens[0], tokens[1]);
-  ret = gstd_parser_parse_raw_cmd (session, (gchar*)"create", uri, response);
+  ret = gstd_parser_parse_raw_cmd (session, (gchar *) "create", uri, response);
 
   g_free (uri);
   g_strfreev (tokens);
@@ -680,7 +701,7 @@ gstd_parser_event_flush_start (GstdSession * session, gchar * action,
   g_return_val_if_fail (response, GSTD_NULL_ARGUMENT);
 
   uri = g_strdup_printf ("/pipelines/%s/event flush_start", pipeline);
-  ret = gstd_parser_parse_raw_cmd (session, (gchar*)"create", uri, response);
+  ret = gstd_parser_parse_raw_cmd (session, (gchar *) "create", uri, response);
 
   g_free (uri);
 
@@ -688,8 +709,8 @@ gstd_parser_event_flush_start (GstdSession * session, gchar * action,
 }
 
 static GstdReturnCode
-gstd_parser_event_flush_stop (GstdSession * session, gchar * action, gchar * args,
-    gchar ** response)
+gstd_parser_event_flush_stop (GstdSession * session, gchar * action,
+    gchar * args, gchar ** response)
 {
   GstdReturnCode ret;
   gchar *uri;
@@ -706,7 +727,7 @@ gstd_parser_event_flush_stop (GstdSession * session, gchar * action, gchar * arg
   uri =
       g_strdup_printf ("/pipelines/%s/event flush_stop %s", tokens[0],
       tokens[1]);
-  ret = gstd_parser_parse_raw_cmd (session, (gchar*)"create", uri, response);
+  ret = gstd_parser_parse_raw_cmd (session, (gchar *) "create", uri, response);
 
   g_free (uri);
   g_strfreev (tokens);
@@ -715,8 +736,8 @@ gstd_parser_event_flush_stop (GstdSession * session, gchar * action, gchar * arg
 }
 
 static GstdReturnCode
-gstd_parser_debug_enable (GstdSession * session, gchar * action, gchar * enabled,
-    gchar ** response)
+gstd_parser_debug_enable (GstdSession * session, gchar * action,
+    gchar * enabled, gchar ** response)
 {
   GstdReturnCode ret;
   gchar *uri;
@@ -727,7 +748,7 @@ gstd_parser_debug_enable (GstdSession * session, gchar * action, gchar * enabled
   check_argument (enabled, GSTD_BAD_COMMAND);
 
   uri = g_strdup_printf ("/debug/enable %s", enabled);
-  ret = gstd_parser_parse_raw_cmd (session, (gchar*)"update", uri, response);
+  ret = gstd_parser_parse_raw_cmd (session, (gchar *) "update", uri, response);
 
   g_free (uri);
 
@@ -747,7 +768,7 @@ gstd_parser_debug_threshold (GstdSession * session, gchar * action,
   check_argument (threshold, GSTD_BAD_COMMAND);
 
   uri = g_strdup_printf ("/debug/threshold %s", threshold);
-  ret = gstd_parser_parse_raw_cmd (session, (gchar*)"update", uri, response);
+  ret = gstd_parser_parse_raw_cmd (session, (gchar *) "update", uri, response);
 
   g_free (uri);
 
@@ -767,7 +788,7 @@ gstd_parser_debug_color (GstdSession * session, gchar * action, gchar * colored,
   check_argument (colored, GSTD_BAD_COMMAND);
 
   uri = g_strdup_printf ("/debug/color %s", colored);
-  ret = gstd_parser_parse_raw_cmd (session, (gchar*)"update", uri, response);
+  ret = gstd_parser_parse_raw_cmd (session, (gchar *) "update", uri, response);
 
   g_free (uri);
 
@@ -788,7 +809,7 @@ gstd_parser_debug_reset (GstdSession * session, gchar * action, gchar * reset,
   check_argument (reset, GSTD_BAD_COMMAND);
 
   uri = g_strdup_printf ("/debug/reset %s", reset);
-  ret = gstd_parser_parse_raw_cmd (session, (gchar*)"update", uri, response);
+  ret = gstd_parser_parse_raw_cmd (session, (gchar *) "update", uri, response);
 
   g_free (uri);
 
@@ -808,14 +829,14 @@ gstd_parser_signal_connect (GstdSession * session, gchar * action,
   g_return_val_if_fail (args, GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (response, GSTD_NULL_ARGUMENT);
 
-  tokens = g_strsplit(args, " ", 3);
+  tokens = g_strsplit (args, " ", 3);
   check_argument (tokens[0], GSTD_BAD_COMMAND);
   check_argument (tokens[1], GSTD_BAD_COMMAND);
   check_argument (tokens[2], GSTD_BAD_COMMAND);
-  
+
   uri = g_strdup_printf ("/pipelines/%s/elements/%s/signals/%s/callback",
-			 tokens[0], tokens[1], tokens[2]);
-  ret = gstd_parser_parse_raw_cmd (session, (gchar*)"read", uri, response);
+      tokens[0], tokens[1], tokens[2]);
+  ret = gstd_parser_parse_raw_cmd (session, (gchar *) "read", uri, response);
 
   g_free (uri);
   g_strfreev (tokens);
@@ -836,14 +857,14 @@ gstd_parser_signal_disconnect (GstdSession * session, gchar * action,
   g_return_val_if_fail (args, GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (response, GSTD_NULL_ARGUMENT);
 
-  tokens = g_strsplit(args, " ", 3);
+  tokens = g_strsplit (args, " ", 3);
   check_argument (tokens[0], GSTD_BAD_COMMAND);
   check_argument (tokens[1], GSTD_BAD_COMMAND);
   check_argument (tokens[2], GSTD_BAD_COMMAND);
-  
+
   uri = g_strdup_printf ("/pipelines/%s/elements/%s/signals/%s/disconnect",
-			 tokens[0], tokens[1], tokens[2]);
-  ret = gstd_parser_parse_raw_cmd (session, (gchar*)"read", uri, response);
+      tokens[0], tokens[1], tokens[2]);
+  ret = gstd_parser_parse_raw_cmd (session, (gchar *) "read", uri, response);
 
   g_free (uri);
   g_strfreev (tokens);
@@ -872,8 +893,8 @@ gstd_parser_signal_timeout (GstdSession * session, gchar * action, gchar * args,
   check_argument (tokens[3], GSTD_BAD_COMMAND);
 
   uri = g_strdup_printf ("/pipelines/%s/elements/%s/signals/%s/timeout %s",
-			 tokens[0], tokens[1], tokens[2], tokens[3]);
-  ret = gstd_parser_parse_raw_cmd (session, (gchar*)"update", uri, response);
+      tokens[0], tokens[1], tokens[2], tokens[3]);
+  ret = gstd_parser_parse_raw_cmd (session, (gchar *) "update", uri, response);
 
   g_free (uri);
   g_strfreev (tokens);

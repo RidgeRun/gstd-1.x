@@ -42,7 +42,7 @@
 
 /* Allow the user to override this value at build time */
 #ifndef GSTC_MAX_RESPONSE_LENGTH
-#  define GSTC_MAX_RESPONSE_LENGTH 4096
+#  define GSTC_MAX_RESPONSE_LENGTH 8192
 #endif
 
 #define NUMBER_OF_SOCKETS (1)

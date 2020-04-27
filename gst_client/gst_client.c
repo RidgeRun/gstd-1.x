@@ -138,6 +138,8 @@ static GstdClientCmd cmds[] = {
       "pipeline_pause <name>"},
   {"pipeline_stop", gstd_client_cmd_socket, "Sets the pipeline to null",
       "pipeline_stop <name>"},
+  {"pipeline_get_graph", gstd_client_cmd_socket, "Gets pipeline graph",
+      "pipeline_get_graph <name>"},
 
   {"element_set", gstd_client_cmd_socket,
         "Sets a property in an element of a given pipeline",
