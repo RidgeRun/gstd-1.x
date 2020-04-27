@@ -61,6 +61,7 @@ GST_DEBUG_CATEGORY_STATIC (gstd_pipeline_debug);
 
 #define FB_NAME "pipeline%d"
 
+gulong deep_notify_id = 0;
 /**
  * GstdPipeline:
  * A wrapper for the conventional pipeline
@@ -417,10 +418,19 @@ gstd_pipeline_set_property (GObject * object,
       self->state = g_value_get_object (value);
       break;
     case PROP_VERBOSE:
+
       if (self->verbose) {
         self->verbose = 0;
       }
       self->verbose = g_value_get_boolean (value);
+      if(self->verbose == TRUE){
+        deep_notify_id =
+          gst_element_add_property_deep_notify_watch (self->pipeline, NULL, TRUE);
+      }
+      if(self->verbose == FALSE && deep_notify_id !=0 ){
+        g_signal_handler_disconnect (self->pipeline, deep_notify_id);
+        deep_notify_id = 0;
+      }
       break;
     default:
       /* We don't have any other property... */
