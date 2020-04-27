@@ -50,9 +50,12 @@ class GstcPlayer:
       self.gstc.pipeline_delete("p0")
 
   def set_res(self, width, height):
-    #self.gstc.pipeline_pause("p0")
+    print("Changing video resolution")
+    if (self.pipe_exists("p0")):
+      self.gstc.pipeline_delete("p0")
+    self.gstc.pipeline_create("p0", self.pipeline)
     self.gstc.element_set("p0", "cf", "caps", "video/x-raw,width="+width+",height="+height+"")
-    #self.gstc.pipeline_play("p0")
+    self.gstc.pipeline_play("p0")
 
   def pipe_exists(self, pipe_name):
     #Check if pipe is already created
@@ -86,28 +89,31 @@ try:
   myPlayer = GstcPlayer()
   myPlayer.openFile(sys.argv[1])
   myPlayer.playVideo()
-  action = 0
+  action = ["running"]
 
-  while (action != "exit"):
+  while (action[0] != "exit"):
 
-    if (action=="play"):
+    if (action[0]=="play"):
       myPlayer.playVideo()
-    elif (action=="pause"):
+    elif (action[0]=="pause"):
       myPlayer.pauseVideo()
-    elif (action=="continue"):
+    elif (action[0]=="continue"):
       myPlayer.continueVideo()
-    elif (action=="stop"):
+    elif (action[0]=="stop"):
       myPlayer.stopVideo()
     #elif (action=="set_speed"):
     #elif (action=="jump_to"):
-    elif (action=="set_res"):
-      myPlayer.set_res("900", "900")
+    elif (action[0]=="set_res"):
+      if (len(action) == 3 and action[1].isnumeric() and action[2].isnumeric()):
+        myPlayer.set_res(action[1], action[2])
+      else:
+        print("Use set_res $X $Y")
     else:
       myPlayer.printUsage()
 
     #TODO react to messages from the bus
 
-    action = input("Command\n")
+    action = input("Command\n").split()
 
 except GstdError:
   print("GstdError: Gstd IPC failed")
