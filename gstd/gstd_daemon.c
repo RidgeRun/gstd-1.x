@@ -89,16 +89,19 @@ error:
   {
     switch (errno) {
       case EACCES:
-        err_msg = "User must have write permissions to %s\n";
+        err_msg = g_strdup_printf ("User %s must have write permissions to %s and its contents\n",
+            g_get_user_name (), pid_path);
         break;
       case ENOENT:
-        err_msg = "Directory %s does not exist, please create it\n";
+        err_msg = g_strdup_printf ("Directory %s does not exist, please create it " \
+            "and grant write permissions to user %s\n", pid_path, g_get_user_name ());
         break;
       default:
-        err_msg = "Failed to access %s\n.";
+        err_msg = g_strdup_printf ("Failed to access %s with user %s\n." ,
+            pid_path, g_get_user_name ());
         break;
     }
-    g_printerr(err_msg, pid_path);
+    g_printerr (err_msg);
   }
 
 out:
