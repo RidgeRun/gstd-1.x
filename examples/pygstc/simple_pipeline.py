@@ -40,7 +40,7 @@ class GstcPlayer:
   def openFile(self, videoPath):
     #Fill pipeline
     self.pipeline = "filesrc location="+videoPath+" ! decodebin ! videoconvert ! \
-          videoscale ! capsfilter name=cf ! autovideosink"
+          videoscale ! autovideosink"
 
   def playVideo(self):
     print("Playing")
@@ -64,14 +64,6 @@ class GstcPlayer:
       self.gstc.pipeline_stop(self.pipeName)
       self.gstc.pipeline_delete(self.pipeName)
 
-  def setRes(self, width, height):
-    print("Changing video resolution")
-    if (self.pipe_exists(self.pipeName)):
-      self.gstc.pipeline_delete(self.pipeName)
-    self.gstc.pipeline_create(self.pipeName, self.pipeline)
-    self.gstc.element_set(self.pipeName, "cf", "caps", "video/x-raw,width="+width+",height="+height+"")
-    self.gstc.pipeline_play(self.pipeName)
-
   def setSpeed(self, speed):
       self.gstc.event_seek(self.pipeName, rate=speed, format=3, flags=1, start_type=1, start=0, end_type=1, end=-1)
 
@@ -93,7 +85,6 @@ def printUsage():
   print("play: To play and run")
   print("pause: To pause the video")
   print("stop: To stop and close the playing")
-  print("set_res $WIDTH $HEIGHT: To change the video resolution")
   print("set_speed $SPEED")
   print("jump $TIME [in seconds]")
 
@@ -140,11 +131,6 @@ if __name__ == "__main__":
         else:
           print("jump $SECS")
 
-      elif (action[0]=="set_res"):
-        if (len(action) == 3 and action[1].isnumeric() and action[2].isnumeric()):
-          myPlayer.setRes(action[1], action[2])
-        else:
-          print("Use set_res $X $Y")
       else:
         printUsage()
 
