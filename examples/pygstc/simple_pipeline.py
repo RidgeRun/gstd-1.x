@@ -147,16 +147,16 @@ if __name__ == "__main__":
       else:
         myPlayer.printUsage()
 
-      #TODO react to messages from the bus
-
       action = input("Command\n").split()
       if ( len(action)==0):
         action = "running"
 
-  except GstdError:
-    print("GstdError: Gstd IPC failed")
-  except GstcError:
-    print("GstcError: Gstd python client failed")
+  except GstdError as err:
+    #GstdError: Gstd IPC failed
+    print("GStreamer Daemon failed with code: "+err, sys.stderr)
+  except GstcError as err:
+    #GstcError: Gstd python client failed
+    print("GStreamer Client failed with code: "+err, sys.stderr)
   else:
     myPlayer.finish()
     print("PyGstc Video Player ended successfully")
