@@ -288,6 +288,19 @@ GstcStatus
 gstc_pipeline_get_graph(GstClient *client, const char *pipeline_name, char **response);
 
 /**
+ * gstc_pipeline_get_graph:
+ * @client: The client returned by gstc_client_new()
+ * @pipeline_name: Name assoicated with the pipeline
+ * @value: Pipeline verbose mode
+ * Attempts to update the verbose mode of the pipeline.
+ *
+ * Returns: GstcStatus indicating success, daemon unreachable, daemon
+ * timeout, bad pipeline name, unable to change pipeline state
+ */
+GstcStatus
+gstc_pipeline_verbose(GstClient *client, const char *pipeline_name, int value);
+
+/**
  * gstc_element_get:
  * @client: The client returned by gstc_client_new()
  * @pname: Name associated with the pipeline
