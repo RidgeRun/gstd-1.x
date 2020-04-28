@@ -58,10 +58,6 @@ class GstcPlayer:
     print("Paused")
     self.gstc.pipeline_pause(self.pipeName)
 
-  def continueVideo(self):
-    print("Playing")
-    self.gstc.pipeline_play(self.pipeName)
-
   def stopVideo(self):
     print("Stop")
     if (self.pipe_exists(self.pipeName)):
@@ -123,8 +119,6 @@ if __name__ == "__main__":
         myPlayer.playVideo()
       elif (action[0]=="pause"):
         myPlayer.pauseVideo()
-      elif (action[0]=="continue"):
-        myPlayer.continueVideo()
       elif (action[0]=="stop"):
         myPlayer.stopVideo()
       elif (action[0]=="set_speed"):
