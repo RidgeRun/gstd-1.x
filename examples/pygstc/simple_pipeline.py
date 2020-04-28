@@ -122,7 +122,7 @@ if __name__ == "__main__":
       elif (action[0]=="stop"):
         myPlayer.stopVideo()
       elif (action[0]=="set_speed"):
-        if (len(action) == 2 and abs(float(action[1])) <= 1):
+        if (len(action) == 2):
           myPlayer.setSpeed(float(action[1]))
         else:
           print("Playback speed valid range: [-1, 1]. 0 is not allowed")
