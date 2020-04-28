@@ -217,12 +217,12 @@ main (gint argc, gchar * argv[])
   }
   g_option_context_free (context);
 
-  if (!gstd_log_init (gstdlogfile, gstlogfile)) {
+  if (!nodaemon && !gstd_log_init (gstdlogfile, gstlogfile)) {
     ret = EXIT_FAILURE;
     goto out;
   }
 
-  if (!gstd_daemon_init (argc, argv, pidfile)) {
+  if (!nodaemon && !gstd_daemon_init (argc, argv, pidfile)) {
     ret = EXIT_FAILURE;
     goto out;
   }
