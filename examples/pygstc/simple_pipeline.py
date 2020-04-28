@@ -89,12 +89,13 @@ class GstcPlayer:
       ret = False
     return ret
 
-  def printUsage(self):
-    print("play: To play and run")
-    print("pause: To pause the video")
-    print("continue: To continue after paused")
-    print("stop: To stop and close the playing")
-    print("set_res $WIDTH $HEIGHT: To change the video resolution")
+def printUsage():
+  print("play: To play and run")
+  print("pause: To pause the video")
+  print("stop: To stop and close the playing")
+  print("set_res $WIDTH $HEIGHT: To change the video resolution")
+  print("set_speed $SPEED")
+  print("jump $TIME [in seconds]")
 
 def printError():
   print("To use run: python3 simple_pipeline.py $VIDEO_PATH")
@@ -137,7 +138,7 @@ if __name__ == "__main__":
         if (len(action) == 2 and action[1].isnumeric() and int(action[1]) >= 0):
           myPlayer.jumpTo(int(action[1]))
         else:
-          print("jump $NANO_SECS")
+          print("jump $SECS")
 
       elif (action[0]=="set_res"):
         if (len(action) == 3 and action[1].isnumeric() and action[2].isnumeric()):
@@ -145,7 +146,7 @@ if __name__ == "__main__":
         else:
           print("Use set_res $X $Y")
       else:
-        myPlayer.printUsage()
+        printUsage()
 
       action = input("Command\n").split()
       if ( len(action)==0):
