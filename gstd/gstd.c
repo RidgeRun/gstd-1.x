@@ -221,7 +221,11 @@ main (gint argc, gchar * argv[])
     ret = EXIT_FAILURE;
     goto out;
   }
-  gstd_daemon_init (argc, argv, pidfile);
+
+  if (!gstd_daemon_init (argc, argv, pidfile)) {
+    ret = EXIT_FAILURE;
+    goto out;
+  }
 
   /* Print the version and exit */
   if (version) {
