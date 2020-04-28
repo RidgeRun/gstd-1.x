@@ -24,37 +24,38 @@ class GstcPlayer:
 
     #Error handler thread
     self.running = True
+    self.firstRun = True
     self.thErrorHandler = threading.Thread(target=self.errPlayerHandler, args=())
-    self.thErrorHandler.daemon = True
-    self.thErrorHandler.start()
 
   def errPlayerHandler(self):
+    self.gstc.bus_timeout(self.pipeName, -1)
+    self.gstc.bus_filter(self.pipeName, "error+eos+warning")
     while (self.running):
-      if(self.pipe_created):
-        self.gstc.bus_timeout(self.pipeName, -1)
-        self.gstc.bus_filter(self.pipeName, "error+eos+warning")
-        resp = self.gstc.bus_read(self.pipeName)
-        print(resp)
+      resp = self.gstc.bus_read(self.pipeName)
+      print(resp)
 
   def finish(self):
     self.running = False
 
   def openFile(self, videoPath):
-    #Create pipeline object
+    #Fill pipeline
     self.pipeline = "filesrc location="+videoPath+" ! decodebin ! videoconvert ! \
           videoscale ! capsfilter name=cf ! autovideosink"
 
   def playVideo(self):
     print("Playing")
-    if (self.pipe_exists(self.pipeName)):
-      self.gstc.pipeline_delete(self.pipeName)
+    if (not self.pipe_exists(self.pipeName)):
+      #Create pipeline object
+      self.gstc.pipeline_create(self.pipeName, self.pipeline)
 
-    self.gstc.pipeline_create(self.pipeName, self.pipeline)
-    self.pipe_created = True
     self.gstc.pipeline_play(self.pipeName)
 
+    if(self.firstRun):
+      self.thErrorHandler.start()
+    self.firstRun = False
+
   def pauseVideo(self):
-    print("Playing")
+    print("Paused")
     self.gstc.pipeline_pause(self.pipeName)
 
   def continueVideo(self):
@@ -66,7 +67,6 @@ class GstcPlayer:
     if (self.pipe_exists(self.pipeName)):
       self.gstc.pipeline_stop(self.pipeName)
       self.gstc.pipeline_delete(self.pipeName)
-      self.pipe_created = False
 
   def setRes(self, width, height):
     print("Changing video resolution")
