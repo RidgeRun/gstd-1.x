@@ -30,6 +30,8 @@
 
 #include <stdlib.h>
 #include <errno.h>
+#include <unistd.h>
+#include <glib/gstdio.h>
 
 #include <libdaemon/dlog.h>
 #include <libdaemon/dfork.h>
@@ -45,15 +47,24 @@ static gchar *gstd_daemon_get_pid_filename (const gchar * filename);
 static gboolean _initialized = FALSE;
 static gchar *pid_filename = NULL;
 
-void
+gboolean
 gstd_daemon_init (gint argc, gchar * argv[], gchar * pidfilename)
 {
   const gchar *process_name;
+  gchar *pid_path;
+  gchar *err_msg;
 
-  g_return_if_fail (argv);
+  g_return_val_if_fail (argv, FALSE);
 
   if (_initialized)
-    return;
+    goto out;
+
+  /* Check if pid dir available */
+  pid_path = gstd_daemon_get_pid_filename (pidfilename);
+  if (0 != g_access (pid_path, W_OK)) {
+    g_printerr ("Unable to access Gstd pid dir: %s\n", g_strerror (errno));
+    goto error;
+  }
 
   /* Sanitize the process name to use it as PID identification */
   process_name = daemon_ident_from_argv0 (argv[0]);
@@ -72,6 +83,28 @@ gstd_daemon_init (gint argc, gchar * argv[], gchar * pidfilename)
   daemon_pid_file_proc = gstd_daemon_pid;
 
   _initialized = TRUE;
+  goto out;
+
+error:
+  {
+    switch (errno) {
+      case EACCES:
+        err_msg = "User must have write permissions to %s\n";
+        break;
+      case ENOENT:
+        err_msg = "Directory %s does not exist, please create it\n";
+        break;
+      default:
+        err_msg = "Failed to access %s\n.";
+        break;
+    }
+    g_printerr(err_msg, pid_path);
+  }
+
+out:
+  {
+    return _initialized;
+  }
 }
 
 gboolean
