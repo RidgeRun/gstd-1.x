@@ -32,7 +32,12 @@ class GstcPlayer:
     self.gstc.bus_filter(self.pipeName, "error+eos+warning")
     while (self.running):
       resp = self.gstc.bus_read(self.pipeName)
-      print(resp)
+      if ((resp["type"]) == "error"):
+        print("Error: Video stopped")
+        self.gstc.pipeline_pause(self.pipeName)
+        self.gstc.pipeline_stop(self.pipeName)
+      else:
+        print(resp)
 
   def finish(self):
     self.running = False
