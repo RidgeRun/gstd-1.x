@@ -93,7 +93,7 @@ class GstcPlayer:
 
   def jumpTo(self, position):
     print("Jump to time: "+str(position))
-    self.gstc.event_seek(self.pipeName, rate=float(self.playingSpeed), format=3, flags=1, start_type=1, start=(position*10^9), end_type=0, end=-1)
+    self.gstc.event_seek(self.pipeName, rate=float(self.playingSpeed), format=3, flags=1, start_type=1, start=(position*(1000000000)), end_type=0, end=-1)
 
   def pipe_exists(self, pipe_name):
     #Check if pipe is already created
