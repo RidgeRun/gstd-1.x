@@ -9,7 +9,7 @@ from pygstc.logger import CustomLogger
 
 class GstcPlayer:
 
-  def __init__(self):
+  def __init__(self, videoPath):
     #Create a custom logger with loglevel=DEBUG
     self.gstd_logger = CustomLogger('simple_playback', loglevel='DEBUG')
     #Create the client with the logger
@@ -24,8 +24,11 @@ class GstcPlayer:
 
     #Error handler thread
     self.running = True
-    self.firstRun = True
     self.thErrorHandler = threading.Thread(target=self.errPlayerHandler, args=())
+
+    self.openFile(videoPath)
+    self.playVideo()
+    self.thErrorHandler.start()
 
   def errPlayerHandler(self):
     self.gstc.bus_timeout(self.pipeName, -1)
@@ -52,12 +55,7 @@ class GstcPlayer:
     if (not self.pipe_exists(self.pipeName)):
       #Create pipeline object
       self.gstc.pipeline_create(self.pipeName, self.pipeline)
-
     self.gstc.pipeline_play(self.pipeName)
-
-    if(self.firstRun):
-      self.thErrorHandler.start()
-    self.firstRun = False
 
   def pauseVideo(self):
     print("Paused")
@@ -105,11 +103,9 @@ if __name__ == "__main__":
     sys.exit(0)
 
   try:
-    myPlayer = GstcPlayer()
-    myPlayer.openFile(sys.argv[1])
-    myPlayer.playVideo()
-    action = ["running"]
+    myPlayer = GstcPlayer(sys.argv[1])
 
+    action = ["running"]
     while (action[0] != "exit"):
 
       if (action[0]=="play"):
