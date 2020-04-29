@@ -11,7 +11,7 @@ class GstcPlayer:
 
   def __init__(self, videoPath):
     #Create a custom logger with loglevel=DEBUG
-    self.gstd_logger = CustomLogger('simple_playback', loglevel='DEBUG')
+    self.gstd_logger = CustomLogger('simple_playback', loglevel='WARNING')
     #Create the client with the logger
     self.gstc = GstdClient(logger=self.gstd_logger)
     self.pipeline = ""
