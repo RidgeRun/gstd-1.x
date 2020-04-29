@@ -920,9 +920,9 @@ class GstdClient:
         Raises
         ------
         GstdError
-            Error is triggered when Gstd IPC fails
+            Error is triggered when the Gstd sever fails internally
         GstcError
-            Error is triggered when the Gstd python client fails internally
+            Error is triggered when Gstd IPC fails
         """
 
         self._logger.info('Setting the pipeline %s verbose mode to %s' % (pipe_name,value))

@@ -295,8 +295,7 @@ gstc_pipeline_get_graph(GstClient *client, const char *pipeline_name, char **res
  * Attempts to update the verbose mode of the pipeline.
  *
  * Returns: GstcStatus indicating success, daemon unreachable, daemon
- * timeout, bad pipeline name, unable to change the verbose mode to 
- * true or false
+ * timeout, bad pipeline name, null argument passed.
  */
 GstcStatus
 gstc_pipeline_verbose(GstClient *client, const char *pipeline_name, int value);
