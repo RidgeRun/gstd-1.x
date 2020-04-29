@@ -36,7 +36,7 @@ class GstcPlayer:
     while (self.running):
       resp = self.gstc.bus_read(self.pipeName)
       if ((resp["type"]) == "error"):
-        print("Error: Video stopped")
+        print("Info: Video stopped")
         self.gstc.pipeline_pause(self.pipeName)
         self.gstc.pipeline_stop(self.pipeName)
       else:
@@ -72,7 +72,7 @@ class GstcPlayer:
     self.gstc.event_seek(self.pipeName, rate=self.playingSpeed, format=3, flags=1, start_type=1, start=0, end_type=1, end=-1)
 
   def jumpTo(self, position):
-    self.gstc.event_seek(self.pipeName, rate=self.playingSpeed, format=3, flags=1, start_type=int(position*10^9), start=0, end_type=0, end=0)
+    self.gstc.event_seek(self.pipeName, rate=float(self.playingSpeed), format=3, flags=1, start_type=1, start=(position*10^9), end_type=0, end=-1)
 
   def pipe_exists(self, pipe_name):
     #Check if pipe is already created
