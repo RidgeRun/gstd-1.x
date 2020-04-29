@@ -55,7 +55,7 @@ class GstcPlayer:
     self.lock.acquire()
     self.running = False
     self.lock.release()
-
+    self.stopVideo()
     self.thErrorHandler.join()
 
   def openFile(self, videoPath):
