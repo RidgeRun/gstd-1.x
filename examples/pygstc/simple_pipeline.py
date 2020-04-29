@@ -16,11 +16,11 @@ class GstcPlayer:
     self.gstc = GstdClient(logger=self.gstd_logger)
     self.pipeline = ""
     self.pipeName = "pygstc_player"
+    self.playingSpeed = 1
 
     #Check if pipe is already created
     if ( self.pipe_exists(self.pipeName)):
       self.gstc.pipeline_delete(self.pipeName)
-    self.pipe_created = False
 
     #Error handler thread
     self.running = True
@@ -68,10 +68,11 @@ class GstcPlayer:
       self.gstc.pipeline_delete(self.pipeName)
 
   def setSpeed(self, speed):
-      self.gstc.event_seek(self.pipeName, rate=speed, format=3, flags=1, start_type=1, start=0, end_type=1, end=-1)
+    self.playingSpeed = speed
+    self.gstc.event_seek(self.pipeName, rate=self.playingSpeed, format=3, flags=1, start_type=1, start=0, end_type=1, end=-1)
 
   def jumpTo(self, position):
-    self.gstc.event_seek(self.pipeName, rate=1.0, format=3, flags=1, start_type=int(position*10^9), start=0, end_type=0, end=0)
+    self.gstc.event_seek(self.pipeName, rate=self.playingSpeed, format=3, flags=1, start_type=int(position*10^9), start=0, end_type=0, end=0)
 
   def pipe_exists(self, pipe_name):
     #Check if pipe is already created
