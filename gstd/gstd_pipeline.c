@@ -51,7 +51,7 @@ enum
 #define GSTD_PIPELINE_DEFAULT_DESCRIPTION NULL
 #define GSTD_PIPELINE_DEFAULT_STATE GSTD_PIPELINE_NULL
 #define GSTD_PIPELINE_DEFAULT_GRAPH NULL
-#define GSTD_PIPELINE_DEFAULT_VERBOSE 0
+#define GSTD_PIPELINE_DEFAULT_VERBOSE FALSE
 
 /* Gstd Pipeline debugging category */
 GST_DEBUG_CATEGORY_STATIC (gstd_pipeline_debug);
@@ -61,7 +61,6 @@ GST_DEBUG_CATEGORY_STATIC (gstd_pipeline_debug);
 
 #define FB_NAME "pipeline%d"
 
-gulong deep_notify_id = 0;
 /**
  * GstdPipeline:
  * A wrapper for the conventional pipeline
@@ -118,9 +117,9 @@ struct _GstdPipeline
   gchar* graph;
  
   /**
-   * Verbose state 
+   * Id to enable/disable deep notify logging (similar to adding -v to get-launch-1.0)
    */
-  gboolean verbose;
+  gulong deep_notify_id;
 };
 
 struct _GstdPipelineClass
@@ -230,6 +229,7 @@ gstd_pipeline_init (GstdPipeline * self)
   self->pipeline_bus = NULL;
   self->state = NULL;
   self->graph = NULL;
+  self->deep_notify_id = 0;
 
   self->elements = g_object_new (GSTD_TYPE_LIST, "name", "elements",
       "node-type", GSTD_TYPE_ELEMENT, "flags", GSTD_PARAM_READ, NULL);
@@ -366,8 +366,8 @@ gstd_pipeline_get_property (GObject * object,
       break;
 
     case PROP_VERBOSE:
-      GST_DEBUG_OBJECT (self, "Returning verbose handler %d", self->verbose);
-      g_value_set_boolean (value, self->verbose);
+      GST_DEBUG_OBJECT (self, "Returning verbose handler %lu", self->deep_notify_id);
+      g_value_set_boolean (value, 0 != self->deep_notify_id);
       break;
 
     case PROP_POSITION:
@@ -402,6 +402,7 @@ gstd_pipeline_set_property (GObject * object,
     guint property_id, const GValue * value, GParamSpec * pspec)
 {
   GstdPipeline *self = GSTD_PIPELINE (object);
+  gboolean verbose = FALSE;
 
   switch (property_id) {
     case PROP_DESCRIPTION:
@@ -418,15 +419,16 @@ gstd_pipeline_set_property (GObject * object,
       self->state = g_value_get_object (value);
       break;
     case PROP_VERBOSE:
+      verbose = g_value_get_boolean (value);
 
-      self->verbose = g_value_get_boolean (value);
-      if(self->verbose == TRUE){
-        deep_notify_id =
-          gst_element_add_property_deep_notify_watch (self->pipeline, NULL, TRUE);
+      if (verbose == FALSE && self->deep_notify_id != 0) {
+        g_signal_handler_disconnect (self->pipeline, self->deep_notify_id);
+        self->deep_notify_id = 0;
       }
-      if(self->verbose == FALSE && deep_notify_id !=0 ){
-        g_signal_handler_disconnect (self->pipeline, deep_notify_id);
-        deep_notify_id = 0;
+      if (verbose == TRUE && self->deep_notify_id == 0) {
+        self->deep_notify_id =
+            gst_element_add_property_deep_notify_watch (self->pipeline, NULL,
+            TRUE);
       }
       break;
     default:
