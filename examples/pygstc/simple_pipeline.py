@@ -114,7 +114,7 @@ def printUsage():
   print("jump $TIME [in seconds]")
 
 def printError():
-  print("To use run: python3 simple_pipeline.py $VIDEO_PATH")
+  print("To use run: python3 simple_pipeline.py $VIDEO_PATH", file=sys.stderr)
 
 
 if __name__ == "__main__":
@@ -163,10 +163,10 @@ if __name__ == "__main__":
 
   except GstdError as err:
     #GstdError: Gstd IPC failed
-    print("GStreamer Daemon failed with code: "+err, sys.stderr)
+    print("GStreamer Daemon failed with code: "+err, file=sys.stderr)
   except GstcError as err:
     #GstcError: Gstd python client failed
-    print("GStreamer Client failed with code: "+err, sys.stderr)
+    print("GStreamer Client failed with code: "+err, file=sys.stderr)
   else:
     myPlayer.finish()
     print("PyGstc Video Player ended successfully")
