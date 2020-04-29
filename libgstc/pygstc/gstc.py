@@ -925,7 +925,7 @@ class GstdClient:
             Error is triggered when the Gstd python client fails internally
         """
 
-        self._logger.info('Setting the pipeline %s verbose mode to %r' % (pipe_name,value))
+        self._logger.info('Setting the pipeline %s verbose mode to %s' % (pipe_name,value))
         parameters = self._check_parameters([pipe_name,value], [str,bool])
         self._send_cmd_line(['pipeline_verbose'] + parameters)
 
