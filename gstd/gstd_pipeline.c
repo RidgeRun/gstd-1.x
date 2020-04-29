@@ -209,7 +209,7 @@ gstd_pipeline_class_init (GstdPipelineClass * klass)
 
   properties[PROP_VERBOSE] =
       g_param_spec_boolean ("verbose", "Verbose",
-      "Verbose state",
+      "Verbose state for the media stream pipeline",
       GSTD_PIPELINE_DEFAULT_VERBOSE, G_PARAM_READWRITE | GSTD_PARAM_READ);
 
   g_object_class_install_properties (object_class, N_PROPERTIES, properties);
@@ -367,7 +367,7 @@ gstd_pipeline_get_property (GObject * object,
 
     case PROP_VERBOSE:
       GST_DEBUG_OBJECT (self, "Returning verbose handler %d", self->verbose);
-      g_value_set_boolean (value, self->verbose );
+      g_value_set_boolean (value, self->verbose);
       break;
 
     case PROP_POSITION:
@@ -419,9 +419,6 @@ gstd_pipeline_set_property (GObject * object,
       break;
     case PROP_VERBOSE:
 
-      if (self->verbose) {
-        self->verbose = 0;
-      }
       self->verbose = g_value_get_boolean (value);
       if(self->verbose == TRUE){
         deep_notify_id =
