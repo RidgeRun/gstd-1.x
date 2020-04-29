@@ -35,10 +35,13 @@ class GstcPlayer:
     self.gstc.bus_filter(self.pipeName, "error+eos+warning")
     while (self.running):
       resp = self.gstc.bus_read(self.pipeName)
-      if ((resp["type"]) == "error"):
+      if (resp["type"] == "error"):
         print("Info: Video stopped")
         self.gstc.pipeline_pause(self.pipeName)
         self.gstc.pipeline_stop(self.pipeName)
+      elif (resp["type"] == "eos"):
+        print("Info: Video stream ended")
+        self.gstc.pipeline_pause(self.pipeName)
       else:
         print(resp)
 
@@ -51,27 +54,29 @@ class GstcPlayer:
           videoscale ! autovideosink"
 
   def playVideo(self):
-    print("Playing")
+    print("Video playing")
     if (not self.pipe_exists(self.pipeName)):
       #Create pipeline object
       self.gstc.pipeline_create(self.pipeName, self.pipeline)
     self.gstc.pipeline_play(self.pipeName)
 
   def pauseVideo(self):
-    print("Paused")
+    print("Video paused")
     self.gstc.pipeline_pause(self.pipeName)
 
   def stopVideo(self):
-    print("Stop")
+    print("Video stopped")
     if (self.pipe_exists(self.pipeName)):
       self.gstc.pipeline_stop(self.pipeName)
       self.gstc.pipeline_delete(self.pipeName)
 
   def setSpeed(self, speed):
+    print("Setting plaay speed to: "+str(speed))
     self.playingSpeed = speed
     self.gstc.event_seek(self.pipeName, rate=self.playingSpeed, format=3, flags=1, start_type=1, start=0, end_type=1, end=-1)
 
   def jumpTo(self, position):
+    print("Jump to time: "+str(position))
     self.gstc.event_seek(self.pipeName, rate=float(self.playingSpeed), format=3, flags=1, start_type=1, start=(position*10^9), end_type=0, end=-1)
 
   def pipe_exists(self, pipe_name):
