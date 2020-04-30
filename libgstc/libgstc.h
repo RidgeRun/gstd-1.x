@@ -2,7 +2,7 @@
  * GStreamer Daemon - gst-launch on steroids
  * C client library abstracting gstd interprocess communication
  *
- * Copyright (c) 2015-2018 RidgeRun, LLC (http://www.ridgerun.com)
+ * Copyright (c) 2015-2020 RidgeRun, LLC (http://www.ridgerun.com)
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -286,6 +286,19 @@ gstc_pipeline_stop(GstClient *client, const char *pipeline_name);
  */
 GstcStatus
 gstc_pipeline_get_graph(GstClient *client, const char *pipeline_name, char **response);
+
+/**
+ * gstc_pipeline_verbose:
+ * @client: The client returned by gstc_client_new()
+ * @pipeline_name: Name associated with the pipeline
+ * @value: Pipeline verbose mode (true/false)
+ * Attempts to update the verbose mode of the pipeline.
+ *
+ * Returns: GstcStatus indicating success, daemon unreachable, daemon
+ * timeout, bad pipeline name, null argument passed.
+ */
+GstcStatus
+gstc_pipeline_verbose(GstClient *client, const char *pipeline_name, int value);
 
 /**
  * gstc_element_get:

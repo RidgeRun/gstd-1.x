@@ -1,6 +1,6 @@
 /*
  * GStreamer Daemon - Gst Launch under steroids
- * Copyright (c) 2015-2017 Ridgerun, LLC (http://www.ridgerun.com)
+ * Copyright (c) 2015-2020 Ridgerun, LLC (http://www.ridgerun.com)
  * 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -140,6 +140,8 @@ static GstdClientCmd cmds[] = {
       "pipeline_stop <name>"},
   {"pipeline_get_graph", gstd_client_cmd_socket, "Gets pipeline graph",
       "pipeline_get_graph <name>"},
+  {"pipeline_verbose", gstd_client_cmd_socket, "Updates pipeline verbose",
+      "pipeline_verbose <name> <value>"},
 
   {"element_set", gstd_client_cmd_socket,
         "Sets a property in an element of a given pipeline",

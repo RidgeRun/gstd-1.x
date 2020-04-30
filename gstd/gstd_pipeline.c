@@ -1,6 +1,6 @@
 /*
  * GStreamer Daemon - Gst Launch under steroids
- * Copyright (c) 2015-2017 Ridgerun, LLC (http://www.ridgerun.com)
+ * Copyright (c) 2015-2020 Ridgerun, LLC (http://www.ridgerun.com)
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -44,12 +44,14 @@ enum
   PROP_POSITION,
   PROP_DURATION,
   PROP_GRAPH,
+  PROP_VERBOSE,
   N_PROPERTIES                  // NOT A PROPERTY
 };
 
 #define GSTD_PIPELINE_DEFAULT_DESCRIPTION NULL
 #define GSTD_PIPELINE_DEFAULT_STATE GSTD_PIPELINE_NULL
 #define GSTD_PIPELINE_DEFAULT_GRAPH NULL
+#define GSTD_PIPELINE_DEFAULT_VERBOSE FALSE
 
 /* Gstd Pipeline debugging category */
 GST_DEBUG_CATEGORY_STATIC (gstd_pipeline_debug);
@@ -109,10 +111,15 @@ struct _GstdPipeline
    */
   gint64 duration;
 
-    /**
+  /**
    * Pipeline graph with GraphViz dot format
    */
   gchar* graph;
+ 
+  /**
+   * Id to enable/disable deep notify logging (similar to adding -v to get-launch-1.0)
+   */
+  gulong deep_notify_id;
 };
 
 struct _GstdPipelineClass
@@ -199,6 +206,11 @@ gstd_pipeline_class_init (GstdPipelineClass * klass)
       G_GINT64_CONSTANT(0), /* Default value */
       G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
+  properties[PROP_VERBOSE] =
+      g_param_spec_boolean ("verbose", "Verbose",
+      "Verbose state for the media stream pipeline",
+      GSTD_PIPELINE_DEFAULT_VERBOSE, G_PARAM_READWRITE | GSTD_PARAM_READ);
+
   g_object_class_install_properties (object_class, N_PROPERTIES, properties);
 
   /* Initialize debug category with nice colors */
@@ -217,6 +229,7 @@ gstd_pipeline_init (GstdPipeline * self)
   self->pipeline_bus = NULL;
   self->state = NULL;
   self->graph = NULL;
+  self->deep_notify_id = 0;
 
   self->elements = g_object_new (GSTD_TYPE_LIST, "name", "elements",
       "node-type", GSTD_TYPE_ELEMENT, "flags", GSTD_PARAM_READ, NULL);
@@ -351,6 +364,12 @@ gstd_pipeline_get_property (GObject * object,
       g_value_set_string (value, gst_debug_bin_to_dot_data(GST_BIN(self->pipeline),
           GST_DEBUG_GRAPH_SHOW_ALL));
       break;
+
+    case PROP_VERBOSE:
+      GST_DEBUG_OBJECT (self, "Returning verbose handler %lu", self->deep_notify_id);
+      g_value_set_boolean (value, 0 != self->deep_notify_id);
+      break;
+
     case PROP_POSITION:
       if (!gst_element_query_position (self->pipeline, GST_FORMAT_TIME, &self->position)) {
         /* if the query could not be performed. return 0 */
@@ -383,6 +402,7 @@ gstd_pipeline_set_property (GObject * object,
     guint property_id, const GValue * value, GParamSpec * pspec)
 {
   GstdPipeline *self = GSTD_PIPELINE (object);
+  gboolean verbose = FALSE;
 
   switch (property_id) {
     case PROP_DESCRIPTION:
@@ -397,6 +417,19 @@ gstd_pipeline_set_property (GObject * object,
         g_object_unref (self->state);
       }
       self->state = g_value_get_object (value);
+      break;
+    case PROP_VERBOSE:
+      verbose = g_value_get_boolean (value);
+
+      if (verbose == FALSE && self->deep_notify_id != 0) {
+        g_signal_handler_disconnect (self->pipeline, self->deep_notify_id);
+        self->deep_notify_id = 0;
+      }
+      if (verbose == TRUE && self->deep_notify_id == 0) {
+        self->deep_notify_id =
+            gst_element_add_property_deep_notify_watch (self->pipeline, NULL,
+            TRUE);
+      }
       break;
     default:
       /* We don't have any other property... */

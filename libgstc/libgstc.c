@@ -2,7 +2,7 @@
  * GStreamer Daemon - gst-launch on steroids
  * C client library abstracting gstd interprocess communication
  *
- * Copyright (c) 2015-2018 RidgeRun, LLC (http://www.ridgerun.com)
+ * Copyright (c) 2015-2020 RidgeRun, LLC (http://www.ridgerun.com)
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -60,6 +60,7 @@
 #define PIPELINE_ELEMENTS_PROPERTIES_FORMAT  "/pipelines/%s/elements/%s/properties"
 #define PIPELINE_ELEMENTS_PROPERTY_FORMAT    "/pipelines/%s/elements/%s/properties/%s"
 #define PIPELINE_EVENT_FORMAT                "/pipelines/%s/event"
+#define PIPELINE_VERBOSE_FORMAT              "/pipelines/%s/verbose"
 
 #define SEEK_FORMAT        "seek %f %d %d %d %lld %d %lld"
 #define FLUSH_STOP_FORMAT  "flush_stop %s"
@@ -416,6 +417,29 @@ gstc_pipeline_get_graph (GstClient * client, const char *pipeline_name, char **r
   }
 
 out:
+  free (what);
+
+  return ret;
+}
+
+GstcStatus
+gstc_pipeline_verbose (GstClient * client, const char *pipeline_name, const int value)
+{
+  GstcStatus ret;
+  int asprintf_ret;
+  char *what;
+  const char *value_bool;
+
+  gstc_assert_and_ret_val (NULL != client, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != pipeline_name, GSTC_NULL_ARGUMENT);
+  
+  asprintf_ret = asprintf (&what, PIPELINE_VERBOSE_FORMAT, pipeline_name);
+  if (asprintf_ret == PRINTF_ERROR) {
+    return GSTC_OOM;
+  }
+  value_bool = value == 0 ? "false" : "true";
+  ret = gstc_cmd_update (client, what, value_bool);
+
   free (what);
 
   return ret;
