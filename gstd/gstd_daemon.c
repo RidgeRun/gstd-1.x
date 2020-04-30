@@ -91,7 +91,6 @@ gstd_daemon_init (gint argc, gchar * argv[], gchar * pidfilename)
 
 error:
   {
-    g_printerr ("Unable to access Gstd pid dir: %s\n", g_strerror (errno));
     switch (errno) {
       case EACCES:
         g_printerr ("User %s must have write permissions to %s and its contents\n",
