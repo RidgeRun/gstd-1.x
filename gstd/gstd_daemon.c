@@ -62,7 +62,8 @@ gstd_daemon_init (gint argc, gchar * argv[], gchar * pidfilename)
   pid_path = gstd_daemon_get_pid_filename (pidfilename);
 
   if (NULL == pid_path) {
-    pid_path = g_strdup ("null");
+    g_printerr ("Unable to access Gstd pid dir: pid path is null\n");
+    goto out;
   }
 
   if (g_access (pid_path, W_OK)) {
