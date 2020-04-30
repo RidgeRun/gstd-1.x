@@ -216,7 +216,7 @@ main (gint argc, gchar * argv[])
   }
   g_option_context_free (context);
 
-  if (!nodaemon && !gstd_log_init (gstdlogfile, gstlogfile)) {
+  if (!gstd_log_init (gstdlogfile, gstlogfile, nodaemon)) {
     ret = EXIT_FAILURE;
     goto out;
   }

@@ -49,7 +49,7 @@ static gchar *gstd_filename;
 static gchar *gst_filename;
 
 gboolean
-gstd_log_init (const gchar * gstdfilename, const gchar * gstfilename)
+gstd_log_init (const gchar * gstdfilename, const gchar * gstfilename, gboolean nodaemon)
 {
   gint debug_color;
   gboolean ret = TRUE;
@@ -59,32 +59,35 @@ gstd_log_init (const gchar * gstdfilename, const gchar * gstfilename)
     goto out;
   }
 
-  gstd_filename =
-      gstd_log_get_filename (gstdfilename, gstd_log_get_gstd_default ());
-  _gstdlog = g_fopen (gstd_filename, "a+");
+  if (!nodaemon) {
+    gstd_filename =
+        gstd_log_get_filename (gstdfilename, gstd_log_get_gstd_default ());
 
-  if (!_gstdlog) {
-    g_printerr ("Unable to open Gstd log file: %s\n", g_strerror (errno));
-    err_filename = gstd_filename;
-    goto error;
-  }
+    _gstdlog = g_fopen (gstd_filename, "a+");
 
-  gst_filename =
-      gstd_log_get_filename (gstfilename, gstd_log_get_gst_default ());
-  _gstlog = g_fopen (gst_filename, "a+");
+    if (!_gstdlog) {
+      g_printerr ("Unable to open Gstd log file: %s\n", g_strerror (errno));
+      err_filename = gstd_filename;
+      goto error;
+    }
 
-  if (!_gstlog) {
-    g_printerr ("Unable to open Gst log file: %s\n", g_strerror (errno));
-    err_filename = gst_filename;
-    goto error;
+    gst_filename =
+        gstd_log_get_filename (gstfilename, gstd_log_get_gst_default ());
+    _gstlog = g_fopen (gst_filename, "a+");
+
+    if (!_gstlog) {
+      g_printerr ("Unable to open Gst log file: %s\n", g_strerror (errno));
+      err_filename = gst_filename;
+      goto error;
+    }
+
+    /* Install our proxy handler */
+    gst_debug_add_log_function (gstd_log_proxy, NULL, NULL);
   }
 
   /* Turn on up to info for gstd debug */
   gst_debug_set_threshold_from_string (GSTD_DEBUG_PREFIX "*:" GSTD_DEBUG_LEVEL,
       FALSE);
-
-  /* Install our proxy handler */
-  gst_debug_add_log_function (gstd_log_proxy, NULL, NULL);
 
   /* Initialize debug category with nice colors */
   debug_color = GST_DEBUG_FG_BLACK | GST_DEBUG_BOLD | GST_DEBUG_BG_WHITE;
