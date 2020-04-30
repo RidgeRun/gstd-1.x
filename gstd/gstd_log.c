@@ -66,7 +66,6 @@ gstd_log_init (const gchar * gstdfilename, const gchar * gstfilename, gboolean n
     _gstdlog = g_fopen (gstd_filename, "a+");
 
     if (!_gstdlog) {
-      g_printerr ("Unable to open Gstd log file: %s\n", g_strerror (errno));
       err_filename = gstd_filename;
       goto error;
     }
@@ -76,7 +75,6 @@ gstd_log_init (const gchar * gstdfilename, const gchar * gstfilename, gboolean n
     _gstlog = g_fopen (gst_filename, "a+");
 
     if (!_gstlog) {
-      g_printerr ("Unable to open Gst log file: %s\n", g_strerror (errno));
       err_filename = gst_filename;
       goto error;
     }
