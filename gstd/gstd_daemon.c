@@ -51,7 +51,7 @@ gboolean
 gstd_daemon_init (gint argc, gchar * argv[], gchar * pidfilename)
 {
   const gchar *process_name;
-  gchar *pid_path;
+  gchar *pid_path = NULL;
 
   g_return_val_if_fail (argv, FALSE);
 
@@ -60,8 +60,12 @@ gstd_daemon_init (gint argc, gchar * argv[], gchar * pidfilename)
 
   /* Check if pid dir available */
   pid_path = gstd_daemon_get_pid_filename (pidfilename);
-  if (0 != g_access (pid_path, W_OK)) {
-    g_printerr ("Unable to access Gstd pid dir: %s\n", g_strerror (errno));
+
+  if (NULL == pid_path) {
+    pid_path = g_strdup ("null");
+  }
+
+  if (g_access (pid_path, W_OK)) {
     goto error;
   }
 
@@ -86,6 +90,7 @@ gstd_daemon_init (gint argc, gchar * argv[], gchar * pidfilename)
 
 error:
   {
+    g_printerr ("Unable to access Gstd pid dir: %s\n", g_strerror (errno));
     switch (errno) {
       case EACCES:
         g_printerr ("User %s must have write permissions to %s and its contents\n",
@@ -103,6 +108,9 @@ error:
 
 out:
   {
+    if (NULL != pid_path) {
+      g_free (pid_path);
+    }
     return _initialized;
   }
 }
