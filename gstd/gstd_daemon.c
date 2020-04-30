@@ -31,8 +31,8 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <unistd.h>
-#include <glib/gstdio.h>
 
+#include <glib/gstdio.h>
 #include <libdaemon/dlog.h>
 #include <libdaemon/dfork.h>
 #include <libdaemon/dsignal.h>
