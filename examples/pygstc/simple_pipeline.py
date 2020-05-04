@@ -87,7 +87,7 @@ class GstcPlayer:
       self.lock.release()
 
   def setSpeed(self, speed):
-    print("Setting plaay speed to: "+str(speed))
+    print("Setting play speed to: "+str(speed))
     self.playingSpeed = speed
     self.gstc.event_seek(self.pipeName, rate=self.playingSpeed, format=3, flags=1, start_type=1, start=0, end_type=1, end=-1)
 
@@ -111,11 +111,12 @@ def printUsage():
   print("pause: To pause the video")
   print("stop: To stop and close the playing")
   print("set_speed $SPEED")
+  print("play_fw: To play forward")
+  print("play_bw: To play backward")
   print("jump $TIME [in seconds]")
 
 def printError():
   print("To use run: python3 simple_pipeline.py $VIDEO_PATH", file=sys.stderr)
-
 
 if __name__ == "__main__":
   print("Sample PyGstC Video Player")
