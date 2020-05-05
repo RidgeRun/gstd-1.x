@@ -38,18 +38,16 @@ static void ipc_add_option_groups (GstdIpc * ipc[], GType factory[],
 static gboolean ipc_start (GstdIpc * ipc[], guint num_ipcs,
     GstdSession * session);
 static void ipc_stop (GstdIpc * ipc[], guint numipc);
-static void print_header (gboolean quiet);
+static void print_header ();
 
 #define HEADER \
       "\nGstd version " PACKAGE_VERSION "\n" \
       "Copyright (C) 2015-2020 RidgeRun (https://www.ridgerun.com)\n\n"
 
 void
-print_header (gboolean quiet)
+print_header ()
 {
-  if (!quiet) {
-    g_print (HEADER);
-  }
+  g_print (HEADER);
 }
 
 static gboolean
@@ -225,7 +223,9 @@ main (gint argc, gchar * argv[])
 
   /* Print the version and exit */
   if (version) {
-    print_header(quiet);
+    if (!quiet) {
+      print_header ();
+    }
     goto out;
   }
 
@@ -237,7 +237,9 @@ main (gint argc, gchar * argv[])
   }
 
   if (nodaemon) {
-    print_header (quiet);
+    if (!quiet) {
+      print_header ();
+    }
   } else {
     gboolean parent;
 
@@ -247,12 +249,14 @@ main (gint argc, gchar * argv[])
 
     /* Parent fork ends here */
     if (parent) {
-      gchar *filename;
-      print_header (quiet);
-      filename = gstd_log_get_current_gstd ();
-      g_print("Log traces will be saved to %s.\n", filename);
-      g_print("Detaching from parent process.\n");
-      g_free (filename);
+      if (!quiet) {
+        gchar *filename;
+        print_header ();
+        filename = gstd_log_get_current_gstd ();
+        g_print ("Log traces will be saved to %s.\n", filename);
+        g_print ("Detaching from parent process.\n");
+        g_free (filename);
+      }
       goto out;
     }
   }
