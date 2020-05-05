@@ -50,9 +50,8 @@ static gchar *gstd_filename;
 static gchar *gst_filename;
 
 gboolean
-gstd_log_init (const gchar * gstdfilename, const gchar * gstfilename, gboolean nodaemon)
+gstd_log_init (const gchar * gstdfilename, const gchar * gstfilename)
 {
-  gint debug_color;
   gboolean ret = TRUE;
   gchar *err_filename;
 
@@ -60,37 +59,27 @@ gstd_log_init (const gchar * gstdfilename, const gchar * gstfilename, gboolean n
     goto out;
   }
 
-  if (!nodaemon) {
-    gstd_filename =
-        gstd_log_get_filename (gstdfilename, gstd_log_get_gstd_default ());
+  gstd_filename =
+      gstd_log_get_filename (gstdfilename, gstd_log_get_gstd_default ());
 
-    _gstdlog = g_fopen (gstd_filename, "a+");
+  _gstdlog = g_fopen (gstd_filename, "a+");
 
-    if (!_gstdlog) {
-      err_filename = gstd_filename;
-      goto error;
-    }
-
-    gst_filename =
-        gstd_log_get_filename (gstfilename, gstd_log_get_gst_default ());
-    _gstlog = g_fopen (gst_filename, "a+");
-
-    if (!_gstlog) {
-      err_filename = gst_filename;
-      goto error;
-    }
-
-    /* Install our proxy handler */
-    gst_debug_add_log_function (gstd_log_proxy, NULL, NULL);
+  if (!_gstdlog) {
+    err_filename = gstd_filename;
+    goto error;
   }
 
-  /* Turn on up to info for gstd debug */
-  gst_debug_set_threshold_from_string (GSTD_DEBUG_PREFIX "*:" GSTD_DEBUG_LEVEL,
-      FALSE);
+  gst_filename =
+      gstd_log_get_filename (gstfilename, gstd_log_get_gst_default ());
+  _gstlog = g_fopen (gst_filename, "a+");
 
-  /* Initialize debug category with nice colors */
-  debug_color = GST_DEBUG_FG_BLACK | GST_DEBUG_BOLD | GST_DEBUG_BG_WHITE;
-  GST_DEBUG_CATEGORY_INIT (gstd_debug, "gstd", debug_color, "Gstd category");
+  if (!_gstlog) {
+    err_filename = gst_filename;
+    goto error;
+  }
+
+  /* Install our proxy handler */
+  gst_debug_add_log_function (gstd_log_proxy, NULL, NULL);
   goto out;
 
 error:
@@ -116,6 +105,19 @@ out:
   {
     return ret;
   }
+}
+
+void
+gstd_debug_init (void)
+{
+  gint debug_color;
+  /* Turn on up to info for gstd debug */
+  gst_debug_set_threshold_from_string (GSTD_DEBUG_PREFIX "*:" GSTD_DEBUG_LEVEL,
+      FALSE);
+
+  /* Initialize debug category with nice colors */
+  debug_color = GST_DEBUG_FG_BLACK | GST_DEBUG_BOLD | GST_DEBUG_BG_WHITE;
+  GST_DEBUG_CATEGORY_INIT (gstd_debug, "gstd", debug_color, "Gstd category");
 }
 
 void
