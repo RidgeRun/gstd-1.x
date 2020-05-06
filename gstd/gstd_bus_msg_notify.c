@@ -75,35 +75,39 @@ gstd_bus_msg_notify_to_string (GstdBusMsg * msg, GstdIFormatter * formatter,
   GstObject *object = NULL;
   const gchar *property_name = NULL;
   const GValue *property_value = NULL;
-  gchar *object_name = NULL ;
+  gchar *object_name = NULL;
   gchar *property_value_str = NULL;
 
   g_return_val_if_fail (msg, GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (formatter, GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (target, GSTD_NULL_ARGUMENT);
 
-  switch(target->type) {
-  case GST_MESSAGE_PROPERTY_NOTIFY:
-    gst_message_parse_property_notify (target, &object, &property_name, &property_value);
-    break;
-  default:
-    return GSTD_EVENT_ERROR;
+  switch (target->type) {
+    case GST_MESSAGE_PROPERTY_NOTIFY:
+      gst_message_parse_property_notify (target, &object, &property_name,
+          &property_value);
+      break;
+    default:
+      return GSTD_EVENT_ERROR;
   }
 
   object_name = gst_object_get_path_string (GST_OBJECT (object));
 
-  if(property_value != NULL){
-    if(G_VALUE_HOLDS_STRING (property_value))
+  if (property_value != NULL) {
+    if (G_VALUE_HOLDS_STRING (property_value))
       property_value_str = g_value_dup_string (property_value);
-    else if(G_VALUE_TYPE (property_value) == GST_TYPE_CAPS)
-      property_value_str = gst_caps_to_string (g_value_get_boxed (property_value));
-    else if(G_VALUE_TYPE (property_value) == GST_TYPE_TAG_LIST)
-      property_value_str = gst_tag_list_to_string (g_value_get_boxed (property_value));
-    else if(G_VALUE_TYPE (property_value) == GST_TYPE_STRUCTURE)
-      property_value_str = gst_structure_to_string (g_value_get_boxed (property_value));
+    else if (G_VALUE_TYPE (property_value) == GST_TYPE_CAPS)
+      property_value_str =
+          gst_caps_to_string (g_value_get_boxed (property_value));
+    else if (G_VALUE_TYPE (property_value) == GST_TYPE_TAG_LIST)
+      property_value_str =
+          gst_tag_list_to_string (g_value_get_boxed (property_value));
+    else if (G_VALUE_TYPE (property_value) == GST_TYPE_STRUCTURE)
+      property_value_str =
+          gst_structure_to_string (g_value_get_boxed (property_value));
     else
       property_value_str = gst_value_serialize (property_value);
-  }else{
+  } else {
     property_value_str = g_strdup ("(no value)");
   }
 
@@ -116,10 +120,10 @@ gstd_bus_msg_notify_to_string (GstdBusMsg * msg, GstdIFormatter * formatter,
   gstd_iformatter_set_member_name (formatter, "message");
   gstd_iformatter_set_string_value (formatter, property_value_str);
 
-  if(object_name){
+  if (object_name) {
     g_free (object_name);
   }
-  if(property_value_str){
+  if (property_value_str) {
     g_free (property_value_str);
   }
 
