@@ -1,6 +1,6 @@
 /*
  * GStreamer Daemon - Gst Launch under steroids
- * Copyright (c) 2015-2017 Ridgerun, LLC (http://www.ridgerun.com)
+ * Copyright (c) 2015-2020 Ridgerun, LLC (http://www.ridgerun.com)
  * 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -81,32 +81,17 @@ gstd_bus_msg_notify_to_string (GstdBusMsg * msg, GstdIFormatter * formatter,
   g_return_val_if_fail (msg, GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (formatter, GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (target, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (target->type == GST_MESSAGE_PROPERTY_NOTIFY,
+      GSTD_EVENT_ERROR);
 
-  switch (target->type) {
-    case GST_MESSAGE_PROPERTY_NOTIFY:
-      gst_message_parse_property_notify (target, &object, &property_name,
-          &property_value);
-      break;
-    default:
-      return GSTD_EVENT_ERROR;
-  }
+  gst_message_parse_property_notify (target, &object, &property_name,
+      &property_value);
 
   object_name = gst_object_get_path_string (GST_OBJECT (object));
 
   if (property_value != NULL) {
-    if (G_VALUE_HOLDS_STRING (property_value))
-      property_value_str = g_value_dup_string (property_value);
-    else if (G_VALUE_TYPE (property_value) == GST_TYPE_CAPS)
-      property_value_str =
-          gst_caps_to_string (g_value_get_boxed (property_value));
-    else if (G_VALUE_TYPE (property_value) == GST_TYPE_TAG_LIST)
-      property_value_str =
-          gst_tag_list_to_string (g_value_get_boxed (property_value));
-    else if (G_VALUE_TYPE (property_value) == GST_TYPE_STRUCTURE)
-      property_value_str =
-          gst_structure_to_string (g_value_get_boxed (property_value));
-    else
-      property_value_str = gst_value_serialize (property_value);
+    property_value_str =
+        g_strdup_value_contents (property_value);
   } else {
     property_value_str = g_strdup ("(no value)");
   }
