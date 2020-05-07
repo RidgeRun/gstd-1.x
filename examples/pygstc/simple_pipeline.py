@@ -21,44 +21,34 @@ class GstcPlayer:
         self.playingSpeed = 1
 
         # Check if pipe is already created
+        # TODO fail if name exists
         if (self.pipe_exists(self.pipeName)):
             self.gstc.pipeline_delete(self.pipeName)
 
-        # Error handler thread
-        self.lock = threading.Lock()
-        self.running = True
-        self.thErrorHandler = threading.Thread(target=self.errPlayerHandler,
-                                               args=())
-
         self.openFile(videoPath)
         self.playVideo()
-        self.thErrorHandler.start()
 
     def errPlayerHandler(self):
-        self.gstc.bus_timeout(self.pipeName, 1000)
-        self.gstc.bus_filter(self.pipeName, "error+eos+warning")
-        while (self.running):
-
-            time.sleep(1)
-            self.lock.acquire()
-
-            if(self.pipe_exists(self.pipeName)):
-                resp = self.gstc.bus_read(self.pipeName)
-                if (resp is not None and resp["type"] == "error"):
-                    print("Info: Video stopped")
-                    self.gstc.pipeline_pause(self.pipeName)
-                    self.gstc.pipeline_stop(self.pipeName)
-                elif (resp is not None and resp["type"] == "eos"):
-                    print("Info: Video stream ended")
-                    self.gstc.pipeline_pause(self.pipeName)
-            self.lock.release()
-
-    def finish(self):
         self.lock.acquire()
-        self.running = False
+        self.gstc.bus_timeout(self.pipeName, 200000000)
+        self.gstc.bus_filter(self.pipeName, "error+eos+warning")
         self.lock.release()
-        self.stopVideo()
-        self.thErrorHandler.join()
+
+        while (True):
+
+            try:
+                self.lock.acquire()
+                resp = self.gstc.bus_read(self.pipeName)
+                self.lock.release()
+                if (resp is not None and resp["type"] == "error"):
+                    print("Player Error. Playing stopped")
+                elif (resp is not None and resp["type"] == "eos"):
+                    print("Player reached end of stream")
+                else:
+                    time.sleep(1)
+                    pass
+            except GstdError:
+                break
 
     def openFile(self, videoPath):
         # Fill pipeline
@@ -70,11 +60,16 @@ class GstcPlayer:
         if (not self.pipe_exists(self.pipeName)):
             # Create pipeline object
             self.gstc.pipeline_create(self.pipeName, self.pipeline)
-            self.gstc.bus_timeout(self.pipeName, 1000)
-        self.gstc.pipeline_play(self.pipeName)
-        self.lock.acquire()
-        self.running = True
-        self.lock.release()
+            self.gstc.pipeline_play(self.pipeName)
+            self.lock = threading.Lock()
+            self.thErrorHandler = threading.Thread(
+                                    target=self.errPlayerHandler,
+                                    args=())
+            self.thErrorHandler.start()
+
+        else:
+            # Continue playing after pause
+            self.gstc.pipeline_play(self.pipeName)
 
     def pauseVideo(self):
         print("Video paused")
@@ -83,10 +78,11 @@ class GstcPlayer:
     def stopVideo(self):
         print("Video stopped")
         if (self.pipe_exists(self.pipeName)):
-            self.gstc.pipeline_stop(self.pipeName)
             self.lock.acquire()
+            self.gstc.pipeline_stop(self.pipeName)
             self.gstc.pipeline_delete(self.pipeName)
             self.lock.release()
+            self.thErrorHandler.join()
 
     def setSpeed(self, speed):
         print("Setting play speed to: "+str(speed))
@@ -191,5 +187,5 @@ if __name__ == "__main__":
         # GstcError: Gstd python client failed
         print("GStreamer Client failed with code: "+err, file=sys.stderr)
     else:
-        myPlayer.finish()
+        myPlayer.stopVideo()
         print("PyGstc Video Player ended successfully")
