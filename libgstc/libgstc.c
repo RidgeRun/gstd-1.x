@@ -395,7 +395,8 @@ gstc_pipeline_stop (GstClient * client, const char *pipeline_name)
 }
 
 GstcStatus
-gstc_pipeline_get_graph (GstClient * client, const char *pipeline_name, char **response)
+gstc_pipeline_get_graph (GstClient * client, const char *pipeline_name,
+    char **response)
 {
 
   GstcStatus ret;
@@ -423,7 +424,8 @@ out:
 }
 
 GstcStatus
-gstc_pipeline_verbose (GstClient * client, const char *pipeline_name, const int value)
+gstc_pipeline_verbose (GstClient * client, const char *pipeline_name,
+    const int value)
 {
   GstcStatus ret;
   int asprintf_ret;
@@ -432,7 +434,7 @@ gstc_pipeline_verbose (GstClient * client, const char *pipeline_name, const int 
 
   gstc_assert_and_ret_val (NULL != client, GSTC_NULL_ARGUMENT);
   gstc_assert_and_ret_val (NULL != pipeline_name, GSTC_NULL_ARGUMENT);
-  
+
   asprintf_ret = asprintf (&what, PIPELINE_VERBOSE_FORMAT, pipeline_name);
   if (asprintf_ret == PRINTF_ERROR) {
     return GSTC_OOM;
