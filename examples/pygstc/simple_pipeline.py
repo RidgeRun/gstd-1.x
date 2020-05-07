@@ -11,7 +11,7 @@ from pygstc.logger import CustomLogger
 
 class GstcPlayer:
 
-    def __init__(self, videoPath):
+    def __init__(self):
         # Create a custom logger with loglevel=DEBUG
         self.gstd_logger = CustomLogger('simple_playback', loglevel='WARNING')
         # Create the client with the logger
@@ -20,13 +20,16 @@ class GstcPlayer:
         self.pipeName = "pygstc_player"
         self.playingSpeed = 1
 
+    def openVideo(self, videoPath):
+        ret = True
         # Check if pipe is already created
-        # TODO fail if name exists
         if (self.pipe_exists(self.pipeName)):
-            self.gstc.pipeline_delete(self.pipeName)
+            ret = False
+        else:
+            self.openFile(videoPath)
+            self.playVideo()
 
-        self.openFile(videoPath)
-        self.playVideo()
+        return ret
 
     def errPlayerHandler(self):
         self.lock.acquire()
@@ -141,7 +144,11 @@ if __name__ == "__main__":
         printError()
         sys.exit(0)
     try:
-        myPlayer = GstcPlayer(sys.argv[1])
+        myPlayer = GstcPlayer()
+
+        if(not myPlayer.openVideo(sys.argv[1])):
+            print("Pipeline already exits", file=sys.stderr)
+            sys.exit(0)
 
         action = ["running"]
         while (action[0] != "exit"):
