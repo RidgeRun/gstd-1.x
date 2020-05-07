@@ -39,9 +39,10 @@ static void gstd_bus_msg_dispose (GObject * object);
 static GstdReturnCode gstd_bus_msg_to_string (GstdObject * object,
     gchar ** outstring);
 
-G_DEFINE_TYPE (GstdBusMsg, gstd_bus_msg, GSTD_TYPE_OBJECT)
+G_DEFINE_TYPE (GstdBusMsg, gstd_bus_msg, GSTD_TYPE_OBJECT);
 
-static void gstd_bus_msg_class_init (GstdBusMsgClass * klass)
+static void
+gstd_bus_msg_class_init (GstdBusMsgClass * klass)
 {
   GObjectClass *oclass;
   GstdObjectClass *goclass;

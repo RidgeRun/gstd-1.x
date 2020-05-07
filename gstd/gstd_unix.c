@@ -53,7 +53,8 @@ G_DEFINE_TYPE (GstdUnix, gstd_unix, GSTD_TYPE_SOCKET);
 static void gstd_unix_dispose (GObject *);
 static GstdReturnCode gstd_unix_create_socket_service (GstdSocket * base,
     GSocketService ** service);
-static gboolean gstd_unix_init_get_option_group (GstdIpc * base, GOptionGroup ** group);
+static gboolean gstd_unix_init_get_option_group (GstdIpc * base,
+    GOptionGroup ** group);
 
 
 static void
@@ -61,7 +62,7 @@ gstd_unix_class_init (GstdUnixClass * klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
   GstdIpcClass *gstdipc_class = GSTD_IPC_CLASS (klass);
-  GstdSocketClass* socket_class = GSTD_SOCKET_CLASS (klass);
+  GstdSocketClass *socket_class = GSTD_SOCKET_CLASS (klass);
   guint debug_color;
   gstdipc_class->get_option_group =
       GST_DEBUG_FUNCPTR (gstd_unix_init_get_option_group);
@@ -92,8 +93,10 @@ gstd_unix_init (GstdUnix * self)
   gchar *default_path;
   GST_INFO_OBJECT (self, "Initializing gstd Unix");
 
-  default_path = g_strdup_printf ("%s/%s", GSTD_RUN_STATE_DIR, GSTD_UNIX_DEFAULT_BASE_NAME);
-  gstd_unix_set_path(self, default_path);
+  default_path =
+      g_strdup_printf ("%s/%s", GSTD_RUN_STATE_DIR,
+      GSTD_UNIX_DEFAULT_BASE_NAME);
+  gstd_unix_set_path (self, default_path);
   g_free (default_path);
   self->num_ports = GSTD_UNIX_DEFAULT_NUM_PORTS;
 
@@ -110,10 +113,11 @@ gstd_unix_dispose (GObject * object)
 
   if (parent->enabled) {
     for (i = 0; i < self->num_ports; i++) {
-      gchar * path_name = g_strdup_printf ("%s_%d", self->unix_path, i);
+      gchar *path_name = g_strdup_printf ("%s_%d", self->unix_path, i);
 
-      if (unlink(path_name) != 0) {
-        GST_ERROR_OBJECT (object, "Unable to delete UNIX path (%s)", strerror(errno));
+      if (unlink (path_name) != 0) {
+        GST_ERROR_OBJECT (object, "Unable to delete UNIX path (%s)",
+            strerror (errno));
       }
       g_free (path_name);
     }
@@ -132,7 +136,7 @@ gstd_unix_create_socket_service (GstdSocket * base, GSocketService ** service)
 {
   GError *error = NULL;
   GstdUnix *self = GSTD_UNIX (base);
-  gchar* path = self->unix_path;
+  gchar *path = self->unix_path;
   guint i;
 
   GST_DEBUG_OBJECT (self, "Getting UNIX Socket address");
@@ -141,20 +145,16 @@ gstd_unix_create_socket_service (GstdSocket * base, GSocketService ** service)
 
   for (i = 0; i < self->num_ports; i++) {
     GSocketAddress *address;
-    gchar * path_name = g_strdup_printf ("%s_%d", path, i);
+    gchar *path_name = g_strdup_printf ("%s_%d", path, i);
 
     address = g_unix_socket_address_new (path_name);
     g_free (path_name);
 
     g_socket_listener_add_address (G_SOCKET_LISTENER (*service),
-                 address,
-                 G_SOCKET_TYPE_STREAM,
-                 G_SOCKET_PROTOCOL_DEFAULT,
-                 NULL,
-                 NULL,
-                 &error);
-      if (error)
-        goto noconnection;
+        address,
+        G_SOCKET_TYPE_STREAM, G_SOCKET_PROTOCOL_DEFAULT, NULL, NULL, &error);
+    if (error)
+      goto noconnection;
   }
   return GSTD_EOK;
 
@@ -177,8 +177,8 @@ gstd_unix_init_get_option_group (GstdIpc * base, GOptionGroup ** group)
         "Enable attach the server through given UNIX socket ", NULL}
     ,
     {"unix-base-path", 'b', 0, G_OPTION_ARG_STRING, &self->unix_path,
-          "Attach to the server using the given path (default /usr/local/var/run/gstd/gstd_default_unix_socket), " \
-        "a '_<port_number>' is appended to this path to create the ports, for instance if only one port is created, its path will be /usr/local/var/run/gstd/gstd_default_unix_socket_0",
+          "Attach to the server using the given path (default /usr/local/var/run/gstd/gstd_default_unix_socket), "
+          "a '_<port_number>' is appended to this path to create the ports, for instance if only one port is created, its path will be /usr/local/var/run/gstd/gstd_default_unix_socket_0",
         "unix-path"}
     ,
     {"unix-num-ports", 'c', 0, G_OPTION_ARG_INT, &self->num_ports,
@@ -187,7 +187,7 @@ gstd_unix_init_get_option_group (GstdIpc * base, GOptionGroup ** group)
     ,
     {NULL}
   };
-    GST_DEBUG_OBJECT (self, "UNIX init group callback ");
+  GST_DEBUG_OBJECT (self, "UNIX init group callback ");
   *group = g_option_group_new ("gstd-unix", ("UNIX Options"),
       ("Show UNIX Options"), NULL, NULL);
 

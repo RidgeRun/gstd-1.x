@@ -44,9 +44,10 @@ struct _GstdBusMsgSimpleClass
   GstdBusMsgClass parent_class;
 };
 
-G_DEFINE_TYPE (GstdBusMsgSimple, gstd_bus_msg_simple, GSTD_TYPE_BUS_MSG)
+G_DEFINE_TYPE (GstdBusMsgSimple, gstd_bus_msg_simple, GSTD_TYPE_BUS_MSG);
 
-static void gstd_bus_msg_simple_class_init (GstdBusMsgSimpleClass * klass)
+static void
+gstd_bus_msg_simple_class_init (GstdBusMsgSimpleClass * klass)
 {
   GstdBusMsgClass *bmclass;
   guint debug_color;
@@ -80,27 +81,27 @@ gstd_bus_msg_simple_to_string (GstdBusMsg * msg, GstdIFormatter * formatter,
   g_return_val_if_fail (target, GSTD_NULL_ARGUMENT);
 
   error = NULL;
-  switch(target->type) {
-  case GST_MESSAGE_ERROR:
-    gst_message_parse_error (target, &error, &debug);
-    break;
-  case GST_MESSAGE_WARNING:
-    gst_message_parse_warning (target, &error, &debug);
-    break;
-  case GST_MESSAGE_INFO:
-    gst_message_parse_info (target, &error, &debug);
-    break;
-  default:
-    return GSTD_EVENT_ERROR;
+  switch (target->type) {
+    case GST_MESSAGE_ERROR:
+      gst_message_parse_error (target, &error, &debug);
+      break;
+    case GST_MESSAGE_WARNING:
+      gst_message_parse_warning (target, &error, &debug);
+      break;
+    case GST_MESSAGE_INFO:
+      gst_message_parse_info (target, &error, &debug);
+      break;
+    default:
+      return GSTD_EVENT_ERROR;
   }
-  
+
   gstd_iformatter_set_member_name (formatter, "message");
   gstd_iformatter_set_string_value (formatter, error->message);
 
   gstd_iformatter_set_member_name (formatter, "debug");
   gstd_iformatter_set_string_value (formatter, debug);
 
-    g_error_free (error);
+  g_error_free (error);
 
   if (debug) {
     g_free (debug);

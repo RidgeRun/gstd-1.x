@@ -44,9 +44,10 @@ struct _GstdBusMsgElementClass
   GstdBusMsgClass parent_class;
 };
 
-G_DEFINE_TYPE (GstdBusMsgElement, gstd_bus_msg_element, GSTD_TYPE_BUS_MSG)
+G_DEFINE_TYPE (GstdBusMsgElement, gstd_bus_msg_element, GSTD_TYPE_BUS_MSG);
 
-static void gstd_bus_msg_element_class_init (GstdBusMsgElementClass * klass)
+static void
+gstd_bus_msg_element_class_init (GstdBusMsgElementClass * klass)
 {
   GstdBusMsgClass *bmclass;
   guint debug_color;
@@ -57,8 +58,8 @@ static void gstd_bus_msg_element_class_init (GstdBusMsgElementClass * klass)
 
   /* Initialize debug category with nice colors */
   debug_color = GST_DEBUG_FG_BLACK | GST_DEBUG_BOLD | GST_DEBUG_BG_WHITE;
-  GST_DEBUG_CATEGORY_INIT (gstd_bus_msg_element_debug, "gstdbusmsgelement", debug_color,
-      "Gstd Bus Msg Element category");
+  GST_DEBUG_CATEGORY_INIT (gstd_bus_msg_element_debug, "gstdbusmsgelement",
+      debug_color, "Gstd Bus Msg Element category");
 
 }
 
@@ -72,7 +73,7 @@ static GstdReturnCode
 gstd_bus_msg_element_to_string (GstdBusMsg * msg, GstdIFormatter * formatter,
     GstMessage * target)
 {
-  const GstStructure * st;
+  const GstStructure *st;
   gint field;
 
   g_return_val_if_fail (msg, GSTD_NULL_ARGUMENT);
@@ -90,19 +91,19 @@ gstd_bus_msg_element_to_string (GstdBusMsg * msg, GstdIFormatter * formatter,
   gstd_iformatter_begin_object (formatter);
 
   /* Iterate through all fields in the structure */
-  for (field = 0 ; field < gst_structure_n_fields (st) ; ++field) {
-    const gchar * field_name;
-    const GValue * field_value;
+  for (field = 0; field < gst_structure_n_fields (st); ++field) {
+    const gchar *field_name;
+    const GValue *field_value;
 
     field_name = gst_structure_nth_field_name (st, field);
     field_value = gst_structure_get_value (st, field_name);
 
     gstd_iformatter_set_member_name (formatter, field_name);
-    gstd_iformatter_set_value(formatter, field_value);
+    gstd_iformatter_set_value (formatter, field_value);
   }
 
   gstd_iformatter_end_object (formatter);
 
- out:
+out:
   return GSTD_EOK;
 }

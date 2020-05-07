@@ -31,13 +31,14 @@ GST_DEBUG_CATEGORY_STATIC (gstd_property_flags_debug);
 #define GSTD_DEBUG_DEFAULT_LEVEL GST_LEVEL_INFO
 
 
-G_DEFINE_TYPE (GstdPropertyFlags, gstd_property_flags, GSTD_TYPE_PROPERTY)
+G_DEFINE_TYPE (GstdPropertyFlags, gstd_property_flags, GSTD_TYPE_PROPERTY);
 
 /* VTable */
 static GstdReturnCode
 gstd_property_flags_update (GstdObject * object, const gchar * arg);
 
-static void gstd_property_flags_class_init (GstdPropertyFlagsClass * klass)
+static void
+gstd_property_flags_class_init (GstdPropertyFlagsClass * klass)
 {
   guint debug_color;
   GstdObjectClass *oclass = GSTD_OBJECT_CLASS (klass);

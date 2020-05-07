@@ -31,8 +31,8 @@ GST_DEBUG_CATEGORY_STATIC (gstd_bus_msg_stream_status_debug);
 #define GSTD_DEBUG_DEFAULT_LEVEL GST_LEVEL_INFO
 
 static GstdReturnCode
-gstd_bus_msg_stream_status_to_string (GstdBusMsg * msg, GstdIFormatter * formatter,
-    GstMessage * target);
+gstd_bus_msg_stream_status_to_string (GstdBusMsg * msg,
+    GstdIFormatter * formatter, GstMessage * target);
 
 static const gchar *
 gstd_bus_msg_stream_status_code_to_string (GstStreamStatusType type);
@@ -47,9 +47,11 @@ struct _GstdBusMsgStreamStatusClass
   GstdBusMsgClass parent_class;
 };
 
-G_DEFINE_TYPE (GstdBusMsgStreamStatus, gstd_bus_msg_stream_status, GSTD_TYPE_BUS_MSG)
+G_DEFINE_TYPE (GstdBusMsgStreamStatus, gstd_bus_msg_stream_status,
+    GSTD_TYPE_BUS_MSG);
 
-static void gstd_bus_msg_stream_status_class_init (GstdBusMsgStreamStatusClass * klass)
+static void
+gstd_bus_msg_stream_status_class_init (GstdBusMsgStreamStatusClass * klass)
 {
   GstdBusMsgClass *bmclass;
   guint debug_color;
@@ -60,7 +62,8 @@ static void gstd_bus_msg_stream_status_class_init (GstdBusMsgStreamStatusClass *
 
   /* Initialize debug category with nice colors */
   debug_color = GST_DEBUG_FG_BLACK | GST_DEBUG_BOLD | GST_DEBUG_BG_WHITE;
-  GST_DEBUG_CATEGORY_INIT (gstd_bus_msg_stream_status_debug, "gstdbusmsgstream_status", debug_color,
+  GST_DEBUG_CATEGORY_INIT (gstd_bus_msg_stream_status_debug,
+      "gstdbusmsgstream_status", debug_color,
       "Gstd Bus Msg StreamStatus category");
 
 }
@@ -74,46 +77,46 @@ gstd_bus_msg_stream_status_init (GstdBusMsgStreamStatus * self)
 static const gchar *
 gstd_bus_msg_stream_status_code_to_string (GstStreamStatusType type)
 {
-  const gchar * type_name;
+  const gchar *type_name;
 
   switch (type) {
-  case GST_STREAM_STATUS_TYPE_CREATE:
-    type_name = "GST_STREAM_STATUS_TYPE_CREATE";
-    break;
-  case GST_STREAM_STATUS_TYPE_ENTER:
-    type_name = "GST_STREAM_STATUS_TYPE_ENTER";
-    break;
-  case GST_STREAM_STATUS_TYPE_LEAVE:
-    type_name = "GST_STREAM_STATUS_TYPE_LEAVE";
-    break;
-  case GST_STREAM_STATUS_TYPE_DESTROY:
-    type_name = "GST_STREAM_STATUS_TYPE_DESTROY";
-    break;
-  case GST_STREAM_STATUS_TYPE_START:
-    type_name = "GST_STREAM_STATUS_TYPE_START";
-    break;
-  case GST_STREAM_STATUS_TYPE_PAUSE:
-    type_name = "GST_STREAM_STATUS_TYPE_PAUSE";
-    break;
-  case GST_STREAM_STATUS_TYPE_STOP:
-    type_name = "GST_STREAM_STATUS_TYPE_STOP";
-    break;
-  default:
-    type_name = "UNKNOWN";
-    break;
+    case GST_STREAM_STATUS_TYPE_CREATE:
+      type_name = "GST_STREAM_STATUS_TYPE_CREATE";
+      break;
+    case GST_STREAM_STATUS_TYPE_ENTER:
+      type_name = "GST_STREAM_STATUS_TYPE_ENTER";
+      break;
+    case GST_STREAM_STATUS_TYPE_LEAVE:
+      type_name = "GST_STREAM_STATUS_TYPE_LEAVE";
+      break;
+    case GST_STREAM_STATUS_TYPE_DESTROY:
+      type_name = "GST_STREAM_STATUS_TYPE_DESTROY";
+      break;
+    case GST_STREAM_STATUS_TYPE_START:
+      type_name = "GST_STREAM_STATUS_TYPE_START";
+      break;
+    case GST_STREAM_STATUS_TYPE_PAUSE:
+      type_name = "GST_STREAM_STATUS_TYPE_PAUSE";
+      break;
+    case GST_STREAM_STATUS_TYPE_STOP:
+      type_name = "GST_STREAM_STATUS_TYPE_STOP";
+      break;
+    default:
+      type_name = "UNKNOWN";
+      break;
   }
 
   return type_name;
 }
 
 static GstdReturnCode
-gstd_bus_msg_stream_status_to_string (GstdBusMsg * msg, GstdIFormatter * formatter,
-    GstMessage * target)
+gstd_bus_msg_stream_status_to_string (GstdBusMsg * msg,
+    GstdIFormatter * formatter, GstMessage * target)
 {
   GstStreamStatusType type;
   GValue value = G_VALUE_INIT;
-  GstElement * owner;
-  GstElementFactory * factory;
+  GstElement *owner;
+  GstElementFactory *factory;
 
   g_return_val_if_fail (msg, GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (formatter, GSTD_NULL_ARGUMENT);
@@ -131,14 +134,15 @@ gstd_bus_msg_stream_status_to_string (GstdBusMsg * msg, GstdIFormatter * formatt
   g_value_unset (&value);
 
   gstd_iformatter_set_member_name (formatter, "type_name");
-  gstd_iformatter_set_string_value (formatter, gstd_bus_msg_stream_status_code_to_string (type));
+  gstd_iformatter_set_string_value (formatter,
+      gstd_bus_msg_stream_status_code_to_string (type));
 
   gstd_iformatter_set_member_name (formatter, "owner");
-  gstd_iformatter_set_string_value (formatter, GST_OBJECT_NAME(owner));
+  gstd_iformatter_set_string_value (formatter, GST_OBJECT_NAME (owner));
 
   gstd_iformatter_set_member_name (formatter, "owner_factory");
   factory = gst_element_get_factory (owner);
-  gstd_iformatter_set_string_value (formatter, GST_OBJECT_NAME(factory));
+  gstd_iformatter_set_string_value (formatter, GST_OBJECT_NAME (factory));
 
   gstd_iformatter_end_object (formatter);
 

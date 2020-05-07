@@ -52,7 +52,8 @@ G_DEFINE_TYPE (GstdSignal, gstd_signal, GSTD_TYPE_OBJECT);
 
 /* VTable */
 static void gstd_signal_get_property (GObject *, guint, GValue *, GParamSpec *);
-static void gstd_signal_set_property (GObject *, guint, const GValue *, GParamSpec *);
+static void gstd_signal_set_property (GObject *, guint, const GValue *,
+    GParamSpec *);
 static void gstd_signal_dispose (GObject *);
 
 static void
@@ -141,8 +142,8 @@ gstd_signal_get_property (GObject * object,
       break;
     case PROP_TIMEOUT:
       GST_DEBUG_OBJECT (self, "Returning signal timeout %" GST_TIME_FORMAT,
-          GST_TIME_ARGS(self->timeout));
-      g_value_set_int64(value, self->timeout);
+          GST_TIME_ARGS (self->timeout));
+      g_value_set_int64 (value, self->timeout);
       break;
     case PROP_CALLBACK:
       GST_DEBUG_OBJECT (self, "Connecting callback");
@@ -170,7 +171,8 @@ gstd_signal_set_property (GObject * object,
       break;
     case PROP_TIMEOUT:
       self->timeout = g_value_get_int64 (value);
-      GST_DEBUG_OBJECT (self, "Timeout changed to %" GST_TIME_FORMAT, GST_TIME_ARGS(self->timeout));
+      GST_DEBUG_OBJECT (self, "Timeout changed to %" GST_TIME_FORMAT,
+          GST_TIME_ARGS (self->timeout));
       break;
     default:
       /* We don't have any other signal... */
@@ -179,9 +181,10 @@ gstd_signal_set_property (GObject * object,
   }
 }
 
-void gstd_signal_disconnect (GstdSignal *self)
+void
+gstd_signal_disconnect (GstdSignal * self)
 {
-  GstdIReader *reader = GSTD_OBJECT(self)->reader;
+  GstdIReader *reader = GSTD_OBJECT (self)->reader;
 
   gstd_signal_reader_disconnect (reader);
 }

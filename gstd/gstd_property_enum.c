@@ -30,13 +30,14 @@ GST_DEBUG_CATEGORY_STATIC (gstd_property_enum_debug);
 #define GSTD_DEBUG_DEFAULT_LEVEL GST_LEVEL_INFO
 
 
-G_DEFINE_TYPE (GstdPropertyEnum, gstd_property_enum, GSTD_TYPE_PROPERTY)
+G_DEFINE_TYPE (GstdPropertyEnum, gstd_property_enum, GSTD_TYPE_PROPERTY);
 
 /* VTable */
 static GstdReturnCode
 gstd_property_enum_update (GstdObject * object, const gchar * arg);
 
-static void gstd_property_enum_class_init (GstdPropertyEnumClass * klass)
+static void
+gstd_property_enum_class_init (GstdPropertyEnumClass * klass)
 {
   guint debug_color;
   GstdObjectClass *oclass = GSTD_OBJECT_CLASS (klass);

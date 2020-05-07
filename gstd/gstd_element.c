@@ -489,7 +489,7 @@ gstd_element_fill_child_properties (GstdElement * self, GstObject * element,
   gint i;
   gchar *suffix;
 
-  if (!GST_IS_CHILD_PROXY(element))
+  if (!GST_IS_CHILD_PROXY (element))
     goto out;
 
   count = gst_child_proxy_get_children_count (GST_CHILD_PROXY (element));
@@ -501,7 +501,7 @@ gstd_element_fill_child_properties (GstdElement * self, GstObject * element,
 
   for (i = 0; i < count; i++) {
     child = gst_child_proxy_get_child_by_index (GST_CHILD_PROXY (element), i);
-    if (!child || !GST_IS_OBJECT(child))
+    if (!child || !GST_IS_OBJECT (child))
       continue;
 
     if (hierarchy)

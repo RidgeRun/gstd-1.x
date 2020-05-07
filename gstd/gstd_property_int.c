@@ -30,7 +30,7 @@ GST_DEBUG_CATEGORY_STATIC (gstd_property_int_debug);
 #define GSTD_DEBUG_DEFAULT_LEVEL GST_LEVEL_INFO
 
 
-G_DEFINE_TYPE (GstdPropertyInt, gstd_property_int, GSTD_TYPE_PROPERTY)
+G_DEFINE_TYPE (GstdPropertyInt, gstd_property_int, GSTD_TYPE_PROPERTY);
 
 /* VTable */
 static void
@@ -39,7 +39,8 @@ gstd_property_int_add_value (GstdProperty * self,
 static GstdReturnCode gstd_property_int_update (GstdObject * object,
     const gchar * arg);
 
-static void gstd_property_int_class_init (GstdPropertyIntClass * klass)
+static void
+gstd_property_int_class_init (GstdPropertyIntClass * klass)
 {
   guint debug_color;
   GstdPropertyClass *pclass = GSTD_PROPERTY_CLASS (klass);
