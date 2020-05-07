@@ -2,7 +2,6 @@
 # released into the public domain. Anyone is free to use the software contained
 # in this file as they choose, including incorporating it into proprietary
 # software.
-import time
 import sys
 import threading
 from pygstc.gstc import GstcError, GstdError, GstdClient
@@ -12,7 +11,7 @@ from pygstc.logger import CustomLogger
 class GstcPlayer:
 
     def __init__(self):
-        # Create a custom logger with loglevel=DEBUG
+        # Create a custom logger with loglevel=WARNING
         self.gstd_logger = CustomLogger('simple_playback', loglevel='WARNING')
         # Create the client with the logger
         self.gstc = GstdClient(logger=self.gstd_logger)
@@ -32,24 +31,16 @@ class GstcPlayer:
         return ret
 
     def errPlayerHandler(self):
-        self.lock.acquire()
         self.gstc.bus_timeout(self.pipeName, 200000000)
         self.gstc.bus_filter(self.pipeName, "error+eos+warning")
-        self.lock.release()
 
         while (True):
-
             try:
-                self.lock.acquire()
                 resp = self.gstc.bus_read(self.pipeName)
-                self.lock.release()
                 if (resp is not None and resp["type"] == "error"):
                     print("Player Error. Playing stopped")
                 elif (resp is not None and resp["type"] == "eos"):
                     print("Player reached end of stream")
-                else:
-                    time.sleep(1)
-                    pass
             except GstdError:
                 break
 
@@ -64,7 +55,6 @@ class GstcPlayer:
             # Create pipeline object
             self.gstc.pipeline_create(self.pipeName, self.pipeline)
             self.gstc.pipeline_play(self.pipeName)
-            self.lock = threading.Lock()
             self.thErrorHandler = threading.Thread(
                                     target=self.errPlayerHandler,
                                     args=())
@@ -81,10 +71,8 @@ class GstcPlayer:
     def stopVideo(self):
         print("Video stopped")
         if (self.pipe_exists(self.pipeName)):
-            self.lock.acquire()
             self.gstc.pipeline_stop(self.pipeName)
             self.gstc.pipeline_delete(self.pipeName)
-            self.lock.release()
             self.thErrorHandler.join()
 
     def setSpeed(self, speed):
