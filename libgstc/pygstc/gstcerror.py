@@ -34,10 +34,17 @@ GSTC - GstdError Class
 
 
 class GstdError(Exception):
+    """Raised when Gstd IPC fails
 
-    """Raised when Gstd IPC fails"""
+    Attributes:
+        description -- GstcError description message
+    """
 
-    pass
+    def __init__(self, description):
+        if description is None:
+            description = "Gstd IPC failed"
+        super(GstdError, self).__init__(description)
+        self.description = description
 
 
 """
@@ -46,7 +53,14 @@ GSTC - GstcError Class
 
 
 class GstcError(Exception):
+    """Raised when the Gstd python client fails internally
 
-    """Raised when the Gstd python client fails internally"""
+    Attributes:
+        description -- GstcError description message
+    """
 
-    pass
+    def __init__(self, description):
+        if description is None:
+            description = "Gstd Python client failed internally"
+        super(GstcError, self).__init__(GstdError, description)
+        self.description = description
