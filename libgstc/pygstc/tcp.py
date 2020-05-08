@@ -97,7 +97,7 @@ class Ipc:
         data : string
             Decoded JSON string with the response
         """
-
+        data = None
         self._logger.debug('GSTD socket sending line: %s' % line)
         try:
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -112,8 +112,9 @@ class Ipc:
             s.close()
         except socket.error:
             s.close()
-            self._logger.error('GSTD socket error')
-            data = None
+            self._logger.error('Server did not respond. Is it up?')
+            raise Exception('Server did not respond. Is it up?')\
+                from socket.error
         return data
 
     def _recvall(self, sock, timeout):

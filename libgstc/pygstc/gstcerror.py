@@ -28,23 +28,36 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
 # OF THE POSSIBILITY OF SUCH DAMAGE.
 
+
+"""
+GSTC - GstClientError Class
+"""
+
+
+class GstClientError(Exception):
+
+    def __init__(self, description, code):
+        super(GstClientError, self).__init__(description)
+        self.description = description
+        self.code = code
+
+
 """
 GSTC - GstdError Class
 """
 
 
-class GstdError(Exception):
+class GstdError(GstClientError):
     """Raised when Gstd IPC fails
 
     Attributes:
         description -- GstcError description message
     """
 
-    def __init__(self, description):
-        if description is None:
-            description = "Gstd IPC failed"
-        super(GstdError, self).__init__(description)
+    def __init__(self, description, code):
+        super(GstdError, self).__init__(description, code)
         self.description = description
+        self.code = code
 
 
 """
@@ -52,15 +65,14 @@ GSTC - GstcError Class
 """
 
 
-class GstcError(Exception):
+class GstcError(GstClientError):
     """Raised when the Gstd python client fails internally
 
     Attributes:
         description -- GstcError description message
     """
 
-    def __init__(self, description):
-        if description is None:
-            description = "Gstd Python client failed internally"
-        super(GstcError, self).__init__(GstdError, description)
+    def __init__(self, description, code):
+        super(GstcError, self).__init__(description, code)
         self.description = description
+        self.code = code

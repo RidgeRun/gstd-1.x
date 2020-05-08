@@ -32,7 +32,7 @@ import inspect
 import json
 import traceback
 
-from pygstc.gstcerror import *
+from pygstc.gstcerror import GstdError, GstcError
 from pygstc.logger import DummyLogger
 from pygstc.tcp import Ipc
 
@@ -183,7 +183,7 @@ class GstdClient:
                 raise GstcError(
                     "%s TypeError: parameter %i: expected %s, '%s found" %
                     (inspect.stack()[1].function, i, type_list[i],
-                     type(parameter)))
+                     type(parameter)), -6)
             if type_list[i] == str:
                 parameter_string_list += [parameter]
             elif type_list[i] == bool:
@@ -224,11 +224,11 @@ class GstdClient:
         except Exception as exception:
             self._logger.error('%s error: %s' % (cmd,
                                                  type(exception).__name__))
-            raise GstcError("Failed to communicate with GSTD")
+            raise GstcError("Failed to communicate with GSTD", 15)
         if result['code'] != 0:
             self._logger.error('%s error: %s' % (cmd,
                                                  result['description']))
-            raise GstdError(result['description'])
+            raise GstdError(result['description'], 13)
         return result
 
     def ping_gstd(self):
@@ -255,9 +255,8 @@ class GstdClient:
             else:
                 raise Exception
         except Exception:
-            raise GstdError("GStreamer Daemon failed to respond")
-        finally:
-            return True
+            self._logger.error('Error contacting GST Daemon')
+            raise GstdError('Error contacting GST Daemon', 15)
 
     def bus_filter(self, pipe_name, filter):
         """
