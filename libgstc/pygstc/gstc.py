@@ -240,20 +240,17 @@ class GstdClient:
         GstdError
             Error is triggered when Gstd IPC fails
 
-        Returns
-        -------
-        result : bool
-            Whether or not GSTD responds
         """
         self._logger.info('Sending ping to GStreamer Daemon')
         try:
             jresult = self._ipc.send(['list_pipelines'], timeout=1)
-            result = json.loads(jresult)
-            if 'description' in result:
-                if result['description'] != "Success":
-                    raise Exception
-            else:
-                raise Exception
+            # Verify correct data format
+            json.loads(jresult)
+
+        except json.JSONDecodeError:
+            self._logger.error('GStreamer Daemon corrupted response')
+            raise GstdError("GStreamer Daemon corrupted response", 13)\
+                from json.JSONDecodeError
         except Exception:
             self._logger.error('Error contacting GST Daemon')
             raise GstdError('Error contacting GST Daemon', 15)
