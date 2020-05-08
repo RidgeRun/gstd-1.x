@@ -182,7 +182,8 @@ class GstdClient:
             if not isinstance(parameter, type_list[i]):
                 raise GstcError(
                     "%s TypeError: parameter %i: expected %s, '%s found" %
-                    (inspect.stack()[1].function, i, type_list[i], type(parameter)))
+                    (inspect.stack()[1].function, i, type_list[i],
+                     type(parameter)))
             if type_list[i] == str:
                 parameter_string_list += [parameter]
             elif type_list[i] == bool:
@@ -666,7 +667,9 @@ class GstdClient:
                           % pipe_name)
         parameters = self._check_parameters(
             [
-                pipe_name, rate, format, flags, start_type, start, end_type, end], [
+                pipe_name, rate, format, flags, start_type, start, end_type,
+                end],
+            [
                 str, float, int, int, int, int, int, int])
         self._send_cmd_line(['event_seek'] + parameters)
 
@@ -916,7 +919,7 @@ class GstdClient:
             The name of the pipeline
         value: boolean
             True or False to activate or deactivate
- 
+
         Raises
         ------
         GstdError
@@ -925,10 +928,10 @@ class GstdClient:
             Error is triggered when Gstd IPC fails
         """
 
-        self._logger.info('Setting the pipeline %s verbose mode to %s' % (pipe_name,value))
-        parameters = self._check_parameters([pipe_name,value], [str,bool])
+        self._logger.info('Setting the pipeline %s verbose mode to %s'
+                          % (pipe_name, value))
+        parameters = self._check_parameters([pipe_name, value], [str, bool])
         self._send_cmd_line(['pipeline_verbose'] + parameters)
-
 
     def read(self, uri):
         """
@@ -1060,8 +1063,8 @@ class GstdClient:
         """
 
         self._logger.info(
-            'Connecting to signal %s of element %s from pipeline %s with timeout %s' %
-            (signal, element, pipe_name, timeout))
+            'Connecting to signal %s of element %s from pipeline %s with \
+                timeout %s' % (signal, element, pipe_name, timeout))
         parameters = self._check_parameters(
             [pipe_name, element, signal, timeout], [str, str, str, int])
         self._send_cmd_line(['signal_timeout'] + parameters)
