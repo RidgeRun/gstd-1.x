@@ -224,8 +224,7 @@ class GstdClient:
         except Exception as exception:
             self._logger.error('%s error: %s' % (cmd,
                                                  type(exception).__name__))
-            traceback.print_exc()
-            raise GstcError(type(exception).__name__)
+            raise GstcError("Failed to communicate with GSTD")
         if result['code'] != 0:
             self._logger.error('%s error: %s' % (cmd,
                                                  result['description']))
@@ -235,6 +234,11 @@ class GstdClient:
     def ping_gstd(self):
         """
         Test if GSTD responds in the configured address and port
+
+        Raises
+        ------
+        GstdError
+            Error is triggered when Gstd IPC fails
 
         Returns
         -------
@@ -250,10 +254,10 @@ class GstdClient:
                     raise Exception
             else:
                 raise Exception
-        except Exception as exception:
-            self._logger.error('GStreamer Daemon failed to respond')
-            return False
-        return True
+        except Exception:
+            raise GstdError("GStreamer Daemon failed to respond")
+        finally:
+            return True
 
     def bus_filter(self, pipe_name, filter):
         """
