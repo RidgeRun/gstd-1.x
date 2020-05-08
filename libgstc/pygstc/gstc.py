@@ -33,8 +33,8 @@ import json
 import traceback
 
 from pygstc.gstcerror import *
-from pygstc.logger import *
-from pygstc.tcp import *
+from pygstc.logger import DummyLogger
+from pygstc.tcp import Ipc
 
 GSTD_PROCNAME = 'gstd'
 
