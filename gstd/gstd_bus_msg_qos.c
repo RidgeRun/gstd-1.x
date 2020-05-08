@@ -44,9 +44,10 @@ struct _GstdBusMsgQosClass
   GstdBusMsgClass parent_class;
 };
 
-G_DEFINE_TYPE (GstdBusMsgQos, gstd_bus_msg_qos, GSTD_TYPE_BUS_MSG)
+G_DEFINE_TYPE (GstdBusMsgQos, gstd_bus_msg_qos, GSTD_TYPE_BUS_MSG);
 
-     static void gstd_bus_msg_qos_class_init (GstdBusMsgQosClass * klass)
+static void
+gstd_bus_msg_qos_class_init (GstdBusMsgQosClass * klass)
 {
   GstdBusMsgClass *bmclass;
   guint debug_color;
