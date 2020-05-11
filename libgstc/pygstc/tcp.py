@@ -113,7 +113,7 @@ class Ipc:
         except socket.error:
             s.close()
             self._logger.error('Server did not respond. Is it up?')
-            raise Exception('Server did not respond. Is it up?')\
+            raise ConnectionRefusedError('Server did not respond. Is it up?')\
                 from socket.error
         return data
 

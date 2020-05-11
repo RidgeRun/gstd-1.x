@@ -251,9 +251,10 @@ class GstdClient:
             self._logger.error('GStreamer Daemon corrupted response')
             raise GstdError("GStreamer Daemon corrupted response", 13)\
                 from json.JSONDecodeError
-        except Exception:
+        except ConnectionRefusedError:
             self._logger.error('Error contacting GST Daemon')
-            raise GstdError('Error contacting GST Daemon', 15)
+            raise GstdError('Error contacting GST Daemon', 15)\
+                from ConnectionRefusedError
 
     def bus_filter(self, pipe_name, filter):
         """
