@@ -44,9 +44,10 @@ struct _GstdBusMsgNotifyClass
   GstdBusMsgClass parent_class;
 };
 
-G_DEFINE_TYPE (GstdBusMsgNotify, gstd_bus_msg_notify, GSTD_TYPE_BUS_MSG)
+G_DEFINE_TYPE (GstdBusMsgNotify, gstd_bus_msg_notify, GSTD_TYPE_BUS_MSG);
 
-static void gstd_bus_msg_notify_class_init (GstdBusMsgNotifyClass * klass)
+static void
+gstd_bus_msg_notify_class_init (GstdBusMsgNotifyClass * klass)
 {
   GstdBusMsgClass *bmclass;
   guint debug_color;
@@ -90,8 +91,7 @@ gstd_bus_msg_notify_to_string (GstdBusMsg * msg, GstdIFormatter * formatter,
   object_name = gst_object_get_path_string (GST_OBJECT (object));
 
   if (property_value != NULL) {
-    property_value_str =
-        g_strdup_value_contents (property_value);
+    property_value_str = g_strdup_value_contents (property_value);
   } else {
     property_value_str = g_strdup ("(no value)");
   }

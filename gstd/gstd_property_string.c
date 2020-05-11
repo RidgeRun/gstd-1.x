@@ -30,7 +30,7 @@ GST_DEBUG_CATEGORY_STATIC (gstd_property_string_debug);
 #define GSTD_DEBUG_DEFAULT_LEVEL GST_LEVEL_INFO
 
 
-G_DEFINE_TYPE (GstdPropertyString, gstd_property_string, GSTD_TYPE_PROPERTY)
+G_DEFINE_TYPE (GstdPropertyString, gstd_property_string, GSTD_TYPE_PROPERTY);
 
 /* VTable */
 static void

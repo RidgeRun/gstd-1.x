@@ -62,8 +62,10 @@ G_DEFINE_TYPE (GstdTcp, gstd_tcp, GSTD_TYPE_SOCKET);
 static void gstd_tcp_dispose (GObject *);
 static GstdReturnCode gstd_tcp_create_socket_service (GstdSocket * base,
     GSocketService ** service);
-static gboolean gstd_tcp_init_get_option_group (GstdIpc * base, GOptionGroup ** group);
-static gboolean gstd_tcp_add_listeners(GSocketService *service, gchar * address, gint port, GError ** error);
+static gboolean gstd_tcp_init_get_option_group (GstdIpc * base,
+    GOptionGroup ** group);
+static gboolean gstd_tcp_add_listeners (GSocketService * service,
+    gchar * address, gint port, GError ** error);
 
 
 static void
@@ -71,7 +73,7 @@ gstd_tcp_class_init (GstdTcpClass * klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
   GstdIpcClass *gstdipc_class = GSTD_IPC_CLASS (klass);
-  GstdSocketClass* socket_class = GSTD_SOCKET_CLASS (klass);
+  GstdSocketClass *socket_class = GSTD_SOCKET_CLASS (klass);
   guint debug_color;
   gstdipc_class->get_option_group =
       GST_DEBUG_FUNCPTR (gstd_tcp_init_get_option_group);
@@ -90,7 +92,7 @@ gstd_tcp_init (GstdTcp * self)
 {
   GST_INFO_OBJECT (self, "Initializing gstd Tcp");
   self->base_port = GSTD_TCP_DEFAULT_PORT;
-  self->address = g_strdup(GSTD_TCP_DEFAULT_ADDRESS);
+  self->address = g_strdup (GSTD_TCP_DEFAULT_ADDRESS);
   self->num_ports = GSTD_TCP_DEFAULT_NUM_PORTS;
   self->max_threads = GSTD_TCP_DEFAULT_MAX_THREADS;
 }
@@ -102,8 +104,8 @@ gstd_tcp_dispose (GObject * object)
 
   GST_INFO_OBJECT (object, "Deinitializing gstd TCP");
 
-  if(self->address)
-    g_free(self->address);
+  if (self->address)
+    g_free (self->address);
 
   G_OBJECT_CLASS (gstd_tcp_parent_class)->dispose (object);
 }
@@ -122,7 +124,7 @@ gstd_tcp_create_socket_service (GstdSocket * base, GSocketService ** service)
   *service = g_threaded_socket_service_new (self->max_threads);
 
   for (i = 0; i < self->num_ports; i++) {
-    gstd_tcp_add_listeners(*service, address, port + i, &error);
+    gstd_tcp_add_listeners (*service, address, port + i, &error);
     if (error)
       goto noconnection;
   }
@@ -176,24 +178,25 @@ gstd_tcp_init_get_option_group (GstdIpc * base, GOptionGroup ** group)
 }
 
 static gboolean
-gstd_tcp_add_listeners(GSocketService *service, gchar * address, gint port, GError ** error)
+gstd_tcp_add_listeners (GSocketService * service, gchar * address, gint port,
+    GError ** error)
 {
-  GSocketAddress * sa;
+  GSocketAddress *sa;
   gboolean ret = TRUE;
 
-  g_return_val_if_fail(service, FALSE);
-  g_return_val_if_fail(address, FALSE);
-  g_return_val_if_fail(error != NULL, FALSE);
+  g_return_val_if_fail (service, FALSE);
+  g_return_val_if_fail (address, FALSE);
+  g_return_val_if_fail (error != NULL, FALSE);
 
-  sa = g_inet_socket_address_new_from_string(address, port);
+  sa = g_inet_socket_address_new_from_string (address, port);
 
-  if(g_socket_listener_add_address(G_SOCKET_LISTENER(service), sa,
-    G_SOCKET_TYPE_STREAM, G_SOCKET_PROTOCOL_TCP, NULL, NULL, error)
-      == FALSE ){
+  if (g_socket_listener_add_address (G_SOCKET_LISTENER (service), sa,
+          G_SOCKET_TYPE_STREAM, G_SOCKET_PROTOCOL_TCP, NULL, NULL, error)
+      == FALSE) {
     ret = FALSE;
   }
 
-  g_object_unref(sa);
+  g_object_unref (sa);
 
   return ret;
 }

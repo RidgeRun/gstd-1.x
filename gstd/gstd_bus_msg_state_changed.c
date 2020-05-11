@@ -45,7 +45,7 @@ struct _GstdBusMsgStateChangedClass
 };
 
 G_DEFINE_TYPE (GstdBusMsgStateChanged, gstd_bus_msg_state_changed,
-    GSTD_TYPE_BUS_MSG)
+    GSTD_TYPE_BUS_MSG);
 
 static void
 gstd_bus_msg_state_changed_class_init (GstdBusMsgStateChangedClass * klass)

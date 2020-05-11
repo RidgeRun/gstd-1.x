@@ -47,14 +47,15 @@ gstd_event_handler_set_property (GObject *,
     guint, const GValue *, GParamSpec *);
 static void gstd_event_handler_dispose (GObject *);
 
-G_DEFINE_TYPE (GstdEventHandler, gstd_event_handler, GSTD_TYPE_OBJECT)
+G_DEFINE_TYPE (GstdEventHandler, gstd_event_handler, GSTD_TYPE_OBJECT);
 
 /* Gstd EventHandler debugging category */
 GST_DEBUG_CATEGORY_STATIC (gstd_event_handler_debug);
 #define GST_CAT_DEFAULT gstd_event_handler_debug
 #define GSTD_DEBUG_DEFAULT_LEVEL GST_LEVEL_INFO
 
-static void gstd_event_handler_class_init (GstdEventHandlerClass * klass)
+static void
+gstd_event_handler_class_init (GstdEventHandlerClass * klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
   GParamSpec *properties[N_PROPERTIES] = { NULL, };

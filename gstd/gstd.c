@@ -167,9 +167,10 @@ main (gint argc, gchar * argv[])
     GSTD_TYPE_UNIX,
   };
 
-  guint num_ipcs = (sizeof (supported_ipcs) / sizeof (GType));  
-  GstdIpc **ipc_array = g_malloc(num_ipcs * sizeof(GstdIpc*));
-  GOptionGroup **optiongroup_array = g_malloc(num_ipcs * sizeof(GOptionGroup*));
+  guint num_ipcs = (sizeof (supported_ipcs) / sizeof (GType));
+  GstdIpc **ipc_array = g_malloc (num_ipcs * sizeof (GstdIpc *));
+  GOptionGroup **optiongroup_array =
+      g_malloc (num_ipcs * sizeof (GOptionGroup *));
 
   GOptionEntry entries[] = {
     {"version", 'v', 0, G_OPTION_ARG_NONE, &version,
@@ -221,7 +222,7 @@ main (gint argc, gchar * argv[])
 
   /* Print the version and exit */
   if (version) {
-    print_header(quiet);
+    print_header (quiet);
     goto out;
   }
 
@@ -244,7 +245,7 @@ main (gint argc, gchar * argv[])
     /* Parent fork ends here */
     if (parent) {
       print_header (quiet);
-      g_print("Detaching from parent process.\n");
+      g_print ("Detaching from parent process.\n");
       goto out;
     }
   }
@@ -282,9 +283,9 @@ main (gint argc, gchar * argv[])
 
   gst_deinit ();
   gstd_log_deinit ();
-  
-  g_free(ipc_array);
-  g_free(optiongroup_array);
+
+  g_free (ipc_array);
+  g_free (optiongroup_array);
 
   goto out;
 

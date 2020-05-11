@@ -114,8 +114,8 @@ struct _GstdPipeline
   /**
    * Pipeline graph with GraphViz dot format
    */
-  gchar* graph;
- 
+  gchar *graph;
+
   /**
    * Id to enable/disable deep notify logging (similar to adding -v to get-launch-1.0)
    */
@@ -190,20 +190,12 @@ gstd_pipeline_class_init (GstdPipelineClass * klass)
       "The pipeline graph on GraphViz dot format",
       GSTD_PIPELINE_DEFAULT_GRAPH, G_PARAM_STATIC_STRINGS | GSTD_PARAM_READ);
 
-   properties[PROP_POSITION] =
-      g_param_spec_int64 ("position", "Position",
-      "The query position of the pipeline",
-      G_GINT64_CONSTANT(0), /* Min value */
-      G_MAXINT64,
-      G_GINT64_CONSTANT(0), /* Default value */
+  properties[PROP_POSITION] = g_param_spec_int64 ("position", "Position", "The query position of the pipeline", G_GINT64_CONSTANT (0),  /* Min value */
+      G_MAXINT64, G_GINT64_CONSTANT (0),        /* Default value */
       G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
-    properties[PROP_DURATION] =
-      g_param_spec_int64 ("duration", "Duration",
-      "The duration of the media stream pipeline",
-      G_GINT64_CONSTANT(0), /* Min value */
-      G_MAXINT64,
-      G_GINT64_CONSTANT(0), /* Default value */
+  properties[PROP_DURATION] = g_param_spec_int64 ("duration", "Duration", "The duration of the media stream pipeline", G_GINT64_CONSTANT (0),   /* Min value */
+      G_MAXINT64, G_GINT64_CONSTANT (0),        /* Default value */
       G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
   properties[PROP_VERBOSE] =
@@ -359,21 +351,23 @@ gstd_pipeline_get_property (GObject * object,
       g_value_set_object (value, self->event_handler);
       break;
     case PROP_GRAPH:
-      GST_DEBUG_OBJECT (self, "Returning graph handler %p",
-          self->graph);
-      g_value_set_string (value, gst_debug_bin_to_dot_data(GST_BIN(self->pipeline),
-          GST_DEBUG_GRAPH_SHOW_ALL));
+      GST_DEBUG_OBJECT (self, "Returning graph handler %p", self->graph);
+      g_value_set_string (value,
+          gst_debug_bin_to_dot_data (GST_BIN (self->pipeline),
+              GST_DEBUG_GRAPH_SHOW_ALL));
       break;
 
     case PROP_VERBOSE:
-      GST_DEBUG_OBJECT (self, "Returning verbose handler %lu", self->deep_notify_id);
+      GST_DEBUG_OBJECT (self, "Returning verbose handler %lu",
+          self->deep_notify_id);
       g_value_set_boolean (value, 0 != self->deep_notify_id);
       break;
 
     case PROP_POSITION:
-      if (!gst_element_query_position (self->pipeline, GST_FORMAT_TIME, &self->position)) {
+      if (!gst_element_query_position (self->pipeline, GST_FORMAT_TIME,
+              &self->position)) {
         /* if the query could not be performed. return 0 */
-        self->position = G_GINT64_CONSTANT(0);
+        self->position = G_GINT64_CONSTANT (0);
       }
 
       GST_DEBUG_OBJECT (self, "Returning pipeline position %" GST_TIME_FORMAT,
@@ -381,9 +375,10 @@ gstd_pipeline_get_property (GObject * object,
       g_value_set_int64 (value, self->position);
       break;
     case PROP_DURATION:
-      if (!gst_element_query_duration (self->pipeline, GST_FORMAT_TIME, &self->duration)) {
+      if (!gst_element_query_duration (self->pipeline, GST_FORMAT_TIME,
+              &self->duration)) {
         /* if the query could not be performed. return 0 */
-        self->duration = G_GINT64_CONSTANT(0);
+        self->duration = G_GINT64_CONSTANT (0);
       }
 
       GST_DEBUG_OBJECT (self, "Returning pipeline duration %" GST_TIME_FORMAT,

@@ -442,8 +442,8 @@ gstd_parser_pipeline_graph (GstdSession * session, gchar * action, gchar * args,
 }
 
 static GstdReturnCode
-gstd_parser_pipeline_verbose (GstdSession * session, gchar * action, gchar * args,
-    gchar ** response)
+gstd_parser_pipeline_verbose (GstdSession * session, gchar * action,
+    gchar * args, gchar ** response)
 {
   GstdReturnCode ret = GSTD_BAD_COMMAND;
   gchar *uri;
@@ -453,7 +453,7 @@ gstd_parser_pipeline_verbose (GstdSession * session, gchar * action, gchar * arg
   g_return_val_if_fail (args, GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (response, GSTD_NULL_ARGUMENT);
 
-  
+
 
   tokens = g_strsplit (args, " ", 2);
   check_argument (tokens[0], GSTD_BAD_COMMAND);
