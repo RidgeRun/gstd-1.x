@@ -36,11 +36,9 @@ GSTC - GstClientError Class
 
 class GstClientError(Exception):
 
-    def __init__(self, description, code):
+    def __init__(self, description):
         super(GstClientError, self).__init__(description)
         self.description = description
-        self.code = code
-
 
 """
 GSTC - GstdError Class
@@ -52,10 +50,11 @@ class GstdError(GstClientError):
 
     Attributes:
         description -- GstcError description message
+        code -- GstdError error code
     """
 
     def __init__(self, description, code):
-        super(GstdError, self).__init__(description, code)
+        super(GstdError, self).__init__(description)
         self.description = description
         self.code = code
 
@@ -70,9 +69,10 @@ class GstcError(GstClientError):
 
     Attributes:
         description -- GstcError description message
+        code -- GstcError error code
     """
 
     def __init__(self, description, code):
-        super(GstcError, self).__init__(description, code)
+        super(GstcError, self).__init__(description)
         self.description = description
         self.code = code
