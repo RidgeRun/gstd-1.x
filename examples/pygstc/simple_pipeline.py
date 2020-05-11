@@ -43,6 +43,8 @@ class GstcPlayer:
                     print("Player reached end of stream")
             except GstdError:
                 break
+            except GstcError:
+                break
 
     def openFile(self, videoPath):
         # Fill pipeline
