@@ -8,6 +8,7 @@ libgstd_core_la_SOURCES = gstd_session.c		\
 			  gstd_list.c			\
 			  gstd_ipc.c			\
 			  gstd_tcp.c			\
+			  gstd_http.c			\
 			  gstd_icreator.c		\
 			  gstd_iformatter.c		\
 			  gstd_pipeline_creator.c	\
@@ -57,11 +58,12 @@ libgstd_core_la_SOURCES = gstd_session.c		\
 libgstd_core_la_CFLAGS = $(GST_CFLAGS)					\
 			 $(GIO_CFLAGS)					\
 			 $(GIO_UNIX_CFLAGS)				\
+			 $(LIBSOUP_CFLAGS)					\
 			 $(GJSON_CFLAGS)				\
 			 -DGSTD_LOG_STATE_DIR=\"$(gstdlogstatedir)\"	\
 			 -DGSTD_RUN_STATE_DIR=\"$(gstdrunstatedir)\"
 
-libgstd_core_la_LDFLAGS = $(GST_LIBS) $(GIO_LIBS) $(GJSON_LIBS)
+libgstd_core_la_LDFLAGS = $(GST_LIBS) $(GIO_LIBS) $(GJSON_LIBS) $(LIBSOUP_LIBS)
 
 # Standalone application that uses libgstd-core
 bin_PROGRAMS = gstd
@@ -70,13 +72,14 @@ gstd_SOURCES =  gstd.c gstd_daemon.c
 
 gstd_CFLAGS = $(GST_CFLAGS)					\
 	      $(GIO_CFLAGS)					\
+		  $(LIBSOUP_CFLAGS)					\
 	      $(GIO_UNIX_CFLAGS)				\
 	      $(GJSON_CFLAGS)					\
 	      $(LIBD_CFLAGS)					\
 	      -DGSTD_LOG_STATE_DIR=\"$(gstdlogstatedir)\"	\
 	      -DGSTD_RUN_STATE_DIR=\"$(gstdrunstatedir)\"
 
-gstd_LDFLAGS = $(GST_LIBS) $(GIO_LIBS) $(GIO_UNIX_LIBS) $(GJSON_LIBS) $(LIBD_LIBS) -Wl,-rpath -Wl,$(libdir)
+gstd_LDFLAGS = $(GST_LIBS) $(GIO_LIBS) $(GIO_UNIX_LIBS) $(GJSON_LIBS) $(LIBD_LIBS) $(LIBSOUP_LIBS) -Wl,-rpath -Wl,$(libdir)
 gstd_LDADD = libgstd-core.la
 
 gstdincludedir = $(includedir)/gstd
@@ -89,6 +92,7 @@ gstdinclude_HEADERS = \
 		  gstd_list.h			\
 		  gstd_ipc.h			\
 		  gstd_tcp.h			\
+		  gstd_http.h			\
 		  gstd_icreator.h		\
 		  gstd_iformatter.h		\
 		  gstd_pipeline_creator.h	\
