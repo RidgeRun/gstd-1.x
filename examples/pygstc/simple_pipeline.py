@@ -115,8 +115,6 @@ def printUsage():
     print("pause: To pause the video")
     print("stop: To stop and close the playing")
     print("set_speed $SPEED")
-    print("play_fw: To play forward")
-    print("play_bw: To play backward")
     print("jump $TIME [in seconds]")
 
 
@@ -153,12 +151,6 @@ if __name__ == "__main__":
                 else:
                     print("Playback speed valid range: [-1, 1]. 0 is not \
                            allowed")
-
-            elif (action[0] == "play_fw"):
-                myPlayer.setSpeed(float(1))
-
-            elif (action[0] == "play_bw"):
-                myPlayer.setSpeed(float(-1))
 
             elif (action[0] == "jump"):
                 if (len(action) == 2 and
