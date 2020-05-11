@@ -216,20 +216,19 @@ class GstdClient:
         result : dictionary
             Response from the IPC
         """
-
-        cmd = cmd_line[0]
         try:
+            cmd = cmd_line[0]
             jresult = self._ipc.send(cmd_line, timeout=self._timeout)
             result = json.loads(jresult)
-        except Exception as exception:
-            self._logger.error('%s error: %s' % (cmd,
-                                                 type(exception).__name__))
-            raise GstcError("Failed to communicate with GSTD", 15)
-        if result['code'] != 0:
-            self._logger.error('%s error: %s' % (cmd,
-                                                 result['description']))
-            raise GstdError(result['description'], 13)
-        return result
+            if result['code'] != 0:
+                self._logger.error('%s error: %s' % (cmd,
+                                                     result['description']))
+                raise GstcError(result['description'], -7)
+            return result
+        except ConnectionRefusedError:
+            raise GstdError("Failed to communicate with GSTD", 15)
+        except TypeError:
+            raise GstcError('Bad command', -1)
 
     def ping_gstd(self):
         """
