@@ -171,10 +171,10 @@ if __name__ == "__main__":
 
     except GstdError as err:
         # GstdError: Gstd IPC failed
-        print("GStreamer Daemon failed with code: "+err, file=sys.stderr)
+        print("GStreamer Daemon failed with code: "+str(err), file=sys.stderr)
     except GstcError as err:
         # GstcError: Gstd python client failed
-        print("GStreamer Client failed with code: "+err, file=sys.stderr)
+        print("GStreamer Client failed with code: "+str(err), file=sys.stderr)
     else:
         myPlayer.stopVideo()
         print("PyGstc Video Player ended successfully")
