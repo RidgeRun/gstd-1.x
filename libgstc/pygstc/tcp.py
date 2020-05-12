@@ -92,6 +92,9 @@ class Ipc:
         timeout : int
             Timeout in seconds to wait for a response. 0: infinite
 
+        Raises
+        -------
+        ConnectionRefusedError : When the socket fails to communicate
         Returns
         -------
         data : string
@@ -111,6 +114,17 @@ class Ipc:
             data = data.decode('utf-8')
             s.close()
             return data
+
+        except BufferError as e:
+            s.close()
+            self._logger.error('Server response too long')
+            raise ConnectionRefusedError('Server response too long')\
+                from e
+        except TimeoutError as e:
+            s.close()
+            self._logger.error('Server took too long to respond')
+            raise ConnectionRefusedError('Server took too long to respond')\
+                from e
         except socket.error as e:
             s.close()
             self._logger.error('Server did not respond. Is it up?')
@@ -128,45 +142,37 @@ class Ipc:
         timeout : int
             Timeout in seconds to wait for a response. 0: infinite
 
+        Raises
+        ------
+        socket.error
+            Error is triggered when Gstd IPC fails
+        BufferError
+            When the incoming buffer is too big.
+
         Returns
         -------
         buf : string
             Raw socket response
         """
-
         buf = b''
-        count = 0
+        newbuf = ''
         try:
+            sock.settimeout(timeout)
             while True:
-                if self._maxsize:
-                    if count >= self._maxsize:
-                        break
+                if (self._maxsize and self._maxsize > len(newbuf)):
+                    raise BufferError
+                # Timeout to perform non-blocking read
+                ready = select.select([sock], [], [], timeout)
 
-                # if timeout is set, perform non-blocking read
-
-                if timeout:
-                    sock.setblocking(0)
-                    ready = select.select([sock], [], [], timeout)
-                    if ready[0]:
-                        newbuf = sock.recv(self._socket_read_size)
-                    else:
-                        buf = None
-                        sock.close()
-                        break
-                else:
+                if ready[0]:
                     newbuf = sock.recv(self._socket_read_size)
-                    if not newbuf:
-                        buf = None
+                    if self._terminator in newbuf:
+                        buf += newbuf[:newbuf.find(self._terminator)]
                         break
-                if self._terminator in newbuf:
+                    else:
+                        buf += newbuf
+            return buf
 
-                    # this is the last item
-
-                    buf += newbuf[:newbuf.find(self._terminator)]
-                    break
-                else:
-                    buf += newbuf
-                    count += len(newbuf)
-        except socket.error:
-            buf = None
-        return buf
+        # Raise an exception timeout
+        except socket.error as e:
+            raise TimeoutError from e
