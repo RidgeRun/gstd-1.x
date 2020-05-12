@@ -225,10 +225,11 @@ class GstdClient:
                                                      result['description']))
                 raise GstcError(result['description'], -7)
             return result
-        except ConnectionRefusedError:
-            raise GstdError("Failed to communicate with GSTD", 15)
-        except TypeError:
-            raise GstcError('Bad command', -1)
+        except ConnectionRefusedError as e:
+            raise GstdError("Failed to communicate with GSTD", 15)\
+                from e
+        except TypeError as e:
+            raise GstcError('Bad command', -1) from e
 
     def ping_gstd(self):
         """
@@ -236,6 +237,8 @@ class GstdClient:
 
         Raises
         ------
+        GstcError
+            Error is triggered when Gst Client fails
         GstdError
             Error is triggered when Gstd IPC fails
 
@@ -246,14 +249,12 @@ class GstdClient:
             # Verify correct data format
             json.loads(jresult)
 
-        except json.JSONDecodeError:
+        except json.JSONDecodeError as e:
             self._logger.error('GStreamer Daemon corrupted response')
-            raise GstdError("GStreamer Daemon corrupted response", 13)\
-                from json.JSONDecodeError
-        except ConnectionRefusedError:
+            raise GstcError("GStreamer Daemon corrupted response", 13) from e
+        except ConnectionRefusedError as e:
             self._logger.error('Error contacting GST Daemon')
-            raise GstdError('Error contacting GST Daemon', 15)\
-                from ConnectionRefusedError
+            raise GstdError('Error contacting GST Daemon', 15) from e
 
     def bus_filter(self, pipe_name, filter):
         """

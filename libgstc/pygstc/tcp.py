@@ -111,11 +111,11 @@ class Ipc:
             data = data.decode('utf-8')
             s.close()
             return data
-        except socket.error:
+        except socket.error as e:
             s.close()
             self._logger.error('Server did not respond. Is it up?')
             raise ConnectionRefusedError('Server did not respond. Is it up?')\
-                from socket.error
+                from e
 
     def _recvall(self, sock, timeout):
         """
