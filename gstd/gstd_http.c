@@ -1,17 +1,17 @@
 /*
  * GStreamer Daemon - Gst Launch under steroids
  * Copyright (c) 2015-2017 Ridgerun, LLC (http://www.ridgerun.com)
- * 
+ *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA
@@ -43,41 +43,40 @@ GST_DEBUG_CATEGORY_STATIC (gstd_http_debug);
 
 struct _GstdHttp
 {
-  GstdSocket parent;
+  GstdIpc parent;
   guint base_port;
   gchar *address;
   guint num_ports;
   gint max_threads;
-  GSocketService *service;
 };
 
 struct _GstdHttpClass
 {
-  GstdSocketClass parent_class;
+  GstdIpcClass parent_class;
 };
 
-G_DEFINE_TYPE (GstdHttp, gstd_http, GSTD_TYPE_SOCKET);
+G_DEFINE_TYPE (GstdHttp, gstd_http, GSTD_TYPE_IPC);
 
 /* VTable */
 
 static void gstd_http_dispose (GObject *);
-static GstdReturnCode gstd_http_create_socket_service (GstdSocket * base,
-    GSocketService ** service);
+static GstdReturnCode gstd_http_start (GstdIpc * base, GstdSession * session);
+static GstdReturnCode gstd_http_stop (GstdIpc * base);
 static gboolean gstd_http_init_get_option_group (GstdIpc * base, GOptionGroup ** group);
-/*static gboolean gstd_http_add_listeners(GSocketService *service, gchar * address, gint port, GError ** error);
-static gboolean gstd_tcp_add_listeners(GSocketService *service, gchar * address, gint port, GError ** error);*/
+
 static void
 gstd_http_class_init (GstdHttpClass * klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
   GstdIpcClass *gstdipc_class = GSTD_IPC_CLASS (klass);
-  GstdSocketClass* socket_class = GSTD_SOCKET_CLASS (klass);
   guint debug_color;
   gstdipc_class->get_option_group =
       GST_DEBUG_FUNCPTR (gstd_http_init_get_option_group);
-  socket_class->create_socket_service =
-      GST_DEBUG_FUNCPTR (gstd_http_create_socket_service);
+  gstdipc_class->start =
+      GST_DEBUG_FUNCPTR (gstd_http_start);
   object_class->dispose = gstd_http_dispose;
+  gstdipc_class->stop =
+      GST_DEBUG_FUNCPTR (gstd_http_stop);
 
   /* Initialize debug category with nice colors */
   debug_color = GST_DEBUG_FG_BLACK | GST_DEBUG_BOLD | GST_DEBUG_BG_WHITE;
@@ -109,89 +108,59 @@ gstd_http_dispose (GObject * object)
 }
 
 static void
-do_post (SoupServer *server, SoupMessage *msg)
-{
-  soup_message_set_status (msg, SOUP_STATUS_OK);
-  return;
-}
-
-static void
-do_get (SoupServer *server, SoupMessage *msg)
-{
-  
-  soup_message_set_status (msg, SOUP_STATUS_OK);
-  soup_message_set_response (msg, "application/json",SOUP_MEMORY_STATIC, "{\"name\":\"John\", \"age\":31, \"city\":\"New York\"}",
-              sizeof("{\"name\":\"Lenin\", \"age\":24, \"city\":\"PZ\"}")-1);
-  return;
-}
-
-static void
 server_callback (SoupServer *server, SoupMessage *msg,
-		 const char *path, GHashTable *query,
-		 SoupClientContext *context, gpointer data)
+     const char *path, GHashTable *query,
+     SoupClientContext *context, gpointer data)
 {
-	SoupMessageHeadersIter iter;
-	const char *name, *value;
-  SoupURI *address;
+  SoupMessageHeadersIter iter;
+
   soup_message_set_flags (msg,SOUP_MESSAGE_NEW_CONNECTION);
-	g_print ("%s %s HTTP/1.%d\n", msg->method, path,
-		 soup_message_get_http_version (msg));
-	soup_message_headers_iter_init (&iter, msg->request_headers);
-	while (soup_message_headers_iter_next (&iter, &name, &value))
-    g_print ("%s: %s\n", name, value);
-    g_print("**%d",soup_message_is_keepalive (msg));
-	if (msg->request_body->length)
-		g_print ("%s\n", msg->request_body->data);
-
-
-	if (msg->method == SOUP_METHOD_GET || msg->method == SOUP_METHOD_HEAD){
-    soup_message_headers_append (msg->response_headers,"Access-Control-Allow-Origin", "*"); 
-		do_get (server, msg);
-    
-    address = soup_message_get_uri(msg);
-    g_print("ADDRESS: %s\n",soup_uri_get_path(address));
-    
+  g_print ("%s %s HTTP/1.%d\n", msg->method, path,
+        soup_message_get_http_version (msg));
+  soup_message_headers_iter_init (&iter, msg->request_headers);
+  if (msg->request_body->length){
+    g_print ("%s\n", msg->request_body->data);
   }
 
-	else{
-    do_post (server, msg);
-    
+  /*Check HTTP request verb*/
+  if (msg->method == SOUP_METHOD_GET){
+    g_print("do_get");
   }
-		//soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+  else if(msg->method == SOUP_METHOD_POST){
+    g_print("do_post");
+  }
+  else if(msg->method == SOUP_METHOD_PUT){
+    g_print("do_put");
+  }
+  else if(msg->method == SOUP_METHOD_DELETE){
+    g_print("do_delete");
+  }
+  else{
+    soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+  }
 
-	g_print ("  -> %d %s\n\n", msg->status_code, msg->reason_phrase); 
+  g_print ("  -> %d %s\n\n", msg->status_code, msg->reason_phrase);
 }
 
 GstdReturnCode
-gstd_http_create_socket_service (GstdSocket * base, GSocketService ** service)
+gstd_http_start (GstdIpc * base, GstdSession * session)
 {
   GError *error = NULL;
   GstdHttp *self = GSTD_HTTP (base);
   guint16 port = self->base_port;
   SoupServer *server;
-	
-  /*GSList *uris, *u;
-	char *str;
-  GSocketAddress * sa;
-  gchar *address = self->address;
-  guint i;*/
 
-  GST_DEBUG_OBJECT (self, "Getting HTTP Socket address");
+  gstd_http_stop (base);
+
+  GST_DEBUG_OBJECT (self, "Getting HTTP address");
   server = soup_server_new(SOUP_SERVER_SERVER_HEADER,"HTTP-Server",NULL);
-
-  *service = g_threaded_socket_service_new (self->max_threads);
-  
-  //sa = g_inet_socket_address_new_from_string(address, port);
-
-    
 
   soup_server_listen_all (server, port+1, 0, &error);
   if (error){
     goto noconnection;
   }
-  soup_server_add_handler (server, NULL, server_callback, NULL, NULL);
+  soup_server_add_handler (server, NULL, server_callback, session, NULL);
 	g_print ("\nWaiting for requests...\n");
-  
 
   return GSTD_EOK;
 
@@ -200,8 +169,6 @@ noconnection:
     GST_ERROR_OBJECT (self, "%s", error->message);
     g_printerr ("%s\n", error->message);
     g_error_free (error);
-    g_socket_service_stop (*service);
-    *service = NULL;
     return GSTD_NO_CONNECTION;
   }
 }
@@ -241,3 +208,18 @@ gstd_http_init_get_option_group (GstdIpc * base, GOptionGroup ** group)
   return TRUE;
 }
 
+static GstdReturnCode
+gstd_http_stop (GstdIpc * base)
+{
+  GstdHttp *self = GSTD_HTTP (base);
+  GstdSession *session = base->session;
+
+  g_return_val_if_fail (session, GSTD_NULL_ARGUMENT);
+
+  GST_DEBUG_OBJECT (self, "Entering SOCKET stop ");
+
+      GST_INFO_OBJECT (session, "Closing SOCKET connection for %s",
+          GSTD_OBJECT_NAME (session));
+
+  return GSTD_EOK;
+}

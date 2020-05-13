@@ -23,7 +23,6 @@
 #include "gstd_return_codes.h"
 #include "gstd_session.h"
 #include "gstd_ipc.h"
-#include "gstd_socket.h"
 
 G_BEGIN_DECLS
 #define GSTD_HTTP_DEFAULT_ADDRESS "127.0.0.1"
