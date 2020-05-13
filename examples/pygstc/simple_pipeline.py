@@ -11,6 +11,10 @@ from pygstc.logger import CustomLogger
 class GstcPlayer:
 
     def __init__(self):
+        self.T_TO_NSECONDS = 1000000000
+        self.BUS_TIMEOUT = 200000000
+        self.BUS_FILTER = "error+eos+warning"
+
         # Create a custom logger with loglevel=WARNING
         self.gstd_logger = CustomLogger('simple_playback', loglevel='WARNING')
         # Create the client with the logger
@@ -31,16 +35,19 @@ class GstcPlayer:
         return ret
 
     def errPlayerHandler(self):
-        self.gstc.bus_timeout(self.pipeName, 200000000)
-        self.gstc.bus_filter(self.pipeName, "error+eos+warning")
+        self.gstc.bus_timeout(self.pipeName, self.BUS_TIMEOUT)
+        self.gstc.bus_filter(self.pipeName, self.BUS_FILTER)
 
         while (True):
             try:
                 resp = self.gstc.bus_read(self.pipeName)
                 if (resp is not None and resp["type"] == "error"):
                     print("Player Error. Playing stopped")
+                    self.stopVideo()
                 elif (resp is not None and resp["type"] == "eos"):
                     print("Player reached end of stream")
+                elif (resp is not None and resp["type"] == "warning"):
+                    print("Player warning:"+str(resp["message"]))
             except GstdError:
                 break
             except GstcError:
@@ -96,7 +103,7 @@ class GstcPlayer:
                              format=3,
                              flags=1,
                              start_type=1,
-                             start=(position*(1000000000)),
+                             start=(position*(self.T_TO_NSECONDS)),
                              end_type=0,
                              end=-1)
 
