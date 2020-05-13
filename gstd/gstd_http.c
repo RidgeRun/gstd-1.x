@@ -108,23 +108,58 @@ gstd_http_dispose (GObject * object)
 }
 
 static void
+do_get (SoupServer *server, SoupMessage *msg, GstdSession *session)
+{
+  gchar *response;
+  gchar *message;
+  SoupURI *address;
+  GstdReturnCode ret;
+  gchar *output = NULL;
+  const gchar *description = NULL;
+
+  address = soup_message_get_uri(msg);
+  g_print("Message:   %s\n",soup_uri_get_path(address));
+  message = g_strdup_printf
+    ("read %s" ,soup_uri_get_path(address));
+  ret = gstd_parser_parse_cmd (session, message, &output); // in the parser
+  // Prepend the code to the output 
+  description = gstd_return_code_to_string (ret);
+  response =
+    g_strdup_printf
+    ("{\n  \"code\" : %d,\n  \"description\" : \"%s\",\n  \"response\" : %s\n}",
+      ret, description, output ? output : "null");
+      
+  g_print("response:%s\n",response);
+  soup_message_set_status (msg, SOUP_STATUS_OK);
+  soup_message_set_response (msg, "application/json",SOUP_MEMORY_COPY, response,
+              strlen(response));
+
+  g_free (output);
+  g_free(response);
+  g_free(message);
+
+  return;
+}
+
+static void
 server_callback (SoupServer *server, SoupMessage *msg,
      const char *path, GHashTable *query,
      SoupClientContext *context, gpointer data)
 {
   SoupMessageHeadersIter iter;
+  GstdSession *session;
 
   soup_message_set_flags (msg,SOUP_MESSAGE_NEW_CONNECTION);
   g_print ("%s %s HTTP/1.%d\n", msg->method, path,
         soup_message_get_http_version (msg));
+  session = GSTD_SESSION (data);
   soup_message_headers_iter_init (&iter, msg->request_headers);
   if (msg->request_body->length){
     g_print ("%s\n", msg->request_body->data);
   }
 
-  /*Check HTTP request verb*/
   if (msg->method == SOUP_METHOD_GET){
-    g_print("do_get");
+    do_get (server, msg, session);
   }
   else if(msg->method == SOUP_METHOD_POST){
     g_print("do_post");
