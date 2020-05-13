@@ -140,7 +140,51 @@ do_get (SoupServer *server, SoupMessage *msg, GstdSession *session)
 
   return;
 }
+static void
+do_post (SoupServer *server, SoupMessage *msg, GHashTable *query, GstdSession *session)
+{
+  gchar *response;
+  gchar *message;
+  gchar *name;
+  gchar *description_pipe;
+  SoupURI *address;
+  GstdReturnCode ret;
+  gchar *output = NULL;
+  const gchar *description = NULL;
 
+  address = soup_message_get_uri(msg);
+  g_print("Message:   %s\n",soup_uri_get_path(address));
+  query = soup_form_decode (soup_uri_get_query (address));
+  name = g_hash_table_lookup (query, "name");
+  if (name){
+    name = g_strdup (name);
+    }
+  description_pipe = g_hash_table_lookup (query, "description");
+  if (description_pipe){
+    description_pipe = g_strdup (description_pipe);
+    }
+  message = g_strdup_printf
+    ("create %s %s %s" ,soup_uri_get_path(address),name,description_pipe);
+  ret = gstd_parser_parse_cmd (session, message, &output); // in the parser
+  // Prepend the code to the output 
+  description = gstd_return_code_to_string (ret);
+  response =
+    g_strdup_printf
+    ("{\n  \"code\" : %d,\n  \"description\" : \"%s\",\n  \"response\" : %s\n}",
+      ret, description, output ? output : "null");
+  
+  g_print("response:%s\n",response);
+  soup_message_set_response (msg, "application/json",SOUP_MEMORY_COPY, response,
+              strlen(response));
+  g_free (output);
+  g_free(response);
+  g_free(message);
+  g_free(name);
+  g_free(description_pipe);
+  
+  soup_message_set_status (msg, SOUP_STATUS_OK);
+  return;
+}
 static void
 server_callback (SoupServer *server, SoupMessage *msg,
      const char *path, GHashTable *query,
@@ -162,7 +206,7 @@ server_callback (SoupServer *server, SoupMessage *msg,
     do_get (server, msg, session);
   }
   else if(msg->method == SOUP_METHOD_POST){
-    g_print("do_post");
+    do_post (server, msg,query,session);
   }
   else if(msg->method == SOUP_METHOD_PUT){
     g_print("do_put");
