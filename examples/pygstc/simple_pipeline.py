@@ -43,7 +43,7 @@ class GstcPlayer:
                 resp = self.gstc.bus_read(self.pipeName)
                 if (resp is not None and resp["type"] == "error"):
                     print("Player Error. Playing stopped")
-                    self.stopVideo()
+                    self.gstc.pipeline_stop(self.pipeName)
                 elif (resp is not None and resp["type"] == "eos"):
                     print("Player reached end of stream")
                 elif (resp is not None and resp["type"] == "warning"):
@@ -163,7 +163,8 @@ if __name__ == "__main__":
                     except ValueError:
                         print("Use float number for speed", file=sys.stderr)
                 else:
-                    print("Correct use: set_spped 0.5 or set_speed -1.0."
+                    print("Correct use: set_spped $TIME. Examples: set_spped "
+                          "0.5 or set_speed -1.0."
                           "The 0 is not allowed")
             elif (action[0] == "jump"):
                 try:
