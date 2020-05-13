@@ -103,7 +103,7 @@ class GstcPlayer:
                              format=3,
                              flags=1,
                              start_type=1,
-                             start=(position*(self.T_TO_NSECONDS)),
+                             start=(int(position*(self.T_TO_NSECONDS))),
                              end_type=0,
                              end=-1)
 
@@ -166,12 +166,14 @@ if __name__ == "__main__":
                     print("Correct use: set_spped 0.5 or set_speed -1.0."
                           "The 0 is not allowed")
             elif (action[0] == "jump"):
-                if (len(action) == 2 and
-                   action[1].isnumeric() and
-                   int(action[1]) >= 0):
-                    myPlayer.jumpTo(int(action[1]))
-                else:
-                    print("Correct use: jump $SECS. Provide time in seconds")
+                try:
+                    if (len(action) == 2 and
+                       float(action[1]) >= 0):
+                        myPlayer.jumpTo(float(action[1]))
+
+                except ValueError:
+                    print("Correct use: jump $SECS."
+                          "Provide positive time in seconds")
 
             else:
                 printUsage()
