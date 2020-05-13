@@ -247,7 +247,10 @@ class GstdClient:
         try:
             jresult = self._ipc.send(['list_pipelines'], timeout=1)
             # Verify correct data format
-            json.loads(jresult)
+            result = json.loads(jresult)
+            if ('description' in result and
+               result['description'] != 'Success'):
+                raise GstcError("GStreamer Daemon bad response", 13)
 
         except json.JSONDecodeError as e:
             self._logger.error('GStreamer Daemon corrupted response')
