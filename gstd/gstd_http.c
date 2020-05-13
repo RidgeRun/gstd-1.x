@@ -47,7 +47,7 @@ struct _GstdHttp
   guint base_port;
   gchar *address;
   guint num_ports;
-  gint max_threads;
+
 };
 
 struct _GstdHttpClass
@@ -90,7 +90,6 @@ gstd_http_init (GstdHttp * self)
   self->base_port = GSTD_HTTP_DEFAULT_PORT;
   self->address = g_strdup (GSTD_HTTP_DEFAULT_ADDRESS);
   self->num_ports = GSTD_HTTP_DEFAULT_NUM_PORTS;
-  self->max_threads = GSTD_HTTP_DEFAULT_MAX_THREADS;
 }
 
 static void
@@ -317,15 +316,18 @@ gstd_http_start (GstdIpc * base, GstdSession * session)
   GstdHttp *self = GSTD_HTTP (base);
   guint16 port = self->base_port;
   SoupServer *server;
+  gint i;
 
   gstd_http_stop (base);
 
   GST_DEBUG_OBJECT (self, "Getting HTTP address");
   server = soup_server_new (SOUP_SERVER_SERVER_HEADER, "HTTP-Server", NULL);
 
-  soup_server_listen_all (server, port + 1, 0, &error);
-  if (error) {
-    goto noconnection;
+  for (i = 0; i < self->num_ports; i++) {
+    soup_server_listen_all (server, port + i, 0, &error);
+    if (error) {
+      goto noconnection;
+      }
   }
   soup_server_add_handler (server, NULL, server_callback, session, NULL);
 
@@ -359,11 +361,6 @@ gstd_http_init_get_option_group (GstdIpc * base, GOptionGroup ** group)
     {"http-num-ports", 'n', 0, G_OPTION_ARG_INT, &self->num_ports,
           "Number of ports to use starting at base-port (default 1)",
         "http-num-ports"}
-    ,
-    {"http-max-threads", 'm', 0, G_OPTION_ARG_INT, &self->max_threads,
-          "Max number of allowed threads to process simultaneous requests. -1 "
-          "means unlimited (default -1)",
-        "http-max-threads"}
     ,
     {NULL}
   };
