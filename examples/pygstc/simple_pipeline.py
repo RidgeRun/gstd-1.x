@@ -112,7 +112,7 @@ class GstcPlayer:
         existing_pipes = self.gstc.list_pipelines()
         if (existing_pipes == []):
             ret = False
-        elif(existing_pipes[0]['name'] == pipe_name):
+        elif any(pipe['name'] == pipe_name for pipe in existing_pipes):
             ret = True
         else:
             ret = False
