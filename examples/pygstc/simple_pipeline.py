@@ -123,8 +123,8 @@ def printUsage():
     print("play: To play and run")
     print("pause: To pause the video")
     print("stop: To stop and close the playing")
-    print("set_speed $SPEED")
-    print("jump $TIME [in seconds]")
+    print("set_speed $SPEED [negative or positive floating point number]")
+    print("jump $TIME [positive number in seconds]")
 
 
 def printError():
@@ -142,10 +142,12 @@ if __name__ == "__main__":
         myPlayer = GstcPlayer()
 
         if(not myPlayer.openVideo(sys.argv[1])):
-            print("Pipeline already exits", file=sys.stderr)
+            print("Player: Trying to allocate existing GSTD resource."
+                  + "delete resource or execute again GSTD",
+                  file=sys.stderr)
             sys.exit(0)
 
-        action = ["running"]
+        action = [None]
         while (action[0] != "exit"):
 
             if (action[0] == "play"):
@@ -156,18 +158,20 @@ if __name__ == "__main__":
                 myPlayer.stopVideo()
             elif (action[0] == "set_speed"):
                 if (len(action) == 2):
-                    myPlayer.setSpeed(float(action[1]))
+                    try:
+                        myPlayer.setSpeed(float(action[1]))
+                    except ValueError:
+                        print("Use float number for speed", file=sys.stderr)
                 else:
-                    print("Playback speed valid range: [-1, 1]. 0 is not \
-                           allowed")
-
+                    print("Correct use: set_spped 0.5 or set_speed -1.0."
+                          "The 0 is not allowed")
             elif (action[0] == "jump"):
                 if (len(action) == 2 and
                    action[1].isnumeric() and
                    int(action[1]) >= 0):
                     myPlayer.jumpTo(int(action[1]))
                 else:
-                    print("jump $SECS")
+                    print("Correct use: jump $SECS. Provide time in seconds")
 
             else:
                 printUsage()
@@ -178,10 +182,12 @@ if __name__ == "__main__":
 
     except GstdError as err:
         # GstdError: Gstd IPC failed
-        print("GStreamer Daemon failed with code: "+str(err), file=sys.stderr)
+        print("PyGstcPlayer failed with error: "+str(err),
+              file=sys.stderr)
     except GstcError as err:
         # GstcError: Gstd python client failed
-        print("GStreamer Client failed with code: "+str(err), file=sys.stderr)
+        print("PyGstcPlayer failed internally with error: "+str(err),
+              file=sys.stderr)
     else:
         myPlayer.stopVideo()
         print("PyGstc Video Player ended successfully")
