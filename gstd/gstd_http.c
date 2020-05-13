@@ -238,6 +238,48 @@ do_put (SoupServer *server, SoupMessage *msg, GHashTable *query, GstdSession *se
 }
 
 static void
+do_delete (SoupServer *server, SoupMessage *msg, GHashTable *query, GstdSession *session)
+{
+  gchar *response;
+  gchar *message;
+  gchar *name;
+  SoupURI *address;
+  GstdReturnCode ret;
+  gchar *output = NULL;
+  const gchar *description = NULL;
+
+  address = soup_message_get_uri(msg);
+  g_print("Message:   %s\n",soup_uri_get_path(address));
+  query = soup_form_decode (soup_uri_get_query (address));
+  name = g_hash_table_lookup (query, "name");
+  if (name){
+    name = g_strdup (name);
+  }
+  message = g_strdup_printf
+    ("delete %s %s" ,soup_uri_get_path(address),name);
+  ret = gstd_parser_parse_cmd (session, message, &output); // in the parser
+  // Prepend the code to the output 
+  description = gstd_return_code_to_string (ret);
+  response =
+    g_strdup_printf
+    ("{\n  \"code\" : %d,\n  \"description\" : \"%s\",\n  \"response\" : %s\n}",
+      ret, description, output ? output : "null");
+
+  g_print("response:%s\n",response);
+  soup_message_set_response (msg, "application/json",SOUP_MEMORY_COPY, response,
+              strlen(response));
+  soup_message_set_status (msg, SOUP_STATUS_OK);
+
+  g_free (output);
+  g_free(response);
+  g_free(message);
+  g_free(name);
+  
+
+  return;
+}
+
+static void
 server_callback (SoupServer *server, SoupMessage *msg,
      const char *path, GHashTable *query,
      SoupClientContext *context, gpointer data)
@@ -264,7 +306,7 @@ server_callback (SoupServer *server, SoupMessage *msg,
     do_put (server, msg,query,session);
   }
   else if(msg->method == SOUP_METHOD_DELETE){
-    g_print("do_delete");
+    do_delete (server, msg,query,session);
   }
   else{
     soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
