@@ -250,7 +250,7 @@ class GstdClient:
             result = json.loads(jresult)
             if ('description' in result and
                result['description'] != 'Success'):
-                raise GstcError("GStreamer Daemon bad response", 13)
+                raise GstdError("GStreamer Daemon bad response", 15)
 
         except json.JSONDecodeError as e:
             self._logger.error('GStreamer Daemon corrupted response')

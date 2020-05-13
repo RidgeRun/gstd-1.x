@@ -31,55 +31,64 @@
 
 """
 GSTC - GstClientError Class
+Main GstClientError Class for the GstClient
+It groups together all the GstClient Errors
 """
 
 
 class GstClientError(Exception):
 
-    """
-    Raised when GstClient fails
+    def __init__(self, description, code):
+        """
+        Raised when GstClient fails
 
-    Attributes:
-        description -- GstClient error description message
-    """
-    def __init__(self, description):
-        super(GstClientError, self).__init__(description)
+        Parameters
+        ----------
+        Attributes:
+            description -- GstClient error description message
+        """
+        super(GstClientError, self).__init__(description, code)
         self.description = description
+        self.code = code
 
 
 """
 GSTC - GstdError Class
+Raised when Gstd IPC fails
 """
 
 
 class GstdError(GstClientError):
-    """Raised when Gstd IPC fails
-
-    Attributes:
-        description -- GstcError description message
-        code -- Error code
-    """
 
     def __init__(self, description, code):
-        super(GstdError, self).__init__(description)
-        self.description = description
-        self.code = code
+        """
+        Initialize new GstcError
+
+        Parameters
+        ----------
+        Attributes:
+            description : GstcError description message
+            code : Error code
+        """
+        super(GstdError, self).__init__(description, code)
 
 
 """
 GSTC - GstcError Class
+Raised when the Gst-Client fails internally
 """
 
 
 class GstcError(GstClientError):
-    """Raised when the Gstd python client fails internally
-
-    Attributes:
-        description -- GstcError description message
-        code -- Error code
-    """
 
     def __init__(self, description, code):
-        super(GstcError, self).__init__(description)
-        self.description = description
-        self.code = code
+        """
+        Initialize new GstcError
+
+        Parameters
+        ----------
+        Attributes:
+            description : GstcError description message
+            code : Error code
+        """
+        super(GstcError, self).__init__(description, code)
