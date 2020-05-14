@@ -41,8 +41,10 @@ class GstcPlayer:
         while (True):
             try:
                 resp = self.gstc.bus_read(self.pipeName)
-                if (resp is not None and resp["type"] == "error"):
-                    print("Player Error. Playing stopped")
+                if (resp is not None and resp["type"] == "error" and
+                   "message" in resp):
+                    print("Player Error. Playing stopped because: " +
+                          resp["message"])
                     self.gstc.pipeline_stop(self.pipeName)
                 elif (resp is not None and resp["type"] == "eos"):
                     print("Player reached end of stream")
@@ -110,9 +112,7 @@ class GstcPlayer:
     def pipe_exists(self, pipe_name):
         # Check if pipe is already created
         existing_pipes = self.gstc.list_pipelines()
-        if (existing_pipes == []):
-            ret = False
-        elif any(pipe['name'] == pipe_name for pipe in existing_pipes):
+        if any(pipe['name'] == pipe_name for pipe in existing_pipes):
             ret = True
         else:
             ret = False
@@ -163,9 +163,9 @@ if __name__ == "__main__":
                     except ValueError:
                         print("Use float number for speed", file=sys.stderr)
                 else:
-                    print("Correct use: set_spped $TIME. Examples: set_spped "
+                    print("Correct use: set_speed $TIME. Examples: set_speed "
                           "0.5 or set_speed -1.0."
-                          "The 0 is not allowed")
+                          "0 is not allowed")
             elif (action[0] == "jump"):
                 try:
                     if (len(action) == 2 and
