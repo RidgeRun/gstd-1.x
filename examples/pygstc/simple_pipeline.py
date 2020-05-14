@@ -46,6 +46,7 @@ class GstcPlayer:
                     print("Player Error. Playing stopped because: " +
                           resp["message"])
                     self.gstc.pipeline_stop(self.pipeName)
+                    self.gstc.pipeline_delete(self.pipeName)
                 elif (resp is not None and resp["type"] == "eos"):
                     print("Player reached end of stream")
                 elif (resp is not None and resp["type"] == "warning"):
