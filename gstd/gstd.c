@@ -210,6 +210,14 @@ main (gint argc, gchar * argv[])
   }
   g_option_context_free (context);
 
+  if (!quiet && !kill) {
+    print_header ();
+  }
+
+  if (version) {
+    goto out;
+  }
+
   if (!nodaemon) {
     if (!gstd_log_init (gstdlogfile, gstlogfile)) {
       ret = EXIT_FAILURE;
@@ -224,14 +232,6 @@ main (gint argc, gchar * argv[])
 
   gstd_debug_init();
 
-  /* Print the version and exit */
-  if (version) {
-    if (!quiet) {
-      print_header ();
-    }
-    goto out;
-  }
-
   if (kill) {
     if (gstd_daemon_stop ()) {
       GST_INFO ("Gstd successfully stopped");
@@ -239,11 +239,7 @@ main (gint argc, gchar * argv[])
     goto out;
   }
 
-  if (nodaemon) {
-    if (!quiet) {
-      print_header ();
-    }
-  } else {
+  if (!nodaemon) {
     gboolean parent;
 
     if (!gstd_daemon_start (&parent)) {
@@ -254,7 +250,6 @@ main (gint argc, gchar * argv[])
     if (parent) {
       if (!quiet) {
         gchar *filename;
-        print_header ();
         filename = gstd_log_get_current_gstd ();
         g_print ("Log traces will be saved to %s.\n", filename);
         g_print ("Detaching from parent process.\n");
