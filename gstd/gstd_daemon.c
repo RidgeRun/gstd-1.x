@@ -52,6 +52,7 @@ gstd_daemon_init (gint argc, gchar * argv[], gchar * pidfilename)
 {
   const gchar *process_name;
   gchar *pid_path = NULL;
+  gboolean ret = TRUE;
 
   g_return_val_if_fail (argv, FALSE);
 
@@ -62,12 +63,15 @@ gstd_daemon_init (gint argc, gchar * argv[], gchar * pidfilename)
   pid_path = gstd_daemon_get_pid_filename (pidfilename);
 
   if (NULL == pid_path) {
-    g_printerr ("Unable to access Gstd pid dir: pid path is null\n");
+    g_printerr ("Unable to access Gstd pid dir: pid path is NULL\n");
+    ret = FALSE;
     goto out;
   }
 
   if (g_access (pid_path, W_OK)) {
-    goto error;
+    g_printerr ("Unable to open Gstd pid dir %s: %s\n", pid_path, g_strerror (errno));
+    ret = FALSE;
+    goto free_path;
   }
 
   /* Sanitize the process name to use it as PID identification */
@@ -87,32 +91,11 @@ gstd_daemon_init (gint argc, gchar * argv[], gchar * pidfilename)
   daemon_pid_file_proc = gstd_daemon_pid;
 
   _initialized = TRUE;
-  goto out;
 
-error:
-  {
-    switch (errno) {
-      case EACCES:
-        g_printerr ("User %s must have write permissions to %s and its contents\n",
-            g_get_user_name (), pid_path);
-        break;
-      case ENOENT:
-        g_printerr ("Directory %s does not exist, please create it and grant write "
-            "permissions to user %s\n", pid_path, g_get_user_name ());
-        break;
-      default:
-        g_printerr ("Failed to access %s with user %s\n", pid_path, g_get_user_name ());
-        break;
-    }
-  }
-
+free_path:
+    g_free (pid_path);
 out:
-  {
-    if (NULL != pid_path) {
-      g_free (pid_path);
-    }
-    return _initialized;
-  }
+    return ret;
 }
 
 gboolean
