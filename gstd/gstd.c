@@ -167,7 +167,7 @@ main (gint argc, gchar * argv[])
 
   GOptionEntry entries[] = {
     {"version", 'v', 0, G_OPTION_ARG_NONE, &version,
-        "Print current gstd version", NULL}
+        "Print current gstd version and exit", NULL}
     ,
     {"kill", 'k', 0, G_OPTION_ARG_NONE, &kill,
         "Kill a running gstd, if any", NULL}
