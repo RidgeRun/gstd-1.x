@@ -51,11 +51,8 @@ static gchar *gst_filename;
 gboolean
 gstd_log_init (const gchar * gstdfilename, const gchar * gstfilename)
 {
-  gboolean ret = TRUE;
-  gchar *err_filename;
-
   if (_gstdlog) {
-    goto out;
+    return TRUE;
   }
 
   gstd_filename =
@@ -64,8 +61,8 @@ gstd_log_init (const gchar * gstdfilename, const gchar * gstfilename)
   _gstdlog = g_fopen (gstd_filename, "a+");
 
   if (!_gstdlog) {
-    err_filename = gstd_filename;
-    goto error;
+    g_printerr ("Unable to open Gstd log file %s: %s\n", gstd_filename, g_strerror (errno));
+    return FALSE;
   }
 
   gst_filename =
@@ -73,37 +70,14 @@ gstd_log_init (const gchar * gstdfilename, const gchar * gstfilename)
   _gstlog = g_fopen (gst_filename, "a+");
 
   if (!_gstlog) {
-    err_filename = gst_filename;
-    goto error;
+    g_printerr ("Unable to open Gst log file %s: %s\n", gst_filename, g_strerror (errno));
+    return FALSE;
   }
 
   /* Install our proxy handler */
   gst_debug_add_log_function (gstd_log_proxy, NULL, NULL);
-  goto out;
 
-error:
-  {
-    switch (errno) {
-      case EACCES:
-        g_printerr ("User %s must have write permissions to %s and its contents\n",
-            g_get_user_name (), g_path_get_dirname (err_filename));
-        break;
-      case ENOENT:
-        g_printerr ("Directory %s does not exist, please create it and grant write permissions " \
-             "to user %s\n", g_path_get_dirname (err_filename), g_get_user_name ());
-        break;
-      default:
-        g_printerr ("Failed to access %s with user %s\n." ,
-            g_path_get_dirname (err_filename), g_get_user_name ());
-        break;
-    }
-    ret = FALSE;
-  }
-
-out:
-  {
-    return ret;
-  }
+  return TRUE;
 }
 
 void
