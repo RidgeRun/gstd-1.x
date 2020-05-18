@@ -111,9 +111,7 @@ class Ipc:
             s.send(' '.join(line).encode('utf-8'))
             data = self._recvall(s, timeout)
             if not data:
-                return json.dumps({'error': 'socket error',
-                                   'description': 'socket read error in '
-                                   + str(' '.join(line)), 'code': -1})
+                raise socket.error("Socket read error happened")
             data = data.decode('utf-8')
             s.close()
             return data
@@ -164,21 +162,25 @@ class Ipc:
         newbuf = ''
         try:
             sock.settimeout(timeout)
-            while True:
-                if (self._maxsize and self._maxsize > len(newbuf)):
-                    raise BufferError
-                # Timeout to perform non-blocking read
-                ready = select.select([sock], [], [], timeout)
-
-                if ready[0]:
-                    newbuf = sock.recv(self._socket_read_size)
-                    if self._terminator in newbuf:
-                        buf += newbuf[:newbuf.find(self._terminator)]
-                        break
-                    else:
-                        buf += newbuf
-            return buf
-
-        # Raise an exception timeout
         except socket.error as e:
             raise TimeoutError from e
+
+        while True:
+            if (self._maxsize and self._maxsize > len(newbuf)):
+                raise BufferError
+            # Timeout to perform non-blocking read
+            ready = select.select([sock], [], [], timeout)
+
+            if ready[0]:
+                try:
+                    newbuf = sock.recv(self._socket_read_size)
+                # Raise an exception timeout
+                except socket.error as e:
+                    raise TimeoutError from e
+
+                if self._terminator in newbuf:
+                    buf += newbuf[:newbuf.find(self._terminator)]
+                    break
+                else:
+                    buf += newbuf
+        return buf

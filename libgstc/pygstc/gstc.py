@@ -276,10 +276,10 @@ class GstdClient:
         except BufferError as e:
             raise GstcError('Gst Client received a buffer bigger ' +
                             'than the maximum size allowed',
-                            GstcErrorCode.GSTC_SEND_ERROR) from e
+                            GstcErrorCode.GSTC_RECV_ERROR) from e
         except TimeoutError as e:
             raise GstcError('Gst Client time our ocurred',
-                            GstcErrorCode.GSTC_SEND_ERROR) from e
+                            GstcErrorCode.GSTC_TIMEOUT) from e
 
     def bus_filter(self, pipe_name, filter):
         """
