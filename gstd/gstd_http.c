@@ -140,7 +140,7 @@ do_get (SoupServer * server, SoupMessage * msg, GstdSession * session)
 {
   gchar *response = NULL;
   gchar *message = NULL;
-  SoupURI *address;
+  SoupURI *address = NULL;
   GstdReturnCode ret = GSTD_EOK;
   gchar *output = NULL;
   const gchar *description = NULL;
@@ -161,7 +161,6 @@ do_get (SoupServer * server, SoupMessage * msg, GstdSession * session)
       ("{\n  \"code\" : %d,\n  \"description\" : \"%s\",\n  \"response\" : %s\n}",
       ret, description, output ? output : "null");
 
-  g_print ("response:%s\n", response);
   soup_message_set_response (msg, "application/json", SOUP_MEMORY_COPY,
       response, strlen (response));
 
@@ -183,7 +182,7 @@ do_post (SoupServer * server, SoupMessage * msg, GHashTable * query,
   gchar *message = NULL;
   gchar *name = NULL;
   gchar *description_pipe = NULL;
-  SoupURI *address;
+  SoupURI *address = NULL;
   GstdReturnCode ret = GSTD_EOK;
   gchar *output = NULL;
   const gchar *description = NULL;
@@ -223,7 +222,6 @@ do_post (SoupServer * server, SoupMessage * msg, GHashTable * query,
       ("{\n  \"code\" : %d,\n  \"description\" : \"%s\",\n  \"response\" : %s\n}",
       ret, description, output ? output : "null");
 
-  g_print ("response:%s\n", response);
   soup_message_set_response (msg, "application/json", SOUP_MEMORY_COPY,
       response, strlen (response));
 out:
@@ -247,7 +245,7 @@ do_put (SoupServer * server, SoupMessage * msg, GHashTable * query,
   gchar *message = NULL;
   gchar *name = NULL;
   gchar *description_pipe = NULL;
-  SoupURI *address;
+  SoupURI *address = NULL;
   GstdReturnCode ret = GSTD_EOK;
   gchar *output = NULL;
   const gchar *description = NULL;
@@ -286,7 +284,6 @@ do_put (SoupServer * server, SoupMessage * msg, GHashTable * query,
       ("{\n  \"code\" : %d,\n  \"description\" : \"%s\",\n  \"response\" : %s\n}",
       ret, description, output ? output : "null");
 
-  g_print ("response:%s\n", response);
   soup_message_set_response (msg, "application/json", SOUP_MEMORY_COPY,
       response, strlen (response));
 out:
@@ -309,7 +306,7 @@ do_delete (SoupServer * server, SoupMessage * msg, GHashTable * query,
   gchar *response = NULL;
   gchar *message = NULL;
   gchar *name = NULL;
-  SoupURI *address;
+  SoupURI *address = NULL;
   GstdReturnCode ret = GSTD_EOK;
   gchar *output = NULL;
   const gchar *description = NULL;
@@ -322,9 +319,8 @@ do_delete (SoupServer * server, SoupMessage * msg, GHashTable * query,
   g_return_if_fail (session);
 
   address = soup_message_get_uri (msg);
-  g_print ("Message:   %s\n", soup_uri_get_path (address));
-
   query_text = soup_uri_get_query (address);
+
   if (query_text) {
     query = soup_form_decode (query_text);
   } else {
@@ -344,7 +340,6 @@ do_delete (SoupServer * server, SoupMessage * msg, GHashTable * query,
       ("{\n  \"code\" : %d,\n  \"description\" : \"%s\",\n  \"response\" : %s\n}",
       ret, description, output ? output : "null");
 
-  g_print ("response:%s\n", response);
   soup_message_set_response (msg, "application/json", SOUP_MEMORY_COPY,
       response, strlen (response));
 
@@ -365,17 +360,14 @@ server_callback (SoupServer * server, SoupMessage * msg,
     const char *path, GHashTable * query,
     SoupClientContext * context, gpointer data)
 {
-  SoupMessageHeadersIter iter;
-  GstdSession *session;
+  g_return_if_fail(server);
+  g_return_if_fail(query);
+  g_return_if_fail(msg);
+  g_return_if_fail(data);
 
-  soup_message_set_flags (msg, SOUP_MESSAGE_NEW_CONNECTION);
-  g_print ("%s %s HTTP/1.%d\n", msg->method, path,
-      soup_message_get_http_version (msg));
+  GstdSession *session = NULL;
+
   session = GSTD_SESSION (data);
-  soup_message_headers_iter_init (&iter, msg->request_headers);
-  if (msg->request_body->length) {
-    g_print ("%s\n", msg->request_body->data);
-  }
 
   if (msg->method == SOUP_METHOD_GET) {
     do_get (server, msg, session);
@@ -389,20 +381,20 @@ server_callback (SoupServer * server, SoupMessage * msg,
     soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
   }
 
-  g_print ("  -> %d %s\n\n", msg->status_code, msg->reason_phrase);
 }
 
 static GstdReturnCode
 gstd_http_start (GstdIpc * base, GstdSession * session)
 {
   GError *error = NULL;
-  GstdHttp *self = GSTD_HTTP (base);
-  guint16 port = self->base_port;
-  SoupServer *server;
-  gint i;
+  SoupServer *server = NULL;
+  gint i = 0;
 
   g_return_val_if_fail (base, GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (session, GSTD_NULL_ARGUMENT);
+
+  GstdHttp *self = GSTD_HTTP (base);
+  guint16 port = self->base_port;
 
   gstd_http_stop (base);
 
@@ -435,6 +427,7 @@ gstd_http_init_get_option_group (GstdIpc * base, GOptionGroup ** group)
   g_return_val_if_fail (group, FALSE);
 
   GstdHttp *self = GSTD_HTTP (base);
+
   GOptionEntry http_args[] = {
     {"enable-http-protocol", 't', 0, G_OPTION_ARG_NONE, &base->enabled,
         "Enable attach the server through given HTTP ports ", NULL}
