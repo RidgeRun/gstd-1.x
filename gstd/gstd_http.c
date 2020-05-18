@@ -45,7 +45,6 @@ struct _GstdHttp
   guint base_port;
   gchar *address;
   guint num_ports;
-
 };
 
 struct _GstdHttpClass
@@ -62,6 +61,18 @@ static GstdReturnCode gstd_http_start (GstdIpc * base, GstdSession * session);
 static GstdReturnCode gstd_http_stop (GstdIpc * base);
 static gboolean gstd_http_init_get_option_group (GstdIpc * base,
     GOptionGroup ** group);
+static SoupStatus get_status_code (GstdReturnCode ret);
+static void do_get (SoupServer * server, SoupMessage * msg,
+    GstdSession * session);
+static void do_post (SoupServer * server, SoupMessage * msg, GHashTable * query,
+    GstdSession * session);
+static void do_put (SoupServer * server, SoupMessage * msg, GHashTable * query,
+    GstdSession * session);
+static void do_delete (SoupServer * server, SoupMessage * msg,
+    GHashTable * query, GstdSession * session);
+static void server_callback (SoupServer * server, SoupMessage * msg,
+    const char *path, GHashTable * query, SoupClientContext * context,
+    gpointer data);
 
 static void
 gstd_http_class_init (GstdHttpClass * klass)
@@ -97,13 +108,14 @@ gstd_http_dispose (GObject * object)
 
   GST_INFO_OBJECT (object, "Deinitializing gstd HTTP");
 
-  if (self->address)
+  if (self->address) {
     g_free (self->address);
+  }
 
   G_OBJECT_CLASS (gstd_http_parent_class)->dispose (object);
 }
 
-SoupStatus
+static SoupStatus
 get_status_code (GstdReturnCode ret)
 {
   SoupStatus status = SOUP_STATUS_OK;
@@ -303,7 +315,7 @@ do_delete (SoupServer * server, SoupMessage * msg, GHashTable * query,
   const gchar *description = NULL;
   SoupStatus status = SOUP_STATUS_OK;
   const gchar *query_text = NULL;
-  
+
   g_return_if_fail (server);
   g_return_if_fail (msg);
   g_return_if_fail (query);
@@ -380,7 +392,7 @@ server_callback (SoupServer * server, SoupMessage * msg,
   g_print ("  -> %d %s\n\n", msg->status_code, msg->reason_phrase);
 }
 
-GstdReturnCode
+static GstdReturnCode
 gstd_http_start (GstdIpc * base, GstdSession * session)
 {
   GError *error = NULL;
@@ -388,7 +400,7 @@ gstd_http_start (GstdIpc * base, GstdSession * session)
   guint16 port = self->base_port;
   SoupServer *server;
   gint i;
-  
+
   g_return_val_if_fail (base, GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (session, GSTD_NULL_ARGUMENT);
 
@@ -416,7 +428,7 @@ noconnection:
   }
 }
 
-gboolean
+static gboolean
 gstd_http_init_get_option_group (GstdIpc * base, GOptionGroup ** group)
 {
   g_return_val_if_fail (base, FALSE);
@@ -453,7 +465,7 @@ static GstdReturnCode
 gstd_http_stop (GstdIpc * base)
 {
   g_return_val_if_fail (base, GSTD_NULL_ARGUMENT);
-  
+
   GstdHttp *self = GSTD_HTTP (base);
   GstdSession *session = base->session;
 
