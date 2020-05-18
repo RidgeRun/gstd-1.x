@@ -32,7 +32,7 @@ import inspect
 import json
 import traceback
 
-from pygstc.gstcerror import GstdError, GstcError
+from pygstc.gstcerror import GstdError, GstcError, GstcErrorCode
 from pygstc.logger import DummyLogger
 from pygstc.tcp import Ipc
 
@@ -183,7 +183,7 @@ class GstdClient:
                 raise GstcError(
                     "%s TypeError: parameter %i: expected %s, '%s found" %
                     (inspect.stack()[1].function, i, type_list[i],
-                     type(parameter)), -6)
+                     type(parameter)), GstcErrorCode.GSTC_MALFORMED)
             if type_list[i] == str:
                 parameter_string_list += [parameter]
             elif type_list[i] == bool:
@@ -220,16 +220,26 @@ class GstdClient:
             cmd = cmd_line[0]
             jresult = self._ipc.send(cmd_line, timeout=self._timeout)
             result = json.loads(jresult)
-            if result['code'] != 0:
+            if result['code'] != GstcErrorCode.GSTC_OK.value:
                 self._logger.error('%s error: %s' % (cmd,
                                                      result['description']))
-                raise GstcError(result['description'], -7)
+                raise GstdError(result['description'],
+                                result['code'])
             return result
         except ConnectionRefusedError as e:
-            raise GstdError("Failed to communicate with GSTD", 15)\
+            raise GstcError("Failed to communicate with GSTD",
+                            GstcErrorCode.GSTC_UNREACHABLE)\
                 from e
         except TypeError as e:
-            raise GstcError('Bad command', -1) from e
+            raise GstcError('Gst Client Bad command',
+                            GstcErrorCode.GSTC_TYPE_ERROR) from e
+        except BufferError as e:
+            raise GstcError('Gst Client received a response bigger ' +
+                            'than the maximum size allowed',
+                            GstcErrorCode.GSTC_RECV_ERROR) from e
+        except TimeoutError as e:
+            raise GstcError('Gst Client time out ocurred',
+                            GstcErrorCode.GSTC_BUS_TIMEOUT) from e
 
     def ping_gstd(self):
         """
@@ -250,14 +260,19 @@ class GstdClient:
             result = json.loads(jresult)
             if ('description' in result and
                result['description'] != 'Success'):
-                raise GstdError("GStreamer Daemon bad response", 15)
+                raise GstdError(result['description'],
+                                result['code'])
 
         except json.JSONDecodeError as e:
-            self._logger.error('GStreamer Daemon corrupted response')
-            raise GstcError("GStreamer Daemon corrupted response", 13) from e
+            err_msg = 'GStreamer Daemon corrupted response'
+            self._logger.error(err_msg)
+            raise GstcError(err_msg,
+                            GstcErrorCode.GSTC_MALFORMED) from e
         except ConnectionRefusedError as e:
-            self._logger.error('Error contacting GST Daemon')
-            raise GstdError('Error contacting GST Daemon', 15) from e
+            err_msg = 'Error contacting Gstd Daemon'
+            self._logger.error(err_msg)
+            raise GstcError(err_msg,
+                            GstcErrorCode.GSTC_UNREACHABLE) from e
 
     def bus_filter(self, pipe_name, filter):
         """
