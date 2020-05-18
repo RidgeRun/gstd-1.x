@@ -199,16 +199,27 @@ do_post (SoupServer * server, SoupMessage * msg, GHashTable * query,
     query = soup_form_decode (query_text);
   } else {
     ret = GSTD_BAD_VALUE;
+    GST_INFO_OBJECT (session, "No query params provided");
     goto out;
   }
 
   name = g_hash_table_lookup (query, "name");
   if (name) {
     name = g_strdup (name);
+  } else {
+    ret = GSTD_BAD_VALUE;
+    GST_INFO_OBJECT (session,
+        "Wrong query param provided, \"name\" doesn't exist");
+    goto out;
   }
   description_pipe = g_hash_table_lookup (query, "description");
   if (description_pipe) {
     description_pipe = g_strdup (description_pipe);
+  } else {
+    ret = GSTD_BAD_VALUE;
+    GST_INFO_OBJECT (session,
+        "Wrong query param provided, \"description\" doesn't exist");
+    goto out;
   }
   message = g_strdup_printf
       ("create %s %s %s", soup_uri_get_path (address), name, description_pipe);
@@ -262,13 +273,20 @@ do_put (SoupServer * server, SoupMessage * msg, GHashTable * query,
     query = soup_form_decode (query_text);
   } else {
     ret = GSTD_BAD_VALUE;
+    GST_INFO_OBJECT (session, "No query params provided");
     goto out;
   }
 
   name = g_hash_table_lookup (query, "name");
   if (name) {
     name = g_strdup (name);
+  } else {
+    ret = GSTD_BAD_VALUE;
+    GST_INFO_OBJECT (session,
+        "Wrong query param provided, \"name\" doesn't exist");
+    goto out;
   }
+
   description_pipe = g_hash_table_lookup (query, "description");
   if (description_pipe) {
     description_pipe = g_strdup (description_pipe);
@@ -329,6 +347,11 @@ do_delete (SoupServer * server, SoupMessage * msg, GHashTable * query,
   name = g_hash_table_lookup (query, "name");
   if (name) {
     name = g_strdup (name);
+  } else {
+    ret = GSTD_BAD_VALUE;
+    GST_INFO_OBJECT (session,
+        "Wrong query param provided, \"name\" doesn't exist");
+    goto out;
   }
   message = g_strdup_printf ("delete %s %s", soup_uri_get_path (address), name);
   ret = gstd_parser_parse_cmd (session, message, &output);      // in the parser
@@ -359,10 +382,10 @@ server_callback (SoupServer * server, SoupMessage * msg,
     const char *path, GHashTable * query,
     SoupClientContext * context, gpointer data)
 {
-  g_return_if_fail(server);
-  g_return_if_fail(query);
-  g_return_if_fail(msg);
-  g_return_if_fail(data);
+  g_return_if_fail (server);
+  g_return_if_fail (query);
+  g_return_if_fail (msg);
+  g_return_if_fail (data);
 
   GstdSession *session = NULL;
 
@@ -417,7 +440,7 @@ noconnection:
     GST_ERROR_OBJECT (self, "%s", error->message);
     g_printerr ("%s\n", error->message);
     g_error_free (error);
-    g_free(server);
+    g_free (server);
     return GSTD_NO_CONNECTION;
   }
 }
