@@ -1,6 +1,6 @@
 /*
  * GStreamer Daemon - Gst Launch under steroids
- * Copyright (c) 2015-2017 Ridgerun, LLC (http://www.ridgerun.com)
+ * Copyright (c) 2015-2020 Ridgerun, LLC (http://www.ridgerun.com)
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -33,13 +33,11 @@
 #include "gstd_pipeline_bus.h"
 #include "gstd_event_handler.h"
 
-
 /* Gstd HTTP debugging category */
 GST_DEBUG_CATEGORY_STATIC (gstd_http_debug);
 #define GST_CAT_DEFAULT gstd_http_debug
 
 #define GSTD_DEBUG_DEFAULT_LEVEL GST_LEVEL_INFO
-
 
 struct _GstdHttp
 {
@@ -136,6 +134,10 @@ do_get (SoupServer * server, SoupMessage * msg, GstdSession * session)
   const gchar *description = NULL;
   SoupStatus status = SOUP_STATUS_OK;
 
+  g_return_if_fail (server);
+  g_return_if_fail (msg);
+  g_return_if_fail (session);
+
   address = soup_message_get_uri (msg);
 
   message = g_strdup_printf ("read %s", soup_uri_get_path (address));
@@ -175,6 +177,11 @@ do_post (SoupServer * server, SoupMessage * msg, GHashTable * query,
   const gchar *description = NULL;
   SoupStatus status = SOUP_STATUS_OK;
   const gchar *query_text = NULL;
+
+  g_return_if_fail (server);
+  g_return_if_fail (msg);
+  g_return_if_fail (query);
+  g_return_if_fail (session);
 
   address = soup_message_get_uri (msg);
 
@@ -235,6 +242,11 @@ do_put (SoupServer * server, SoupMessage * msg, GHashTable * query,
   SoupStatus status = SOUP_STATUS_OK;
   const gchar *query_text = NULL;
 
+  g_return_if_fail (server);
+  g_return_if_fail (msg);
+  g_return_if_fail (query);
+  g_return_if_fail (session);
+
   address = soup_message_get_uri (msg);
 
   query_text = soup_uri_get_query (address);
@@ -291,6 +303,11 @@ do_delete (SoupServer * server, SoupMessage * msg, GHashTable * query,
   const gchar *description = NULL;
   SoupStatus status = SOUP_STATUS_OK;
   const gchar *query_text = NULL;
+  
+  g_return_if_fail (server);
+  g_return_if_fail (msg);
+  g_return_if_fail (query);
+  g_return_if_fail (session);
 
   address = soup_message_get_uri (msg);
   g_print ("Message:   %s\n", soup_uri_get_path (address));
@@ -371,6 +388,9 @@ gstd_http_start (GstdIpc * base, GstdSession * session)
   guint16 port = self->base_port;
   SoupServer *server;
   gint i;
+  
+  g_return_val_if_fail (base, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (session, GSTD_NULL_ARGUMENT);
 
   gstd_http_stop (base);
 
@@ -399,6 +419,9 @@ noconnection:
 gboolean
 gstd_http_init_get_option_group (GstdIpc * base, GOptionGroup ** group)
 {
+  g_return_val_if_fail (base, FALSE);
+  g_return_val_if_fail (group, FALSE);
+
   GstdHttp *self = GSTD_HTTP (base);
   GOptionEntry http_args[] = {
     {"enable-http-protocol", 't', 0, G_OPTION_ARG_NONE, &base->enabled,
@@ -409,7 +432,7 @@ gstd_http_init_get_option_group (GstdIpc * base, GOptionGroup ** group)
         "http-address"}
     ,
     {"http-base-port", 'p', 0, G_OPTION_ARG_INT, &self->base_port,
-          "Attach to the server starting through a given port (default 5000)",
+          "Attach to the server starting through a given port (default 5001)",
         "http-base-port"}
     ,
     {"http-num-ports", 'n', 0, G_OPTION_ARG_INT, &self->num_ports,
@@ -429,10 +452,10 @@ gstd_http_init_get_option_group (GstdIpc * base, GOptionGroup ** group)
 static GstdReturnCode
 gstd_http_stop (GstdIpc * base)
 {
+  g_return_val_if_fail (base, GSTD_NULL_ARGUMENT);
+  
   GstdHttp *self = GSTD_HTTP (base);
   GstdSession *session = base->session;
-
-  g_return_val_if_fail (session, GSTD_NULL_ARGUMENT);
 
   GST_DEBUG_OBJECT (self, "Entering SOCKET stop ");
 
