@@ -27,7 +27,6 @@
 G_BEGIN_DECLS
 #define GSTD_HTTP_DEFAULT_ADDRESS "127.0.0.1"
 #define GSTD_HTTP_DEFAULT_PORT 5001
-#define GSTD_HTTP_DEFAULT_NUM_PORTS 1
 
 #define GSTD_TYPE_HTTP \
   (gstd_http_get_type())
@@ -44,7 +43,6 @@ G_BEGIN_DECLS
 typedef struct _GstdHttp GstdHttp;
 typedef struct _GstdHttpClass GstdHttpClass;
 GType gstd_http_get_type (void);
-
 
 G_END_DECLS
 #endif //__GSTD_HTTP_H__

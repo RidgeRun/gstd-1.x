@@ -42,9 +42,8 @@ GST_DEBUG_CATEGORY_STATIC (gstd_http_debug);
 struct _GstdHttp
 {
   GstdIpc parent;
-  guint base_port;
+  guint port;
   gchar *address;
-  guint num_ports;
 };
 
 struct _GstdHttpClass
@@ -96,9 +95,8 @@ static void
 gstd_http_init (GstdHttp * self)
 {
   GST_INFO_OBJECT (self, "Initializing gstd Http");
-  self->base_port = GSTD_HTTP_DEFAULT_PORT;
+  self->port = GSTD_HTTP_DEFAULT_PORT;
   self->address = g_strdup (GSTD_HTTP_DEFAULT_ADDRESS);
-  self->num_ports = GSTD_HTTP_DEFAULT_NUM_PORTS;
 }
 
 static void
@@ -388,25 +386,27 @@ gstd_http_start (GstdIpc * base, GstdSession * session)
 {
   GError *error = NULL;
   SoupServer *server = NULL;
-  gint i = 0;
 
   g_return_val_if_fail (base, GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (session, GSTD_NULL_ARGUMENT);
 
   GstdHttp *self = GSTD_HTTP (base);
-  guint16 port = self->base_port;
+  guint16 port = self->port;
+  gchar *address = self->address;
 
   gstd_http_stop (base);
 
   GST_DEBUG_OBJECT (self, "Getting HTTP address");
   server = soup_server_new (SOUP_SERVER_SERVER_HEADER, "HTTP-Server", NULL);
 
-  for (i = 0; i < self->num_ports; i++) {
-    soup_server_listen_all (server, port + i, 0, &error);
-    if (error) {
-      goto noconnection;
-    }
+  GSocketAddress *sa;
+  sa = g_inet_socket_address_new_from_string (address, port);
+
+  soup_server_listen (server, sa, 0, &error);
+  if (error) {
+    goto noconnection;
   }
+
   soup_server_add_handler (server, NULL, server_callback, session, NULL);
 
   return GSTD_EOK;
@@ -433,16 +433,12 @@ gstd_http_init_get_option_group (GstdIpc * base, GOptionGroup ** group)
         "Enable attach the server through given HTTP ports ", NULL}
     ,
     {"http-address", 'a', 0, G_OPTION_ARG_STRING, &self->address,
-          "Attach to the server starting through a given address (default 127.0.0.1)",
+          "Attach to the server through a given address (default 127.0.0.1)",
         "http-address"}
     ,
-    {"http-base-port", 'p', 0, G_OPTION_ARG_INT, &self->base_port,
-          "Attach to the server starting through a given port (default 5001)",
-        "http-base-port"}
-    ,
-    {"http-num-ports", 'n', 0, G_OPTION_ARG_INT, &self->num_ports,
-          "Number of ports to use starting at base-port (default 1)",
-        "http-num-ports"}
+    {"http-port", 'p', 0, G_OPTION_ARG_INT, &self->port,
+          "Attach to the server through a given port (default 5001)",
+        "http-port"}
     ,
     {NULL}
   };
