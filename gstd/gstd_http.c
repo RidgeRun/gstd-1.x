@@ -323,6 +323,7 @@ do_delete (SoupServer * server, SoupMessage * msg, GHashTable * query,
     query = soup_form_decode (query_text);
   } else {
     ret = GSTD_BAD_VALUE;
+    GST_INFO_OBJECT (session, "No query params provided");
     goto out;
   }
   name = g_hash_table_lookup (query, "name");
@@ -416,6 +417,7 @@ noconnection:
     GST_ERROR_OBJECT (self, "%s", error->message);
     g_printerr ("%s\n", error->message);
     g_error_free (error);
+    g_free(server);
     return GSTD_NO_CONNECTION;
   }
 }
@@ -458,10 +460,11 @@ gstd_http_stop (GstdIpc * base)
   GstdHttp *self = GSTD_HTTP (base);
   GstdSession *session = base->session;
 
-  GST_DEBUG_OBJECT (self, "Entering SOCKET stop ");
+  GST_DEBUG_OBJECT (self, "Entering HTTP server stop ");
 
-  GST_INFO_OBJECT (session, "Closing SOCKET connection for %s",
+  GST_INFO_OBJECT (session, "Closing HTTP server connection for %s",
       GSTD_OBJECT_NAME (session));
+
 
   return GSTD_EOK;
 }
