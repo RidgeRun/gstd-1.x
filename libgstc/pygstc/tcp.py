@@ -94,7 +94,10 @@ class Ipc:
 
         Raises
         -------
+        BufferError: When the incoming buffer is too big
+        TimeoutError : When the server takes too long to respond
         ConnectionRefusedError : When the socket fails to communicate
+
         Returns
         -------
         data : string
@@ -117,18 +120,21 @@ class Ipc:
 
         except BufferError as e:
             s.close()
-            self._logger.error('Server response too long')
-            raise ConnectionRefusedError('Server response too long')\
+            error_msg = 'Server response too long'
+            self._logger.error(error_msg)
+            raise BufferError(error_msg)\
                 from e
         except TimeoutError as e:
             s.close()
-            self._logger.error('Server took too long to respond')
-            raise ConnectionRefusedError('Server took too long to respond')\
+            error_msg = 'Server took too long to respond'
+            self._logger.error(error_msg)
+            raise TimeoutError(error_msg)\
                 from e
         except socket.error as e:
             s.close()
-            self._logger.error('Server did not respond. Is it up?')
-            raise ConnectionRefusedError('Server did not respond. Is it up?')\
+            error_msg = 'Server did not respond. Is it up?'
+            self._logger.error(error_msg)
+            raise ConnectionRefusedError(error_msg)\
                 from e
 
     def _recvall(self, sock, timeout):

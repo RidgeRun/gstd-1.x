@@ -273,6 +273,13 @@ class GstdClient:
             self._logger.error(err_msg)
             raise GstcError(err_msg,
                             GstcErrorCode.GSTC_UNREACHABLE) from e
+        except BufferError as e:
+            raise GstcError('Gst Client received a buffer bigger ' +
+                            'than the maximum size allowed',
+                            GstcErrorCode.GSTC_SEND_ERROR) from e
+        except TimeoutError as e:
+            raise GstcError('Gst Client time our ocurred',
+                            GstcErrorCode.GSTC_SEND_ERROR) from e
 
     def bus_filter(self, pipe_name, filter):
         """
