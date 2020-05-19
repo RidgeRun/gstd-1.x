@@ -151,7 +151,7 @@ do_get (SoupServer * server, SoupMessage * msg, GstdSession * session)
   address = soup_message_get_uri (msg);
 
   message = g_strdup_printf ("read %s", soup_uri_get_path (address));
-  ret = gstd_parser_parse_cmd (session, message, &output);  // in the parser
+  ret = gstd_parser_parse_cmd (session, message, &output);      // in the parser
   // Prepend the code to the output
   description = gstd_return_code_to_string (ret);
   response =
@@ -372,7 +372,8 @@ server_callback (SoupServer * server, SoupMessage * msg,
   GstdSession *session = NULL;
 
   session = GSTD_SESSION (data);
-
+  soup_message_headers_append (msg->response_headers,
+      "Access-Control-Allow-Origin", "*");
   if (msg->method == SOUP_METHOD_GET) {
     do_get (server, msg, session);
   } else if (msg->method == SOUP_METHOD_POST) {
