@@ -151,7 +151,7 @@ do_get (SoupServer * server, SoupMessage * msg, GstdSession * session)
   address = soup_message_get_uri (msg);
 
   message = g_strdup_printf ("read %s", soup_uri_get_path (address));
-  ret = gstd_parser_parse_cmd (session, message, &output);      // in the parser
+  ret = gstd_parser_parse_cmd (session, message, &output);  // in the parser
   // Prepend the code to the output
   description = gstd_return_code_to_string (ret);
   response =
@@ -204,18 +204,14 @@ do_post (SoupServer * server, SoupMessage * msg, GHashTable * query,
   }
 
   name = g_hash_table_lookup (query, "name");
-  if (name) {
-    name = g_strdup (name);
-  } else {
+  if (!name) {
     ret = GSTD_BAD_VALUE;
     GST_INFO_OBJECT (session,
         "Wrong query param provided, \"name\" doesn't exist");
     goto out;
   }
   description_pipe = g_hash_table_lookup (query, "description");
-  if (description_pipe) {
-    description_pipe = g_strdup (description_pipe);
-  } else {
+  if (!description_pipe) {
     ret = GSTD_BAD_VALUE;
     GST_INFO_OBJECT (session,
         "Wrong query param provided, \"description\" doesn't exist");
@@ -240,8 +236,6 @@ out:
   g_free (output);
   g_free (response);
   g_free (message);
-  g_free (name);
-  g_free (description_pipe);
 
   return;
 }
@@ -253,7 +247,6 @@ do_put (SoupServer * server, SoupMessage * msg, GHashTable * query,
   gchar *response = NULL;
   gchar *message = NULL;
   gchar *name = NULL;
-  gchar *description_pipe = NULL;
   SoupURI *address = NULL;
   GstdReturnCode ret = GSTD_EOK;
   gchar *output = NULL;
@@ -278,19 +271,13 @@ do_put (SoupServer * server, SoupMessage * msg, GHashTable * query,
   }
 
   name = g_hash_table_lookup (query, "name");
-  if (name) {
-    name = g_strdup (name);
-  } else {
+  if (!name) {
     ret = GSTD_BAD_VALUE;
     GST_INFO_OBJECT (session,
         "Wrong query param provided, \"name\" doesn't exist");
     goto out;
   }
 
-  description_pipe = g_hash_table_lookup (query, "description");
-  if (description_pipe) {
-    description_pipe = g_strdup (description_pipe);
-  }
   message = g_strdup_printf ("update %s %s", soup_uri_get_path (address), name);
   ret = gstd_parser_parse_cmd (session, message, &output);      // in the parser
   // Prepend the code to the output
@@ -309,8 +296,6 @@ out:
   g_free (output);
   g_free (response);
   g_free (message);
-  g_free (name);
-  g_free (description_pipe);
 
   return;
 }
@@ -345,9 +330,7 @@ do_delete (SoupServer * server, SoupMessage * msg, GHashTable * query,
     goto out;
   }
   name = g_hash_table_lookup (query, "name");
-  if (name) {
-    name = g_strdup (name);
-  } else {
+  if (!name) {
     ret = GSTD_BAD_VALUE;
     GST_INFO_OBJECT (session,
         "Wrong query param provided, \"name\" doesn't exist");
@@ -372,7 +355,6 @@ out:
   g_free (output);
   g_free (response);
   g_free (message);
-  g_free (name);
 
   return;
 }
