@@ -58,7 +58,7 @@ libgstd_core_la_SOURCES = gstd_session.c		\
 libgstd_core_la_CFLAGS = $(GST_CFLAGS)					\
 			 $(GIO_CFLAGS)					\
 			 $(GIO_UNIX_CFLAGS)				\
-			 $(LIBSOUP_CFLAGS)					\
+			 $(LIBSOUP_CFLAGS)				\
 			 $(GJSON_CFLAGS)				\
 			 -DGSTD_LOG_STATE_DIR=\"$(gstdlogstatedir)\"	\
 			 -DGSTD_RUN_STATE_DIR=\"$(gstdrunstatedir)\"
@@ -72,14 +72,21 @@ gstd_SOURCES =  gstd.c gstd_daemon.c
 
 gstd_CFLAGS = $(GST_CFLAGS)					\
 	      $(GIO_CFLAGS)					\
-		  $(LIBSOUP_CFLAGS)					\
+	      $(LIBSOUP_CFLAGS)					\
 	      $(GIO_UNIX_CFLAGS)				\
 	      $(GJSON_CFLAGS)					\
 	      $(LIBD_CFLAGS)					\
 	      -DGSTD_LOG_STATE_DIR=\"$(gstdlogstatedir)\"	\
 	      -DGSTD_RUN_STATE_DIR=\"$(gstdrunstatedir)\"
 
-gstd_LDFLAGS = $(GST_LIBS) $(GIO_LIBS) $(GIO_UNIX_LIBS) $(GJSON_LIBS) $(LIBD_LIBS) $(LIBSOUP_LIBS) -Wl,-rpath -Wl,$(libdir)
+gstd_LDFLAGS = $(GST_LIBS)					\
+	       $(GIO_LIBS)					\
+	       $(GIO_UNIX_LIBS)					\
+	       $(GJSON_LIBS)					\
+	       $(LIBD_LIBS)					\
+	       $(LIBSOUP_LIBS)					\
+	       -Wl,-rpath -Wl,$(libdir)
+
 gstd_LDADD = libgstd-core.la
 
 gstdincludedir = $(includedir)/gstd
