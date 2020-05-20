@@ -152,22 +152,19 @@ do_get (SoupServer * server, SoupMessage * msg, GstdSession * session)
 
   message = g_strdup_printf ("read %s", soup_uri_get_path (address));
   ret = gstd_parser_parse_cmd (session, message, &output);      // in the parser
+  g_free (message);
   // Prepend the code to the output
   description = gstd_return_code_to_string (ret);
   response =
       g_strdup_printf
       ("{\n  \"code\" : %d,\n  \"description\" : \"%s\",\n  \"response\" : %s\n}",
       ret, description, output ? output : "null");
-
+  g_free (output);
   soup_message_set_response (msg, "application/json", SOUP_MEMORY_COPY,
       response, strlen (response));
-
+  g_free (response);
   status = get_status_code (ret);
   soup_message_set_status (msg, status);
-
-  g_free (output);
-  g_free (response);
-  g_free (message);
 
   return;
 }
@@ -195,9 +192,8 @@ do_post (SoupServer * server, SoupMessage * msg, GHashTable * query,
   address = soup_message_get_uri (msg);
 
   query_text = soup_uri_get_query (address);
-  if (query_text) {
-    query = soup_form_decode (query_text);
-  } else {
+
+  if (!query_text) {
     ret = GSTD_BAD_VALUE;
     GST_INFO_OBJECT (session, "No query params provided");
     goto out;
@@ -217,26 +213,25 @@ do_post (SoupServer * server, SoupMessage * msg, GHashTable * query,
         "Wrong query param provided, \"description\" doesn't exist");
     goto out;
   }
+
   message = g_strdup_printf
       ("create %s %s %s", soup_uri_get_path (address), name, description_pipe);
   ret = gstd_parser_parse_cmd (session, message, &output);      // in the parser
+  g_free (message);
   // Prepend the code to the output
   description = gstd_return_code_to_string (ret);
   response =
       g_strdup_printf
       ("{\n  \"code\" : %d,\n  \"description\" : \"%s\",\n  \"response\" : %s\n}",
       ret, description, output ? output : "null");
-
+  g_free (output);
   soup_message_set_response (msg, "application/json", SOUP_MEMORY_COPY,
       response, strlen (response));
+  g_free (response);
+
 out:
   status = get_status_code (ret);
   soup_message_set_status (msg, status);
-
-  g_free (output);
-  g_free (response);
-  g_free (message);
-
   return;
 }
 
@@ -260,11 +255,9 @@ do_put (SoupServer * server, SoupMessage * msg, GHashTable * query,
   g_return_if_fail (session);
 
   address = soup_message_get_uri (msg);
-
   query_text = soup_uri_get_query (address);
-  if (query_text) {
-    query = soup_form_decode (query_text);
-  } else {
+
+  if (!query_text) {
     ret = GSTD_BAD_VALUE;
     GST_INFO_OBJECT (session, "No query params provided");
     goto out;
@@ -280,23 +273,21 @@ do_put (SoupServer * server, SoupMessage * msg, GHashTable * query,
 
   message = g_strdup_printf ("update %s %s", soup_uri_get_path (address), name);
   ret = gstd_parser_parse_cmd (session, message, &output);      // in the parser
+  g_free (message);
   // Prepend the code to the output
   description = gstd_return_code_to_string (ret);
   response =
       g_strdup_printf
       ("{\n  \"code\" : %d,\n  \"description\" : \"%s\",\n  \"response\" : %s\n}",
       ret, description, output ? output : "null");
-
+  g_free (output);
   soup_message_set_response (msg, "application/json", SOUP_MEMORY_COPY,
       response, strlen (response));
+  g_free (response);
+
 out:
   status = get_status_code (ret);
   soup_message_set_status (msg, status);
-
-  g_free (output);
-  g_free (response);
-  g_free (message);
-
   return;
 }
 
@@ -322,13 +313,13 @@ do_delete (SoupServer * server, SoupMessage * msg, GHashTable * query,
   address = soup_message_get_uri (msg);
   query_text = soup_uri_get_query (address);
 
-  if (query_text) {
-    query = soup_form_decode (query_text);
-  } else {
+  if (!query_text) {
     ret = GSTD_BAD_VALUE;
     GST_INFO_OBJECT (session, "No query params provided");
     goto out;
   }
+
+  query = soup_form_decode (query_text);
   name = g_hash_table_lookup (query, "name");
   if (!name) {
     ret = GSTD_BAD_VALUE;
@@ -336,26 +327,24 @@ do_delete (SoupServer * server, SoupMessage * msg, GHashTable * query,
         "Wrong query param provided, \"name\" doesn't exist");
     goto out;
   }
+
   message = g_strdup_printf ("delete %s %s", soup_uri_get_path (address), name);
   ret = gstd_parser_parse_cmd (session, message, &output);      // in the parser
+  g_free (message);
   // Prepend the code to the output
   description = gstd_return_code_to_string (ret);
   response =
       g_strdup_printf
       ("{\n  \"code\" : %d,\n  \"description\" : \"%s\",\n  \"response\" : %s\n}",
       ret, description, output ? output : "null");
-
+  g_free (output);
   soup_message_set_response (msg, "application/json", SOUP_MEMORY_COPY,
       response, strlen (response));
+  g_free (response);
 
 out:
   status = get_status_code (ret);
   soup_message_set_status (msg, status);
-
-  g_free (output);
-  g_free (response);
-  g_free (message);
-
   return;
 }
 
