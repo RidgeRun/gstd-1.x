@@ -44,13 +44,6 @@ typedef struct _GstdHttp GstdHttp;
 typedef struct _GstdHttpClass GstdHttpClass;
 GType gstd_http_get_type (void);
 
-typedef enum
-{
-  GET,
-  POST,
-  PUT,
-  DELETE,
-} verb;
 
 G_END_DECLS
 #endif //__GSTD_HTTP_H__

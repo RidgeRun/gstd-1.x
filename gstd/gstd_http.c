@@ -39,6 +39,13 @@ GST_DEBUG_CATEGORY_STATIC (gstd_http_debug);
 
 #define GSTD_DEBUG_DEFAULT_LEVEL GST_LEVEL_INFO
 
+typedef enum _GstdHttpVerbs
+{
+  GET,
+  POST,
+  PUT,
+  DELETE,
+} GstdHttpVerbs;
 
 struct _GstdHttp
 {
@@ -71,7 +78,7 @@ static GstdReturnCode do_put (SoupServer * server, SoupMessage * msg,
 static GstdReturnCode do_delete (SoupServer * server, SoupMessage * msg,
     char *name, char **output, GstdSession * session);
 static void do_request (SoupServer * server, SoupMessage * msg,
-    GHashTable * query, GstdSession * session, verb request_verb);
+    GHashTable * query, GstdSession * session, GstdHttpVerbs request_verb);
 static void server_callback (SoupServer * server, SoupMessage * msg,
     const char *path, GHashTable * query, SoupClientContext * context,
     gpointer data);
@@ -151,7 +158,7 @@ do_get (SoupServer * server, SoupMessage * msg, char **output,
   address = soup_message_get_uri (msg);
 
   message = g_strdup_printf ("read %s", soup_uri_get_path (address));
-  ret = gstd_parser_parse_cmd (session, message, output);       // in the parser
+  ret = gstd_parser_parse_cmd (session, message, output);
   g_free (message);
 
   return ret;
@@ -173,7 +180,7 @@ do_post (SoupServer * server, SoupMessage * msg, char *name,
 
   message = g_strdup_printf
       ("create %s %s %s", soup_uri_get_path (address), name, description);
-  ret = gstd_parser_parse_cmd (session, message, output);       // in the parser
+  ret = gstd_parser_parse_cmd (session, message, output);
   g_free (message);
 
   return ret;
@@ -194,7 +201,7 @@ do_put (SoupServer * server, SoupMessage * msg, char *name, char **output,
   address = soup_message_get_uri (msg);
 
   message = g_strdup_printf ("update %s %s", soup_uri_get_path (address), name);
-  ret = gstd_parser_parse_cmd (session, message, output);       // in the parser
+  ret = gstd_parser_parse_cmd (session, message, output);
   g_free (message);
 
   return ret;
@@ -215,14 +222,14 @@ do_delete (SoupServer * server, SoupMessage * msg, char *name,
   address = soup_message_get_uri (msg);
 
   message = g_strdup_printf ("delete %s %s", soup_uri_get_path (address), name);
-  ret = gstd_parser_parse_cmd (session, message, output);       // in the parser
+  ret = gstd_parser_parse_cmd (session, message, output);
   g_free (message);
   return ret;
 }
 
 static void
 do_request (SoupServer * server, SoupMessage * msg, GHashTable * query,
-    GstdSession * session, verb request_verb)
+    GstdSession * session, GstdHttpVerbs request_verb)
 {
   gchar *response = NULL;
   gchar *name = NULL;
@@ -245,14 +252,14 @@ do_request (SoupServer * server, SoupMessage * msg, GHashTable * query,
 
     if (!query_text) {
       ret = GSTD_BAD_VALUE;
-      GST_INFO_OBJECT (session, "No query params provided");
+      GST_ERROR_OBJECT (session, "No query params provided");
       goto out;
     }
 
     name = g_hash_table_lookup (query, "name");
     if (!name) {
       ret = GSTD_BAD_VALUE;
-      GST_INFO_OBJECT (session,
+      GST_ERROR_OBJECT (session,
           "Wrong query param provided, \"name\" doesn't exist");
       goto out;
     }
@@ -261,7 +268,7 @@ do_request (SoupServer * server, SoupMessage * msg, GHashTable * query,
       description_pipe = g_hash_table_lookup (query, "description");
       if (!description_pipe) {
         ret = GSTD_BAD_VALUE;
-        GST_INFO_OBJECT (session,
+        GST_ERROR_OBJECT (session,
             "Wrong query param provided, \"description\" doesn't exist");
         goto out;
       }
@@ -341,6 +348,7 @@ gstd_http_start (GstdIpc * base, GstdSession * session)
 {
   GError *error = NULL;
   SoupServer *server = NULL;
+  GSocketAddress *sa;
 
   g_return_val_if_fail (base, GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (session, GSTD_NULL_ARGUMENT);
@@ -351,10 +359,10 @@ gstd_http_start (GstdIpc * base, GstdSession * session)
 
   gstd_http_stop (base);
 
-  GST_DEBUG_OBJECT (self, "Getting HTTP address");
-  server = soup_server_new (SOUP_SERVER_SERVER_HEADER, "HTTP-Server", NULL);
+  GST_DEBUG_OBJECT (self, "Initializing HTTP server");
+  server = soup_server_new (SOUP_SERVER_SERVER_HEADER, "Gstd-1.0", NULL);
 
-  GSocketAddress *sa;
+  
   sa = g_inet_socket_address_new_from_string (address, port);
 
   soup_server_listen (server, sa, 0, &error);
