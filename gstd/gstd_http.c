@@ -186,7 +186,6 @@ do_post (SoupServer * server, SoupMessage * msg, GHashTable * query,
 
   g_return_if_fail (server);
   g_return_if_fail (msg);
-  g_return_if_fail (query);
   g_return_if_fail (session);
 
   address = soup_message_get_uri (msg);
@@ -251,7 +250,6 @@ do_put (SoupServer * server, SoupMessage * msg, GHashTable * query,
 
   g_return_if_fail (server);
   g_return_if_fail (msg);
-  g_return_if_fail (query);
   g_return_if_fail (session);
 
   address = soup_message_get_uri (msg);
@@ -307,7 +305,6 @@ do_delete (SoupServer * server, SoupMessage * msg, GHashTable * query,
 
   g_return_if_fail (server);
   g_return_if_fail (msg);
-  g_return_if_fail (query);
   g_return_if_fail (session);
 
   address = soup_message_get_uri (msg);
@@ -354,7 +351,6 @@ server_callback (SoupServer * server, SoupMessage * msg,
     SoupClientContext * context, gpointer data)
 {
   g_return_if_fail (server);
-  g_return_if_fail (query);
   g_return_if_fail (msg);
   g_return_if_fail (data);
 
