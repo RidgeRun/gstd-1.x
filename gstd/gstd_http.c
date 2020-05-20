@@ -319,6 +319,8 @@ server_callback (SoupServer * server, SoupMessage * msg,
       "Access-Control-Allow-Origin", "*");
   soup_message_headers_append (msg->response_headers,
       "Access-Control-Allow-Headers", "origin,range,content-type");
+  soup_message_headers_append (msg->response_headers,
+      "Access-Control-Allow-Methods", "PUT, GET, POST, DELETE");
 
   if (msg->method == SOUP_METHOD_GET) {
     do_request (server, msg, query, session, GET);
