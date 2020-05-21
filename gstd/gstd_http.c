@@ -178,12 +178,26 @@ do_post (SoupServer * server, SoupMessage * msg, char *name,
 
   address = soup_message_get_uri (msg);
 
+  if (!name) {
+    ret = GSTD_BAD_VALUE;
+    GST_ERROR_OBJECT (session,
+        "Wrong query param provided, \"name\" doesn't exist");
+    goto out;
+  }
+  if (!description) {
+      ret = GSTD_BAD_VALUE;
+      GST_ERROR_OBJECT (session,
+          "Wrong query param provided, \"description\" doesn't exist");
+      goto out;
+  }
+
   message = g_strdup_printf
       ("create %s %s %s", soup_uri_get_path (address), name, description);
   ret = gstd_parser_parse_cmd (session, message, output);
   g_free (message);
 
-  return ret;
+  out:
+    return ret;
 }
 
 static GstdReturnCode
@@ -200,11 +214,19 @@ do_put (SoupServer * server, SoupMessage * msg, char *name, char **output,
 
   address = soup_message_get_uri (msg);
 
+  if (!name) {
+    ret = GSTD_BAD_VALUE;
+    GST_ERROR_OBJECT (session,
+        "Wrong query param provided, \"name\" doesn't exist");
+    goto out;
+  }
+
   message = g_strdup_printf ("update %s %s", soup_uri_get_path (address), name);
   ret = gstd_parser_parse_cmd (session, message, output);
   g_free (message);
 
-  return ret;
+  out:
+    return ret;
 }
 
 static GstdReturnCode
@@ -221,10 +243,19 @@ do_delete (SoupServer * server, SoupMessage * msg, char *name,
 
   address = soup_message_get_uri (msg);
 
+  if (!name) {
+    ret = GSTD_BAD_VALUE;
+    GST_ERROR_OBJECT (session,
+        "Wrong query param provided, \"name\" doesn't exist");
+    goto out;
+  }
+
   message = g_strdup_printf ("delete %s %s", soup_uri_get_path (address), name);
   ret = gstd_parser_parse_cmd (session, message, output);
   g_free (message);
-  return ret;
+
+  out:
+    return ret;
 }
 
 static void
@@ -248,50 +279,28 @@ do_request (SoupServer * server, SoupMessage * msg, GHashTable * query,
   address = soup_message_get_uri (msg);
 
   query_text = soup_uri_get_query (address);
-  if (request_verb != GET) {
 
+  if (!(msg->method == SOUP_METHOD_GET)) {
     if (!query_text) {
       ret = GSTD_BAD_VALUE;
       GST_ERROR_OBJECT (session, "No query params provided");
       goto out;
     }
-
     name = g_hash_table_lookup (query, "name");
-    if (!name) {
-      ret = GSTD_BAD_VALUE;
-      GST_ERROR_OBJECT (session,
-          "Wrong query param provided, \"name\" doesn't exist");
-      goto out;
-    }
-
-    if (request_verb == POST) {
-      description_pipe = g_hash_table_lookup (query, "description");
-      if (!description_pipe) {
-        ret = GSTD_BAD_VALUE;
-        GST_ERROR_OBJECT (session,
-            "Wrong query param provided, \"description\" doesn't exist");
-        goto out;
-      }
-    }
-
+    description_pipe = g_hash_table_lookup (query, "description");
   }
 
-  switch (request_verb) {
-    case GET:
-      ret = do_get (server, msg, &output, session);
-      break;
-    case POST:
-      ret = do_post (server, msg, name, description_pipe, &output, session);
-      break;
-    case PUT:
-      ret = do_put (server, msg, name, &output, session);
-      break;
-    case DELETE:
-      ret = do_delete (server, msg, name, &output, session);
-      break;
 
-    default:
-      break;
+  if (msg->method == SOUP_METHOD_GET) {
+    ret = do_get (server, msg, &output, session);
+  } else if (msg->method == SOUP_METHOD_POST) {
+    ret = do_post (server, msg, name, description_pipe, &output, session);
+  } else if (msg->method == SOUP_METHOD_PUT) {
+    ret = do_put (server, msg, name, &output, session);
+  } else if (msg->method == SOUP_METHOD_DELETE) {
+    ret = do_delete (server, msg, name, &output, session);
+  } else {
+    soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
   }
 
   description = gstd_return_code_to_string (ret);
@@ -322,24 +331,14 @@ server_callback (SoupServer * server, SoupMessage * msg,
   GstdSession *session = NULL;
 
   session = GSTD_SESSION (data);
+
   soup_message_headers_append (msg->response_headers,
       "Access-Control-Allow-Origin", "*");
   soup_message_headers_append (msg->response_headers,
       "Access-Control-Allow-Headers", "origin,range,content-type");
   soup_message_headers_append (msg->response_headers,
       "Access-Control-Allow-Methods", "PUT, GET, POST, DELETE");
-
-  if (msg->method == SOUP_METHOD_GET) {
-    do_request (server, msg, query, session, GET);
-  } else if (msg->method == SOUP_METHOD_POST) {
-    do_request (server, msg, query, session, POST);
-  } else if (msg->method == SOUP_METHOD_PUT) {
-    do_request (server, msg, query, session, PUT);
-  } else if (msg->method == SOUP_METHOD_DELETE) {
-    do_request (server, msg, query, session, DELETE);
-  } else {
-    soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
-  }
+  do_request (server, msg, query, session, GET);
 
 }
 
@@ -362,7 +361,7 @@ gstd_http_start (GstdIpc * base, GstdSession * session)
   GST_DEBUG_OBJECT (self, "Initializing HTTP server");
   server = soup_server_new (SOUP_SERVER_SERVER_HEADER, "Gstd-1.0", NULL);
 
-  
+
   sa = g_inet_socket_address_new_from_string (address, port);
 
   soup_server_listen (server, sa, 0, &error);
