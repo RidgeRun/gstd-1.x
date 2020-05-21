@@ -52,6 +52,7 @@ struct _GstdHttp
   GstdIpc parent;
   guint port;
   gchar *address;
+  SoupServer *server;
 };
 
 struct _GstdHttpClass
@@ -107,6 +108,7 @@ gstd_http_init (GstdHttp * self)
   GST_INFO_OBJECT (self, "Initializing gstd Http");
   self->port = GSTD_HTTP_DEFAULT_PORT;
   self->address = g_strdup (GSTD_HTTP_DEFAULT_ADDRESS);
+  self->server =NULL;
 }
 
 static void
@@ -324,13 +326,15 @@ server_callback (SoupServer * server, SoupMessage * msg,
     const char *path, GHashTable * query,
     SoupClientContext * context, gpointer data)
 {
+  GstdSession *session = NULL;
+
   g_return_if_fail (server);
   g_return_if_fail (msg);
   g_return_if_fail (data);
 
-  GstdSession *session = NULL;
-
   session = GSTD_SESSION (data);
+  g_return_if_fail (session);
+
 
   soup_message_headers_append (msg->response_headers,
       "Access-Control-Allow-Origin", "*");
@@ -346,7 +350,6 @@ static GstdReturnCode
 gstd_http_start (GstdIpc * base, GstdSession * session)
 {
   GError *error = NULL;
-  SoupServer *server = NULL;
   GSocketAddress *sa;
 
   g_return_val_if_fail (base, GSTD_NULL_ARGUMENT);
@@ -359,17 +362,19 @@ gstd_http_start (GstdIpc * base, GstdSession * session)
   gstd_http_stop (base);
 
   GST_DEBUG_OBJECT (self, "Initializing HTTP server");
-  server = soup_server_new (SOUP_SERVER_SERVER_HEADER, "Gstd-1.0", NULL);
-
+  self->server = soup_server_new (SOUP_SERVER_SERVER_HEADER, "Gstd-1.0", NULL);
+  if (!self->server) {
+    goto noconnection;
+  }
 
   sa = g_inet_socket_address_new_from_string (address, port);
 
-  soup_server_listen (server, sa, 0, &error);
+  soup_server_listen (self->server, sa, 0, &error);
   if (error) {
     goto noconnection;
   }
 
-  soup_server_add_handler (server, NULL, server_callback, session, NULL);
+  soup_server_add_handler (self->server, NULL, server_callback, session, NULL);
 
   return GSTD_EOK;
 
@@ -378,7 +383,7 @@ noconnection:
     GST_ERROR_OBJECT (self, "%s", error->message);
     g_printerr ("%s\n", error->message);
     g_error_free (error);
-    g_free (server);
+    g_object_unref (self->server);
     return GSTD_NO_CONNECTION;
   }
 }
@@ -422,9 +427,11 @@ gstd_http_stop (GstdIpc * base)
   GstdSession *session = base->session;
 
   GST_DEBUG_OBJECT (self, "Entering HTTP server stop ");
-
   GST_INFO_OBJECT (session, "Closing HTTP server connection for %s",
       GSTD_OBJECT_NAME (session));
+  if(self->server){
+    g_object_unref (self->server);
+  }
 
   return GSTD_EOK;
 }
