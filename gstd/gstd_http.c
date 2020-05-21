@@ -64,7 +64,7 @@ G_DEFINE_TYPE (GstdHttp, gstd_http, GSTD_TYPE_IPC);
 
 /* VTable */
 
-static void gstd_http_dispose (GObject *);
+static void gstd_http_finalize (GObject *);
 static GstdReturnCode gstd_http_start (GstdIpc * base, GstdSession * session);
 static GstdReturnCode gstd_http_stop (GstdIpc * base);
 static gboolean gstd_http_init_get_option_group (GstdIpc * base,
@@ -93,7 +93,7 @@ gstd_http_class_init (GstdHttpClass * klass)
   gstdipc_class->get_option_group =
       GST_DEBUG_FUNCPTR (gstd_http_init_get_option_group);
   gstdipc_class->start = GST_DEBUG_FUNCPTR (gstd_http_start);
-  object_class->dispose = gstd_http_dispose;
+  object_class->finalize = gstd_http_finalize;
   gstdipc_class->stop = GST_DEBUG_FUNCPTR (gstd_http_stop);
 
   /* Initialize debug category with nice colors */
@@ -108,11 +108,11 @@ gstd_http_init (GstdHttp * self)
   GST_INFO_OBJECT (self, "Initializing gstd Http");
   self->port = GSTD_HTTP_DEFAULT_PORT;
   self->address = g_strdup (GSTD_HTTP_DEFAULT_ADDRESS);
-  self->server =NULL;
+  self->server = NULL;
 }
 
 static void
-gstd_http_dispose (GObject * object)
+gstd_http_finalize (GObject * object)
 {
   GstdHttp *self = GSTD_HTTP (object);
 
@@ -121,8 +121,9 @@ gstd_http_dispose (GObject * object)
   if (self->address) {
     g_free (self->address);
   }
+  self->address = NULL;
 
-  G_OBJECT_CLASS (gstd_http_parent_class)->dispose (object);
+  G_OBJECT_CLASS (gstd_http_parent_class)->finalize (object);
 }
 
 static SoupStatus
@@ -187,10 +188,10 @@ do_post (SoupServer * server, SoupMessage * msg, char *name,
     goto out;
   }
   if (!description) {
-      ret = GSTD_BAD_VALUE;
-      GST_ERROR_OBJECT (session,
-          "Wrong query param provided, \"description\" doesn't exist");
-      goto out;
+    ret = GSTD_BAD_VALUE;
+    GST_ERROR_OBJECT (session,
+        "Wrong query param provided, \"description\" doesn't exist");
+    goto out;
   }
 
   message = g_strdup_printf
@@ -198,8 +199,8 @@ do_post (SoupServer * server, SoupMessage * msg, char *name,
   ret = gstd_parser_parse_cmd (session, message, output);
   g_free (message);
 
-  out:
-    return ret;
+out:
+  return ret;
 }
 
 static GstdReturnCode
@@ -227,8 +228,8 @@ do_put (SoupServer * server, SoupMessage * msg, char *name, char **output,
   ret = gstd_parser_parse_cmd (session, message, output);
   g_free (message);
 
-  out:
-    return ret;
+out:
+  return ret;
 }
 
 static GstdReturnCode
@@ -256,8 +257,8 @@ do_delete (SoupServer * server, SoupMessage * msg, char *name,
   ret = gstd_parser_parse_cmd (session, message, output);
   g_free (message);
 
-  out:
-    return ret;
+out:
+  return ret;
 }
 
 static void
@@ -291,7 +292,6 @@ do_request (SoupServer * server, SoupMessage * msg, GHashTable * query,
     name = g_hash_table_lookup (query, "name");
     description_pipe = g_hash_table_lookup (query, "description");
   }
-
 
   if (msg->method == SOUP_METHOD_GET) {
     ret = do_get (server, msg, &output, session);
@@ -334,7 +334,6 @@ server_callback (SoupServer * server, SoupMessage * msg,
 
   session = GSTD_SESSION (data);
   g_return_if_fail (session);
-
 
   soup_message_headers_append (msg->response_headers,
       "Access-Control-Allow-Origin", "*");
@@ -429,7 +428,7 @@ gstd_http_stop (GstdIpc * base)
   GST_DEBUG_OBJECT (self, "Entering HTTP server stop ");
   GST_INFO_OBJECT (session, "Closing HTTP server connection for %s",
       GSTD_OBJECT_NAME (session));
-  if(self->server){
+  if (self->server) {
     g_object_unref (self->server);
   }
 
