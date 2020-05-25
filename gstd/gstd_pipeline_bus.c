@@ -129,7 +129,7 @@ gstd_pipeline_bus_new (GstBus * bus)
   g_return_val_if_fail (bus, NULL);
 
   self = GSTD_PIPELINE_BUS (g_object_new (GSTD_TYPE_PIPELINE_BUS, NULL));
-  self->bus = G_OBJECT(bus);
+  self->bus = G_OBJECT (bus);
 
   return self;
 }

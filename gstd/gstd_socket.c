@@ -40,8 +40,7 @@ gstd_socket_callback (GSocketService * service,
     GSocketConnection * connection,
     GObject * source_object, gpointer user_data);
 static void gstd_socket_dispose (GObject *);
-static GstdReturnCode
-gstd_socket_start (GstdIpc * base, GstdSession * session);
+static GstdReturnCode gstd_socket_start (GstdIpc * base, GstdSession * session);
 static GstdReturnCode gstd_socket_stop (GstdIpc * base);
 
 static void
@@ -88,7 +87,7 @@ gstd_socket_callback (GSocketService * service,
   GInputStream *istream;
   GOutputStream *ostream;
   gint read;
-  const guint size = 1024*1024;
+  const guint size = 1024 * 1024;
   gchar *output = NULL;
   gchar *response;
   gchar *message;
@@ -116,18 +115,20 @@ gstd_socket_callback (GSocketService * service,
     }
     message[read] = '\0';
 
-    ret = gstd_parser_parse_cmd (session, message, &output); // in the parser
+    ret = gstd_parser_parse_cmd (session, message, &output);    // in the parser
 
     /* Prepend the code to the output */
     description = gstd_return_code_to_string (ret);
     response =
-      g_strdup_printf
-      ("{\n  \"code\" : %d,\n  \"description\" : \"%s\",\n  \"response\" : %s\n}",
-       ret, description, output ? output : "null");
+        g_strdup_printf
+        ("{\n  \"code\" : %d,\n  \"description\" : \"%s\",\n  \"response\" : %s\n}",
+        ret, description, output ? output : "null");
     g_free (output);
     output = NULL;
 
-    read = g_output_stream_write (ostream, response, strlen (response) + 1, NULL, NULL);
+    read =
+        g_output_stream_write (ostream, response, strlen (response) + 1, NULL,
+        NULL);
     if (read < 0) {
       break;
     }
@@ -158,10 +159,10 @@ gstd_socket_start (GstdIpc * base, GstdSession * session)
 
   service = self->service;
 
- ret = GSTD_SOCKET_GET_CLASS (self)->create_socket_service (self, &service);
+  ret = GSTD_SOCKET_GET_CLASS (self)->create_socket_service (self, &service);
 
- if(ret != GSTD_EOK)
-  return ret;
+  if (ret != GSTD_EOK)
+    return ret;
 
   /* listen to the 'incoming' signal */
   g_signal_connect (service, "run", G_CALLBACK (gstd_socket_callback), session);

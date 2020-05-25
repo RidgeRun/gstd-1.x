@@ -42,13 +42,13 @@
 
 /* Allow the user to override this value at build time */
 #ifndef GSTC_MAX_RESPONSE_LENGTH
-#  define GSTC_MAX_RESPONSE_LENGTH 4096
+#  define GSTC_MAX_RESPONSE_LENGTH 8192
 #endif
 
 #define NUMBER_OF_SOCKETS (1)
 
 static int create_new_socket ();
-static GstcStatus open_socket(GstcSocket *self);
+static GstcStatus open_socket (GstcSocket * self);
 
 struct _GstcSocket
 {
@@ -68,7 +68,7 @@ create_new_socket (void)
 }
 
 static GstcStatus
-open_socket(GstcSocket *self)
+open_socket (GstcSocket * self)
 {
   gstc_assert_and_ret_val (NULL != self, GSTC_NULL_ARGUMENT);
 
@@ -105,13 +105,13 @@ gstc_socket_new (const char *address, const unsigned int port,
   }
 
   self->keep_connection_open = keep_connection_open;
-  
+
   self->server.sin_addr.s_addr = inet_addr (address);
   self->server.sin_family = domain;
   self->server.sin_port = htons (port);
 
   if (self->keep_connection_open) {
-    ret = open_socket(self);
+    ret = open_socket (self);
     if (ret != GSTC_OK) {
       goto free_self;
     }
@@ -142,7 +142,7 @@ gstc_socket_send (GstcSocket * self, const char *request, char **response,
   gstc_assert_and_ret_val (NULL != response, GSTC_NULL_ARGUMENT);
 
   if (!self->keep_connection_open) {
-    ret = open_socket(self);
+    ret = open_socket (self);
     if (ret != GSTC_OK) {
       goto out;
     }
@@ -157,7 +157,7 @@ gstc_socket_send (GstcSocket * self, const char *request, char **response,
 
   ufds[0].fd = self->socket;
   ufds[0].events = POLLIN;
-  
+
   rv = poll (ufds, NUMBER_OF_SOCKETS, timeout);
 
   /* Error ocurred in poll */

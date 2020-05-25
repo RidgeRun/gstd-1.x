@@ -23,6 +23,7 @@
 
 #include "gstd_bus_msg.h"
 #include "gstd_bus_msg_element.h"
+#include "gstd_bus_msg_notify.h"
 #include "gstd_bus_msg_qos.h"
 #include "gstd_bus_msg_simple.h"
 #include "gstd_bus_msg_state_changed.h"
@@ -38,9 +39,10 @@ static void gstd_bus_msg_dispose (GObject * object);
 static GstdReturnCode gstd_bus_msg_to_string (GstdObject * object,
     gchar ** outstring);
 
-G_DEFINE_TYPE (GstdBusMsg, gstd_bus_msg, GSTD_TYPE_OBJECT)
+G_DEFINE_TYPE (GstdBusMsg, gstd_bus_msg, GSTD_TYPE_OBJECT);
 
-static void gstd_bus_msg_class_init (GstdBusMsgClass * klass)
+static void
+gstd_bus_msg_class_init (GstdBusMsgClass * klass)
 {
   GObjectClass *oclass;
   GstdObjectClass *goclass;
@@ -109,6 +111,9 @@ gstd_bus_msg_factory_make (GstMessage * target)
       break;
     case (GST_MESSAGE_STATE_CHANGED):
       msg = g_object_new (GSTD_TYPE_BUS_MSG_STATE_CHANGED, NULL);
+      break;
+    case (GST_MESSAGE_PROPERTY_NOTIFY):
+      msg = g_object_new (GSTD_TYPE_BUS_MSG_NOTIFY, NULL);
       break;
     default:
       msg = g_object_new (GSTD_TYPE_BUS_MSG, NULL);

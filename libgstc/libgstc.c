@@ -2,7 +2,7 @@
  * GStreamer Daemon - gst-launch on steroids
  * C client library abstracting gstd interprocess communication
  *
- * Copyright (c) 2015-2018 RidgeRun, LLC (http://www.ridgerun.com)
+ * Copyright (c) 2015-2020 RidgeRun, LLC (http://www.ridgerun.com)
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -53,12 +53,14 @@
 
 #define PIPELINE_CREATE_FORMAT               "%s %s"
 #define PIPELINE_STATE_FORMAT                "/pipelines/%s/state"
+#define PIPELINE_GRAPH_FORMAT                "/pipelines/%s/graph"
 #define PIPELINE_BUS_FORMAT                  "/pipelines/%s/bus/%s"
 #define PIPELINE_BUS_MSG_FORMAT              "/pipelines/%s/bus/message"
 #define PIPELINE_ELEMENTS_FORMAT             "/pipelines/%s/elements/"
 #define PIPELINE_ELEMENTS_PROPERTIES_FORMAT  "/pipelines/%s/elements/%s/properties"
 #define PIPELINE_ELEMENTS_PROPERTY_FORMAT    "/pipelines/%s/elements/%s/properties/%s"
 #define PIPELINE_EVENT_FORMAT                "/pipelines/%s/event"
+#define PIPELINE_VERBOSE_FORMAT              "/pipelines/%s/verbose"
 
 #define SEEK_FORMAT        "seek %f %d %d %d %lld %d %lld"
 #define FLUSH_STOP_FORMAT  "flush_stop %s"
@@ -390,6 +392,59 @@ gstc_pipeline_stop (GstClient * client, const char *pipeline_name)
   gstc_assert_and_ret_val (NULL != pipeline_name, GSTC_NULL_ARGUMENT);
 
   return gstc_cmd_change_state (client, pipeline_name, state);
+}
+
+GstcStatus
+gstc_pipeline_get_graph (GstClient * client, const char *pipeline_name,
+    char **response)
+{
+
+  GstcStatus ret;
+  int asprintf_ret;
+  char *what;
+
+  gstc_assert_and_ret_val (NULL != client, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != pipeline_name, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != response, GSTC_NULL_ARGUMENT);
+
+  asprintf_ret = asprintf (&what, PIPELINE_GRAPH_FORMAT, pipeline_name);
+  if (asprintf_ret == PRINTF_ERROR) {
+    return GSTC_OOM;
+  }
+
+  ret = gstc_cmd_read (client, what, response, client->timeout);
+  if (GSTC_OK != ret) {
+    goto out;
+  }
+
+out:
+  free (what);
+
+  return ret;
+}
+
+GstcStatus
+gstc_pipeline_verbose (GstClient * client, const char *pipeline_name,
+    const int value)
+{
+  GstcStatus ret;
+  int asprintf_ret;
+  char *what;
+  const char *value_bool;
+
+  gstc_assert_and_ret_val (NULL != client, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != pipeline_name, GSTC_NULL_ARGUMENT);
+
+  asprintf_ret = asprintf (&what, PIPELINE_VERBOSE_FORMAT, pipeline_name);
+  if (asprintf_ret == PRINTF_ERROR) {
+    return GSTC_OOM;
+  }
+  value_bool = value == 0 ? "false" : "true";
+  ret = gstc_cmd_update (client, what, value_bool);
+
+  free (what);
+
+  return ret;
 }
 
 void

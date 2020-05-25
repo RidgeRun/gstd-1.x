@@ -2,7 +2,7 @@
  * GStreamer Daemon - gst-launch on steroids
  * C client library abstracting gstd interprocess communication
  *
- * Copyright (c) 2015-2018 RidgeRun, LLC (http://www.ridgerun.com)
+ * Copyright (c) 2015-2020 RidgeRun, LLC (http://www.ridgerun.com)
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -43,7 +43,7 @@
  * A #GstClient is created along with one or more GStreamer pipelines.
  * The pipelines states are controlled, along with any element
  * properties.  Once an application is done with a pipeline, it can be
- * deleted.  To release all resources assoicated with the #GstClient,
+ * deleted.  To release all resources associated with the #GstClient,
  * the client can be released.
  *
  * Usage Notes:
@@ -225,7 +225,7 @@ GstcStatus gstc_pipeline_list(GstClient *client, char **pipelines[],
 /**
  * gstc_pipeline_delete:
  * @client: The client returned by gstc_client_new()
- * @pipeline_name: Name assoicated with the pipeline
+ * @pipeline_name: Name associated with the pipeline
  *
  * Deletes a previously created GStreamer pipeline named @pipeline_name.
  *
@@ -238,7 +238,7 @@ gstc_pipeline_delete(GstClient *client, const char *pipeline_name);
 /**
  * gstc_pipeline_play:
  * @client: The client returned by gstc_client_new()
- * @pipeline_name: Name assoicated with the pipeline
+ * @pipeline_name: Name associated with the pipeline
  *
  * Attempts to change the named pipeline to the play state.
  *
@@ -251,7 +251,7 @@ gstc_pipeline_play(GstClient *client, const char *pipeline_name);
 /**
  * gstc_pipeline_pause:
  * @client: The client returned by gstc_client_new()
- * @pipeline_name: Name assoicated with the pipeline
+ * @pipeline_name: Name associated with the pipeline
  *
  * Attempts to change the named pipeline to the paused state.
  *
@@ -264,7 +264,7 @@ gstc_pipeline_pause(GstClient *client, const char *pipeline_name);
 /**
  * gstc_pipeline_stop:
  * @client: The client returned by gstc_client_new()
- * @pipeline_name: Name assoicated with the pipeline
+ * @pipeline_name: Name associated with the pipeline
  *
  * Attempts to change the named pipeline to the null state.
  *
@@ -273,6 +273,32 @@ gstc_pipeline_pause(GstClient *client, const char *pipeline_name);
  */
 GstcStatus
 gstc_pipeline_stop(GstClient *client, const char *pipeline_name);
+
+/**
+ * gstc_pipeline_get_graph:
+ * @client: The client returned by gstc_client_new()
+ * @pipeline_name: Name associated with the pipeline
+ * @response: Pipeline graph description
+ * Attempts to get the graph of the pipeline.
+ *
+ * Returns: GstcStatus indicating success, daemon unreachable, daemon
+ * timeout, bad pipeline name, unable to get the pipeline graph
+ */
+GstcStatus
+gstc_pipeline_get_graph(GstClient *client, const char *pipeline_name, char **response);
+
+/**
+ * gstc_pipeline_verbose:
+ * @client: The client returned by gstc_client_new()
+ * @pipeline_name: Name associated with the pipeline
+ * @value: Pipeline verbose mode (true/false)
+ * Attempts to update the verbose mode of the pipeline.
+ *
+ * Returns: GstcStatus indicating success, daemon unreachable, daemon
+ * timeout, bad pipeline name, null argument passed.
+ */
+GstcStatus
+gstc_pipeline_verbose(GstClient *client, const char *pipeline_name, int value);
 
 /**
  * gstc_element_get:
@@ -296,7 +322,7 @@ GstcStatus gstc_element_get (GstClient *client, const char *pname,
 /**
  * gstc_element_set:
  * @client: The client returned by gstc_client_new()
- * @pipeline_name: Name assoicated with the pipeline
+ * @pipeline_name: Name associated with the pipeline
  * @element_name: Element name to be set
  * @property_name: Property name to be set
  * @format: Zero or more directives: ordinary characters (not %), are

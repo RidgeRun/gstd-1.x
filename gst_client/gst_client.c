@@ -1,6 +1,6 @@
 /*
  * GStreamer Daemon - Gst Launch under steroids
- * Copyright (c) 2015-2017 Ridgerun, LLC (http://www.ridgerun.com)
+ * Copyright (c) 2015-2020 Ridgerun, LLC (http://www.ridgerun.com)
  * 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -113,17 +113,17 @@ static GstdClientCmd cmds[] = {
   {"exit", gstd_client_cmd_quit, "Exits Gstd client", "exit"},
   {"help", gstd_client_cmd_help, "Prints help information", "help [command]"},
   {"create", gstd_client_cmd_socket, "Creates a resource at the given URI",
-        "create <URI> [property value ...]"},
+      "create <URI> [property value ...]"},
   {"read", gstd_client_cmd_socket, "Reads the resource at the given URI",
-        "read <URI>"},
+      "read <URI>"},
   {"update", gstd_client_cmd_socket, "Updates the resource at the given URI",
-        "update <URI> [property value ...]"},
+      "update <URI> [property value ...]"},
   {"delete", gstd_client_cmd_socket,
         "Deletes the resource held at the given URI with the given name",
       "read <URI> <name>"},
   {"sh", gstd_client_cmd_sh, "Executes a shell command", "sh <command>"},
   {"source", gstd_client_cmd_source, "Sources a file with commands",
-        "source <file>"},
+      "source <file>"},
 
   // High level commands
   {"pipeline_create", gstd_client_cmd_socket,
@@ -138,13 +138,17 @@ static GstdClientCmd cmds[] = {
       "pipeline_pause <name>"},
   {"pipeline_stop", gstd_client_cmd_socket, "Sets the pipeline to null",
       "pipeline_stop <name>"},
+  {"pipeline_get_graph", gstd_client_cmd_socket, "Gets pipeline graph",
+      "pipeline_get_graph <name>"},
+  {"pipeline_verbose", gstd_client_cmd_socket, "Updates pipeline verbose",
+      "pipeline_verbose <name> <value>"},
 
   {"element_set", gstd_client_cmd_socket,
         "Sets a property in an element of a given pipeline",
       "element_set <pipe> <element> <property> <value>"},
   {"element_get", gstd_client_cmd_socket,
         "Queries a property in an element of a given pipeline",
-      "element_set <pipe> <element> <property>"},
+      "element_get <pipe> <element> <property>"},
 
   {"list_pipelines", gstd_client_cmd_socket, "List the existing pipelines",
       "list_pipelines"},
@@ -155,52 +159,52 @@ static GstdClientCmd cmds[] = {
         "List the properties of an element in a given pipeline",
       "list_properties <pipe> <elemement>"},
   {"list_signals", gstd_client_cmd_socket,
-      "List the signals of an element in a given pipeline",
+        "List the signals of an element in a given pipeline",
       "list_signals <pipe> <elemement>"},
 
   {"bus_read", gstd_client_cmd_socket, "List the existing pipelines",
       "bus_read <pipe>"},
   {"bus_filter", gstd_client_cmd_socket,
-      "Select the types of message to be read from the bus. Separate with "
-      "a '+', i.e.: eos+warning+error",
+        "Select the types of message to be read from the bus. Separate with "
+        "a '+', i.e.: eos+warning+error",
       "bus_read <pipe> <filter>"},
   {"bus_timeout", gstd_client_cmd_socket,
-      "Apply a timeout for the bus polling. -1: forever, 0: return immediately, "
-      "n: wait n nanoseconds",
+        "Apply a timeout for the bus polling. -1: forever, 0: return immediately, "
+        "n: wait n nanoseconds",
       "bus_timeout <pipe> <timeout>"},
 
   {"event_eos", gstd_client_cmd_socket, "Send an end-of-stream event",
       "event_eos <pipe>"},
   {"event_seek", gstd_client_cmd_socket,
-      "Perform a seek in the given pipeline",
+        "Perform a seek in the given pipeline",
       "event_seek <pipe> <rate=1.0> <format=3> <flags=1> <start-type=1> <start=0> <end-type=1> <end=-1>"},
   {"event_flush_start", gstd_client_cmd_socket,
-      "Put the pipeline in flushing mode",
+        "Put the pipeline in flushing mode",
       "event_flush_start <pipe>"},
   {"event_flush_stop", gstd_client_cmd_socket,
-      "Take the pipeline out from flushing mode",
+        "Take the pipeline out from flushing mode",
       "event_flush_stop <pipe> <reset=true>"},
 
   {"signal_connect", gstd_client_cmd_socket, "Connect to signal and wait",
       "signal_connect <pipe> <element> <signal>"},
   {"signal_timeout", gstd_client_cmd_socket,
-      "Apply a timeout for the signal waiting. -1: forever, 0: return immediately, "
-      "n: wait n microseconds",
+        "Apply a timeout for the signal waiting. -1: forever, 0: return immediately, "
+        "n: wait n microseconds",
       "signal_timeout <pipe> <element> <signal> <timeout>"},
   {"signal_disconnect", gstd_client_cmd_socket, "Disconnect from signal",
       "signal_disconnect <pipe> <element> <signal>"},
 
   {"debug_enable", gstd_client_cmd_socket,
-      "Enable/Disable GStreamer debug",
+        "Enable/Disable GStreamer debug",
       "debug_enable <enable>"},
   {"debug_threshold", gstd_client_cmd_socket,
-      "The debug filter to apply (as you would use with gst-launch)",
+        "The debug filter to apply (as you would use with gst-launch)",
       "debug_threshold <threshold>"},
   {"debug_color", gstd_client_cmd_socket,
-      "Enable/Disable colors in the debug logging",
+        "Enable/Disable colors in the debug logging",
       "debug_color <colors>"},
   {"debug_reset", gstd_client_cmd_socket,
-      "Enable/Disable debug threshold reset",
+        "Enable/Disable debug threshold reset",
       "debug_reset <reset>"},
 
   {NULL}
@@ -248,7 +252,7 @@ gstd_client_execute (gchar * line, GstdClientData * data)
   if (tokens[1])
     arg = g_strstrip (tokens[1]);
   else
-    arg = (gchar*)"";
+    arg = (gchar *) "";
 
   /* Find and execute the respective command */
   cmd = cmds;
@@ -292,30 +296,31 @@ main (gint argc, gchar * argv[])
 
   GOptionEntry entries[] = {
     {"quiet", 'q', 0, G_OPTION_ARG_NONE, &quiet, "Dont't print startup headers",
-          NULL}
+        NULL}
     ,
     {"file", 'f', 0, G_OPTION_ARG_FILENAME, &file,
         "Execute the commands in file", "script"}
     ,
     {"interactive", 'i', 0, G_OPTION_ARG_NONE, &inter,
-          "Enter interactive mode after executing cmdline", NULL}
+        "Enter interactive mode after executing cmdline", NULL}
     ,
     {"launch", 'l', 0, G_OPTION_ARG_NONE, &launch,
-          "Emulate gst-launch, often combined with -i", NULL}
+        "Emulate gst-launch, often combined with -i", NULL}
     ,
     {"tcp-port", 'p', 0, G_OPTION_ARG_INT, &tcp_port,
           "Attach to the server through the given port (default 5000)",
         "tcp-port"}
     ,
     {"tcp-address", 'a', 0, G_OPTION_ARG_STRING, &address,
-          "The IP address of the server (defaults to "
+        "The IP address of the server (defaults to "
           GSTD_CLIENT_DEFAULT_TCP_INET_ADDRESS ")", "address"}
     ,
     {"unix", 'u', 0, G_OPTION_ARG_NONE, &use_unix,
-          "Use unix socket", NULL}
+        "Use unix socket", NULL}
     ,
     {"unix-base-path", 'b', 0, G_OPTION_ARG_STRING, &address,
-          "The server unix path (defaults to " GSTD_CLIENT_DEFAULT_UNIX_BASE_NAME
+        "The server unix path (defaults to "
+          GSTD_CLIENT_DEFAULT_UNIX_BASE_NAME
           "), use 'unix-port' to specify the port number", "path"}
     ,
     {"unix-port", 'e', 0, G_OPTION_ARG_INT, &unix_port,
@@ -323,10 +328,10 @@ main (gint argc, gchar * argv[])
         "unix-port"}
     ,
     {"version", 'v', 0, G_OPTION_ARG_NONE, &version,
-          "Print current gstd-client version", NULL}
+        "Print current gstd-client version", NULL}
     ,
     {G_OPTION_REMAINING, '0', 0, G_OPTION_ARG_STRING_ARRAY, &remaining,
-          "commands", NULL}
+        "commands", NULL}
     ,
     {NULL}
   };
@@ -348,7 +353,7 @@ main (gint argc, gchar * argv[])
 
   //Did the user pass in a custom history?
   if (g_getenv (history_env)) {
-    history_full = g_strdup (g_getenv(history_env));
+    history_full = g_strdup (g_getenv (history_env));
   } else {
     // Read home location from environment
     history_full = g_strdup_printf ("%s/%s", g_getenv ("HOME"), history);
@@ -364,12 +369,13 @@ main (gint argc, gchar * argv[])
 
   if (!address) {
     if (use_unix) {
-      address = g_strdup_printf ("%s/%s", GSTD_RUN_STATE_DIR, GSTD_CLIENT_DEFAULT_UNIX_BASE_NAME);
+      address =
+          g_strdup_printf ("%s/%s", GSTD_RUN_STATE_DIR,
+          GSTD_CLIENT_DEFAULT_UNIX_BASE_NAME);
     } else {
       address = g_strdup (GSTD_CLIENT_DEFAULT_TCP_INET_ADDRESS);
     }
   }
-
   // Enter interactive only if no commands nor file has been set, or if the
   // user explicitely asked for it
   inter = inter || (!file && !remaining);
@@ -399,7 +405,7 @@ main (gint argc, gchar * argv[])
   signal (SIGINT, sig_handler);
 
   if (file && !quit) {
-    gstd_client_cmd_source ((gchar*)"source", file, data);
+    gstd_client_cmd_source ((gchar *) "source", file, data);
     g_free (file);
   }
 
@@ -487,7 +493,8 @@ gstd_client_completer (const gchar * text, gint state)
 static void
 gstd_client_header (gboolean quiet)
 {
-  const gchar *header = "GStreamer Daemon  Copyright (C) 2015-2017 Ridgerun, LLC (http://www.ridgerun.com)\n"
+  const gchar *header =
+      "GStreamer Daemon  Copyright (C) 2015-2017 Ridgerun, LLC (http://www.ridgerun.com)\n"
       "This program comes with ABSOLUTELY NO WARRANTY; for details type `warranty'.\n"
       "This is free software, and you are welcome to redistribute it\n"
       "under certain conditions; read the license for more details.\n";
@@ -564,7 +571,7 @@ gstd_client_cmd_socket (gchar * name, gchar * arg, GstdClientData * data)
   GOutputStream *ostream;
   gchar buffer[1024 * 1024];
   gint read;
-  gchar * path_name;
+  gchar *path_name;
 
   g_return_val_if_fail (name, -1);
   g_return_val_if_fail (arg, -1);
@@ -575,16 +582,13 @@ gstd_client_cmd_socket (gchar * name, gchar * arg, GstdClientData * data)
   if (!data->con) {
     if (data->use_unix) {
       GSocketAddress *socket_address;
-      g_socket_client_set_family (data->client,
-                                G_SOCKET_FAMILY_UNIX);
+      g_socket_client_set_family (data->client, G_SOCKET_FAMILY_UNIX);
       path_name = g_strdup_printf ("%s_%d", data->address, data->unix_port);
       socket_address = g_unix_socket_address_new (path_name);
       g_free (path_name);
 
       data->con = g_socket_client_connect (data->client,
-                           (GSocketConnectable *) socket_address,
-                           NULL,
-                           &err);
+          (GSocketConnectable *) socket_address, NULL, &err);
     } else {
       data->con = g_socket_client_connect_to_host (data->client,
           data->address, data->tcp_port, NULL, &err);

@@ -41,29 +41,29 @@ gstd_log_proxy (GstDebugCategory * category, GstDebugLevel level,
 
 static const gchar *gstd_log_get_gstd_default (void);
 static const gchar *gstd_log_get_gst_default (void);
-static gchar *gstd_log_get_filename (const gchar * filename, const gchar * default_filename);
+static gchar *gstd_log_get_filename (const gchar * filename,
+    const gchar * default_filename);
 
 static FILE *_gstdlog = NULL;
 static FILE *_gstlog = NULL;
 static gchar *gstd_filename;
 static gchar *gst_filename;
 
-void
+gboolean
 gstd_log_init (const gchar * gstdfilename, const gchar * gstfilename)
 {
-  gint debug_color;
-
   if (_gstdlog) {
-    return;
+    return TRUE;
   }
 
   gstd_filename =
       gstd_log_get_filename (gstdfilename, gstd_log_get_gstd_default ());
+
   _gstdlog = g_fopen (gstd_filename, "a+");
 
   if (!_gstdlog) {
-    g_printerr ("Unable to open Gstd log file: %s\n", g_strerror (errno));
-    return;
+    g_printerr ("Unable to open Gstd log file %s: %s\n", gstd_filename, g_strerror (errno));
+    return FALSE;
   }
 
   gst_filename =
@@ -71,16 +71,23 @@ gstd_log_init (const gchar * gstdfilename, const gchar * gstfilename)
   _gstlog = g_fopen (gst_filename, "a+");
 
   if (!_gstlog) {
-    g_printerr ("Unable to open Gst log file: %s\n", g_strerror (errno));
-    return;
+    g_printerr ("Unable to open Gst log file %s: %s\n", gst_filename, g_strerror (errno));
+    return FALSE;
   }
-
-  /* Turn on up to info for gstd debug */
-  gst_debug_set_threshold_from_string (GSTD_DEBUG_PREFIX "*:" GSTD_DEBUG_LEVEL,
-      FALSE);
 
   /* Install our proxy handler */
   gst_debug_add_log_function (gstd_log_proxy, NULL, NULL);
+
+  return TRUE;
+}
+
+void
+gstd_debug_init (void)
+{
+  gint debug_color;
+  /* Turn on up to info for gstd debug */
+  gst_debug_set_threshold_from_string (GSTD_DEBUG_PREFIX "*:" GSTD_DEBUG_LEVEL,
+      FALSE);
 
   /* Initialize debug category with nice colors */
   debug_color = GST_DEBUG_FG_BLACK | GST_DEBUG_BOLD | GST_DEBUG_BG_WHITE;
@@ -144,7 +151,7 @@ gstd_log_get_filename (const gchar * filename, const gchar * default_filename)
     return g_strdup (filename);
   } else {
     g_printerr
-      ("WARNING: The pid filename is not absolute since default filename\n");
+        ("WARNING: The pid filename is not absolute since default filename\n");
     return g_strdup (default_filename);;
   }
 }

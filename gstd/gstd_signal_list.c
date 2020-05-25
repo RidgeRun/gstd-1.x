@@ -69,7 +69,7 @@ gstd_signal_list_dispose (GObject * object)
 
   if (list->list) {
     GList *elem;
-    for (elem = list->list; elem; elem = g_list_next(elem)) {
+    for (elem = list->list; elem; elem = g_list_next (elem)) {
       gstd_signal_disconnect (elem->data);
     }
 
