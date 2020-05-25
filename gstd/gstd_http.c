@@ -39,14 +39,6 @@ GST_DEBUG_CATEGORY_STATIC (gstd_http_debug);
 
 #define GSTD_DEBUG_DEFAULT_LEVEL GST_LEVEL_INFO
 
-typedef enum _GstdHttpVerbs
-{
-  GET,
-  POST,
-  PUT,
-  DELETE,
-} GstdHttpVerbs;
-
 struct _GstdHttp
 {
   GstdIpc parent;
@@ -71,15 +63,16 @@ static gboolean gstd_http_init_get_option_group (GstdIpc * base,
     GOptionGroup ** group);
 static SoupStatus get_status_code (GstdReturnCode ret);
 static GstdReturnCode do_get (SoupServer * server, SoupMessage * msg,
-    char **output, GstdSession * session);
+    char **output, const char *path, GstdSession * session);
 static GstdReturnCode do_post (SoupServer * server, SoupMessage * msg,
-    char *name, char *description, char **output, GstdSession * session);
+    char *name, char *description, char **output, const char *path,
+    GstdSession * session);
 static GstdReturnCode do_put (SoupServer * server, SoupMessage * msg,
-    char *name, char **output, GstdSession * session);
+    char *name, char **output, const char *path, GstdSession * session);
 static GstdReturnCode do_delete (SoupServer * server, SoupMessage * msg,
-    char *name, char **output, GstdSession * session);
+    char *name, char **output, const char *path, GstdSession * session);
 static void do_request (SoupServer * server, SoupMessage * msg,
-    GHashTable * query, GstdSession * session, GstdHttpVerbs request_verb);
+    GHashTable * query, GstdSession * session, const char *path);
 static void server_callback (SoupServer * server, SoupMessage * msg,
     const char *path, GHashTable * query, SoupClientContext * context,
     gpointer data);
@@ -90,6 +83,7 @@ gstd_http_class_init (GstdHttpClass * klass)
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
   GstdIpcClass *gstdipc_class = GSTD_IPC_CLASS (klass);
   guint debug_color;
+
   gstdipc_class->get_option_group =
       GST_DEBUG_FUNCPTR (gstd_http_init_get_option_group);
   gstdipc_class->start = GST_DEBUG_FUNCPTR (gstd_http_start);
@@ -147,20 +141,18 @@ get_status_code (GstdReturnCode ret)
 }
 
 static GstdReturnCode
-do_get (SoupServer * server, SoupMessage * msg, char **output,
+do_get (SoupServer * server, SoupMessage * msg, char **output, const char *path,
     GstdSession * session)
 {
   gchar *message = NULL;
-  SoupURI *address = NULL;
   GstdReturnCode ret = GSTD_EOK;
 
   g_return_val_if_fail (server, GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (msg, GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (session, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (output, GSTD_NULL_ARGUMENT);
 
-  address = soup_message_get_uri (msg);
-
-  message = g_strdup_printf ("read %s", soup_uri_get_path (address));
+  message = g_strdup_printf ("read %s", path);
   ret = gstd_parser_parse_cmd (session, message, output);
   g_free (message);
 
@@ -169,17 +161,14 @@ do_get (SoupServer * server, SoupMessage * msg, char **output,
 
 static GstdReturnCode
 do_post (SoupServer * server, SoupMessage * msg, char *name,
-    char *description, char **output, GstdSession * session)
+    char *description, char **output, const char *path, GstdSession * session)
 {
   gchar *message = NULL;
-  SoupURI *address = NULL;
   GstdReturnCode ret = GSTD_EOK;
 
   g_return_val_if_fail (server, GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (msg, GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (session, GSTD_NULL_ARGUMENT);
-
-  address = soup_message_get_uri (msg);
 
   if (!name) {
     ret = GSTD_BAD_VALUE;
@@ -194,8 +183,7 @@ do_post (SoupServer * server, SoupMessage * msg, char *name,
     goto out;
   }
 
-  message = g_strdup_printf
-      ("create %s %s %s", soup_uri_get_path (address), name, description);
+  message = g_strdup_printf ("create %s %s %s", path, name, description);
   ret = gstd_parser_parse_cmd (session, message, output);
   g_free (message);
 
@@ -205,17 +193,14 @@ out:
 
 static GstdReturnCode
 do_put (SoupServer * server, SoupMessage * msg, char *name, char **output,
-    GstdSession * session)
+    const char *path, GstdSession * session)
 {
   gchar *message = NULL;
-  SoupURI *address = NULL;
   GstdReturnCode ret = GSTD_EOK;
 
   g_return_val_if_fail (server, GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (msg, GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (session, GSTD_NULL_ARGUMENT);
-
-  address = soup_message_get_uri (msg);
 
   if (!name) {
     ret = GSTD_BAD_VALUE;
@@ -224,7 +209,7 @@ do_put (SoupServer * server, SoupMessage * msg, char *name, char **output,
     goto out;
   }
 
-  message = g_strdup_printf ("update %s %s", soup_uri_get_path (address), name);
+  message = g_strdup_printf ("update %s %s", path, name);
   ret = gstd_parser_parse_cmd (session, message, output);
   g_free (message);
 
@@ -234,17 +219,14 @@ out:
 
 static GstdReturnCode
 do_delete (SoupServer * server, SoupMessage * msg, char *name,
-    char **output, GstdSession * session)
+    char **output, const char *path, GstdSession * session)
 {
   gchar *message = NULL;
-  SoupURI *address = NULL;
   GstdReturnCode ret = GSTD_EOK;
 
   g_return_val_if_fail (server, GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (msg, GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (session, GSTD_NULL_ARGUMENT);
-
-  address = soup_message_get_uri (msg);
 
   if (!name) {
     ret = GSTD_BAD_VALUE;
@@ -253,7 +235,7 @@ do_delete (SoupServer * server, SoupMessage * msg, char *name,
     goto out;
   }
 
-  message = g_strdup_printf ("delete %s %s", soup_uri_get_path (address), name);
+  message = g_strdup_printf ("delete %s %s", path, name);
   ret = gstd_parser_parse_cmd (session, message, output);
   g_free (message);
 
@@ -263,44 +245,33 @@ out:
 
 static void
 do_request (SoupServer * server, SoupMessage * msg, GHashTable * query,
-    GstdSession * session, GstdHttpVerbs request_verb)
+    GstdSession * session, const char *path)
 {
   gchar *response = NULL;
   gchar *name = NULL;
   gchar *description_pipe = NULL;
-  SoupURI *address = NULL;
-  GstdReturnCode ret = GSTD_EOK;
+  GstdReturnCode ret = GSTD_BAD_COMMAND;
   gchar *output = NULL;
   const gchar *description = NULL;
   SoupStatus status = SOUP_STATUS_OK;
-  const gchar *query_text = NULL;
 
   g_return_if_fail (server);
   g_return_if_fail (msg);
   g_return_if_fail (session);
 
-  address = soup_message_get_uri (msg);
-
-  query_text = soup_uri_get_query (address);
-
-  if (!(msg->method == SOUP_METHOD_GET)) {
-    if (!query_text) {
-      ret = GSTD_BAD_VALUE;
-      GST_ERROR_OBJECT (session, "No query params provided");
-      goto out;
-    }
+  if (query != NULL) {
     name = g_hash_table_lookup (query, "name");
     description_pipe = g_hash_table_lookup (query, "description");
   }
 
   if (msg->method == SOUP_METHOD_GET) {
-    ret = do_get (server, msg, &output, session);
+    ret = do_get (server, msg, &output, path, session);
   } else if (msg->method == SOUP_METHOD_POST) {
-    ret = do_post (server, msg, name, description_pipe, &output, session);
+    ret = do_post (server, msg, name, description_pipe, &output, path, session);
   } else if (msg->method == SOUP_METHOD_PUT) {
-    ret = do_put (server, msg, name, &output, session);
+    ret = do_put (server, msg, name, &output, path, session);
   } else if (msg->method == SOUP_METHOD_DELETE) {
-    ret = do_delete (server, msg, name, &output, session);
+    ret = do_delete (server, msg, name, &output, path, session);
   } else {
     soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
   }
@@ -315,7 +286,6 @@ do_request (SoupServer * server, SoupMessage * msg, GHashTable * query,
       response, strlen (response));
   g_free (response);
 
-out:
   status = get_status_code (ret);
   soup_message_set_status (msg, status);
   return;
@@ -341,7 +311,7 @@ server_callback (SoupServer * server, SoupMessage * msg,
       "Access-Control-Allow-Headers", "origin,range,content-type");
   soup_message_headers_append (msg->response_headers,
       "Access-Control-Allow-Methods", "PUT, GET, POST, DELETE");
-  do_request (server, msg, query, session, GET);
+  do_request (server, msg, query, session, path);
 
 }
 
