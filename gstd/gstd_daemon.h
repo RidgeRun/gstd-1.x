@@ -32,8 +32,11 @@
  * \param argc The amount of parameters given in argv 
  * \param argv The array of cmdline arguments given to 
  * the process in the application's main
- **/
-void gstd_daemon_init (gint argc, gchar * argv[], gchar * pidfilename);
+ *
+ * \return TRUE if the resources were initilized succesfully, FALSE
+ * otherwise.
+ */
+gboolean gstd_daemon_init (gint argc, gchar * argv[], gchar * pidfilename);
 
 /**
  * Daemonizes the current process using the given process name

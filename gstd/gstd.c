@@ -38,22 +38,16 @@ static void ipc_add_option_groups (GstdIpc * ipc[], GType factory[],
 static gboolean ipc_start (GstdIpc * ipc[], guint num_ipcs,
     GstdSession * session);
 static void ipc_stop (GstdIpc * ipc[], guint numipc);
-static void print_header (gboolean quiet);
+static void print_header ();
 
 #define HEADER \
       "\nGstd version " PACKAGE_VERSION "\n" \
-      "Copyright (C) 2015-2020 RidgeRun (https://www.ridgerun.com)\n\n" \
-      "Log traces will be saved to %s.\n"
+      "Copyright (C) 2015-2020 RidgeRun (https://www.ridgerun.com)\n\n"
 
 void
-print_header (gboolean quiet)
+print_header ()
 {
-  gchar *filename;
-  if (!quiet) {
-    filename = gstd_log_get_current_gstd ();
-    g_print (HEADER, filename);
-    g_free (filename);
-  }
+  g_print (HEADER);
 }
 
 static gboolean
@@ -174,7 +168,7 @@ main (gint argc, gchar * argv[])
 
   GOptionEntry entries[] = {
     {"version", 'v', 0, G_OPTION_ARG_NONE, &version,
-        "Print current gstd version", NULL}
+        "Print current gstd version and exit", NULL}
     ,
     {"kill", 'k', 0, G_OPTION_ARG_NONE, &kill,
         "Kill a running gstd, if any", NULL}
@@ -217,14 +211,27 @@ main (gint argc, gchar * argv[])
   }
   g_option_context_free (context);
 
-  gstd_log_init (gstdlogfile, gstlogfile);
-  gstd_daemon_init (argc, argv, pidfile);
+  if (!quiet && !kill) {
+    print_header ();
+  }
 
-  /* Print the version and exit */
   if (version) {
-    print_header (quiet);
     goto out;
   }
+
+  if (!nodaemon) {
+    if (!gstd_log_init (gstdlogfile, gstlogfile)) {
+      ret = EXIT_FAILURE;
+      goto out;
+    }
+
+    if (!gstd_daemon_init (argc, argv, pidfile)) {
+      ret = EXIT_FAILURE;
+      goto out;
+    }
+  }
+
+  gstd_debug_init();
 
   if (kill) {
     if (gstd_daemon_stop ()) {
@@ -233,9 +240,7 @@ main (gint argc, gchar * argv[])
     goto out;
   }
 
-  if (nodaemon) {
-    print_header (quiet);
-  } else {
+  if (!nodaemon) {
     gboolean parent;
 
     if (!gstd_daemon_start (&parent)) {
@@ -244,8 +249,13 @@ main (gint argc, gchar * argv[])
 
     /* Parent fork ends here */
     if (parent) {
-      print_header (quiet);
-      g_print ("Detaching from parent process.\n");
+      if (!quiet) {
+        gchar *filename;
+        filename = gstd_log_get_current_gstd ();
+        g_print ("Log traces will be saved to %s.\n", filename);
+        g_print ("Detaching from parent process.\n");
+        g_free (filename);
+      }
       goto out;
     }
   }

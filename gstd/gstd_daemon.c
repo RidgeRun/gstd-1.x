@@ -30,7 +30,9 @@
 
 #include <stdlib.h>
 #include <errno.h>
+#include <unistd.h>
 
+#include <glib/gstdio.h>
 #include <libdaemon/dlog.h>
 #include <libdaemon/dfork.h>
 #include <libdaemon/dsignal.h>
@@ -45,15 +47,32 @@ static gchar *gstd_daemon_get_pid_filename (const gchar * filename);
 static gboolean _initialized = FALSE;
 static gchar *pid_filename = NULL;
 
-void
+gboolean
 gstd_daemon_init (gint argc, gchar * argv[], gchar * pidfilename)
 {
   const gchar *process_name;
+  gchar *pid_path = NULL;
+  gboolean ret = TRUE;
 
-  g_return_if_fail (argv);
+  g_return_val_if_fail (argv, FALSE);
 
   if (_initialized)
-    return;
+    goto out;
+
+  /* Check if pid dir available */
+  pid_path = gstd_daemon_get_pid_filename (pidfilename);
+
+  if (NULL == pid_path) {
+    g_printerr ("Unable to access Gstd pid dir: pid path is NULL\n");
+    ret = FALSE;
+    goto out;
+  }
+
+  if (g_access (pid_path, W_OK)) {
+    g_printerr ("Unable to open Gstd pid dir %s: %s\n", pid_path, g_strerror (errno));
+    ret = FALSE;
+    goto free_path;
+  }
 
   /* Sanitize the process name to use it as PID identification */
   process_name = daemon_ident_from_argv0 (argv[0]);
@@ -72,6 +91,11 @@ gstd_daemon_init (gint argc, gchar * argv[], gchar * pidfilename)
   daemon_pid_file_proc = gstd_daemon_pid;
 
   _initialized = TRUE;
+
+free_path:
+    g_free (pid_path);
+out:
+    return ret;
 }
 
 gboolean
