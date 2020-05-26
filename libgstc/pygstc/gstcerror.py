@@ -70,12 +70,12 @@ class GstdError(GstClientError):
             description : GstdError description message
             code : Error code
         """
-        super(GstdError, self).__init__(description, code)
+        super().__init__(description, code)
 
 
 """
 GstClient - GstcError Class
-Raised when the Gst-Client fails internally
+Raised when the GstClient fails internally
 """
 
 
@@ -91,7 +91,7 @@ class GstcError(GstClientError):
             description : GstcError description message
             code : Error code
         """
-        super(GstcError, self).__init__(description, code)
+        super().__init__(description, code)
 
 
 """

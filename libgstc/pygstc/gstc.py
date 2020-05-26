@@ -39,20 +39,20 @@ from pygstc.tcp import Ipc
 GSTD_PROCNAME = 'gstd'
 
 """
-GSTC - GstdClient Class
+GstClient - GstdClient Class
 """
 
 
 class GstdClient:
 
     """
-    Class used as client to comunicate with the GStreamer Daemon over
+    Class used as a client to communicate with the Gstd over
     an abstract inter-process communication class.
 
     Methods
     ----------
     ping_gstd ()
-        Test if GSTD responds in the configured address and port
+        Test if Gstd responds in the configured address and port
     bus_filter(pipe_name, filter)
         Select the types of message to be read from the bus. Separate
         with a '+', i.e.: eos+warning+error
@@ -139,9 +139,9 @@ class GstdClient:
         Parameters
         ----------
         ip : string
-            IP where GSTD is running
+            IP where Gstd is running
         port : int
-            Port where GSTD is running
+            Port where Gstd is running
         logger : CustomLogger
             Custom logger where all log messages from this class are going
             to be reported
@@ -153,7 +153,7 @@ class GstdClient:
             self._logger = DummyLogger()
         self._ip = ip
         self._port = port
-        self._logger.info('Starting GStreamer Daemon Client with ip=%s port=%d'
+        self._logger.info('Starting GstClient with ip=%s port=%d'
                           % (self._ip, self._port))
         self._ipc = Ipc(self._logger, self._ip, self._port)
         self._timeout = timeout
@@ -227,33 +227,33 @@ class GstdClient:
                                 result['code'])
             return result
         except ConnectionRefusedError as e:
-            raise GstcError("Failed to communicate with GSTD",
+            raise GstcError("Failed to communicate with Gstd",
                             GstcErrorCode.GSTC_UNREACHABLE)\
                 from e
         except TypeError as e:
-            raise GstcError('Gst Client Bad command',
+            raise GstcError('GstClient bad command',
                             GstcErrorCode.GSTC_TYPE_ERROR) from e
         except BufferError as e:
-            raise GstcError('Gst Client received a response bigger ' +
+            raise GstcError('GstClient received a response bigger ' +
                             'than the maximum size allowed',
                             GstcErrorCode.GSTC_RECV_ERROR) from e
         except TimeoutError as e:
-            raise GstcError('Gst Client time out ocurred',
+            raise GstcError('GstClient time out ocurred',
                             GstcErrorCode.GSTC_BUS_TIMEOUT) from e
 
     def ping_gstd(self):
         """
-        Test if GSTD responds in the configured address and port
+        Test if Gstd responds in the configured address and port
 
         Raises
         ------
         GstcError
-            Error is triggered when Gst Client fails
+            Error is triggered when GstClient fails
         GstdError
             Error is triggered when Gstd IPC fails
 
         """
-        self._logger.info('Sending ping to GStreamer Daemon')
+        self._logger.info('Sending ping to Gstd')
         try:
             jresult = self._ipc.send(['list_pipelines'], timeout=1)
             # Verify correct data format
@@ -264,21 +264,21 @@ class GstdClient:
                                 result['code'])
 
         except json.JSONDecodeError as e:
-            err_msg = 'GStreamer Daemon corrupted response'
+            err_msg = 'Gstd corrupted response'
             self._logger.error(err_msg)
             raise GstcError(err_msg,
                             GstcErrorCode.GSTC_MALFORMED) from e
         except ConnectionRefusedError as e:
-            err_msg = 'Error contacting Gstd Daemon'
+            err_msg = 'Error contacting Gstd'
             self._logger.error(err_msg)
             raise GstcError(err_msg,
                             GstcErrorCode.GSTC_UNREACHABLE) from e
         except BufferError as e:
-            raise GstcError('Gst Client received a buffer bigger ' +
+            raise GstcError('GstClient received a buffer bigger ' +
                             'than the maximum size allowed',
                             GstcErrorCode.GSTC_RECV_ERROR) from e
         except TimeoutError as e:
-            raise GstcError('Gst Client time our ocurred',
+            raise GstcError('GstClient time out ocurred',
                             GstcErrorCode.GSTC_TIMEOUT) from e
 
     def bus_filter(self, pipe_name, filter):
@@ -341,7 +341,7 @@ class GstdClient:
         pipe_name: string
             The name of the pipeline
         timeout: int
-            Timeout in nanosecons. -1: forever, 0: return
+            Timeout in nanoseconds. -1: forever, 0: return
             immediately, n: wait n nanoseconds.
 
         Raises
@@ -1052,7 +1052,7 @@ class GstdClient:
         """
 
         self._logger.info(
-            'Disonnecting from signal %s of element %s from pipeline %s' %
+            'Disconnecting from signal %s of element %s from pipeline %s' %
             (signal, element, pipe_name))
         parameters = self._check_parameters(
             [pipe_name, element, signal], [str, str, str])
@@ -1077,7 +1077,7 @@ class GstdClient:
         signal: string
             The name of the signal
         timeout: int
-            Timeout in nanosecons.  -1: forever, 0: return
+            Timeout in nanoseconds.  -1: forever, 0: return
             immediately, n: wait n microseconds.
 
         Raises

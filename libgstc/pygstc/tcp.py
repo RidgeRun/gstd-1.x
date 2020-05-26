@@ -33,14 +33,14 @@ import select
 import socket
 
 """
-GSTC - Ipc Class
+GstClient - Ipc Class
 """
 
 
 class Ipc:
 
     """
-    Implementation of IPC that uses TCP sockets to communicate with GSTD
+    Implementation of IPC that uses TCP sockets to communicate with Gstd
 
     Methods
     ----------
@@ -65,9 +65,9 @@ class Ipc:
             Custom logger where all log messages from this class are going
             to be reported
         ip : string
-            The IP where GSTD is running
+            The IP where Gstd is running
         port : int
-            The port where GSTD is running
+            The port where Gstd is running
         maxsize : int
             Size of the message to read on each iteration
         terminator : string
