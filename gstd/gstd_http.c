@@ -26,12 +26,7 @@
 #include <gst/gst.h>
 #include <libsoup/soup.h>
 
-#include "gstd_ipc.h"
 #include "gstd_http.h"
-#include "gstd_parser.h"
-#include "gstd_element.h"
-#include "gstd_pipeline_bus.h"
-#include "gstd_event_handler.h"
 
 /* Gstd HTTP debugging category */
 GST_DEBUG_CATEGORY_STATIC (gstd_http_debug);
@@ -151,6 +146,7 @@ do_get (SoupServer * server, SoupMessage * msg, char **output, const char *path,
   g_return_val_if_fail (msg, GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (session, GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (output, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (path, GSTD_NULL_ARGUMENT);
 
   message = g_strdup_printf ("read %s", path);
   ret = gstd_parser_parse_cmd (session, message, output);
@@ -169,6 +165,10 @@ do_post (SoupServer * server, SoupMessage * msg, char *name,
   g_return_val_if_fail (server, GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (msg, GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (session, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (path, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (name, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (description, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (output, GSTD_NULL_ARGUMENT);
 
   if (!name) {
     ret = GSTD_BAD_VALUE;
@@ -201,6 +201,9 @@ do_put (SoupServer * server, SoupMessage * msg, char *name, char **output,
   g_return_val_if_fail (server, GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (msg, GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (session, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (name, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (output, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (path, GSTD_NULL_ARGUMENT);
 
   if (!name) {
     ret = GSTD_BAD_VALUE;
@@ -227,6 +230,9 @@ do_delete (SoupServer * server, SoupMessage * msg, char *name,
   g_return_val_if_fail (server, GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (msg, GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (session, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (name, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (output, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (path, GSTD_NULL_ARGUMENT);
 
   if (!name) {
     ret = GSTD_BAD_VALUE;
@@ -258,6 +264,7 @@ do_request (SoupServer * server, SoupMessage * msg, GHashTable * query,
   g_return_if_fail (server);
   g_return_if_fail (msg);
   g_return_if_fail (session);
+  g_return_if_fail (path);
 
   if (query != NULL) {
     name = g_hash_table_lookup (query, "name");
@@ -272,8 +279,6 @@ do_request (SoupServer * server, SoupMessage * msg, GHashTable * query,
     ret = do_put (server, msg, name, &output, path, session);
   } else if (msg->method == SOUP_METHOD_DELETE) {
     ret = do_delete (server, msg, name, &output, path, session);
-  } else {
-    soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
   }
 
   description = gstd_return_code_to_string (ret);
@@ -353,6 +358,7 @@ noconnection:
     g_printerr ("%s\n", error->message);
     g_error_free (error);
     g_object_unref (self->server);
+    self->server = NULL;
     return GSTD_NO_CONNECTION;
   }
 }
@@ -395,12 +401,13 @@ gstd_http_stop (GstdIpc * base)
   GstdHttp *self = GSTD_HTTP (base);
   GstdSession *session = base->session;
 
-  GST_DEBUG_OBJECT (self, "Entering HTTP server stop ");
   GST_INFO_OBJECT (session, "Closing HTTP server connection for %s",
       GSTD_OBJECT_NAME (session));
   if (self->server) {
     g_object_unref (self->server);
   }
+  self->server = NULL;
+
 
   return GSTD_EOK;
 }
