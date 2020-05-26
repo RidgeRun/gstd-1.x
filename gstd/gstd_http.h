@@ -19,9 +19,6 @@
 #ifndef __GSTD_HTTP_H__
 #define __GSTD_HTTP_H__
 
-#include <gio/gio.h>
-#include "gstd_return_codes.h"
-#include "gstd_session.h"
 #include "gstd_ipc.h"
 
 G_BEGIN_DECLS

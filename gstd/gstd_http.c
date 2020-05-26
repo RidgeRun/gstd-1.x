@@ -107,6 +107,8 @@ gstd_http_finalize (GObject * object)
 
   GST_INFO_OBJECT (object, "Deinitializing gstd HTTP");
 
+  gstd_http_stop (GSTD_IPC(object));
+
   if (self->address) {
     g_free (self->address);
   }
@@ -279,7 +281,9 @@ do_request (SoupServer * server, SoupMessage * msg, GHashTable * query,
     ret = do_put (server, msg, name, &output, path, session);
   } else if (msg->method == SOUP_METHOD_DELETE) {
     ret = do_delete (server, msg, name, &output, path, session);
-  }
+  } else if (msg->method == SOUP_METHOD_OPTIONS){
+    ret = GSTD_EOK;
+  } 
 
   description = gstd_return_code_to_string (ret);
   response =
@@ -407,7 +411,6 @@ gstd_http_stop (GstdIpc * base)
     g_object_unref (self->server);
   }
   self->server = NULL;
-
 
   return GSTD_EOK;
 }
