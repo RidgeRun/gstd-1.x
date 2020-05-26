@@ -29,6 +29,7 @@
 #include "gstd_ipc.h"
 #include "gstd_tcp.h"
 #include "gstd_unix.h"
+#include "gstd_http.h"
 #include "gstd_daemon.h"
 #include "gstd_log.h"
 
@@ -159,6 +160,7 @@ main (gint argc, gchar * argv[])
   GType supported_ipcs[] = {
     GSTD_TYPE_TCP,
     GSTD_TYPE_UNIX,
+    GSTD_TYPE_HTTP,
   };
 
   guint num_ipcs = (sizeof (supported_ipcs) / sizeof (GType));
