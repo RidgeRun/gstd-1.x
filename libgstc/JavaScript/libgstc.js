@@ -75,11 +75,11 @@ class GstdClient {
 
     var http = new XMLHttpRequest();
     http.open('POST', this.ip + ":" + this.port + "/pipelines?name="+pipe_name+"&description="+pipe_desc);
-    let jpipe = JSON.stringify({
+    let jBodyMsg = JSON.stringify({
       name: pipe_name,
       description: pipe_desc
     });
-    http.send(jpipe);
+    http.send(jBodyMsg);
     http.onreadystatechange = function (){
       GstdClient.send_cmd(http, callback);
     }
@@ -93,10 +93,10 @@ class GstdClient {
 
     var http = new XMLHttpRequest();
     http.open('PUT', this.ip + ":" + this.port + "/pipelines/"+pipe_name+"/state?name=playing");
-    let jpipe = JSON.stringify({
+    let jBodyMsg = JSON.stringify({
       name: "playing"
     });
-    http.send(jpipe);
+    http.send(jBodyMsg);
     http.onreadystatechange = function (){
       GstdClient.send_cmd(http, callback);
     }
@@ -110,10 +110,10 @@ class GstdClient {
 
     var http = new XMLHttpRequest();
     http.open('PUT', this.ip + ":" + this.port + "/pipelines/"+pipe_name+"/elements/"+element+"/properties/"+prop+"?name="+value);
-    let jpipe = JSON.stringify({
+    let jBodyMsg = JSON.stringify({
       name: "paused"
     });
-    http.send(jpipe);
+    http.send(jBodyMsg);
     http.onreadystatechange = function (){
       GstdClient.send_cmd(http, callback);
     }
@@ -127,10 +127,10 @@ class GstdClient {
 
     var http = new XMLHttpRequest();
     http.open('PUT', this.ip + ":" + this.port + "/pipelines/"+pipe_name+"/state?name=paused");
-    let jpipe = JSON.stringify({
+    let jBodyMsg = JSON.stringify({
       name: "paused"
     });
-    http.send(jpipe);
+    http.send(jBodyMsg);
     http.onreadystatechange = function (){
       GstdClient.send_cmd(http, callback);
     }
@@ -144,10 +144,10 @@ class GstdClient {
 
     var http = new XMLHttpRequest();
     http.open('PUT', this.ip + ":" + this.port + "/pipelines/"+pipe_name+"/state?name=null");
-    let jpipe = JSON.stringify({
+    let jBodyMsg = JSON.stringify({
       name: "null"
     });
-    http.send(jpipe);
+    http.send(jBodyMsg);
     http.onreadystatechange = function (){
       GstdClient.send_cmd(http, callback);
     }
@@ -161,10 +161,10 @@ class GstdClient {
 
     var http = new XMLHttpRequest();
     http.open('DELETE', this.ip + ":" + this.port + "/pipelines?name="+pipe_name);
-    let jpipe = JSON.stringify({
+    let jBodyMsg = JSON.stringify({
       name: pipe_name
     });
-    http.send(jpipe);
+    http.send(jBodyMsg);
     http.onreadystatechange = function (){
       GstdClient.send_cmd(http, callback);
     }
