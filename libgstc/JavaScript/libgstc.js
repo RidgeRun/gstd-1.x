@@ -28,6 +28,9 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
 // OF THE POSSIBILITY OF SUCH DAMAGE.
 
+/*
+GstClient - GstdClient Class
+*/
 class GstdClient {
 
   constructor(ip='http://localhost',port=5000){
@@ -36,11 +39,22 @@ class GstdClient {
   }
 
   static send_cmd(http, callback) {
+    // Check if the fetch operation is complete
     if (http.readyState === XMLHttpRequest.DONE) {
-      if (http.status === 200) {
-        callback(http.responseText);
+      // Check if the data transfer has been completed successfully
+      var status = http.status;
+      // Check for 'HTTP response status codes'
+      // Handling Client errors (200–499) internally
+      if (status === 0 || (status >= 200 && status < 500)) {
+        var gstdResponse = JSON.parse(http.responseText);
+        if (gstdResponse.code === GstcErrorCode.GSTC_OK) {
+          callback(gstdResponse);
+        } else {
+          throw new GstdError([gstdResponse.description, gstdResponse.code]);
+        }
       } else {
-        callback('Error: ' + http.status+". " + http.responseText);
+        throw new GstcError(['Server did not respond. Is it up?',
+          GstcErrorCode.GSTC_UNREACHABLE]);
       }
     }
   }
@@ -75,7 +89,7 @@ class GstdClient {
 
     var http = new XMLHttpRequest();
     http.open('POST', this.ip + ":" + this.port + "/pipelines?name="+pipe_name+"&description="+pipe_desc);
-    let jBodyMsg = JSON.stringify({
+    var jBodyMsg = JSON.stringify({
       name: pipe_name,
       description: pipe_desc
     });
@@ -93,7 +107,7 @@ class GstdClient {
 
     var http = new XMLHttpRequest();
     http.open('PUT', this.ip + ":" + this.port + "/pipelines/"+pipe_name+"/state?name=playing");
-    let jBodyMsg = JSON.stringify({
+    var jBodyMsg = JSON.stringify({
       name: "playing"
     });
     http.send(jBodyMsg);
@@ -110,7 +124,7 @@ class GstdClient {
 
     var http = new XMLHttpRequest();
     http.open('PUT', this.ip + ":" + this.port + "/pipelines/"+pipe_name+"/elements/"+element+"/properties/"+prop+"?name="+value);
-    let jBodyMsg = JSON.stringify({
+    var jBodyMsg = JSON.stringify({
       name: "paused"
     });
     http.send(jBodyMsg);
@@ -127,7 +141,7 @@ class GstdClient {
 
     var http = new XMLHttpRequest();
     http.open('PUT', this.ip + ":" + this.port + "/pipelines/"+pipe_name+"/state?name=paused");
-    let jBodyMsg = JSON.stringify({
+    var jBodyMsg = JSON.stringify({
       name: "paused"
     });
     http.send(jBodyMsg);
@@ -144,7 +158,7 @@ class GstdClient {
 
     var http = new XMLHttpRequest();
     http.open('PUT', this.ip + ":" + this.port + "/pipelines/"+pipe_name+"/state?name=null");
-    let jBodyMsg = JSON.stringify({
+    var jBodyMsg = JSON.stringify({
       name: "null"
     });
     http.send(jBodyMsg);
@@ -161,7 +175,7 @@ class GstdClient {
 
     var http = new XMLHttpRequest();
     http.open('DELETE', this.ip + ":" + this.port + "/pipelines?name="+pipe_name);
-    let jBodyMsg = JSON.stringify({
+    var jBodyMsg = JSON.stringify({
       name: pipe_name
     });
     http.send(jBodyMsg);
@@ -169,4 +183,59 @@ class GstdClient {
       GstdClient.send_cmd(http, callback);
     }
   }
+}
+
+/*
+GstClient - GstcError Class
+*/
+class GstcError extends Error {
+  constructor(...params) {
+    // Pass remaining arguments (including vendor specific ones) to parent constructor
+    super(...params)
+
+    // Maintains proper stack trace for where our error was thrown (only available on V8)
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, GstcError)
+    }
+
+    this.name = 'GstcError'
+    // Custom debugging information
+    this.date = new Date()
+  }
+}
+
+/*
+GstClient - GstdError Class
+*/
+class GstdError extends Error {
+  constructor(...params) {
+    // Pass remaining arguments (including vendor specific ones) to parent constructor
+    super(...params)
+
+    // Maintains proper stack trace for where our error was thrown (only available on V8)
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, GstdError)
+    }
+
+    this.name = 'GstdError'
+    // Custom debugging information
+    this.date = new Date()
+  }
+}
+
+const GstcErrorCode = {
+  GSTC_OK: 0,
+  GSTC_NULL_ARGUMENT: -1,
+  GSTC_UNREACHABLE: -2,
+  GSTC_TIMEOUT: -3,
+  GSTC_OOM: -4,
+  GSTC_TYPE_ERROR: -5,
+  GSTC_MALFORMED: -6,
+  GSTC_NOT_FOUND: -7,
+  GSTC_SEND_ERROR: -8,
+  GSTC_RECV_ERROR: -9,
+  GSTC_SOCKET_ERROR: -10,
+  GSTC_THREAD_ERROR: -11,
+  GSTC_BUS_TIMEOUT: -12,
+  GSTC_SOCKET_TIMEOUT: -13,
 }
