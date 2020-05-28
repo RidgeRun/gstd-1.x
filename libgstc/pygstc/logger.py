@@ -41,7 +41,7 @@ COLORS = {
 }
 
 """
-GSTC - ColorFormatter Class
+GstClient - ColorFormatter Class
 """
 
 
@@ -85,7 +85,7 @@ class ColorFormatter(logging.Formatter):
 
 
 """
-GSTC - CustomLogger Class
+GstClient - CustomLogger Class
 """
 
 
@@ -258,7 +258,7 @@ class CustomLogger:
 
 
 """
-GSTC - DummyLogger Class
+GstClient - DummyLogger Class
 """
 
 

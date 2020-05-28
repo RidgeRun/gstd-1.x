@@ -33,14 +33,14 @@ import select
 import socket
 
 """
-GSTC - Ipc Class
+GstClient - Ipc Class
 """
 
 
 class Ipc:
 
     """
-    Implementation of IPC that uses TCP sockets to communicate with GSTD
+    Implementation of IPC that uses TCP sockets to communicate with Gstd
 
     Methods
     ----------
@@ -65,9 +65,9 @@ class Ipc:
             Custom logger where all log messages from this class are going
             to be reported
         ip : string
-            The IP where GSTD is running
+            The IP where Gstd is running
         port : int
-            The port where GSTD is running
+            The port where Gstd is running
         maxsize : int
             Size of the message to read on each iteration
         terminator : string
@@ -92,12 +92,18 @@ class Ipc:
         timeout : int
             Timeout in seconds to wait for a response. 0: infinite
 
+        Raises
+        -------
+        BufferError: When the incoming buffer is too big
+        TimeoutError : When the server takes too long to respond
+        ConnectionRefusedError : When the socket fails to communicate
+
         Returns
         -------
         data : string
             Decoded JSON string with the response
         """
-
+        data = None
         self._logger.debug('GSTD socket sending line: %s' % line)
         try:
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -105,16 +111,29 @@ class Ipc:
             s.send(' '.join(line).encode('utf-8'))
             data = self._recvall(s, timeout)
             if not data:
-                return json.dumps({'error': 'socket error',
-                                   'description': 'socket read error in '
-                                   + str(' '.join(line)), 'code': -1})
+                raise socket.error("Socket read error happened")
             data = data.decode('utf-8')
             s.close()
-        except socket.error:
+            return data
+
+        except BufferError as e:
             s.close()
-            self._logger.error('GSTD socket error')
-            data = None
-        return data
+            error_msg = 'Server response too long'
+            self._logger.error(error_msg)
+            raise BufferError(error_msg)\
+                from e
+        except TimeoutError as e:
+            s.close()
+            error_msg = 'Server took too long to respond'
+            self._logger.error(error_msg)
+            raise TimeoutError(error_msg)\
+                from e
+        except socket.error as e:
+            s.close()
+            error_msg = 'Server did not respond. Is it up?'
+            self._logger.error(error_msg)
+            raise ConnectionRefusedError(error_msg)\
+                from e
 
     def _recvall(self, sock, timeout):
         """
@@ -127,45 +146,41 @@ class Ipc:
         timeout : int
             Timeout in seconds to wait for a response. 0: infinite
 
+        Raises
+        ------
+        socket.error
+            Error is triggered when Gstd IPC fails
+        BufferError
+            When the incoming buffer is too big.
+
         Returns
         -------
         buf : string
             Raw socket response
         """
-
         buf = b''
-        count = 0
+        newbuf = ''
         try:
-            while True:
-                if self._maxsize:
-                    if count >= self._maxsize:
-                        break
+            sock.settimeout(timeout)
+        except socket.error as e:
+            raise TimeoutError from e
 
-                # if timeout is set, perform non-blocking read
+        while True:
+            if (self._maxsize and self._maxsize > len(newbuf)):
+                raise BufferError
+            # Timeout to perform non-blocking read
+            ready = select.select([sock], [], [], timeout)
 
-                if timeout:
-                    sock.setblocking(0)
-                    ready = select.select([sock], [], [], timeout)
-                    if ready[0]:
-                        newbuf = sock.recv(self._socket_read_size)
-                    else:
-                        buf = None
-                        sock.close()
-                        break
-                else:
+            if ready[0]:
+                try:
                     newbuf = sock.recv(self._socket_read_size)
-                    if not newbuf:
-                        buf = None
-                        break
+                # Raise an exception timeout
+                except socket.error as e:
+                    raise TimeoutError from e
+
                 if self._terminator in newbuf:
-
-                    # this is the last item
-
                     buf += newbuf[:newbuf.find(self._terminator)]
                     break
                 else:
                     buf += newbuf
-                    count += len(newbuf)
-        except socket.error:
-            buf = None
         return buf
