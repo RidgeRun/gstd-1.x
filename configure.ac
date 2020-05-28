@@ -220,12 +220,15 @@ Makefile
 gstd/Makefile
 gst_client/Makefile
 libgstc/Makefile
+libgstc/C/Makefile
+libgstc/Python/Makefile
 examples/Makefile
 examples/libgstc/Makefile
 tests/Makefile
 tests/gstd/Makefile
 tests/libgstc/Makefile
-tests/libgstc/pygstc/Makefile
+tests/libgstc/C/Makefile
+tests/libgstc/Python/Makefile
 docs/Makefile
 docs/reference/Makefile
 docs/reference/gstd/Makefile
