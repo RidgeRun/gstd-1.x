@@ -45,7 +45,7 @@ class GstdClient {
       var status = http.status;
       // Check for 'HTTP response status codes'
       // Handling Client errors (200–499) internally
-      if (status === 0 || (status >= 200 && status < 500)) {
+      if (status >= 200 && status < 500) {
         var gstdResponse = JSON.parse(http.responseText);
         if (gstdResponse.code === GstcErrorCode.GSTC_OK) {
           callback(gstdResponse);
