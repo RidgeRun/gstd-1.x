@@ -15,7 +15,7 @@ gstc_headers = [
   'libgstc_thread.h'
 ]
 
-## Build and install library and pkgconfi file
+## Build and install library and pkgconfig file
 # Build library
 gstc_lib = library('gstc-@0@'.format(apiversion),
   gstc_sources,
@@ -29,8 +29,8 @@ gstc_lib = library('gstc-@0@'.format(apiversion),
 # Install library header file
 install_headers('libgstc.h')
 
-# Generate pfgconfig file
-pkgconfig.generate(gstc_lib, description : 'Gst client library to control Gstd')
+# Generate pkgconfig file
+pkgconfig.generate(gstc_lib, description : 'GStreamer Client library to control Gstd')
 
 # Define the library as an internal dependency to the current build
 lib_gstc_dep = declare_dependency(link_with: gstc_lib,
