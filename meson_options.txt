@@ -2,7 +2,7 @@
 option('enable-tests', type : 'feature', value : 'auto', yield : true, description : 'Build tests')
 option('enable-examples', type : 'feature', value : 'auto', yield : true, description : 'Build examples')
 option('enable-gtk-doc', type : 'boolean', value : false, description : 'Use gtk-doc to build documentation')
-option('enable-systemd', type : 'boolean', value : true, description : 'Enable systemd gstd.service install')
+option('enable-systemd', type : 'boolean', value : false, description : 'Enable systemd gstd.service install')
 option('enable-initd', type : 'boolean', value : false, description : 'Enable init script install')
 
 # String options

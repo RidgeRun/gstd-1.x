@@ -200,11 +200,11 @@ AC_ARG_WITH([gstd-logstatedir],
   [AC_SUBST([gstdlogstatedir], [$with_gstd_logstatedir])],
   [AC_SUBST([gstdlogstatedir], [$default])])
 
-dnl allow the user to disable systemd gstd.service install
+dnl allow the user to enable systemd gstd.service install
 AC_ARG_ENABLE(systemd,
-  AS_HELP_STRING([--disable-systemd], [Disable install of systemd gstd.service]),
-  [ systemd=false ],
-  [ systemd=true ])
+  AS_HELP_STRING([--enable-systemd], [Enable install of systemd gstd.service]),
+  [ systemd=true ],
+  [ systemd=false ])
 
 AM_CONDITIONAL(WITH_SYSTEMD, test "$systemd" = true)
 
