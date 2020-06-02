@@ -447,6 +447,32 @@ GstcStatus gstc_pipeline_seek(GstClient *client, const char *pname,
 
 
 /**
+ * gstc_pipeline_step:
+ * @client: The client returned by gstc_client_new()
+ * @pname: Name associated with the pipeline
+ * @format: Format for seek values: undefined (0), default (1), bytes (2),
+ * nanoseconds(3), buffers (4) or percent (5) where default means to use the
+ * format of the pad/element, nanoseconds means time in nanoseconds and percentage
+ * means percentage of the stream.
+ * @amount: the amount of data to step
+ * @rate: New playback rate, e.g. 1 is normal, 0.5 is half speed,
+ * 2 is twice as fast as normal. A rate of <= 0.0 is not allowed.
+ * @flush: The flush flag will clear any pending data in the pipeline before starting the step operation: false (0), true (1).
+ * @intermediate: The intermediate flag instructs the pipeline that this step operation is part of a larger step operation: false (0), true (1).
+ *
+ * Creates a new step event. The purpose of the step event is to instruct a sink to skip
+ * @amount (expressed in @format) of media. It can be used to implement stepping through
+ * the video frame by frame or for doing fast trick modes.
+ *
+ * Returns: GstcStatus indicating success, daemon unreachable, daemon timeout,
+ * bad pipeline name, out of memory
+ */
+GstcStatus gstc_pipeline_step(GstClient *client, const char *pname,
+    int format, long long amount, double rate, int flush,
+    int intermediate);
+
+
+/**
  * Configures playback of the pipeline between @start to @stop at the speed
  * given in @rate.  Effectively causes gstd to invoke gst_element_seek().
  * gstc_pipeline_list_elements:

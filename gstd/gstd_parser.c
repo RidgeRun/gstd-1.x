@@ -77,6 +77,8 @@ static GstdReturnCode gstd_parser_event_eos (GstdSession *, gchar *, gchar *,
     gchar **);
 static GstdReturnCode gstd_parser_event_seek (GstdSession *, gchar *, gchar *,
     gchar **);
+static GstdReturnCode gstd_parser_event_step (GstdSession *, gchar *, gchar *,
+    gchar **);
 static GstdReturnCode gstd_parser_event_flush_start (GstdSession *, gchar *,
     gchar *, gchar **);
 static GstdReturnCode gstd_parser_event_flush_stop (GstdSession *, gchar *,
@@ -131,6 +133,7 @@ static GstdCmd cmds[] = {
 
   {"event_eos", gstd_parser_event_eos},
   {"event_seek", gstd_parser_event_seek},
+  {"event_step", gstd_parser_event_step},
   {"event_flush_start", gstd_parser_event_flush_start},
   {"event_flush_stop", gstd_parser_event_flush_stop},
 
@@ -165,7 +168,7 @@ gstd_parser_parse_raw_cmd (GstdSession * session, gchar * action, gchar * args,
   uri = tokens[0];
   rest = tokens[1];
 
-  // Alias the empty string to the base
+  /* Alias the empty string to the base */
   if (!uri)
     uri = (gchar *) "/";
 
@@ -244,10 +247,10 @@ gstd_parser_create (GstdSession * session, GstdObject * obj, gchar * args,
   g_return_val_if_fail (GSTD_IS_SESSION (session), GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (G_IS_OBJECT (obj), GSTD_NULL_ARGUMENT);
 
-  // This may mean a potential leak
+  /* This may mean a potential leak */
   g_warn_if_fail (!*response);
 
-  // Tokens has the form {<name>, <description>}
+  /* Tokens has the form {<name>, <description>} */
   if (NULL == args) {
     name = NULL;
     description = NULL;
@@ -288,10 +291,10 @@ gstd_parser_read (GstdSession * session, GstdObject * obj, gchar * args,
   g_return_val_if_fail (GSTD_IS_SESSION (session), GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (GSTD_IS_OBJECT (obj), GSTD_NULL_ARGUMENT);
 
-  // This may mean a potential leak
+  /* This may mean a potential leak */
   g_warn_if_fail (!*response);
 
-  // Print the raw object
+  /* Print the raw object */
   return gstd_object_to_string (obj, response);
 }
 
@@ -708,10 +711,35 @@ gstd_parser_event_seek (GstdSession * session, gchar * action, gchar * args,
 
   tokens = g_strsplit (args, " ", 2);
   check_argument (tokens[0], GSTD_BAD_COMMAND);
-  // We don't check for the second token since we want to allow defaults
+  /* We don't check for the second token since we want to allow defaults */
 
   uri = g_strdup_printf ("/pipelines/%s/event seek %s", tokens[0], tokens[1]);
   ret = gstd_parser_parse_raw_cmd (session, (gchar *) "create", uri, response);
+
+  g_free (uri);
+  g_strfreev (tokens);
+
+  return ret;
+}
+
+static GstdReturnCode
+gstd_parser_event_step (GstdSession * session, gchar * action, gchar * args,
+    gchar ** response)
+{
+  GstdReturnCode ret;
+  gchar *uri;
+  gchar **tokens;
+
+  g_return_val_if_fail (GSTD_IS_SESSION (session), GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (args, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (response, GSTD_NULL_ARGUMENT);
+
+  tokens = g_strsplit (args, " ", 2);
+  check_argument (tokens[0], GSTD_BAD_COMMAND);
+  /* We don't check for the second token since we want to allow defaults */
+
+  uri = g_strdup_printf ("/pipelines/%s/event step %s", tokens[0], tokens[1]);
+  ret = gstd_parser_parse_raw_cmd (session, (gchar*)"create", uri, response);
 
   g_free (uri);
   g_strfreev (tokens);
@@ -752,7 +780,7 @@ gstd_parser_event_flush_stop (GstdSession * session, gchar * action,
 
   tokens = g_strsplit (args, " ", 2);
   check_argument (tokens[0], GSTD_BAD_COMMAND);
-  // We don't check for the second token since we want to allow defaults
+  /* We don't check for the second token since we want to allow defaults */
 
   uri =
       g_strdup_printf ("/pipelines/%s/event flush_stop %s", tokens[0],
