@@ -202,11 +202,9 @@ AC_ARG_WITH([gstd-logstatedir],
 
 dnl allow the user to enable systemd gstd.service install
 AC_ARG_ENABLE(systemd,
-  AS_HELP_STRING([--enable-systemd], [Enable install of systemd gstd.service]),
+  AS_HELP_STRING([--enable-systemd], [Enable install of systemd gstd.service, requires the user to define --init-username]),
   [ systemd=true ],
   [ systemd=false ])
-
-AM_CONDITIONAL(WITH_SYSTEMD, test "$systemd" = true)
 
 dnl allow the user to specify systemd gstd.service file location
 default=${sysconfdir}/systemd/system/
@@ -218,11 +216,9 @@ AC_ARG_WITH([gstd-systemddir],
 
 dnl allow the user to enable init script install
 AC_ARG_ENABLE(initd,
-  AS_HELP_STRING([--enable-initd], [Enable install of init script]),
+  AS_HELP_STRING([--enable-initd], [Enable install of init script, requires the user to define --init-username]),
   [ initd=true ],
   [ initd=false ])
-
-AM_CONDITIONAL(WITH_INITD, test "$initd" = true)
 
 dnl allow the user to specify init script location
 default=${sysconfdir}/init.d/
@@ -231,6 +227,16 @@ AC_ARG_WITH([gstd-initddir],
   [Install init script @<:@to DIR if specified@:>@, otherwise defaults to ${sysconfdir}/init.d/]),
   [AC_SUBST([gstdinitddir], [$with_gstd_initddir])],
   [AC_SUBST([gstdinitddir], [$default])])
+
+dnl allow the user to specify the username to be used in the init.d/systemd to start gstd
+AC_ARG_WITH([init-username],
+  AS_HELP_STRING([--with-init-username@<:@=USERNAME@:>@],
+  [Start gstd with user @<:@USERNAME@:>@ in the init scripts, otherwise the scripts will not be installed]),
+  [AC_SUBST([initusername], [$with_init_username])],
+  [systemd=false; initd=false])
+
+AM_CONDITIONAL(WITH_SYSTEMD, test "$systemd" = true)
+AM_CONDITIONAL(WITH_INITD, test "$initd" = true)
 
 dnl check if compiler understands -Wall (if yes, add -Wall to GST_CFLAGS)
 AC_MSG_CHECKING([to see if compiler understands -Wall])
