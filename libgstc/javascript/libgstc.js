@@ -46,111 +46,70 @@ class GstdClient {
 
   /**
    * Send Command
-   * @param {XMLHttpRequest} http
-   * @param {Function} callback
+   * @param {String} url
+   * @param {Array} request
    * @throws {GstdError} Error is triggered when Gstd IPC fails
    * @throws {GstcError} Error is triggered when GstClient fails
    */
-  static send_cmd(http, callback) {
-    /** Check if the fetch operation is complete */
-    if (http.readyState !== XMLHttpRequest.DONE) {
-      return;
-    }
-
-    /** Check if the data transfer has been completed successfully */
-    var status = http.status;
-
-    if (status >= 200 && status < 500) {
-      var gstd_res = JSON.parse(http.responseText);
-      if (gstd_res.code === GstcErrorCode.GSTC_OK) {
-        callback(gstd_res);
-      } else {
-        throw new GstdError([gstd_res.description, gstd_res.code]);
+  static async send_cmd(url, request) {
+    try {
+      var response = await fetch (url, request);
+      var j_resp = await response.json();
+      if (j_resp["code"] !== GstcErrorCode.GSTC_OK ) {
+        throw new GstdError([j_resp["description"], j_resp["code"]]);
       }
-    } else {
+      return j_resp;
+    } catch (e) {
+      if(e instanceof GstdError) {
+        throw e;
+      }
       throw new GstcError(['Server did not respond. Is it up?',
         GstcErrorCode.GSTC_UNREACHABLE]);
     }
-
-  }
-
-  /**
-   * Check Callback
-   * @param {Function} callback
-   */
-  static check_callback(callback) {
-    if (typeof callback !== "function") {
-      console.error ("Provide a callback function");
-      return false;
-    }
-    return true;
   }
 
   /**
    * List Pipelines
-   * @param {Function} callback
    */
-  list_pipelines(callback) {
-
-    if (!GstdClient.check_callback(callback)) {
-      return TypeError;
-    }
-
-    var http = new XMLHttpRequest();
-    http.open('GET', this.ip + ":" + this.port + "/pipelines");
-    http.send();
-    http.onreadystatechange = function() {
-      GstdClient.send_cmd(http, callback);
-    }
+  async list_pipelines() {
+    var url = this.ip + ":" + this.port + "/pipelines";
+    var request = { method : "GET" };
+    return await GstdClient.send_cmd(url, request);
   }
 
   /**
    * Pipeline Create
    * @param {String} pipe_name
    * @param {String} pipe_desc
-   * @param {Function} callback
    */
-  pipeline_create(pipe_name, pipe_desc, callback) {
+  async pipeline_create(pipe_name, pipe_desc) {
 
-    if (!GstdClient.check_callback(callback)) {
-      return TypeError;
+    var url = this.ip + ":" + this.port + "/pipelines?name=" + pipe_name +
+      "&description=" + pipe_desc;
+    var request = {
+      method: 'POST'
     }
 
-    var http = new XMLHttpRequest();
-    http.open('POST', this.ip + ":" + this.port + "/pipelines?name=" +
-      pipe_name + "&description=" + pipe_desc);
-
-    var j_body_msg = JSON.stringify({
-      name: pipe_name,
-      description: pipe_desc
-    });
-    http.send(j_body_msg);
-    http.onreadystatechange = function() {
-      GstdClient.send_cmd(http, callback);
-    }
+    return await GstdClient.send_cmd(url, request);
   }
 
   /**
    * Pipeline Play
    * @param {String} pipe_name
-   * @param {Function} callback
    */
-  pipeline_play(pipe_name, callback) {
+  async pipeline_play(pipe_name) {
 
-    if (!GstdClient.check_callback(callback)) {
-      return TypeError;
+    var url = this.ip + ":" + this.port + "/pipelines/" + pipe_name +
+      "/state?name=playing";
+    var request = {
+      method: 'PUT',
+      body: {
+        name : pipe_name,
+        status : 'playing'
+      },
     }
 
-    var http = new XMLHttpRequest();
-    http.open('PUT', this.ip + ":" + this.port + "/pipelines/" + pipe_name +
-      "/state?name=playing");
-    var j_body_msg = JSON.stringify({
-      name: "playing"
-    });
-    http.send(j_body_msg);
-    http.onreadystatechange = function() {
-      GstdClient.send_cmd(http, callback);
-    }
+    return await GstdClient.send_cmd(url, request);
   }
 
   /**
@@ -159,93 +118,77 @@ class GstdClient {
    * @param {String} element
    * @param {String} prop
    * @param {String} value
-   * @param {Function} callback
    */
-  element_set(pipe_name, element, prop, value, callback) {
+  async element_set(pipe_name, element, prop, value) {
 
-    if (!GstdClient.check_callback(callback)) {
-      return TypeError;
+    var url = this.ip + ":" + this.port + "/pipelines/" + pipe_name +
+    "/elements/" + element + "/properties/" + prop + "?name=" + value;
+    var request = {
+      method: 'PUT',
+      body: {
+        name : pipe_name,
+        element : element,
+        prop : prop,
+        value : value
+      },
     }
 
-    var http = new XMLHttpRequest();
-    http.open('PUT', this.ip + ":" + this.port + "/pipelines/" + pipe_name +
-      "/elements/" + element + "/properties/" + prop + "?name=" + value);
-    var j_body_msg = JSON.stringify({
-      name: "paused"
-    });
-    http.send(j_body_msg);
-    http.onreadystatechange = function() {
-      GstdClient.send_cmd(http, callback);
-    }
+    return await GstdClient.send_cmd(url, request);
   }
 
   /**
    * Pipeline Pause
    * @param {String} pipe_name
-   * @param {Function} callback
    */
-  pipeline_pause(pipe_name, callback) {
+  async pipeline_pause(pipe_name) {
 
-    if (!GstdClient.check_callback(callback)) {
-      return TypeError;
+    var url = this.ip + ":" + this.port + "/pipelines/" + pipe_name +
+    "/state?name=paused";
+    var request = {
+      method: 'PUT',
+      body: {
+        name : pipe_name,
+        status : 'paused'
+      },
     }
 
-    var http = new XMLHttpRequest();
-    http.open('PUT', this.ip + ":" + this.port + "/pipelines/" + pipe_name +
-      "/state?name=paused");
-    var j_body_msg = JSON.stringify({
-      name: "paused"
-    });
-    http.send(j_body_msg);
-    http.onreadystatechange = function() {
-      GstdClient.send_cmd(http, callback);
-    }
+    return await GstdClient.send_cmd(url, request);
   }
 
   /**
    * Pipeline Stop
    * @param {String} pipe_name
-   * @param {Function} callback
    */
-  pipeline_stop(pipe_name, callback) {
+  async pipeline_stop(pipe_name) {
 
-    if (!GstdClient.check_callback(callback)) {
-      return TypeError;
+    var url = this.ip + ":" + this.port + "/pipelines/" + pipe_name +
+      "/state?name=null";
+    var request = {
+      method: 'PUT',
+      body: {
+        name : pipe_name,
+        status : 'null'
+      },
     }
 
-    var http = new XMLHttpRequest();
-    http.open('PUT', this.ip + ":" + this.port + "/pipelines/" + pipe_name +
-      "/state?name=null");
-    var j_body_msg = JSON.stringify({
-      name: "null"
-    });
-    http.send(j_body_msg);
-    http.onreadystatechange = function() {
-      GstdClient.send_cmd(http, callback);
-    }
+    return await GstdClient.send_cmd(url, request);
   }
 
   /**
    * Pipeline Delete
    * @param {String} pipe_name
-   * @param {Function} callback
    */
-  pipeline_delete(pipe_name, callback) {
+  async pipeline_delete(pipe_name) {
 
-    if (!GstdClient.check_callback(callback)) {
-      return TypeError;
+    var url = this.ip + ":" + this.port + "/pipelines?name=" + pipe_name;
+    var request = {
+      method: 'DELETE',
+      body: {
+        name : pipe_name
+      },
     }
 
-    var http = new XMLHttpRequest();
-    http.open('DELETE', this.ip + ":" + this.port + "/pipelines?name=" +
-      pipe_name);
-    var j_body_msg = JSON.stringify({
-      name: pipe_name
-    });
-    http.send(j_body_msg);
-    http.onreadystatechange = function() {
-      GstdClient.send_cmd(http, callback);
-    }
+    return await GstdClient.send_cmd(url, request);
   }
 }
 
