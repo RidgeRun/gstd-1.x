@@ -1,4 +1,4 @@
-SUBDIRS=C
+SUBDIRS=c
 
 # FIXME Disable pygstc checks
-#SUBDIRS = Python
+#SUBDIRS = python

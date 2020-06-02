@@ -1,3 +1,3 @@
-subdir('C')
+subdir('c')
 # FIXME Disable pygstc checks
-# subdir('Python')
+# subdir('python')

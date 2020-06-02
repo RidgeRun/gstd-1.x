@@ -1,2 +1,2 @@
-subdir('C')
-subdir('Python')
+subdir('c')
+subdir('python')

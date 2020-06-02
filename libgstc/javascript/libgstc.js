@@ -63,7 +63,7 @@ class GstdClient {
     if (status >= 200 && status < 500) {
       var gstd_res = JSON.parse(http.responseText);
       if (gstd_res.code === GstcErrorCode.GSTC_OK) {
-        callback(gstd_res);
+        callback(gstdResponse);
       } else {
         throw new GstdError([gstd_res.description, gstd_res.code]);
       }

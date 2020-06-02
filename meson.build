@@ -59,7 +59,7 @@ test_libgstc_deps=[gst_base_dep, json_glib_dep, jansson_dep, thread_dep, gst_che
 test_gstd_deps=[gst_base_dep, gio_unix_dep, json_glib_dep, libd_dep, jansson_dep, gst_check_dep]
 
 # Define header directories
-lib_gstc_inc_dir = include_directories('libgstc/C')
+lib_gstc_inc_dir = include_directories('libgstc/c')
 gstd_inc_dir = include_directories('gstd')
 configinc = include_directories('.')
 

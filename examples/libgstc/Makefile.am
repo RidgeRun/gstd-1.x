@@ -4,5 +4,5 @@ noinst_PROGRAMS = 		\
 	mp4_recording 		\
 	gapless_playback
 
-AM_CFLAGS = -I$(top_srcdir)/libgstc/C
-AM_LDFLAGS = -L$(top_builddir)/libgstc/C/.libs/ -lgstc-1.0
+AM_CFLAGS = -I$(top_srcdir)/libgstc/c
+AM_LDFLAGS = -L$(top_builddir)/libgstc/c/.libs/ -lgstc-1.0
