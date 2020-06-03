@@ -39,6 +39,7 @@ G_BEGIN_DECLS
   (G_TYPE_INSTANCE_GET_CLASS ((obj), GSTD_TYPE_TPC, GstdHttpClass))
 typedef struct _GstdHttp GstdHttp;
 typedef struct _GstdHttpClass GstdHttpClass;
+typedef struct _GstdHttpRequest GstdHttpRequest;
 GType gstd_http_get_type (void);
 
 
