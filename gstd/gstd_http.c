@@ -35,7 +35,6 @@ GST_DEBUG_CATEGORY_STATIC (gstd_http_debug);
 #define GSTD_DEBUG_DEFAULT_LEVEL GST_LEVEL_INFO
 
 #define GSTD_MAX_NUMBER_OF_THREADS 10
-GMutex mutex;
 
 struct _GstdHttpRequest
 {
@@ -44,6 +43,7 @@ struct _GstdHttpRequest
   GstdSession *session;
   const char *path;
   GHashTable *query;
+  GMutex *mutex;
 };
 
 struct _GstdHttp
@@ -54,6 +54,7 @@ struct _GstdHttp
   SoupServer *server;
   GstdSession *session;
   GThreadPool *pool;
+  GMutex mutex;
 };
 
 struct _GstdHttpClass
@@ -288,9 +289,9 @@ do_request (gpointer data_request, gpointer eval)
   g_return_if_fail (data_request);
 
   GstdHttpRequest *data_request_local = (GstdHttpRequest *) data_request;
-  g_mutex_lock (&mutex);
+  g_mutex_lock (data_request_local->mutex);
   server = data_request_local->server;
-  g_mutex_unlock (&mutex);
+  g_mutex_unlock (data_request_local->mutex);
   msg = data_request_local->msg;
   session = data_request_local->session;
   path = data_request_local->path;
@@ -325,11 +326,11 @@ do_request (gpointer data_request, gpointer eval)
 
   status = get_status_code (ret);
   soup_message_set_status (msg, status);
-  g_mutex_lock (&mutex);
+  g_mutex_lock (data_request_local->mutex);
   soup_server_unpause_message (server, msg);
-  g_mutex_unlock (&mutex);
+  g_mutex_unlock (data_request_local->mutex);
   if (query != NULL) {
-     g_hash_table_unref (query);
+    g_hash_table_unref (query);
   }
   free (data_request);
   return;
@@ -361,6 +362,7 @@ server_callback (SoupServer * server, SoupMessage * msg,
   } else {
     data_request->query = query;
   }
+  data_request->mutex = &self->mutex;
 
   soup_message_headers_append (msg->response_headers,
       "Access-Control-Allow-Origin", "*");
@@ -368,9 +370,9 @@ server_callback (SoupServer * server, SoupMessage * msg,
       "Access-Control-Allow-Headers", "origin,range,content-type");
   soup_message_headers_append (msg->response_headers,
       "Access-Control-Allow-Methods", "PUT, GET, POST, DELETE");
-  g_mutex_lock (&mutex);
+  g_mutex_lock (&self->mutex);
   soup_server_pause_message (server, msg);
-  g_mutex_unlock (&mutex);
+  g_mutex_unlock (&self->mutex);
   if (!g_thread_pool_push (self->pool, (gpointer) data_request, NULL)) {
     GST_ERROR_OBJECT (self->pool, "Thread pool push failed");
   }
