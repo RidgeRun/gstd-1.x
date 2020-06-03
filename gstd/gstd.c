@@ -44,8 +44,8 @@ static void print_header ();
       "\nGstd version " PACKAGE_VERSION "\n" \
       "Copyright (C) 2015-2020 RidgeRun (https://www.ridgerun.com)\n\n"
 
-void
-print_header ()
+static void
+print_header (void)
 {
   g_print (HEADER);
 }
