@@ -10,6 +10,7 @@ option('with-gstd-runstatedir', type : 'string', value : '/var/run/gstd', descri
 option('with-gstd-logstatedir', type : 'string', value : '/var/log/gstd', description : 'Specify the location of gstd\'s log files')
 option('with-gstd-systemddir', type : 'string', value : '${sysconfdir}/systemd/system', description : 'Specify the location of gstd.service file')
 option('with-gstd-initddir', type : 'string', value : '${sysconfdir}/init.d', description : 'Specify the location of gstd init script')
+option('with-init-username', type : 'string', value : 'none', description : 'Specify the username to start gstd in the init script, mandatory')
 
 # Common options
 option('package-name', type : 'string', yield : true,

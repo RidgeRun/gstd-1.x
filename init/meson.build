@@ -4,8 +4,12 @@ cdata.set('prefix', get_option('prefix'))
 cdata.set('gstdrunstatedir', get_option('with-gstd-runstatedir'))
 cdata.set('gstdlogstatedir', get_option('with-gstd-logstatedir'))
 
-systemd_enabled = get_option('enable-systemd')
-initd_enabled = get_option('enable-initd')
+systemd_enabled = false
+initd_enabled = false
+if get_option('with-init-username') != 'none'
+   systemd_enabled = get_option('enable-systemd')
+   initd_enabled = get_option('enable-initd')
+endif
 
 # Generate the init script
 if systemd_enabled or initd_enabled
