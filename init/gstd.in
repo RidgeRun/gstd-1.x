@@ -42,14 +42,14 @@ case "$1" in
 
         #Manage pid and log directories
         for d in ${directories[@]}; do
-            manage_dir "$d" 766 root
+            manage_dir "$d" 766 @initusername@
         done
 
         #Start gstd
-        @prefix@/bin/gstd;
+        DISPLAY=:1 sudo -u @initusername@ @prefix@/bin/gstd -e;
         ;;
     stop)
-        @prefix@/bin/gstd -k;
+        sudo -u @initusername@ @prefix@/bin/gstd -k;
         ;;
     *)
         echo "$0 {start|stop}"

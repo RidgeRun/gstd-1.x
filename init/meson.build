@@ -3,6 +3,7 @@ cdata = configuration_data()
 cdata.set('prefix', get_option('prefix'))
 cdata.set('gstdrunstatedir', get_option('with-gstd-runstatedir'))
 cdata.set('gstdlogstatedir', get_option('with-gstd-logstatedir'))
+cdata.set('initusername', get_option('with-init-username'))
 
 systemd_enabled = false
 initd_enabled = false
