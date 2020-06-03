@@ -328,6 +328,9 @@ do_request (gpointer data_request, gpointer eval)
   g_mutex_lock (&mutex);
   soup_server_unpause_message (server, msg);
   g_mutex_unlock (&mutex);
+  if (query != NULL) {
+     g_hash_table_unref (query);
+  }
   free (data_request);
   return;
 }
