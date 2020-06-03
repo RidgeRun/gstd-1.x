@@ -146,18 +146,30 @@ lib_gstd_dir = meson.current_build_dir()
 # Install library headers
 # install_headers(libgstd_header_files)
 # Install run and log directories
+runstatedir = get_option('with-gstd-runstatedir')
+if runstatedir == '${prefix}/var/run/gstd'
+   runstatedir = get_option('prefix') + '/var/run/gstd/'
+endif
+
+logstatedir = get_option('with-gstd-logstatedir')
+if logstatedir == '${prefix}/var/log/gstd'
+   logstatedir = get_option('prefix') + '/var/log/gstd/'
+endif
+
 install_subdir('gstd',
-  install_dir : get_option('prefix') + get_option('with-gstd-runstatedir'),
+  install_dir : runstatedir,
   strip_directory : true,
 )
+
 install_subdir('gstd',
-  install_dir : get_option('prefix') + get_option('with-gstd-logstatedir'),
+  install_dir : logstatedir,
   strip_directory : true,
 )
+
 # Since install_subdir function doesn't change the mode of the directories installed
 # Run a script at install time to change the mode of the directories
-meson.add_install_script('gstd_chmod.sh','755',get_option('with-gstd-runstatedir'))
-meson.add_install_script('gstd_chmod.sh','755',get_option('with-gstd-logstatedir'))
+meson.add_install_script('gstd_chmod.sh','755', runstatedir)
+meson.add_install_script('gstd_chmod.sh','755', logstatedir)
 
 ## Create symbolic link to gstd
 meson.add_install_script('gstd_symbolic_link.sh',
