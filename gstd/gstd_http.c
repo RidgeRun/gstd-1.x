@@ -34,12 +34,26 @@ GST_DEBUG_CATEGORY_STATIC (gstd_http_debug);
 
 #define GSTD_DEBUG_DEFAULT_LEVEL GST_LEVEL_INFO
 
+typedef struct _GstdHttpRequest
+{
+  SoupServer *server;
+  SoupMessage *msg;
+  GstdSession *session;
+  const char *path;
+  GHashTable *query;
+  GMutex *mutex;
+} GstdHttpRequest;
+
 struct _GstdHttp
 {
   GstdIpc parent;
   guint port;
   gchar *address;
+  gint max_threads;
   SoupServer *server;
+  GstdSession *session;
+  GThreadPool *pool;
+  GMutex mutex;
 };
 
 struct _GstdHttpClass
@@ -66,8 +80,7 @@ static GstdReturnCode do_put (SoupServer * server, SoupMessage * msg,
     char *name, char **output, const char *path, GstdSession * session);
 static GstdReturnCode do_delete (SoupServer * server, SoupMessage * msg,
     char *name, char **output, const char *path, GstdSession * session);
-static void do_request (SoupServer * server, SoupMessage * msg,
-    GHashTable * query, GstdSession * session, const char *path);
+static void do_request (gpointer data_request, gpointer eval);
 static void server_callback (SoupServer * server, SoupMessage * msg,
     const char *path, GHashTable * query, SoupClientContext * context,
     gpointer data);
@@ -95,9 +108,14 @@ static void
 gstd_http_init (GstdHttp * self)
 {
   GST_INFO_OBJECT (self, "Initializing gstd Http");
+  g_mutex_init (&self->mutex);
   self->port = GSTD_HTTP_DEFAULT_PORT;
   self->address = g_strdup (GSTD_HTTP_DEFAULT_ADDRESS);
+  self->max_threads = GSTD_HTTP_DEFAULT_MAX_THREADS;
   self->server = NULL;
+  self->session = NULL;
+  self->pool = NULL;
+
 }
 
 static void
@@ -107,12 +125,16 @@ gstd_http_finalize (GObject * object)
 
   GST_INFO_OBJECT (object, "Deinitializing gstd HTTP");
 
-  gstd_http_stop (GSTD_IPC(object));
+  gstd_http_stop (GSTD_IPC (object));
+  g_mutex_clear (&self->mutex);
 
   if (self->address) {
     g_free (self->address);
   }
   self->address = NULL;
+
+  g_thread_pool_free (self->pool, FALSE, TRUE);
+  self->pool = NULL;
 
   G_OBJECT_CLASS (gstd_http_parent_class)->finalize (object);
 }
@@ -153,6 +175,7 @@ do_get (SoupServer * server, SoupMessage * msg, char **output, const char *path,
   message = g_strdup_printf ("read %s", path);
   ret = gstd_parser_parse_cmd (session, message, output);
   g_free (message);
+  message = NULL;
 
   return ret;
 }
@@ -188,6 +211,7 @@ do_post (SoupServer * server, SoupMessage * msg, char *name,
   message = g_strdup_printf ("create %s %s %s", path, name, description);
   ret = gstd_parser_parse_cmd (session, message, output);
   g_free (message);
+  message = NULL;
 
 out:
   return ret;
@@ -217,6 +241,7 @@ do_put (SoupServer * server, SoupMessage * msg, char *name, char **output,
   message = g_strdup_printf ("update %s %s", path, name);
   ret = gstd_parser_parse_cmd (session, message, output);
   g_free (message);
+  message = NULL;
 
 out:
   return ret;
@@ -246,14 +271,14 @@ do_delete (SoupServer * server, SoupMessage * msg, char *name,
   message = g_strdup_printf ("delete %s %s", path, name);
   ret = gstd_parser_parse_cmd (session, message, output);
   g_free (message);
+  message = NULL;
 
 out:
   return ret;
 }
 
 static void
-do_request (SoupServer * server, SoupMessage * msg, GHashTable * query,
-    GstdSession * session, const char *path)
+do_request (gpointer data_request, gpointer eval)
 {
   gchar *response = NULL;
   gchar *name = NULL;
@@ -262,11 +287,22 @@ do_request (SoupServer * server, SoupMessage * msg, GHashTable * query,
   gchar *output = NULL;
   const gchar *description = NULL;
   SoupStatus status = SOUP_STATUS_OK;
+  SoupServer *server = NULL;
+  SoupMessage *msg = NULL;
+  GstdSession *session = NULL;
+  const char *path = NULL;
+  GHashTable *query = NULL;
 
-  g_return_if_fail (server);
-  g_return_if_fail (msg);
-  g_return_if_fail (session);
-  g_return_if_fail (path);
+  g_return_if_fail (data_request);
+
+  GstdHttpRequest *data_request_local = (GstdHttpRequest *) data_request;
+  g_mutex_lock (data_request_local->mutex);
+  server = data_request_local->server;
+  g_mutex_unlock (data_request_local->mutex);
+  msg = data_request_local->msg;
+  session = data_request_local->session;
+  path = data_request_local->path;
+  query = data_request_local->query;
 
   if (query != NULL) {
     name = g_hash_table_lookup (query, "name");
@@ -281,9 +317,9 @@ do_request (SoupServer * server, SoupMessage * msg, GHashTable * query,
     ret = do_put (server, msg, name, &output, path, session);
   } else if (msg->method == SOUP_METHOD_DELETE) {
     ret = do_delete (server, msg, name, &output, path, session);
-  } else if (msg->method == SOUP_METHOD_OPTIONS){
+  } else if (msg->method == SOUP_METHOD_OPTIONS) {
     ret = GSTD_EOK;
-  } 
+  }
 
   description = gstd_return_code_to_string (ret);
   response =
@@ -291,12 +327,25 @@ do_request (SoupServer * server, SoupMessage * msg, GHashTable * query,
       ("{\n  \"code\" : %d,\n  \"description\" : \"%s\",\n  \"response\" : %s\n}",
       ret, description, output ? output : "null");
   g_free (output);
+  output = NULL;
+
   soup_message_set_response (msg, "application/json", SOUP_MEMORY_COPY,
       response, strlen (response));
   g_free (response);
+  response = NULL;
 
   status = get_status_code (ret);
   soup_message_set_status (msg, status);
+  g_mutex_lock (data_request_local->mutex);
+  soup_server_unpause_message (server, msg);
+  g_mutex_unlock (data_request_local->mutex);
+
+  if (query != NULL) {
+    g_hash_table_unref (query);
+  }
+  free (data_request);
+  data_request = NULL;
+
   return;
 }
 
@@ -311,8 +360,22 @@ server_callback (SoupServer * server, SoupMessage * msg,
   g_return_if_fail (msg);
   g_return_if_fail (data);
 
-  session = GSTD_SESSION (data);
-  g_return_if_fail (session);
+  GstdHttp *self = GSTD_HTTP (data);
+  session = self->session;
+
+  GstdHttpRequest *data_request;
+  data_request = (GstdHttpRequest *) malloc (sizeof (GstdHttpRequest));
+
+  data_request->msg = msg;
+  data_request->server = server;
+  data_request->session = session;
+  data_request->path = path;
+  if (query) {
+    data_request->query = g_hash_table_ref (query);
+  } else {
+    data_request->query = query;
+  }
+  data_request->mutex = &self->mutex;
 
   soup_message_headers_append (msg->response_headers,
       "Access-Control-Allow-Origin", "*");
@@ -320,7 +383,12 @@ server_callback (SoupServer * server, SoupMessage * msg,
       "Access-Control-Allow-Headers", "origin,range,content-type");
   soup_message_headers_append (msg->response_headers,
       "Access-Control-Allow-Methods", "PUT, GET, POST, DELETE");
-  do_request (server, msg, query, session, path);
+  g_mutex_lock (&self->mutex);
+  soup_server_pause_message (server, msg);
+  g_mutex_unlock (&self->mutex);
+  if (!g_thread_pool_push (self->pool, (gpointer) data_request, NULL)) {
+    GST_ERROR_OBJECT (self->pool, "Thread pool push failed");
+  }
 
 }
 
@@ -337,6 +405,7 @@ gstd_http_start (GstdIpc * base, GstdSession * session)
   guint16 port = self->port;
   gchar *address = self->address;
 
+  self->session = session;
   gstd_http_stop (base);
 
   GST_DEBUG_OBJECT (self, "Initializing HTTP server");
@@ -344,15 +413,22 @@ gstd_http_start (GstdIpc * base, GstdSession * session)
   if (!self->server) {
     goto noconnection;
   }
+  self->pool =
+      g_thread_pool_new (do_request, NULL, self->max_threads, FALSE, &error);
 
-  sa = g_inet_socket_address_new_from_string (address, port);
-
-  soup_server_listen (self->server, sa, 0, &error);
   if (error) {
     goto noconnection;
   }
 
-  soup_server_add_handler (self->server, NULL, server_callback, session, NULL);
+  sa = g_inet_socket_address_new_from_string (address, port);
+
+  soup_server_listen (self->server, sa, 0, &error);
+
+  if (error) {
+    goto noconnection;
+  }
+
+  soup_server_add_handler (self->server, NULL, server_callback, self, NULL);
 
   return GSTD_EOK;
 
@@ -361,6 +437,7 @@ noconnection:
     GST_ERROR_OBJECT (self, "%s", error->message);
     g_printerr ("%s\n", error->message);
     g_error_free (error);
+    error = NULL;
     g_object_unref (self->server);
     self->server = NULL;
     return GSTD_NO_CONNECTION;
@@ -387,6 +464,11 @@ gstd_http_init_get_option_group (GstdIpc * base, GOptionGroup ** group)
           "Attach to the server through a given port (default 5001)",
         "http-port"}
     ,
+    {"http-max-threads", 'm', 0, G_OPTION_ARG_INT, &self->max_threads,
+          "Max number of allowed threads to process simultaneous requests. -1 "
+          "means unlimited (default -1)",
+        "http-max-threads"}
+    ,
     {NULL}
   };
   GST_DEBUG_OBJECT (self, "HTTP init group callback ");
@@ -407,6 +489,7 @@ gstd_http_stop (GstdIpc * base)
 
   GST_INFO_OBJECT (session, "Closing HTTP server connection for %s",
       GSTD_OBJECT_NAME (session));
+
   if (self->server) {
     g_object_unref (self->server);
   }

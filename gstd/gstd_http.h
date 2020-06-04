@@ -24,6 +24,7 @@
 G_BEGIN_DECLS
 #define GSTD_HTTP_DEFAULT_ADDRESS "127.0.0.1"
 #define GSTD_HTTP_DEFAULT_PORT 5001
+#define GSTD_HTTP_DEFAULT_MAX_THREADS -1
 
 #define GSTD_TYPE_HTTP \
   (gstd_http_get_type())
