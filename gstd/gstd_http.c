@@ -34,9 +34,7 @@ GST_DEBUG_CATEGORY_STATIC (gstd_http_debug);
 
 #define GSTD_DEBUG_DEFAULT_LEVEL GST_LEVEL_INFO
 
-#define GSTD_MAX_NUMBER_OF_THREADS 10
-
-struct _GstdHttpRequest
+typedef struct _GstdHttpRequest
 {
   SoupServer *server;
   SoupMessage *msg;
@@ -44,13 +42,14 @@ struct _GstdHttpRequest
   const char *path;
   GHashTable *query;
   GMutex *mutex;
-};
+} GstdHttpRequest;
 
 struct _GstdHttp
 {
   GstdIpc parent;
   guint port;
   gchar *address;
+  gint max_threads;
   SoupServer *server;
   GstdSession *session;
   GThreadPool *pool;
@@ -109,8 +108,10 @@ static void
 gstd_http_init (GstdHttp * self)
 {
   GST_INFO_OBJECT (self, "Initializing gstd Http");
+  g_mutex_init (&self->mutex);
   self->port = GSTD_HTTP_DEFAULT_PORT;
   self->address = g_strdup (GSTD_HTTP_DEFAULT_ADDRESS);
+  self->max_threads = GSTD_HTTP_DEFAULT_MAX_THREADS;
   self->server = NULL;
   self->session = NULL;
   self->pool = NULL;
@@ -125,6 +126,7 @@ gstd_http_finalize (GObject * object)
   GST_INFO_OBJECT (object, "Deinitializing gstd HTTP");
 
   gstd_http_stop (GSTD_IPC (object));
+  g_mutex_clear (&self->mutex);
 
   if (self->address) {
     g_free (self->address);
@@ -132,6 +134,7 @@ gstd_http_finalize (GObject * object)
   self->address = NULL;
 
   g_thread_pool_free (self->pool, FALSE, TRUE);
+  self->pool = NULL;
 
   G_OBJECT_CLASS (gstd_http_parent_class)->finalize (object);
 }
@@ -172,6 +175,7 @@ do_get (SoupServer * server, SoupMessage * msg, char **output, const char *path,
   message = g_strdup_printf ("read %s", path);
   ret = gstd_parser_parse_cmd (session, message, output);
   g_free (message);
+  message = NULL;
 
   return ret;
 }
@@ -207,6 +211,7 @@ do_post (SoupServer * server, SoupMessage * msg, char *name,
   message = g_strdup_printf ("create %s %s %s", path, name, description);
   ret = gstd_parser_parse_cmd (session, message, output);
   g_free (message);
+  message = NULL;
 
 out:
   return ret;
@@ -236,6 +241,7 @@ do_put (SoupServer * server, SoupMessage * msg, char *name, char **output,
   message = g_strdup_printf ("update %s %s", path, name);
   ret = gstd_parser_parse_cmd (session, message, output);
   g_free (message);
+  message = NULL;
 
 out:
   return ret;
@@ -265,6 +271,7 @@ do_delete (SoupServer * server, SoupMessage * msg, char *name,
   message = g_strdup_printf ("delete %s %s", path, name);
   ret = gstd_parser_parse_cmd (session, message, output);
   g_free (message);
+  message = NULL;
 
 out:
   return ret;
@@ -320,19 +327,25 @@ do_request (gpointer data_request, gpointer eval)
       ("{\n  \"code\" : %d,\n  \"description\" : \"%s\",\n  \"response\" : %s\n}",
       ret, description, output ? output : "null");
   g_free (output);
+  output = NULL;
+
   soup_message_set_response (msg, "application/json", SOUP_MEMORY_COPY,
       response, strlen (response));
   g_free (response);
+  response = NULL;
 
   status = get_status_code (ret);
   soup_message_set_status (msg, status);
   g_mutex_lock (data_request_local->mutex);
   soup_server_unpause_message (server, msg);
   g_mutex_unlock (data_request_local->mutex);
+
   if (query != NULL) {
     g_hash_table_unref (query);
   }
   free (data_request);
+  data_request = NULL;
+
   return;
 }
 
@@ -401,8 +414,7 @@ gstd_http_start (GstdIpc * base, GstdSession * session)
     goto noconnection;
   }
   self->pool =
-      g_thread_pool_new (do_request, NULL, GSTD_MAX_NUMBER_OF_THREADS, FALSE,
-      &error);
+      g_thread_pool_new (do_request, NULL, self->max_threads, FALSE, &error);
 
   if (error) {
     goto noconnection;
@@ -425,6 +437,7 @@ noconnection:
     GST_ERROR_OBJECT (self, "%s", error->message);
     g_printerr ("%s\n", error->message);
     g_error_free (error);
+    error = NULL;
     g_object_unref (self->server);
     self->server = NULL;
     return GSTD_NO_CONNECTION;
@@ -450,6 +463,11 @@ gstd_http_init_get_option_group (GstdIpc * base, GOptionGroup ** group)
     {"http-port", 'p', 0, G_OPTION_ARG_INT, &self->port,
           "Attach to the server through a given port (default 5001)",
         "http-port"}
+    ,
+    {"http-max-threads", 'm', 0, G_OPTION_ARG_INT, &self->max_threads,
+          "Max number of allowed threads to process simultaneous requests. -1 "
+          "means unlimited (default -1)",
+        "http-max-threads"}
     ,
     {NULL}
   };
