@@ -139,3 +139,4 @@ libgstc_pipeline_element_get_SOURCES =		\
 	test_libgstc_element_get.c		\
 	@top_srcdir@/libgstc/c/libgstc.c	\
 		$(COMMON_SOURCES)
+

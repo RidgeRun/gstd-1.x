@@ -18,3 +18,4 @@ noinst_HEADERS = \
 	libgstc_assert.h	\
 	libgstc_json.h		\
 	libgstc_thread.h
+

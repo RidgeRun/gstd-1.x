@@ -221,6 +221,7 @@ gstd/Makefile
 gst_client/Makefile
 libgstc/Makefile
 libgstc/c/Makefile
+libgstc/javascript/Makefile
 libgstc/python/Makefile
 examples/Makefile
 examples/libgstc/Makefile

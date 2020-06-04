@@ -1,2 +1,4 @@
 SUBDIRS=c	\
+    javascript  \
     python
+
