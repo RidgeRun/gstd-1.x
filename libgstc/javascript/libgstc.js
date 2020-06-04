@@ -34,9 +34,11 @@
 class GstdClient {
 
   /**
-   * GstdClient Construtor
-   * @param {String} ip
-   * @param {Number} port
+   * GstdClient Construtor.
+   *
+   * @param {String} ip.
+   * @param {Number} port.
+   *
    * @throws {GstcErrorCode}
   */
   constructor(ip='http://localhost',port=5000) {
@@ -45,31 +47,39 @@ class GstdClient {
   }
 
   /**
-   * Send Command
-   * @param {String} url
-   * @param {Array} request
-   * @throws {GstdError} Error is triggered when Gstd IPC fails
-   * @throws {GstcError} Error is triggered when GstClient fails
+   * Send Command.
+   *
+   * @param {String} url.
+   * @param {Array} request.
+   *
+   * @throws {GstdError} Error is triggered when Gstd IPC fails.
+   * @throws {GstcError} Error is triggered when GstClient fails.
+   *
+   * @return {JSON} Response from Gstd.
    */
   static async send_cmd(url, request) {
     try {
       var response = await fetch (url, request);
       var j_resp = await response.json();
-      if (j_resp["code"] !== GstcErrorCode.GSTC_OK ) {
-        throw new GstdError([j_resp["description"], j_resp["code"]]);
-      }
-      return j_resp;
     } catch (e) {
-      if(e instanceof GstdError) {
-        throw e;
-      }
-      throw new GstcError(['Server did not respond. Is it up?',
+      if(e instanceof TypeError) {
+        throw new GstcError(['Gstd corrupted response',
+        GstcErrorCode.GSTC_RECV_ERROR]);
+      } else {
+        throw new GstcError(['Gstd did not respond. Is it up?',
         GstcErrorCode.GSTC_UNREACHABLE]);
+      }
     }
+    if (j_resp["code"] !== GstcErrorCode.GSTC_OK ) {
+      throw new GstdError([j_resp["description"], j_resp["code"]]);
+    }
+    return j_resp;
   }
 
   /**
-   * List Pipelines
+   * List Pipelines.
+   *
+   * @return {JSON} Response from Gstd.
    */
   async list_pipelines() {
     var url = this.ip + ":" + this.port + "/pipelines";
@@ -78,24 +88,34 @@ class GstdClient {
   }
 
   /**
-   * Pipeline Create
-   * @param {String} pipe_name
-   * @param {String} pipe_desc
+   * Pipeline Create.
+   *
+   * @param {String} pipe_name.
+   * @param {String} pipe_desc.
+   *
+   * @return {JSON} Response from Gstd.
    */
   async pipeline_create(pipe_name, pipe_desc) {
 
     var url = this.ip + ":" + this.port + "/pipelines?name=" + pipe_name +
       "&description=" + pipe_desc;
     var request = {
-      method: 'POST'
+      method: 'POST',
+      body : {
+        name : pipe_name,
+        description : pipe_desc
+      }
     }
 
     return await GstdClient.send_cmd(url, request);
   }
 
   /**
-   * Pipeline Play
-   * @param {String} pipe_name
+   * Pipeline Play.
+   *
+   * @param {String} pipe_name.
+   *
+   * @return {JSON} Response from Gstd.
    */
   async pipeline_play(pipe_name) {
 
@@ -113,11 +133,14 @@ class GstdClient {
   }
 
   /**
-   * Element Set
-   * @param {String} pipe_name
-   * @param {String} element
-   * @param {String} prop
-   * @param {String} value
+   * Element Set.
+   *
+   * @param {String} pipe_name.
+   * @param {String} element.
+   * @param {String} prop.
+   * @param {String} value.
+   *
+   * @return {JSON} Response from Gstd.
    */
   async element_set(pipe_name, element, prop, value) {
 
@@ -137,8 +160,11 @@ class GstdClient {
   }
 
   /**
-   * Pipeline Pause
-   * @param {String} pipe_name
+   * Pipeline Pause.
+   *
+   * @param {String} pipe_name.
+   *
+   * @return {JSON} Response from Gstd.
    */
   async pipeline_pause(pipe_name) {
 
@@ -156,8 +182,11 @@ class GstdClient {
   }
 
   /**
-   * Pipeline Stop
-   * @param {String} pipe_name
+   * Pipeline Stop.
+   *
+   * @param {String} pipe_name.
+   *
+   * @return {JSON} Response from Gstd.
    */
   async pipeline_stop(pipe_name) {
 
@@ -175,8 +204,11 @@ class GstdClient {
   }
 
   /**
-   * Pipeline Delete
-   * @param {String} pipe_name
+   * Pipeline Delete.
+   *
+   * @param {String} pipe_name.
+   *
+   * @return {JSON} Response from Gstd.
    */
   async pipeline_delete(pipe_name) {
 
@@ -196,8 +228,9 @@ class GstdClient {
 class GstcError extends Error {
 
   /**
-   * Constructor
-   * @param  {...any} params List of Params
+   * Constructor.
+   *
+   * @param  {...any} params List of Params.
    */
   constructor(...params) {
 
@@ -218,8 +251,9 @@ class GstcError extends Error {
 class GstdError extends Error {
 
   /**
-   * Constructor
-   * @param  {...any} params List of Params
+   * Constructor.
+   *
+   * @param  {...any} params List of Params.
    */
   constructor(...params) {
 
@@ -252,3 +286,4 @@ const GstcErrorCode = {
   GSTC_BUS_TIMEOUT: -12,
   GSTC_SOCKET_TIMEOUT: -13,
 }
+
