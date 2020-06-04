@@ -62,12 +62,13 @@ class GstdClient {
       var response = await fetch (url, request);
       var j_resp = await response.json();
     } catch (e) {
-      if(e instanceof TypeError) {
-        throw new GstcError(['Gstd corrupted response',
-        GstcErrorCode.GSTC_RECV_ERROR]);
-      } else {
+      if(e instanceof TypeError &&
+         e.message.includes("NetworkError")) {
         throw new GstcError(['Gstd did not respond. Is it up?',
         GstcErrorCode.GSTC_UNREACHABLE]);
+      } else {
+        throw new GstcError(['Gstd corrupted response',
+        GstcErrorCode.GSTC_RECV_ERROR]);
       }
     }
     if (j_resp["code"] !== GstcErrorCode.GSTC_OK ) {
@@ -218,6 +219,45 @@ class GstdClient {
       body: {
         name : pipe_name
       },
+    }
+
+    return await GstdClient.send_cmd(url, request);
+  }
+
+  /**
+   * Bus Filter
+   *
+   * @param {String} pipe_name.
+   * @param {String} filter.
+   *
+   * @return {JSON} Response from Gstd.
+   */
+  async bus_filter(pipe_name, filter) {
+    var url = this.ip + ":" + this.port + "/pipelines/" + pipe_name +
+      "/bus/types?name=" + filter;
+    var request = {
+      method: 'PUT',
+      body: {
+        name : pipe_name,
+        filter : filter
+      },
+    }
+
+    return await GstdClient.send_cmd(url, request);
+  }
+
+  /**
+   * Bus Read
+   *
+   * @param {String} pipe_name
+   *
+   * @return {JSON} Response from Gstd.
+   */
+  async bus_read(pipe_name) {
+    var url = this.ip + ":" + this.port + "/pipelines/" + pipe_name +
+      "/bus/message";
+    var request = {
+      method: 'GET'
     }
 
     return await GstdClient.send_cmd(url, request);
