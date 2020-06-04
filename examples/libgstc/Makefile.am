@@ -5,4 +5,4 @@ noinst_PROGRAMS = 		\
 	gapless_playback
 
 AM_CFLAGS = -I$(top_srcdir)/libgstc/c
-LDADD = -L$(top_builddir)/libgstc/c/.libs/$(lib_LTLIBRARIES) -lgstc-1.0
+LDADD = $(top_builddir)/libgstc/c/libgstc-1.0.la
