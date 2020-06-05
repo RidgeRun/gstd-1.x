@@ -7,4 +7,4 @@ ExecStart=@prefix@/libexec/gstd/gstd start
 ExecStop=@prefix@/libexec/gstd/gstd stop
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=default.target

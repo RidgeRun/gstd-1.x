@@ -5,12 +5,12 @@ cdata.set('gstdrunstatedir', get_option('with-gstd-runstatedir'))
 cdata.set('gstdlogstatedir', get_option('with-gstd-logstatedir'))
 cdata.set('initusername', get_option('with-init-username'))
 
-systemd_enabled = false
 initd_enabled = false
 if get_option('with-init-username') != 'none'
-   systemd_enabled = get_option('enable-systemd')
    initd_enabled = get_option('enable-initd')
 endif
+
+systemd_enabled = get_option('enable-systemd')
 
 # Generate the init script
 if systemd_enabled or initd_enabled
@@ -34,14 +34,11 @@ if systemd_enabled
 
    # Install service file
    systemd_dir = get_option('with-gstd-systemddir')
-   if systemd_dir == '${sysconfdir}/systemd/system'
-      systemd_dir = get_option('sysconfdir') + '/systemd/system'
+   if systemd_dir == '${sysconfdir}/systemd/user'
+      systemd_dir = get_option('sysconfdir') + '/systemd/user'
    endif
    install_data(service_file,
    install_dir: systemd_dir)
-
-   crossbuild = meson.is_cross_build() ?  '1' : '0'
-   meson.add_install_script('gstd.service_enable.sh', systemd_dir, crossbuild)
 endif
 
 if initd_enabled

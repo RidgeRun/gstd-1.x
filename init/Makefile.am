@@ -6,15 +6,6 @@ systemd_service_DATA = gstd.service
 #Install init script
 systemd_initdir = @prefix@/libexec/gstd/
 systemd_init_SCRIPTS = gstd
-
-crossbuild = '0'
-if CROSSCOMPILE
-	crossbuild = '1'
-endif
-
-install-data-hook:
-	./gstd.service_enable.sh ${systemd_servicedir} ${crossbuild}
-
 endif
 
 if WITH_INITD

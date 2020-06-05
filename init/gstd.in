@@ -46,10 +46,10 @@ case "$1" in
         done
 
         #Start gstd
-        DISPLAY=:1 sudo -u @initusername@ @prefix@/bin/gstd -e;
+        @prefix@/bin/gstd -e;
         ;;
     stop)
-        sudo -u @initusername@ @prefix@/bin/gstd -k;
+        @prefix@/bin/gstd -k -e;
         ;;
     *)
         echo "$0 {start|stop}"
