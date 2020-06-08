@@ -38,8 +38,6 @@ class GstdClient {
    *
    * @param {String} ip.
    * @param {Number} port.
-   *
-   * @throws {GstcErrorCode}
   */
   constructor(ip='http://localhost',port=5000) {
     this.ip = ip;
@@ -55,7 +53,7 @@ class GstdClient {
    * @throws {GstdError} Error is triggered when Gstd IPC fails.
    * @throws {GstcError} Error is triggered when GstClient fails.
    *
-   * @return {JSON} Response from Gstd.
+   * @return {object} Response from Gstd.
    */
   static async send_cmd(url, request) {
     try {
@@ -80,12 +78,15 @@ class GstdClient {
   /**
    * List Pipelines.
    *
-   * @return {JSON} Response from Gstd.
+   * @throws {GstdError} Error is triggered when Gstd IPC fails.
+   * @throws {GstcError} Error is triggered when GstClient fails.
+   *
+   * @return {object} Response from Gstd.
    */
   async list_pipelines() {
     var url = this.ip + ":" + this.port + "/pipelines";
     var request = { method : "GET" };
-    return await GstdClient.send_cmd(url, request);
+    return GstdClient.send_cmd(url, request);
   }
 
   /**
@@ -94,7 +95,10 @@ class GstdClient {
    * @param {String} pipe_name.
    * @param {String} pipe_desc.
    *
-   * @return {JSON} Response from Gstd.
+   * @throws {GstdError} Error is triggered when Gstd IPC fails.
+   * @throws {GstcError} Error is triggered when GstClient fails.
+   *
+   * @return {object} Response from Gstd.
    */
   async pipeline_create(pipe_name, pipe_desc) {
 
@@ -108,7 +112,7 @@ class GstdClient {
       }
     }
 
-    return await GstdClient.send_cmd(url, request);
+    return GstdClient.send_cmd(url, request);
   }
 
   /**
@@ -116,7 +120,10 @@ class GstdClient {
    *
    * @param {String} pipe_name.
    *
-   * @return {JSON} Response from Gstd.
+   * @throws {GstdError} Error is triggered when Gstd IPC fails.
+   * @throws {GstcError} Error is triggered when GstClient fails.
+   *
+   * @return {object} Response from Gstd.
    */
   async pipeline_play(pipe_name) {
 
@@ -130,7 +137,7 @@ class GstdClient {
       },
     }
 
-    return await GstdClient.send_cmd(url, request);
+    return GstdClient.send_cmd(url, request);
   }
 
   /**
@@ -141,7 +148,10 @@ class GstdClient {
    * @param {String} prop.
    * @param {String} value.
    *
-   * @return {JSON} Response from Gstd.
+   * @throws {GstdError} Error is triggered when Gstd IPC fails.
+   * @throws {GstcError} Error is triggered when GstClient fails.
+   *
+   * @return {object} Response from Gstd.
    */
   async element_set(pipe_name, element, prop, value) {
 
@@ -157,7 +167,7 @@ class GstdClient {
       },
     }
 
-    return await GstdClient.send_cmd(url, request);
+    return GstdClient.send_cmd(url, request);
   }
 
   /**
@@ -165,7 +175,10 @@ class GstdClient {
    *
    * @param {String} pipe_name.
    *
-   * @return {JSON} Response from Gstd.
+   * @throws {GstdError} Error is triggered when Gstd IPC fails.
+   * @throws {GstcError} Error is triggered when GstClient fails.
+   *
+   * @return {object} Response from Gstd.
    */
   async pipeline_pause(pipe_name) {
 
@@ -179,7 +192,7 @@ class GstdClient {
       },
     }
 
-    return await GstdClient.send_cmd(url, request);
+    return GstdClient.send_cmd(url, request);
   }
 
   /**
@@ -187,7 +200,10 @@ class GstdClient {
    *
    * @param {String} pipe_name.
    *
-   * @return {JSON} Response from Gstd.
+   * @throws {GstdError} Error is triggered when Gstd IPC fails.
+   * @throws {GstcError} Error is triggered when GstClient fails.
+   *
+   * @return {object} Response from Gstd.
    */
   async pipeline_stop(pipe_name) {
 
@@ -201,7 +217,7 @@ class GstdClient {
       },
     }
 
-    return await GstdClient.send_cmd(url, request);
+    return GstdClient.send_cmd(url, request);
   }
 
   /**
@@ -209,7 +225,10 @@ class GstdClient {
    *
    * @param {String} pipe_name.
    *
-   * @return {JSON} Response from Gstd.
+   * @throws {GstdError} Error is triggered when Gstd IPC fails.
+   * @throws {GstcError} Error is triggered when GstClient fails.
+   *
+   * @return {object} Response from Gstd.
    */
   async pipeline_delete(pipe_name) {
 
@@ -221,7 +240,7 @@ class GstdClient {
       },
     }
 
-    return await GstdClient.send_cmd(url, request);
+    return GstdClient.send_cmd(url, request);
   }
 
   /**
@@ -230,7 +249,10 @@ class GstdClient {
    * @param {String} pipe_name.
    * @param {String} filter.
    *
-   * @return {JSON} Response from Gstd.
+   * @throws {GstdError} Error is triggered when Gstd IPC fails.
+   * @throws {GstcError} Error is triggered when GstClient fails.
+   *
+   * @return {object} Response from Gstd.
    */
   async bus_filter(pipe_name, filter) {
     var url = this.ip + ":" + this.port + "/pipelines/" + pipe_name +
@@ -243,15 +265,18 @@ class GstdClient {
       },
     }
 
-    return await GstdClient.send_cmd(url, request);
+    return GstdClient.send_cmd(url, request);
   }
 
   /**
-   * Bus Read
+   * Bus Read.
    *
-   * @param {String} pipe_name
+   * @param {String} pipe_name.
    *
-   * @return {JSON} Response from Gstd.
+   * @throws {GstdError} Error is triggered when Gstd IPC fails.
+   * @throws {GstcError} Error is triggered when GstClient fails.
+   *
+   * @return {object} Response from Gstd.
    */
   async bus_read(pipe_name) {
     var url = this.ip + ":" + this.port + "/pipelines/" + pipe_name +
@@ -260,7 +285,305 @@ class GstdClient {
       method: 'GET'
     }
 
-    return await GstdClient.send_cmd(url, request);
+    return GstdClient.send_cmd(url, request);
+  }
+
+  /**
+   * Apply a timeout for the bus polling.
+   *
+   * @param {String} pipe_name.
+   * @param {Integer} timeout.
+   *
+   * @throws {GstdError} Error is triggered when Gstd IPC fails.
+   * @throws {GstcError} Error is triggered when GstClient fails.
+   *
+   * @return {object} Response from Gstd.
+   */
+  async bus_timeout(pipe_name, timeout) {
+    var url = this.ip + ":" + this.port + "/pipelines/" + pipe_name +
+      "/bus/timeout?name=" + timeout;
+    var request = {
+      method: 'PUT',
+      body: {
+        name : pipe_name,
+        timeout : timeout
+      },
+    }
+
+    return GstdClient.send_cmd(url, request);
+  }
+
+  /**
+   * Perform a seek in the given pipeline
+   *
+   * @param {String} pipe_name
+   * @param {Integer} rate
+   * @param {Integer} format
+   * @param {Integer} flags
+   * @param {Integer} start_type
+   * @param {Integer} start
+   * @param {Integer} end_type
+   * @param {Integer} end
+   *
+   * @throws {GstdError} Error is triggered when Gstd IPC fails.
+   * @throws {GstcError} Error is triggered when GstClient fails.
+   *
+   * @return {object} Response from Gstd.
+   */
+  async event_seek(pipe_name, rate=1.0, format=3, flags=1, start_type=1,
+    start=0, end_type=1, end=-1) {
+
+      var url = this.ip + ":" + this.port + "/pipelines/" + pipe_name +
+      "/event?name=seek&description=" + rate + "%20" + format + "%20" +
+      flags + "%20" + start_type + "%20" + start + "%20" + end_type + "%20" + end;
+    var request = {
+      method : 'POST',
+      body : {
+        event: 'seek',
+        name : pipe_name,
+        rate : rate,
+        format : format,
+        flags : flags,
+        start_type : start_type,
+        end_type : end_type,
+        end : end
+      }
+    }
+
+    return GstdClient.send_cmd(url, request);
+  }
+
+  /**
+   * Enable/Disable colors in the debug logging.
+   *
+   * @param {Boolean} enable.
+   *
+   * @throws {GstdError} Error is triggered when Gstd IPC fails.
+   * @throws {GstcError} Error is triggered when GstClient fails.
+   *
+   * @return {object} Response from Gstd.
+   */
+  async debug_color (enable) {
+    var url = this.ip + ":" + this.port + "/debug/color?name=" + enable;
+    var request = {
+      method: 'PUT',
+      body: {
+        name : enable,
+      },
+    }
+
+    return GstdClient.send_cmd(url, request);
+  }
+
+  /**
+   * Enable/Disable GStreamer debug.
+   *
+   * @param {Boolean} enable.
+   *
+   * @throws {GstdError} Error is triggered when Gstd IPC fails.
+   * @throws {GstcError} Error is triggered when GstClient fails.
+   *
+   * @return {object} Response from Gstd.
+   */
+  async debug_enable(enable) {
+    var url = this.ip + ":" + this.port + "/debug/enable?name=" + enable;
+    var request = {
+      method: 'PUT',
+      body: {
+        name : enable,
+      },
+    }
+
+    return GstdClient.send_cmd(url, request);
+  }
+
+  /**
+   * Enable/Disable debug threshold reset.
+   *
+   * @param {Boolean} reset
+   *
+   * @throws {GstdError} Error is triggered when Gstd IPC fails.
+   * @throws {GstcError} Error is triggered when GstClient fails.
+   *
+   * @return {object} Response from Gstd.
+   */
+  async debug_reset(enable) {
+    var url = this.ip + ":" + this.port + "/debug/reset?name=" + enable;
+    var request = {
+      method: 'PUT',
+      body: {
+        name : enable,
+      },
+    }
+
+    return GstdClient.send_cmd(url, request);
+  }
+
+  /**
+   * The debug filter to apply (as you would use with gst-launch).
+   *
+   * Debug threshold:
+   *     0   none    No debug information is output.
+   *     1   ERROR   Logs all fatal errors.
+   *     2   WARNING Logs all warnings.
+   *     3   FIXME   Logs all "fixme" messages.
+   *     4   INFO    Logs all informational messages.
+   *     5   DEBUG   Logs all debug messages.
+   *     6   LOG     Logs all log messages.
+   *     7   TRACE   Logs all trace messages.
+   *     9   MEMDUMP Logs all memory dump messages.
+   *
+   * @param {String} threshold.
+   *
+   * @return {object} Response from Gstd.
+   */
+  async debug_threshold(threshold) {
+    var url = this.ip + ":" + this.port + "/debug/threshold?name=" + threshold;
+    var request = {
+      method: 'PUT',
+      body: {
+        threshold : threshold,
+      },
+    }
+
+    return GstdClient.send_cmd(url, request);
+  }
+
+  /**
+   * Queries a property in an element of a given pipeline.
+   *
+   * @param {String} pipe_name
+   * @param {String} element
+   * @param {String} prop
+   *
+   * @return {object} Response from Gstd.
+   */
+  async element_get(pipe_name, element, prop) {
+    var url = this.ip + ":" + this.port + "/pipelines/" + pipe_name +
+      "/elements/" + element + "/properties/" + prop;
+    var request = {
+      method: 'GET'
+    }
+
+    return GstdClient.send_cmd(url, request);
+  }
+
+  /**
+   * List the elements in a given pipeline.
+   *
+   * @param {String} pipe_name
+   *
+   * @return {object} Response from Gstd.
+   */
+  async list_elements(pipe_name) {
+    var url = this.ip + ":" + this.port + "/pipelines/" + pipe_name +
+      "/elements/";
+    var request = {
+      method: 'GET'
+    }
+
+    return GstdClient.send_cmd(url, request);
+  }
+
+  /**
+   * List the properties of an element in a given pipeline.
+   *
+   * @param {String} pipe_name
+   * @param {String} element
+   *
+   * @return {object} Response from Gstd.
+   */
+  async list_properties(pipe_name, element) {
+    var url = this.ip + ":" + this.port + "/pipelines/" + pipe_name +
+      "/elements/" + element + "/properties";
+    var request = {
+      method: 'GET'
+    }
+
+    return GstdClient.send_cmd(url, request);
+  }
+
+  /**
+   * List the signals of an element in a given pipeline.
+   *
+   * @param {String} pipe_name
+   * @param {String} element
+   *
+   * @return {object} Response from Gstd.
+   */
+  async list_signals(pipe_name, element) {
+    var url = this.ip + ":" + this.port + "/pipelines/" + pipe_name +
+      "/elements/" + element + "/signals";
+    var request = {
+      method: 'GET'
+    }
+
+    return GstdClient.send_cmd(url, request);
+  }
+
+  /**
+   * Connect to signal and wait.
+   *
+   * @param {String} pipe_name
+   * @param {String} element
+   * @param {String} signal
+   *
+   * @return {object} Response from Gstd.
+   */
+  async signal_connect(pipe_name, element, signal) {
+    var url = this.ip + ":" + this.port + "/pipelines/" + pipe_name +
+      "/elements/" + element + "/signals/" + signal + "/callback";
+    var request = {
+      method: 'GET'
+    }
+
+    return GstdClient.send_cmd(url, request);
+  }
+
+  /**
+   * Disconnect from signal.
+   *
+   * @param {String} pipe_name
+   * @param {String} element
+   * @param {String} signal
+   *
+   * @return {object} Response from Gstd.
+   */
+  async signal_disconnect(pipe_name, element, signal) {
+    var url = this.ip + ":" + this.port + "/pipelines/" + pipe_name +
+      "/elements/" + element + "/signals/" + signal + "/disconnect";
+    var request = {
+      method: 'GET'
+    }
+
+    return GstdClient.send_cmd(url, request);
+  }
+
+  /**
+   * Apply a timeout for the signal waiting.
+   *
+   * @param {String} pipe_name
+   * @param {String} element
+   * @param {String} signal
+   * @param {String} timeout
+   *
+   * @return {object} Response from Gstd.
+   */
+  async signal_timeout(pipe_name, element, signal, timeout) {
+    var url = this.ip + ":" + this.port + "/pipelines/" + pipe_name +
+      "/elements/" + element + "/signals/" + signal + "timeout?name=" +
+      timeout;
+    var request = {
+      method: 'PUT',
+      body: {
+        name : pipe_name,
+        element : element,
+        signal : signal,
+        timeout : timeout
+      },
+    }
+
+    return GstdClient.send_cmd(url, request);
   }
 }
 
