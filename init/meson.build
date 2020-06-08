@@ -1,8 +1,20 @@
 cdata = configuration_data()
 
-cdata.set('prefix', get_option('prefix'))
-cdata.set('gstdrunstatedir', get_option('with-gstd-runstatedir'))
-cdata.set('gstdlogstatedir', get_option('with-gstd-logstatedir'))
+prefix = get_option('prefix')
+runstatedir = get_option('with-gstd-runstatedir')
+logstatedir = get_option('with-gstd-logstatedir')
+
+# Replace the ${prefix} by the actual prefix value
+if runstatedir.contains('${prefix}')
+   runstatedir = prefix + runstatedir.split('${prefix}')[1]
+endif
+if logstatedir.contains('${prefix}')
+   logstatedir = prefix + logstatedir.split('${prefix}')[1]
+endif
+
+cdata.set('prefix', prefix)
+cdata.set('gstdrunstatedir', runstatedir)
+cdata.set('gstdlogstatedir', logstatedir)
 cdata.set('initusername', get_option('with-init-username'))
 
 initd_enabled = false
@@ -13,10 +25,14 @@ endif
 systemd_enabled = get_option('enable-systemd')
 
 # Generate the init script
-if systemd_enabled or initd_enabled
+if systemd_enabled
+   initd_dir = get_option('with-gstd-initddir')
+   if initd_dir == '${sysconfdir}/init.d'
+      initd_dir = get_option('sysconfdir') + '/init.d'
+   endif
    init_file = configure_file(
-   input: 'gstd.in',
-   output: 'gstd',
+   input: 'gstd.conf.in',
+   output: 'gstd.conf',
    configuration: cdata)
 endif
 

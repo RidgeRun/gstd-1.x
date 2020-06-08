@@ -1,0 +1,2 @@
+d @gstdrunstatedir@ 0755 @initusername@ @initusername@
+d @gstdlogstatedir@ 0755 @initusername@ @initusername@
