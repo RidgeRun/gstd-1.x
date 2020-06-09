@@ -24,7 +24,7 @@ libd_dep      = dependency('libdaemon',          version : '>=0.14')
 jansson_dep   = dependency('jansson',            version : '>=2.7')
 gst_check_dep = dependency('gstreamer-check-1.0',version : '>=1.0.5')
 thread_dep    = dependency('threads')
-
+libsoup_dep = dependency('libsoup-2.4',		       version : '>=2.4')
 
 cc = meson.get_compiler('c')
 readline = cc.find_library('readline', required: true)
@@ -49,7 +49,7 @@ endif
 
 ## Dependencies
 # Define gst Daemon dependencies
-gstd_deps = [gst_base_dep, gio_unix_dep, json_glib_dep, libd_dep, jansson_dep]
+gstd_deps = [gst_base_dep, gio_unix_dep, json_glib_dep, libd_dep, jansson_dep, libsoup_dep]
 # Define gst client library dependencies
 libgstc_deps = [gst_base_dep, json_glib_dep, jansson_dep, thread_dep]
 # Define gst client application dependencies
@@ -59,7 +59,7 @@ test_libgstc_deps=[gst_base_dep, json_glib_dep, jansson_dep, thread_dep, gst_che
 test_gstd_deps=[gst_base_dep, gio_unix_dep, json_glib_dep, libd_dep, jansson_dep, gst_check_dep]
 
 # Define header directories
-lib_gstc_inc_dir = include_directories('libgstc')
+lib_gstc_inc_dir = include_directories('libgstc/c')
 gstd_inc_dir = include_directories('gstd')
 configinc = include_directories('.')
 

@@ -12,6 +12,7 @@ libgstd_src_files = [
   'gstd_list.c',
   'gstd_ipc.c',
   'gstd_tcp.c',
+  'gstd_http.c',
   'gstd_icreator.c',
   'gstd_iformatter.c',
   'gstd_pipeline_creator.c',
