@@ -1,5 +1,6 @@
 [Unit]
 Description=GstD systemd service to generate folders for run-time variable data and log files.
+PartOf=graphical-session.target
 
 [Service]
 Type=forking
@@ -7,4 +8,4 @@ ExecStart=@PREFIX@/bin/gstd -e
 ExecStop=@PREFIX@/bin/gstd -e -k
 
 [Install]
-WantedBy=default.target
+WantedBy=graphical-session.target
