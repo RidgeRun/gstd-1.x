@@ -75,14 +75,14 @@ lib_gstd_dir = []
 lib_gstc_dir = []
 
 # Define compiler args and include directories
-runstatedir = get_option('with-gstd-runstatedir')
-if runstatedir == '${prefix}/var/run/gstd'
+runstatedir = get_option('with-gstd-runstatedir') + '/'
+if runstatedir == '${prefix}/var/run/gstd/'
    runstatedir = prefix + '/var/run/gstd/'
 endif
 gstd_run_state_dir = '-DGSTD_RUN_STATE_DIR="@0@"'.format(runstatedir)
 
-logstatedir = get_option('with-gstd-logstatedir')
-if logstatedir == '${prefix}/var/log/gstd'
+logstatedir = get_option('with-gstd-logstatedir') + '/'
+if logstatedir == '${prefix}/var/log/gstd/'
    logstatedir = prefix + '/var/log/gstd/'
 endif
 gstd_log_state_dir = '-DGSTD_LOG_STATE_DIR="@0@"'.format(logstatedir)

@@ -159,8 +159,8 @@ install_subdir('gstd',
 
 # Since install_subdir function doesn't change the mode of the directories installed
 # Run a script at install time to change the mode of the directories
-meson.add_install_script('gstd_chmod.sh','755', runstatedir)
-meson.add_install_script('gstd_chmod.sh','755', logstatedir)
+meson.add_install_script('gstd_chmod.sh','777', runstatedir)
+meson.add_install_script('gstd_chmod.sh','777', logstatedir)
 
 ## Create symbolic link to gstd
 meson.add_install_script('gstd_symbolic_link.sh',

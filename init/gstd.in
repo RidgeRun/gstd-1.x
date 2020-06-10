@@ -37,7 +37,7 @@ case "$1" in
 
         #Manage pid and log directories
         for d in ${directories[@]}; do
-            manage_dir "$d" 755 @GSTD_STATE_DIRS_OWNER@
+            manage_dir "$d" 777 @GSTD_STATE_DIRS_OWNER@
         done
 
         #Start gstd
