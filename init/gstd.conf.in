@@ -1,2 +1,2 @@
-d @gstdrunstatedir@ 0755 @owner@ @owner@
-d @gstdlogstatedir@ 0755 @owner@ @owner@
+d @GSTD_RUN_STATE_DIR@ 0755 @GSTD_STATE_DIRS_OWNER@ @GSTD_STATE_DIRS_OWNER@
+d @GSTD_LOG_STATE_DIR@ 0755 @GSTD_STATE_DIRS_OWNER@ @GSTD_STATE_DIRS_OWNER@

@@ -28,8 +28,8 @@ manage_dir()
     fi
 }
 
-gstdrunstatedir=@gstdrunstatedir@
-gstdlogstatedir=@gstdlogstatedir@
+gstdrunstatedir=@GSTD_RUN_STATE_DIR@
+gstdlogstatedir=@GSTD_LOG_STATE_DIR@
 
 case "$1" in
     start)
@@ -37,14 +37,14 @@ case "$1" in
 
         #Manage pid and log directories
         for d in ${directories[@]}; do
-            manage_dir "$d" 755 @owner@
+            manage_dir "$d" 755 @GSTD_STATE_DIRS_OWNER@
         done
 
         #Start gstd
-        @prefix@/bin/gstd -e;
+        @PREFIX@/bin/gstd -e;
         ;;
     stop)
-        @prefix@/bin/gstd -k -e;
+        @PREFIX@/bin/gstd -k -e;
         ;;
     *)
         echo "$0 {start|stop}"

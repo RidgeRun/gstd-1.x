@@ -1,24 +1,23 @@
 cdata = configuration_data()
-cdata.set('gstdrunstatedir', runstatedir)
-cdata.set('gstdlogstatedir', logstatedir)
-cdata.set('prefix', prefix)
-cdata.set('owner', get_option('with-statedir-owner'))
+cdata.set('GSTD_RUN_STATE_DIR', runstatedir)
+cdata.set('GSTD_LOG_STATE_DIR', logstatedir)
+cdata.set('PREFIX', prefix)
+cdata.set('GSTD_STATE_DIRS_OWNER', get_option('with-statedir-owner'))
 
 initd_enabled = get_option('enable-initd')
 systemd_enabled = get_option('enable-systemd')
 
-# Generate the init script
 if systemd_enabled
-   initd_dir = get_option('with-gstd-initddir')
-   if initd_dir == '${sysconfdir}/init.d'
-      initd_dir = get_option('sysconfdir') + '/init.d'
-   endif
-
    # Generate tmpfiles.d config file
-   init_file = configure_file(
+   tmpfiles = configure_file(
    input: 'gstd.conf.in',
    output: 'gstd.conf',
    configuration: cdata)
+
+   # Install tmpfiles config file
+   tmpfiles_dir = systemd_dep.get_pkgconfig_variable('tmpfilesdir')
+   install_data(tmpfiles,
+   install_dir: tmpfiles_dir)
 
    # Generate service file
    service_file = configure_file(
@@ -28,8 +27,9 @@ if systemd_enabled
 
    # Install service file
    systemd_dir = get_option('with-gstd-systemddir')
-   if systemd_dir == '${sysconfdir}/systemd/user'
-      systemd_dir = get_option('sysconfdir') + '/systemd/user'
+   if systemd_dir == 'Systemd default systemduserunitdir'
+      systemd_dir = systemd_dep.get_pkgconfig_variable( \
+      'systemduserunitdir')
    endif
    install_data(service_file,
    install_dir: systemd_dir)
