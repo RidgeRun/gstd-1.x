@@ -146,15 +146,6 @@ lib_gstd_dir = meson.current_build_dir()
 # Install library headers
 # install_headers(libgstd_header_files)
 # Install run and log directories
-runstatedir = get_option('with-gstd-runstatedir')
-if runstatedir == '${prefix}/var/run/gstd'
-   runstatedir = get_option('prefix') + '/var/run/gstd/'
-endif
-
-logstatedir = get_option('with-gstd-logstatedir')
-if logstatedir == '${prefix}/var/log/gstd'
-   logstatedir = get_option('prefix') + '/var/log/gstd/'
-endif
 
 install_subdir('gstd',
   install_dir : runstatedir,

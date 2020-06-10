@@ -2,10 +2,6 @@
 
 ### BEGIN INIT INFO
 # Provides: GstD
-# Required-Start: $local_fs $remote_fs
-# Required-Stop: $local_fs $remote_fs
-# Default-Start:  5
-# Default-Stop: 0 6
 # Short-Description: start and stop GstD
 # Description: Gstreamer Daemon is a framework for
 #              controlling audio and video streaming
@@ -32,7 +28,6 @@ manage_dir()
     fi
 }
 
-prefix=@prefix@
 gstdrunstatedir=@gstdrunstatedir@
 gstdlogstatedir=@gstdlogstatedir@
 
@@ -42,7 +37,7 @@ case "$1" in
 
         #Manage pid and log directories
         for d in ${directories[@]}; do
-            manage_dir "$d" 766 @initusername@
+            manage_dir "$d" 755 @owner@
         done
 
         #Start gstd

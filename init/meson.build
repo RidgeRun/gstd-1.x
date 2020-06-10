@@ -1,27 +1,10 @@
 cdata = configuration_data()
-
-prefix = get_option('prefix')
-runstatedir = get_option('with-gstd-runstatedir')
-logstatedir = get_option('with-gstd-logstatedir')
-
-# Replace the ${prefix} by the actual prefix value
-if runstatedir.contains('${prefix}')
-   runstatedir = prefix + runstatedir.split('${prefix}')[1]
-endif
-if logstatedir.contains('${prefix}')
-   logstatedir = prefix + logstatedir.split('${prefix}')[1]
-endif
-
-cdata.set('prefix', prefix)
 cdata.set('gstdrunstatedir', runstatedir)
 cdata.set('gstdlogstatedir', logstatedir)
-cdata.set('initusername', get_option('with-init-username'))
+cdata.set('prefix', prefix)
+cdata.set('owner', get_option('with-statedir-owner'))
 
-initd_enabled = false
-if get_option('with-init-username') != 'none'
-   initd_enabled = get_option('enable-initd')
-endif
-
+initd_enabled = get_option('enable-initd')
 systemd_enabled = get_option('enable-systemd')
 
 # Generate the init script
@@ -30,17 +13,12 @@ if systemd_enabled
    if initd_dir == '${sysconfdir}/init.d'
       initd_dir = get_option('sysconfdir') + '/init.d'
    endif
+
+   # Generate tmpfiles.d config file
    init_file = configure_file(
    input: 'gstd.conf.in',
    output: 'gstd.conf',
    configuration: cdata)
-endif
-
-if systemd_enabled
-   # Install init script
-   install_data(init_file,
-   install_dir: get_option('prefix') + '/libexec/gstd',
-   install_mode: 'r-xr-xr-x')
 
    # Generate service file
    service_file = configure_file(
@@ -58,6 +36,12 @@ if systemd_enabled
 endif
 
 if initd_enabled
+   # Generate init script
+   init_file = configure_file(
+   input: 'gstd.in',
+   output: 'gstd',
+   configuration: cdata)
+
    # Install init script
    initd_dir = get_option('with-gstd-initddir')
    if initd_dir == '${sysconfdir}/init.d'
@@ -66,6 +50,4 @@ if initd_enabled
    install_data(init_file,
    install_dir: initd_dir,
    install_mode: 'r-xr-xr-x')
-
-   meson.add_install_script('gstd.init_enable.sh', initd_dir)
 endif

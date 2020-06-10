@@ -63,20 +63,6 @@ lib_gstc_inc_dir = include_directories('libgstc/c')
 gstd_inc_dir = include_directories('gstd')
 configinc = include_directories('.')
 
-# Define compiler args and include directories
-runstatedir = get_option('with-gstd-runstatedir')
-if runstatedir == '${prefix}/var/run/gstd'
-   runstatedir = get_option('prefix') + '/var/run/gstd/'
-endif
-gstd_run_state_dir = '-DGSTD_RUN_STATE_DIR="@0@"'.format(runstatedir)
-
-logstatedir = get_option('with-gstd-logstatedir')
-if logstatedir == '${prefix}/var/log/gstd'
-   logstatedir = get_option('prefix') + '/var/log/gstd/'
-endif
-gstd_log_state_dir = '-DGSTD_LOG_STATE_DIR="@0@"'.format(logstatedir)
-gst_c_args = ['-DHAVE_CONFIG_H',gstd_log_state_dir,gstd_run_state_dir]
-
 # Define gstreamer API version
 apiversion = '1.0'
 
@@ -87,6 +73,19 @@ lib_install_dir = get_option('libdir')
 lib_gstd_dir = []
 lib_gstc_dir = []
 
+# Define compiler args and include directories
+runstatedir = get_option('with-gstd-runstatedir')
+if runstatedir == '${prefix}/var/run/gstd'
+   runstatedir = prefix + '/var/run/gstd/'
+endif
+gstd_run_state_dir = '-DGSTD_RUN_STATE_DIR="@0@"'.format(runstatedir)
+
+logstatedir = get_option('with-gstd-logstatedir')
+if logstatedir == '${prefix}/var/log/gstd'
+   logstatedir = prefix + '/var/log/gstd/'
+endif
+gstd_log_state_dir = '-DGSTD_LOG_STATE_DIR="@0@"'.format(logstatedir)
+gst_c_args = ['-DHAVE_CONFIG_H',gstd_log_state_dir,gstd_run_state_dir]
 
 # Get an object returns describing a compiler
 cc = meson.get_compiler('c')
