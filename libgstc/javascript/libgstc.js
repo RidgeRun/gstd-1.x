@@ -435,6 +435,9 @@ class GstdClient {
    *
    * @param {String} threshold.
    *
+   * @throws {GstdError} Error is triggered when Gstd IPC fails.
+   * @throws {GstcError} Error is triggered when GstClient fails.
+   *
    * @return {object} Response from Gstd.
    */
   async debug_threshold(threshold) {
@@ -456,6 +459,9 @@ class GstdClient {
    * @param {String} element
    * @param {String} prop
    *
+   * @throws {GstdError} Error is triggered when Gstd IPC fails.
+   * @throws {GstcError} Error is triggered when GstClient fails.
+   *
    * @return {object} Response from Gstd.
    */
   async element_get(pipe_name, element, prop) {
@@ -472,6 +478,9 @@ class GstdClient {
    * List the elements in a given pipeline.
    *
    * @param {String} pipe_name
+   *
+   * @throws {GstdError} Error is triggered when Gstd IPC fails.
+   * @throws {GstcError} Error is triggered when GstClient fails.
    *
    * @return {object} Response from Gstd.
    */
@@ -491,6 +500,9 @@ class GstdClient {
    * @param {String} pipe_name
    * @param {String} element
    *
+   * @throws {GstdError} Error is triggered when Gstd IPC fails.
+   * @throws {GstcError} Error is triggered when GstClient fails.
+   *
    * @return {object} Response from Gstd.
    */
   async list_properties(pipe_name, element) {
@@ -508,6 +520,9 @@ class GstdClient {
    *
    * @param {String} pipe_name
    * @param {String} element
+   *
+   * @throws {GstdError} Error is triggered when Gstd IPC fails.
+   * @throws {GstcError} Error is triggered when GstClient fails.
    *
    * @return {object} Response from Gstd.
    */
@@ -528,6 +543,9 @@ class GstdClient {
    * @param {String} element
    * @param {String} signal
    *
+   * @throws {GstdError} Error is triggered when Gstd IPC fails.
+   * @throws {GstcError} Error is triggered when GstClient fails.
+   *
    * @return {object} Response from Gstd.
    */
   async signal_connect(pipe_name, element, signal) {
@@ -546,6 +564,9 @@ class GstdClient {
    * @param {String} pipe_name
    * @param {String} element
    * @param {String} signal
+   *
+   * @throws {GstdError} Error is triggered when Gstd IPC fails.
+   * @throws {GstcError} Error is triggered when GstClient fails.
    *
    * @return {object} Response from Gstd.
    */
@@ -567,6 +588,9 @@ class GstdClient {
    * @param {String} signal
    * @param {String} timeout
    *
+   * @throws {GstdError} Error is triggered when Gstd IPC fails.
+   * @throws {GstcError} Error is triggered when GstClient fails.
+   *
    * @return {object} Response from Gstd.
    */
   async signal_timeout(pipe_name, element, signal, timeout) {
@@ -585,6 +609,87 @@ class GstdClient {
 
     return GstdClient.send_cmd(url, request);
   }
+
+  /**
+   * Send an end-of-stream event.
+   *
+   * @param {String} pipe_name.
+   *
+   * @throws {GstdError} Error is triggered when Gstd IPC fails.
+   * @throws {GstcError} Error is triggered when GstClient fails.
+   *
+   * @return {object} Response from Gstd.
+   */
+  async event_eos(pipe_name) {
+
+    var event_name = "eos";
+    var url = this.ip + ":" + this.port + "/pipelines/" + pipe_name +
+      "/event?name=" + event_name;
+    var request = {
+      method: 'POST',
+      body : {
+        name : pipe_name,
+        event : event_name
+      }
+    }
+
+    return GstdClient.send_cmd(url, request);
+  }
+
+  /**
+   * Put the pipeline in flushing mode.
+   *
+   * @param {String} pipe_name.
+   *
+   * @throws {GstdError} Error is triggered when Gstd IPC fails.
+   * @throws {GstcError} Error is triggered when GstClient fails.
+   *
+   * @return {object} Response from Gstd.
+   */
+  async event_flush_start(pipe_name) {
+
+    var event_name = "flush_start";
+    var url = this.ip + ":" + this.port + "/pipelines/" + pipe_name +
+      "/event?name=" + event_name;
+    var request = {
+      method: 'POST',
+      body : {
+        name : pipe_name,
+        event : event_name
+      }
+    }
+
+    return GstdClient.send_cmd(url, request);
+  }
+
+  /**
+   * Take the pipeline out from flushing mode.
+   *
+   * @param {String} pipe_name.
+   *
+   * @throws {GstdError} Error is triggered when Gstd IPC fails.
+   * @throws {GstcError} Error is triggered when GstClient fails.
+   *
+   * @return {object} Response from Gstd.
+   */
+  async event_flush_stop(pipe_name) {
+
+    var event_name = "flush_stop";
+    var event_desc = "true";
+    var url = this.ip + ":" + this.port + "/pipelines/" + pipe_name +
+      "/event?name=" + event_name + "&description=" + event_desc;
+    var request = {
+      method: 'POST',
+      body : {
+        name : pipe_name,
+        event : event_name,
+        description : event_desc
+      }
+    }
+
+    return GstdClient.send_cmd(url, request);
+  }
+
 }
 
 /** GstClient - GstcError Class */
