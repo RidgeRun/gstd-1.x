@@ -221,7 +221,7 @@ main (gint argc, gchar * argv[])
     goto out;
   }
 
-  if (daemon) {
+  if (daemon || kill) {
     if (!gstd_log_init (gstdlogfile, gstlogfile)) {
       ret = EXIT_FAILURE;
       goto out;

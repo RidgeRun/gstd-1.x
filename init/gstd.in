@@ -45,7 +45,7 @@ case "$1" in
         @prefix@/bin/gstd -e;
         ;;
     stop)
-        @prefix@/bin/gstd -k -e;
+        @prefix@/bin/gstd -k;
         ;;
     *)
         echo "$0 {start|stop}"

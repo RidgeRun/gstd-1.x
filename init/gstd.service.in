@@ -5,7 +5,7 @@ PartOf=graphical-session.target
 [Service]
 Type=forking
 ExecStart=@prefix@/bin/gstd -e
-ExecStop=@prefix@/bin/gstd -e -k
+ExecStop=@prefix@/bin/gstd -k
 
 [Install]
 WantedBy=graphical-session.target
