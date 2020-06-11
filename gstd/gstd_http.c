@@ -192,7 +192,6 @@ do_post (SoupServer * server, SoupMessage * msg, char *name,
   g_return_val_if_fail (session, GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (path, GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (name, GSTD_NULL_ARGUMENT);
-  g_return_val_if_fail (description, GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (output, GSTD_NULL_ARGUMENT);
 
   if (!name) {
@@ -201,14 +200,13 @@ do_post (SoupServer * server, SoupMessage * msg, char *name,
         "Wrong query param provided, \"name\" doesn't exist");
     goto out;
   }
-  if (!description) {
-    ret = GSTD_BAD_VALUE;
-    GST_ERROR_OBJECT (session,
-        "Wrong query param provided, \"description\" doesn't exist");
-    goto out;
+
+  if (description) {
+    message = g_strdup_printf ("create %s %s %s", path, name, description);
+  } else {
+    message = g_strdup_printf ("create %s %s", path, name);
   }
 
-  message = g_strdup_printf ("create %s %s %s", path, name, description);
   ret = gstd_parser_parse_cmd (session, message, output);
   g_free (message);
   message = NULL;
