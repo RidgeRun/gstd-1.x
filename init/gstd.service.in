@@ -1,5 +1,5 @@
 [Unit]
-Description=GstD systemd service to generate folders for run-time variable data and log files.
+Description=Systemd service to launch GstD
 PartOf=graphical-session.target
 
 [Service]
