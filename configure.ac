@@ -22,6 +22,9 @@ LIBD_REQUIRED=0.14
 dnl required version of jansson
 JANSSON_REQUIRED=2.7
 
+dnl required version of systemd
+SYSTEMD_REQUIRED=232
+
 AC_CONFIG_SRCDIR([gstd/gstd.c])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIRS([m4])
@@ -189,54 +192,70 @@ default=${localstatedir}/run/gstd/
 AC_ARG_WITH([gstd-runstatedir],
   [AS_HELP_STRING([--with-gstd-runstatedir],
     [Specify the location of the gstd's PID file @<:@default=${default}@:>@])],
-  [AC_SUBST(gstdrunstatedir, [$with_gstd_runstatedir])],
-  [AC_SUBST(gstdrunstatedir, [$default])])
+  [AC_SUBST(GSTD_RUN_STATE_DIR, [$with_gstd_runstatedir])],
+  [AC_SUBST(GSTD_RUN_STATE_DIR, [$default])])
 
 dnl allow the user to specify the location of the log files
 default=${localstatedir}/log/gstd/
 AC_ARG_WITH([gstd-logstatedir],
   [AS_HELP_STRING([--with-gstd-logstatedir],
     [Specify the location of gstd's log files @<:@default=${default}@:>@])],
-  [AC_SUBST([gstdlogstatedir], [$with_gstd_logstatedir])],
-  [AC_SUBST([gstdlogstatedir], [$default])])
+  [AC_SUBST([GSTD_LOG_STATE_DIR], [$with_gstd_logstatedir])],
+  [AC_SUBST([GSTD_LOG_STATE_DIR], [$default])])
 
 dnl allow the user to enable systemd gstd.service install
 AC_ARG_ENABLE(systemd,
-  AS_HELP_STRING([--enable-systemd], [Enable install of systemd gstd.service, requires the user to define --init-username]),
+  AS_HELP_STRING([--enable-systemd], [Enable install of systemd gstd.service]),
   [ systemd=true ],
   [ systemd=false ])
+AM_CONDITIONAL(WITH_SYSTEMD, test "$systemd" = true)
+
+dnl if systemd option is enabled, check for libsystemd dependency
+if test "$systemd" = true; then
+  PKG_CHECK_MODULES(SYSTEMD, [
+      libsystemd >= $SYSTEMD_REQUIRED
+    ], [
+    ], [
+    AC_MSG_ERROR([
+      Can't find systemd development packages:
+
+      libsystemd-dev >= $SYSTEMD_REQUIRED
+
+      Please make sure you have the necessary libsystemd-dev
+      development headers installed.
+    ])
+  ])
+  AC_SUBST([GSTD_SYSTEMD_CONF_DIR], [$(pkg-config systemd --variable=tmpfilesdir)])
+  AC_SUBST([GSTD_SYSTEMD_DIR], [$(pkg-config systemd --variable=systemduserunitdir)])
+fi
 
 dnl allow the user to specify systemd gstd.service file location
-default=${sysconfdir}/systemd/system/
 AC_ARG_WITH([gstd-systemddir],
   AS_HELP_STRING([--with-gstd-systemddir@<:@=DIR@:>@],
-  [Install systemd gstd.service @<:@to DIR if specified@:>@, otherwise defaults to ${sysconfdir}/systemd/system/]),
-  [AC_SUBST([gstdsystemddir], [$with_gstd_systemddir])],
-  [AC_SUBST([gstdsystemddir], [$default])])
+  [Install systemd gstd.service @<:@to DIR if specified@:>@, otherwise defaults to systemd variable systemduserunitdir]),
+  [AC_SUBST([GSTD_SYSTEMD_DIR], [$with_gstd_systemddir])], [])
 
 dnl allow the user to enable init script install
 AC_ARG_ENABLE(initd,
-  AS_HELP_STRING([--enable-initd], [Enable install of init script, requires the user to define --init-username]),
+  AS_HELP_STRING([--enable-initd], [Enable install of init.d script]),
   [ initd=true ],
   [ initd=false ])
+AM_CONDITIONAL(WITH_INITD, test "$initd" = true)
 
 dnl allow the user to specify init script location
 default=${sysconfdir}/init.d/
 AC_ARG_WITH([gstd-initddir],
   AS_HELP_STRING([--with-gstd-initddir@<:@=DIR@:>@],
   [Install init script @<:@to DIR if specified@:>@, otherwise defaults to ${sysconfdir}/init.d/]),
-  [AC_SUBST([gstdinitddir], [$with_gstd_initddir])],
-  [AC_SUBST([gstdinitddir], [$default])])
+  [AC_SUBST([GSTD_INITD_DIR], [$with_gstd_initddir])],
+  [AC_SUBST([GSTD_INITD_DIR], [$default])])
 
-dnl allow the user to specify the username to be used in the init.d/systemd to start gstd
-AC_ARG_WITH([init-username],
-  AS_HELP_STRING([--with-init-username@<:@=USERNAME@:>@],
-  [Start gstd with user @<:@USERNAME@:>@ in the init scripts, otherwise the scripts will not be installed]),
-  [AC_SUBST([initusername], [$with_init_username])],
-  [systemd=false; initd=false])
-
-AM_CONDITIONAL(WITH_SYSTEMD, test "$systemd" = true)
-AM_CONDITIONAL(WITH_INITD, test "$initd" = true)
+dnl allow the user to specify the owner of the state dirs
+AC_ARG_WITH([statedir-owner],
+  AS_HELP_STRING([--with-statedir-owner@<:@=USERNAME@:>@],
+  [Set the state dir ownership to @<:@USERNAME@:>@, @<:@default=root@:>@]),
+  [AC_SUBST([GSTD_STATE_DIRS_OWNER], [$with_statedir_owner])],
+  [AC_SUBST([GSTD_STATE_DIRS_OWNER], ["root"])])
 
 dnl check if compiler understands -Wall (if yes, add -Wall to GST_CFLAGS)
 AC_MSG_CHECKING([to see if compiler understands -Wall])
@@ -248,9 +267,6 @@ AC_COMPILE_IFELSE([AC_LANG_PROGRAM([ ], [ ])], [
 ], [
   AC_MSG_RESULT([no])
 ])
-
-dnl determine if build is cross-compile
-AM_CONDITIONAL([CROSSCOMPILE], [test x$host = x$build])
 
 dnl =======================================================================
 dnl Finally, create Makefiles in all directories
@@ -277,5 +293,6 @@ docs/reference/gstd/Makefile
 init/Makefile
 init/gstd:init/gstd.in
 init/gstd.service:init/gstd.service.in
+init/gstd.conf:init/gstd.conf.in
 ])
 AC_OUTPUT

@@ -28,6 +28,7 @@ manage_dir()
     fi
 }
 
+prefix=@prefix@
 gstdrunstatedir=@GSTD_RUN_STATE_DIR@
 gstdlogstatedir=@GSTD_LOG_STATE_DIR@
 
@@ -41,10 +42,10 @@ case "$1" in
         done
 
         #Start gstd
-        @PREFIX@/bin/gstd -e;
+        @prefix@/bin/gstd -e;
         ;;
     stop)
-        @PREFIX@/bin/gstd -k -e;
+        @prefix@/bin/gstd -k -e;
         ;;
     *)
         echo "$0 {start|stop}"
