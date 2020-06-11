@@ -14,6 +14,6 @@ endif
 
 if WITH_INITD
 #Install the script
-initd_scriptdir = @GSTD_INIT_DIR@
+initd_scriptdir = @GSTD_INITD_DIR@
 initd_script_SCRIPTS = gstd
 endif
