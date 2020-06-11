@@ -1,7 +1,7 @@
 cdata = configuration_data()
 cdata.set('GSTD_RUN_STATE_DIR', runstatedir)
 cdata.set('GSTD_LOG_STATE_DIR', logstatedir)
-cdata.set('PREFIX', prefix)
+cdata.set('prefix', prefix)
 cdata.set('GSTD_STATE_DIRS_OWNER', get_option('with-statedir-owner'))
 
 initd_enabled = get_option('enable-initd')
