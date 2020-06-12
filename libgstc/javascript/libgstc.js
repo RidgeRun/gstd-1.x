@@ -40,6 +40,7 @@ class GstdClient {
    * @param {Number} port.
   */
   constructor(ip='http://localhost',port=5000) {
+
     this.ip = ip;
     this.port = port;
   }
@@ -56,6 +57,7 @@ class GstdClient {
    * @return {object} Response from Gstd.
    */
   static async send_cmd(url, request) {
+
     try {
       var response = await fetch (url, request);
       var j_resp = await response.json();
@@ -73,6 +75,99 @@ class GstdClient {
       throw new GstdError([j_resp["description"], j_resp["code"]]);
     }
     return j_resp;
+  }
+
+  /**
+   * Create a resource at the given URI.
+   *
+   * @param {String} uri.
+   * @param {String} property.
+   * @param {String} value.
+   *
+   * @throws {GstdError} Error is triggered when Gstd IPC fails.
+   * @throws {GstcError} Error is triggered when GstClient fails.
+   *
+   * @return {object} Response from Gstd.
+   */
+  async create(uri, property, value) {
+
+    var url = this.ip + ":" + this.port + uri + "?name=" + property +
+      "&description=" + value;
+    var request = {
+      method: 'POST',
+      body : {
+        uri : uri,
+        property : property,
+        value : value
+      }
+    }
+
+    return GstdClient.send_cmd(url, request);
+  }
+
+  /**
+   * Read the resource held at the given URI with the given name.
+   *
+   * @param {String} uri.
+   *
+   * @throws {GstdError} Error is triggered when Gstd IPC fails.
+   * @throws {GstcError} Error is triggered when GstClient fails.
+   *
+   * @return {object} Response from Gstd.
+   */
+  async read(uri) {
+
+    var url = this.ip + ":" + this.port + uri;
+    var request = { method : "GET" };
+    return GstdClient.send_cmd(url, request);
+  }
+
+  /**
+   * Update the resource at the given URI.
+   *
+   * @param {String} uri.
+   * @param {String} value.
+   *
+   * @throws {GstdError} Error is triggered when Gstd IPC fails.
+   * @throws {GstcError} Error is triggered when GstClient fails.
+   *
+   * @return {object} Response from Gstd.
+   */
+  async update(uri, value){
+
+    var url = this.ip + ":" + this.port + uri + "?name=" + value;
+    var request = {
+      method: 'PUT',
+      body: {
+        uri : uri,
+        description : value
+      },
+    }
+
+    return GstdClient.send_cmd(url, request);
+  }
+
+  /**
+   * Delete the resource held at the given URI with the given name.
+   *
+   * @param {String} uri.
+   *
+   * @throws {GstdError} Error is triggered when Gstd IPC fails.
+   * @throws {GstcError} Error is triggered when GstClient fails.
+   *
+   * @return {object} Response from Gstd.
+   */
+  async delete(uri, name) {
+    var url = this.ip + ":" + this.port + uri + "?name=" + name;
+    var request = {
+      method: 'DELETE',
+      body: {
+        uri : uri,
+        name : name
+      },
+    }
+
+    return GstdClient.send_cmd(url, request);
   }
 
   /**
