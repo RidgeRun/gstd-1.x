@@ -117,9 +117,9 @@ class GstdClient {
    */
   async read(uri) {
 
-    var url = this.ip + ":" + this.port + uri;
+    var uri = this.ip + ":" + this.port + uri;
     var request = { method : "GET" };
-    return GstdClient.send_cmd(url, request);
+    return GstdClient.send_cmd(uri, request);
   }
 
   /**
@@ -179,9 +179,8 @@ class GstdClient {
    * @return {object} Response from Gstd.
    */
   async list_pipelines() {
-    var url = this.ip + ":" + this.port + "/pipelines";
-    var request = { method : "GET" };
-    return GstdClient.send_cmd(url, request);
+
+    return this.read("/pipelines");
   }
 
   /**
@@ -197,17 +196,7 @@ class GstdClient {
    */
   async pipeline_create(pipe_name, pipe_desc) {
 
-    var url = this.ip + ":" + this.port + "/pipelines?name=" + pipe_name +
-      "&description=" + pipe_desc;
-    var request = {
-      method: 'POST',
-      body : {
-        name : pipe_name,
-        description : pipe_desc
-      }
-    }
-
-    return GstdClient.send_cmd(url, request);
+    return this.create("/pipelines", pipe_name, pipe_desc);
   }
 
   /**
@@ -222,17 +211,7 @@ class GstdClient {
    */
   async pipeline_play(pipe_name) {
 
-    var url = this.ip + ":" + this.port + "/pipelines/" + pipe_name +
-      "/state?name=playing";
-    var request = {
-      method: 'PUT',
-      body: {
-        name : pipe_name,
-        status : 'playing'
-      },
-    }
-
-    return GstdClient.send_cmd(url, request);
+    return this.update("/pipelines/" + pipe_name + "/state", "playing");
   }
 
   /**
@@ -250,19 +229,9 @@ class GstdClient {
    */
   async element_set(pipe_name, element, prop, value) {
 
-    var url = this.ip + ":" + this.port + "/pipelines/" + pipe_name +
-    "/elements/" + element + "/properties/" + prop + "?name=" + value;
-    var request = {
-      method: 'PUT',
-      body: {
-        name : pipe_name,
-        element : element,
-        prop : prop,
-        value : value
-      },
-    }
-
-    return GstdClient.send_cmd(url, request);
+    var uri = "/pipelines/" + pipe_name + "/elements/" + element +
+      "/properties/" + prop;
+    return this.update(uri, value);
   }
 
   /**
@@ -277,17 +246,7 @@ class GstdClient {
    */
   async pipeline_pause(pipe_name) {
 
-    var url = this.ip + ":" + this.port + "/pipelines/" + pipe_name +
-    "/state?name=paused";
-    var request = {
-      method: 'PUT',
-      body: {
-        name : pipe_name,
-        status : 'paused'
-      },
-    }
-
-    return GstdClient.send_cmd(url, request);
+    return this.update("/pipelines/" + pipe_name + "/state", "paused");
   }
 
   /**
@@ -302,17 +261,7 @@ class GstdClient {
    */
   async pipeline_stop(pipe_name) {
 
-    var url = this.ip + ":" + this.port + "/pipelines/" + pipe_name +
-      "/state?name=null";
-    var request = {
-      method: 'PUT',
-      body: {
-        name : pipe_name,
-        status : 'null'
-      },
-    }
-
-    return GstdClient.send_cmd(url, request);
+    return this.update("/pipelines/" + pipe_name + "/state", "null");
   }
 
   /**
@@ -327,15 +276,7 @@ class GstdClient {
    */
   async pipeline_delete(pipe_name) {
 
-    var url = this.ip + ":" + this.port + "/pipelines?name=" + pipe_name;
-    var request = {
-      method: 'DELETE',
-      body: {
-        name : pipe_name
-      },
-    }
-
-    return GstdClient.send_cmd(url, request);
+    return this.delete("/pipelines", pipe_name);
   }
 
   /**
@@ -350,17 +291,8 @@ class GstdClient {
    * @return {object} Response from Gstd.
    */
   async bus_filter(pipe_name, filter) {
-    var url = this.ip + ":" + this.port + "/pipelines/" + pipe_name +
-      "/bus/types?name=" + filter;
-    var request = {
-      method: 'PUT',
-      body: {
-        name : pipe_name,
-        filter : filter
-      },
-    }
 
-    return GstdClient.send_cmd(url, request);
+    return this.update("/pipelines/" + pipe_name + "/bus/types", filter);
   }
 
   /**
@@ -374,13 +306,8 @@ class GstdClient {
    * @return {object} Response from Gstd.
    */
   async bus_read(pipe_name) {
-    var url = this.ip + ":" + this.port + "/pipelines/" + pipe_name +
-      "/bus/message";
-    var request = {
-      method: 'GET'
-    }
 
-    return GstdClient.send_cmd(url, request);
+    return this.read("/pipelines/" + pipe_name + "/bus/message");
   }
 
   /**
@@ -395,17 +322,8 @@ class GstdClient {
    * @return {object} Response from Gstd.
    */
   async bus_timeout(pipe_name, timeout) {
-    var url = this.ip + ":" + this.port + "/pipelines/" + pipe_name +
-      "/bus/timeout?name=" + timeout;
-    var request = {
-      method: 'PUT',
-      body: {
-        name : pipe_name,
-        timeout : timeout
-      },
-    }
 
-    return GstdClient.send_cmd(url, request);
+    return this.update("/pipelines/" + pipe_name + "/bus/timeout", timeout);
   }
 
   /**
@@ -428,24 +346,10 @@ class GstdClient {
   async event_seek(pipe_name, rate=1.0, format=3, flags=1, start_type=1,
     start=0, end_type=1, end=-1) {
 
-      var url = this.ip + ":" + this.port + "/pipelines/" + pipe_name +
-      "/event?name=seek&description=" + rate + "%20" + format + "%20" +
-      flags + "%20" + start_type + "%20" + start + "%20" + end_type + "%20" + end;
-    var request = {
-      method : 'POST',
-      body : {
-        event: 'seek',
-        name : pipe_name,
-        rate : rate,
-        format : format,
-        flags : flags,
-        start_type : start_type,
-        end_type : end_type,
-        end : end
-      }
-    }
-
-    return GstdClient.send_cmd(url, request);
+    var uri = "/pipelines/" + pipe_name + "/event";
+    var description = rate + "%20" + format + "%20" + flags + "%20" +
+      start_type + "%20" + start + "%20" + end_type + "%20" + end;
+    return this.create(uri, "seek", description);
   }
 
   /**
@@ -459,15 +363,8 @@ class GstdClient {
    * @return {object} Response from Gstd.
    */
   async debug_color (enable) {
-    var url = this.ip + ":" + this.port + "/debug/color?name=" + enable;
-    var request = {
-      method: 'PUT',
-      body: {
-        name : enable,
-      },
-    }
 
-    return GstdClient.send_cmd(url, request);
+    return this.update("/debug/color", enable);
   }
 
   /**
@@ -481,15 +378,8 @@ class GstdClient {
    * @return {object} Response from Gstd.
    */
   async debug_enable(enable) {
-    var url = this.ip + ":" + this.port + "/debug/enable?name=" + enable;
-    var request = {
-      method: 'PUT',
-      body: {
-        name : enable,
-      },
-    }
 
-    return GstdClient.send_cmd(url, request);
+    return this.update("/debug/enable", enable);
   }
 
   /**
@@ -503,15 +393,8 @@ class GstdClient {
    * @return {object} Response from Gstd.
    */
   async debug_reset(enable) {
-    var url = this.ip + ":" + this.port + "/debug/reset?name=" + enable;
-    var request = {
-      method: 'PUT',
-      body: {
-        name : enable,
-      },
-    }
 
-    return GstdClient.send_cmd(url, request);
+    return this.update("/debug/reset", enable);
   }
 
   /**
@@ -536,15 +419,8 @@ class GstdClient {
    * @return {object} Response from Gstd.
    */
   async debug_threshold(threshold) {
-    var url = this.ip + ":" + this.port + "/debug/threshold?name=" + threshold;
-    var request = {
-      method: 'PUT',
-      body: {
-        threshold : threshold,
-      },
-    }
 
-    return GstdClient.send_cmd(url, request);
+    return this.update("/debug/threshold", threshold);
   }
 
   /**
@@ -560,13 +436,10 @@ class GstdClient {
    * @return {object} Response from Gstd.
    */
   async element_get(pipe_name, element, prop) {
-    var url = this.ip + ":" + this.port + "/pipelines/" + pipe_name +
-      "/elements/" + element + "/properties/" + prop;
-    var request = {
-      method: 'GET'
-    }
 
-    return GstdClient.send_cmd(url, request);
+    var uri = "/pipelines/" + pipe_name + "/elements/" + element +
+      "/properties/" + prop;
+    return this.read(uri);
   }
 
   /**
@@ -580,13 +453,8 @@ class GstdClient {
    * @return {object} Response from Gstd.
    */
   async list_elements(pipe_name) {
-    var url = this.ip + ":" + this.port + "/pipelines/" + pipe_name +
-      "/elements/";
-    var request = {
-      method: 'GET'
-    }
 
-    return GstdClient.send_cmd(url, request);
+    return this.read("/pipelines/" + pipe_name + "/elements/");
   }
 
   /**
@@ -601,13 +469,10 @@ class GstdClient {
    * @return {object} Response from Gstd.
    */
   async list_properties(pipe_name, element) {
-    var url = this.ip + ":" + this.port + "/pipelines/" + pipe_name +
-      "/elements/" + element + "/properties";
-    var request = {
-      method: 'GET'
-    }
 
-    return GstdClient.send_cmd(url, request);
+    var uri = "/pipelines/" + pipe_name + "/elements/" + element +
+      "/properties";
+    return this.read(uri);
   }
 
   /**
@@ -622,13 +487,10 @@ class GstdClient {
    * @return {object} Response from Gstd.
    */
   async list_signals(pipe_name, element) {
-    var url = this.ip + ":" + this.port + "/pipelines/" + pipe_name +
-      "/elements/" + element + "/signals";
-    var request = {
-      method: 'GET'
-    }
 
-    return GstdClient.send_cmd(url, request);
+    var uri = "/pipelines/" + pipe_name + "/elements/" + element +
+      "/signals";
+    return this.read(uri);
   }
 
   /**
@@ -644,13 +506,10 @@ class GstdClient {
    * @return {object} Response from Gstd.
    */
   async signal_connect(pipe_name, element, signal) {
-    var url = this.ip + ":" + this.port + "/pipelines/" + pipe_name +
-      "/elements/" + element + "/signals/" + signal + "/callback";
-    var request = {
-      method: 'GET'
-    }
 
-    return GstdClient.send_cmd(url, request);
+    var uri = "/pipelines/" + pipe_name + "/elements/" + element +
+      "/signals/" + signal + "/callback";
+    return this.read(uri);
   }
 
   /**
@@ -666,13 +525,10 @@ class GstdClient {
    * @return {object} Response from Gstd.
    */
   async signal_disconnect(pipe_name, element, signal) {
-    var url = this.ip + ":" + this.port + "/pipelines/" + pipe_name +
-      "/elements/" + element + "/signals/" + signal + "/disconnect";
-    var request = {
-      method: 'GET'
-    }
 
-    return GstdClient.send_cmd(url, request);
+    var uri = "/pipelines/" + pipe_name + "/elements/" + element +
+      "/signals/" + signal + "/disconnect";
+    return this.read(uri);
   }
 
   /**
@@ -689,20 +545,10 @@ class GstdClient {
    * @return {object} Response from Gstd.
    */
   async signal_timeout(pipe_name, element, signal, timeout) {
-    var url = this.ip + ":" + this.port + "/pipelines/" + pipe_name +
-      "/elements/" + element + "/signals/" + signal + "timeout?name=" +
-      timeout;
-    var request = {
-      method: 'PUT',
-      body: {
-        name : pipe_name,
-        element : element,
-        signal : signal,
-        timeout : timeout
-      },
-    }
 
-    return GstdClient.send_cmd(url, request);
+    var url = this.ip + ":" + this.port + "/pipelines/" + pipe_name +
+      "/elements/" + element + "/signals/" + signal + "/timeout";
+    return this.update("/debug/threshold", timeout);
   }
 
   /**
@@ -717,18 +563,7 @@ class GstdClient {
    */
   async event_eos(pipe_name) {
 
-    var event_name = "eos";
-    var url = this.ip + ":" + this.port + "/pipelines/" + pipe_name +
-      "/event?name=" + event_name;
-    var request = {
-      method: 'POST',
-      body : {
-        name : pipe_name,
-        event : event_name
-      }
-    }
-
-    return GstdClient.send_cmd(url, request);
+    return this.create("/pipelines/" + pipe_name + "/event", "eos");
   }
 
   /**
@@ -743,18 +578,8 @@ class GstdClient {
    */
   async event_flush_start(pipe_name) {
 
-    var event_name = "flush_start";
-    var url = this.ip + ":" + this.port + "/pipelines/" + pipe_name +
-      "/event?name=" + event_name;
-    var request = {
-      method: 'POST',
-      body : {
-        name : pipe_name,
-        event : event_name
-      }
-    }
-
-    return GstdClient.send_cmd(url, request);
+    var uri = "/pipelines/" + pipe_name + "/event";
+    return this.create(uri, "flush_start");
   }
 
   /**
@@ -769,20 +594,8 @@ class GstdClient {
    */
   async event_flush_stop(pipe_name) {
 
-    var event_name = "flush_stop";
-    var event_desc = "true";
-    var url = this.ip + ":" + this.port + "/pipelines/" + pipe_name +
-      "/event?name=" + event_name + "&description=" + event_desc;
-    var request = {
-      method: 'POST',
-      body : {
-        name : pipe_name,
-        event : event_name,
-        description : event_desc
-      }
-    }
-
-    return GstdClient.send_cmd(url, request);
+    var uri = "/pipelines/" + pipe_name + "/event";
+    return this.create(uri, "flush_stop", "true");
   }
 
 }
