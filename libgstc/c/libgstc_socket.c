@@ -44,17 +44,20 @@
 #ifndef GSTC_MAX_RESPONSE_LENGTH
 #  define GSTC_MAX_RESPONSE_LENGTH 8192
 #endif
+#ifndef GSTC_MAX_SOCKET_BUFFER_SIZE
+#  define GSTC_MAX_SOCKET_BUFFER_SIZE (1024*1024)
+#endif
 
 #define NUMBER_OF_SOCKETS (1)
 
 static int create_new_socket ();
 static GstcStatus open_socket (GstcSocket * self);
 
-struct _GstcSocket
-{
+struct _GstcSocket {
   int socket;
   struct sockaddr_in server;
   int keep_connection_open;
+  char * pSocketBuffer;
 };
 
 static int
@@ -70,6 +73,7 @@ create_new_socket (void)
 static GstcStatus
 open_socket (GstcSocket * self)
 {
+  int buffsize = GSTC_MAX_SOCKET_BUFFER_SIZE;
   gstc_assert_and_ret_val (NULL != self, GSTC_NULL_ARGUMENT);
 
   self->socket = create_new_socket ();
@@ -77,20 +81,27 @@ open_socket (GstcSocket * self)
     return GSTC_SOCKET_ERROR;
   }
 
+  self->pSocketBuffer = (char *) malloc (GSTC_MAX_SOCKET_BUFFER_SIZE);
+  if (!self->pSocketBuffer) {
+    return GSTC_SOCKET_ERROR;
+  }
+  setsockopt (self->socket, SOL_SOCKET, SO_RCVBUF, &buffsize, sizeof (buffsize) );
+
   if (connect (self->socket, (struct sockaddr *) &self->server,
-          sizeof (self->server)) < 0) {
+      sizeof (self->server) ) < 0) {
     close (self->socket);
+    free (self->pSocketBuffer);
     return GSTC_UNREACHABLE;
   }
   return GSTC_OK;
 }
 
 GstcStatus
-gstc_socket_new (const char *address, const unsigned int port,
-    const int keep_connection_open, GstcSocket ** out)
+gstc_socket_new (const char * address, const unsigned int port,
+  const int keep_connection_open, GstcSocket ** out)
 {
   GstcStatus ret;
-  GstcSocket *self;
+  GstcSocket * self;
   const int domain = AF_INET;
 
   gstc_assert_and_ret_val (NULL != address, GSTC_NULL_ARGUMENT);
@@ -98,7 +109,7 @@ gstc_socket_new (const char *address, const unsigned int port,
 
   *out = NULL;
 
-  self = (GstcSocket *) malloc (sizeof (GstcSocket));
+  self = (GstcSocket *) malloc (sizeof (GstcSocket) );
   if (NULL == self) {
     ret = GSTC_OOM;
     goto out;
@@ -130,8 +141,8 @@ out:
 }
 
 GstcStatus
-gstc_socket_send (GstcSocket * self, const char *request, char **response,
-    const int timeout)
+gstc_socket_send (GstcSocket * self, const char * request, char ** response,
+  const int timeout)
 {
   int rv;
   struct pollfd ufds[NUMBER_OF_SOCKETS];
@@ -183,6 +194,7 @@ gstc_socket_send (GstcSocket * self, const char *request, char **response,
 out:
   if (!self->keep_connection_open) {
     close (self->socket);
+    free (self->pSocketBuffer);
   }
 
   return ret;
@@ -195,6 +207,7 @@ gstc_socket_free (GstcSocket * socket)
 
   if (socket->keep_connection_open) {
     close (socket->socket);
+    free (socket->pSocketBuffer);
   }
   free (socket);
 }
