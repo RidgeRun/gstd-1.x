@@ -51,8 +51,8 @@ class GstdClient {
    * @param {String} url.
    * @param {Array} request.
    *
-   * @throws {GstdError} Error is triggered when Gstd IPC fails.
-   * @throws {GstcError} Error is triggered when GstClient fails.
+   * @throws {GstdError} Triggered when Gstd fails to process a request.
+   * @throws {GstcError} Triggered when GstClient fails.
    *
    * @return {object} Response from Gstd.
    */
@@ -84,8 +84,8 @@ class GstdClient {
    * @param {String} property.
    * @param {String} value.
    *
-   * @throws {GstdError} Error is triggered when Gstd IPC fails.
-   * @throws {GstcError} Error is triggered when GstClient fails.
+   * @throws {GstdError} Triggered when Gstd fails to process a request.
+   * @throws {GstcError} Triggered when GstClient fails.
    *
    * @return {object} Response from Gstd.
    */
@@ -110,8 +110,8 @@ class GstdClient {
    *
    * @param {String} uri.
    *
-   * @throws {GstdError} Error is triggered when Gstd IPC fails.
-   * @throws {GstcError} Error is triggered when GstClient fails.
+   * @throws {GstdError} Triggered when Gstd fails to process a request.
+   * @throws {GstcError} Triggered when GstClient fails.
    *
    * @return {object} Response from Gstd.
    */
@@ -152,8 +152,8 @@ class GstdClient {
    *
    * @param {String} uri.
    *
-   * @throws {GstdError} Error is triggered when Gstd IPC fails.
-   * @throws {GstcError} Error is triggered when GstClient fails.
+   * @throws {GstdError} Triggered when Gstd fails to process a request.
+   * @throws {GstcError} Triggered when GstClient fails.
    *
    * @return {object} Response from Gstd.
    */
@@ -173,8 +173,8 @@ class GstdClient {
   /**
    * List Pipelines.
    *
-   * @throws {GstdError} Error is triggered when Gstd IPC fails.
-   * @throws {GstcError} Error is triggered when GstClient fails.
+   * @throws {GstdError} Triggered when Gstd fails to process a request.
+   * @throws {GstcError} Triggered when GstClient fails.
    *
    * @return {object} Response from Gstd.
    */
@@ -189,8 +189,8 @@ class GstdClient {
    * @param {String} pipe_name.
    * @param {String} pipe_desc.
    *
-   * @throws {GstdError} Error is triggered when Gstd IPC fails.
-   * @throws {GstcError} Error is triggered when GstClient fails.
+   * @throws {GstdError} Triggered when Gstd fails to process a request.
+   * @throws {GstcError} Triggered when GstClient fails.
    *
    * @return {object} Response from Gstd.
    */
@@ -204,8 +204,8 @@ class GstdClient {
    *
    * @param {String} pipe_name.
    *
-   * @throws {GstdError} Error is triggered when Gstd IPC fails.
-   * @throws {GstcError} Error is triggered when GstClient fails.
+   * @throws {GstdError} Triggered when Gstd fails to process a request.
+   * @throws {GstcError} Triggered when GstClient fails.
    *
    * @return {object} Response from Gstd.
    */
@@ -222,8 +222,8 @@ class GstdClient {
    * @param {String} prop.
    * @param {String} value.
    *
-   * @throws {GstdError} Error is triggered when Gstd IPC fails.
-   * @throws {GstcError} Error is triggered when GstClient fails.
+   * @throws {GstdError} Triggered when Gstd fails to process a request.
+   * @throws {GstcError} Triggered when GstClient fails.
    *
    * @return {object} Response from Gstd.
    */
@@ -239,8 +239,8 @@ class GstdClient {
    *
    * @param {String} pipe_name.
    *
-   * @throws {GstdError} Error is triggered when Gstd IPC fails.
-   * @throws {GstcError} Error is triggered when GstClient fails.
+   * @throws {GstdError} Triggered when Gstd fails to process a request.
+   * @throws {GstcError} Triggered when GstClient fails.
    *
    * @return {object} Response from Gstd.
    */
@@ -254,8 +254,8 @@ class GstdClient {
    *
    * @param {String} pipe_name.
    *
-   * @throws {GstdError} Error is triggered when Gstd IPC fails.
-   * @throws {GstcError} Error is triggered when GstClient fails.
+   * @throws {GstdError} Triggered when Gstd fails to process a request.
+   * @throws {GstcError} Triggered when GstClient fails.
    *
    * @return {object} Response from Gstd.
    */
@@ -269,8 +269,8 @@ class GstdClient {
    *
    * @param {String} pipe_name.
    *
-   * @throws {GstdError} Error is triggered when Gstd IPC fails.
-   * @throws {GstcError} Error is triggered when GstClient fails.
+   * @throws {GstdError} Triggered when Gstd fails to process a request.
+   * @throws {GstcError} Triggered when GstClient fails.
    *
    * @return {object} Response from Gstd.
    */
@@ -285,8 +285,8 @@ class GstdClient {
    * @param {String} pipe_name.
    * @param {String} filter.
    *
-   * @throws {GstdError} Error is triggered when Gstd IPC fails.
-   * @throws {GstcError} Error is triggered when GstClient fails.
+   * @throws {GstdError} Triggered when Gstd fails to process a request.
+   * @throws {GstcError} Triggered when GstClient fails.
    *
    * @return {object} Response from Gstd.
    */
@@ -300,8 +300,8 @@ class GstdClient {
    *
    * @param {String} pipe_name.
    *
-   * @throws {GstdError} Error is triggered when Gstd IPC fails.
-   * @throws {GstcError} Error is triggered when GstClient fails.
+   * @throws {GstdError} Triggered when Gstd fails to process a request.
+   * @throws {GstcError} Triggered when GstClient fails.
    *
    * @return {object} Response from Gstd.
    */
@@ -316,8 +316,8 @@ class GstdClient {
    * @param {String} pipe_name.
    * @param {Integer} timeout.
    *
-   * @throws {GstdError} Error is triggered when Gstd IPC fails.
-   * @throws {GstcError} Error is triggered when GstClient fails.
+   * @throws {GstdError} Triggered when Gstd fails to process a request.
+   * @throws {GstcError} Triggered when GstClient fails.
    *
    * @return {object} Response from Gstd.
    */
@@ -338,8 +338,8 @@ class GstdClient {
    * @param {Integer} end_type
    * @param {Integer} end
    *
-   * @throws {GstdError} Error is triggered when Gstd IPC fails.
-   * @throws {GstcError} Error is triggered when GstClient fails.
+   * @throws {GstdError} Triggered when Gstd fails to process a request.
+   * @throws {GstcError} Triggered when GstClient fails.
    *
    * @return {object} Response from Gstd.
    */
@@ -357,8 +357,8 @@ class GstdClient {
    *
    * @param {Boolean} enable.
    *
-   * @throws {GstdError} Error is triggered when Gstd IPC fails.
-   * @throws {GstcError} Error is triggered when GstClient fails.
+   * @throws {GstdError} Triggered when Gstd fails to process a request.
+   * @throws {GstcError} Triggered when GstClient fails.
    *
    * @return {object} Response from Gstd.
    */
@@ -372,8 +372,8 @@ class GstdClient {
    *
    * @param {Boolean} enable.
    *
-   * @throws {GstdError} Error is triggered when Gstd IPC fails.
-   * @throws {GstcError} Error is triggered when GstClient fails.
+   * @throws {GstdError} Triggered when Gstd fails to process a request.
+   * @throws {GstcError} Triggered when GstClient fails.
    *
    * @return {object} Response from Gstd.
    */
@@ -387,8 +387,8 @@ class GstdClient {
    *
    * @param {Boolean} reset
    *
-   * @throws {GstdError} Error is triggered when Gstd IPC fails.
-   * @throws {GstcError} Error is triggered when GstClient fails.
+   * @throws {GstdError} Triggered when Gstd fails to process a request.
+   * @throws {GstcError} Triggered when GstClient fails.
    *
    * @return {object} Response from Gstd.
    */
@@ -413,8 +413,8 @@ class GstdClient {
    *
    * @param {String} threshold.
    *
-   * @throws {GstdError} Error is triggered when Gstd IPC fails.
-   * @throws {GstcError} Error is triggered when GstClient fails.
+   * @throws {GstdError} Triggered when Gstd fails to process a request.
+   * @throws {GstcError} Triggered when GstClient fails.
    *
    * @return {object} Response from Gstd.
    */
@@ -430,8 +430,8 @@ class GstdClient {
    * @param {String} element
    * @param {String} prop
    *
-   * @throws {GstdError} Error is triggered when Gstd IPC fails.
-   * @throws {GstcError} Error is triggered when GstClient fails.
+   * @throws {GstdError} Triggered when Gstd fails to process a request.
+   * @throws {GstcError} Triggered when GstClient fails.
    *
    * @return {object} Response from Gstd.
    */
@@ -447,8 +447,8 @@ class GstdClient {
    *
    * @param {String} pipe_name
    *
-   * @throws {GstdError} Error is triggered when Gstd IPC fails.
-   * @throws {GstcError} Error is triggered when GstClient fails.
+   * @throws {GstdError} Triggered when Gstd fails to process a request.
+   * @throws {GstcError} Triggered when GstClient fails.
    *
    * @return {object} Response from Gstd.
    */
@@ -463,8 +463,8 @@ class GstdClient {
    * @param {String} pipe_name
    * @param {String} element
    *
-   * @throws {GstdError} Error is triggered when Gstd IPC fails.
-   * @throws {GstcError} Error is triggered when GstClient fails.
+   * @throws {GstdError} Triggered when Gstd fails to process a request.
+   * @throws {GstcError} Triggered when GstClient fails.
    *
    * @return {object} Response from Gstd.
    */
@@ -481,8 +481,8 @@ class GstdClient {
    * @param {String} pipe_name
    * @param {String} element
    *
-   * @throws {GstdError} Error is triggered when Gstd IPC fails.
-   * @throws {GstcError} Error is triggered when GstClient fails.
+   * @throws {GstdError} Triggered when Gstd fails to process a request.
+   * @throws {GstcError} Triggered when GstClient fails.
    *
    * @return {object} Response from Gstd.
    */
@@ -500,8 +500,8 @@ class GstdClient {
    * @param {String} element
    * @param {String} signal
    *
-   * @throws {GstdError} Error is triggered when Gstd IPC fails.
-   * @throws {GstcError} Error is triggered when GstClient fails.
+   * @throws {GstdError} Triggered when Gstd fails to process a request.
+   * @throws {GstcError} Triggered when GstClient fails.
    *
    * @return {object} Response from Gstd.
    */
@@ -519,8 +519,8 @@ class GstdClient {
    * @param {String} element
    * @param {String} signal
    *
-   * @throws {GstdError} Error is triggered when Gstd IPC fails.
-   * @throws {GstcError} Error is triggered when GstClient fails.
+   * @throws {GstdError} Triggered when Gstd fails to process a request.
+   * @throws {GstcError} Triggered when GstClient fails.
    *
    * @return {object} Response from Gstd.
    */
@@ -539,8 +539,8 @@ class GstdClient {
    * @param {String} signal
    * @param {String} timeout
    *
-   * @throws {GstdError} Error is triggered when Gstd IPC fails.
-   * @throws {GstcError} Error is triggered when GstClient fails.
+   * @throws {GstdError} Triggered when Gstd fails to process a request.
+   * @throws {GstcError} Triggered when GstClient fails.
    *
    * @return {object} Response from Gstd.
    */
@@ -556,8 +556,8 @@ class GstdClient {
    *
    * @param {String} pipe_name.
    *
-   * @throws {GstdError} Error is triggered when Gstd IPC fails.
-   * @throws {GstcError} Error is triggered when GstClient fails.
+   * @throws {GstdError} Triggered when Gstd fails to process a request.
+   * @throws {GstcError} Triggered when GstClient fails.
    *
    * @return {object} Response from Gstd.
    */
@@ -571,8 +571,8 @@ class GstdClient {
    *
    * @param {String} pipe_name.
    *
-   * @throws {GstdError} Error is triggered when Gstd IPC fails.
-   * @throws {GstcError} Error is triggered when GstClient fails.
+   * @throws {GstdError} Triggered when Gstd fails to process a request.
+   * @throws {GstcError} Triggered when GstClient fails.
    *
    * @return {object} Response from Gstd.
    */
@@ -587,8 +587,8 @@ class GstdClient {
    *
    * @param {String} pipe_name.
    *
-   * @throws {GstdError} Error is triggered when Gstd IPC fails.
-   * @throws {GstcError} Error is triggered when GstClient fails.
+   * @throws {GstdError} Triggered when Gstd fails to process a request.
+   * @throws {GstcError} Triggered when GstClient fails.
    *
    * @return {object} Response from Gstd.
    */
