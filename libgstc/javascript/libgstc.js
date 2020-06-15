@@ -91,8 +91,13 @@ class GstdClient {
    */
   async create(uri, property, value) {
 
-    var complete_uri = this.ip + ":" + this.port + uri + "?name=" + property +
-      "&description=" + value;
+    var complete_uri = this.ip + ":" + this.port + uri + "?name=" + property;
+
+    /** Allow create without description */
+    if (value != null) {
+      complete_uri = complete_uri + "&description=" + value;
+    }
+
     var request = {
       method: 'POST',
       body : {
@@ -579,7 +584,7 @@ class GstdClient {
   async event_flush_start(pipe_name) {
 
     var uri = "/pipelines/" + pipe_name + "/event";
-    return this.create(uri, "flush_start");
+    return this.create(uri, "flush_start", null);
   }
 
   /**
