@@ -446,6 +446,8 @@ gstd_parser_pipeline_verbose (GstdSession * session, gchar * action,
     gchar * args, gchar ** response)
 {
   GstdReturnCode ret = GSTD_BAD_COMMAND;
+
+#if GST_VERSION_MINOR >= 10
   gchar *uri;
   gchar **tokens;
 
@@ -464,6 +466,11 @@ gstd_parser_pipeline_verbose (GstdSession * session, gchar * action,
 
   g_free (uri);
   g_strfreev (tokens);
+
+#else
+  GST_ERROR_OBJECT (session, "GST v.%d.%d does not support deep notify",
+      GST_VERSION_MAJOR, GST_VERSION_MINOR);
+#endif
 
   return ret;
 }

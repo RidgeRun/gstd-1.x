@@ -113,6 +113,10 @@ class GstdClient:
         Set the pipeline to playing
     pipeline_stop(pipe_name)
         Set the pipeline to null
+    pipeline_get_graph(self, pipe_name)
+        Get the pipeline graph
+    pipeline_verbose(self, pipe_name, value)
+        Set the pipeline verbose mode
     read(uri)
         Read the resource held at the given URI with the given name
     signal_connect(pipe_name, element, signal)
