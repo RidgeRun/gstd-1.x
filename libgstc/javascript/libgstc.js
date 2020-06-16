@@ -81,29 +81,29 @@ class GstdClient {
    * Create a resource at the given URI.
    *
    * @param {String} uri.
-   * @param {String} property.
-   * @param {String} value.
+   * @param {String} name.
+   * @param {String} description.
    *
    * @throws {GstdError} Triggered when Gstd fails to process a request.
    * @throws {GstcError} Triggered when GstClient fails.
    *
    * @return {object} Response from Gstd.
    */
-  async create(uri, property, value) {
+  async create(uri, name, description) {
 
-    var complete_uri = this.ip + ":" + this.port + uri + "?name=" + property;
+    var complete_uri = this.ip + ":" + this.port + uri + "?name=" + name;
 
     /** Allow create without description */
-    if (value != null) {
-      complete_uri = complete_uri + "&description=" + value;
+    if (description != null) {
+      complete_uri = complete_uri + "&description=" + description;
     }
 
     var request = {
       method: 'POST',
       body : {
         uri : uri,
-        property : property,
-        value : value
+        name : name,
+        description : description
       }
     }
 
@@ -131,21 +131,21 @@ class GstdClient {
    * Update the resource at the given URI.
    *
    * @param {String} uri.
-   * @param {String} value.
+   * @param {String} description.
    *
    * @throws {GstdError} Triggered when Gstd fails to process a request.
    * @throws {GstcError} Triggered when GstClient fails.
    *
    * @return {object} Response from Gstd.
    */
-  async update(uri, value){
+  async update(uri, description){
 
-    var complete_uri = this.ip + ":" + this.port + uri + "?name=" + value;
+    var complete_uri = this.ip + ":" + this.port + uri + "?name=" + description;
     var request = {
       method: 'PUT',
       body: {
         uri : uri,
-        description : value
+        description : description
       },
     }
 
