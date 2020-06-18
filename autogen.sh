@@ -28,6 +28,13 @@ autoreconf --verbose --force --install || {
  exit 1;
 }
 
+# install pre-commit hook for doing clean commits
+rm -f .git/hooks/pre-commit
+if ! ln -s ../../common/hooks/pre-commit.hook .git/hooks/pre-commit 2> /dev/null
+then
+  echo "Failed to create commit hook symlink"
+fi
+
 echo
 echo "Now run './configure' with your system settings followed by 'make' to compile this module."
 echo
