@@ -57,7 +57,6 @@ struct _GstcSocket {
   int socket;
   struct sockaddr_in server;
   int keep_connection_open;
-  char * pSocketBuffer;
 };
 
 static int
@@ -81,16 +80,14 @@ open_socket (GstcSocket * self)
     return GSTC_SOCKET_ERROR;
   }
 
-  self->pSocketBuffer = (char *) malloc (GSTC_MAX_SOCKET_BUFFER_SIZE);
-  if (!self->pSocketBuffer) {
+  if(setsockopt (self->socket, SOL_SOCKET, SO_RCVBUF, &buffsize, sizeof (buffsize))) {
+    close (self->socket);
     return GSTC_SOCKET_ERROR;
   }
-  setsockopt (self->socket, SOL_SOCKET, SO_RCVBUF, &buffsize, sizeof (buffsize) );
 
   if (connect (self->socket, (struct sockaddr *) &self->server,
       sizeof (self->server) ) < 0) {
     close (self->socket);
-    free (self->pSocketBuffer);
     return GSTC_UNREACHABLE;
   }
   return GSTC_OK;
@@ -194,7 +191,6 @@ gstc_socket_send (GstcSocket * self, const char * request, char ** response,
 out:
   if (!self->keep_connection_open) {
     close (self->socket);
-    free (self->pSocketBuffer);
   }
 
   return ret;
@@ -207,7 +203,6 @@ gstc_socket_free (GstcSocket * socket)
 
   if (socket->keep_connection_open) {
     close (socket->socket);
-    free (socket->pSocketBuffer);
   }
   free (socket);
 }
