@@ -40,6 +40,7 @@ class GstdClient {
    * @param {Number} port.
   */
   constructor(ip='http://localhost',port=5000) {
+
     this.ip = ip;
     this.port = port;
   }
@@ -50,12 +51,13 @@ class GstdClient {
    * @param {String} url.
    * @param {Array} request.
    *
-   * @throws {GstdError} Error is triggered when Gstd IPC fails.
-   * @throws {GstcError} Error is triggered when GstClient fails.
+   * @throws {GstdError} Triggered when Gstd fails to process a request.
+   * @throws {GstcError} Triggered when GstClient fails.
    *
    * @return {object} Response from Gstd.
    */
   static async send_cmd(url, request) {
+
     try {
       var response = await fetch (url, request);
       var j_resp = await response.json();
@@ -76,17 +78,114 @@ class GstdClient {
   }
 
   /**
+   * Create a resource at the given URI.
+   *
+   * @param {String} uri.
+   * @param {String} name.
+   * @param {String} description.
+   *
+   * @throws {GstdError} Triggered when Gstd fails to process a request.
+   * @throws {GstcError} Triggered when GstClient fails.
+   *
+   * @return {object} Response from Gstd.
+   */
+  async create(uri, name, description) {
+
+    var complete_uri = this.ip + ":" + this.port + uri + "?name=" + name;
+
+    /* Allow create without description */
+    if (description != null) {
+      complete_uri = complete_uri + "&description=" + description;
+    }
+
+    var request = {
+      method: 'POST',
+      body : {
+        uri : uri,
+        name : name,
+        description : description
+      }
+    }
+
+    return GstdClient.send_cmd(complete_uri, request);
+  }
+
+  /**
+   * Read the resource held at the given URI with the given name.
+   *
+   * @param {String} uri.
+   *
+   * @throws {GstdError} Triggered when Gstd fails to process a request.
+   * @throws {GstcError} Triggered when GstClient fails.
+   *
+   * @return {object} Response from Gstd.
+   */
+  async read(uri) {
+
+    var complete_uri = this.ip + ":" + this.port + uri;
+    var request = { method : "GET" };
+    return GstdClient.send_cmd(complete_uri, request);
+  }
+
+  /**
+   * Update the resource at the given URI.
+   *
+   * @param {String} uri.
+   * @param {String} description.
+   *
+   * @throws {GstdError} Triggered when Gstd fails to process a request.
+   * @throws {GstcError} Triggered when GstClient fails.
+   *
+   * @return {object} Response from Gstd.
+   */
+  async update(uri, description){
+
+    var complete_uri = this.ip + ":" + this.port + uri + "?name=" + description;
+    var request = {
+      method: 'PUT',
+      body: {
+        uri : uri,
+        description : description
+      },
+    }
+
+    return GstdClient.send_cmd(complete_uri, request);
+  }
+
+  /**
+   * Delete the resource held at the given URI with the given name.
+   *
+   * @param {String} uri.
+   *
+   * @throws {GstdError} Triggered when Gstd fails to process a request.
+   * @throws {GstcError} Triggered when GstClient fails.
+   *
+   * @return {object} Response from Gstd.
+   */
+  async delete(uri, name) {
+    var complete_uri = this.ip + ":" + this.port + uri + "?name=" + name;
+    var request = {
+      method: 'DELETE',
+      body: {
+        uri : uri,
+        name : name
+      },
+    }
+
+    return GstdClient.send_cmd(complete_uri, request);
+  }
+
+  /**
    * List Pipelines.
    *
-   * @throws {GstdError} Error is triggered when Gstd IPC fails.
-   * @throws {GstcError} Error is triggered when GstClient fails.
+   * @throws {GstdError} Triggered when Gstd fails to process a request.
+   * @throws {GstcError} Triggered when GstClient fails.
    *
    * @return {object} Response from Gstd.
    */
   async list_pipelines() {
-    var url = this.ip + ":" + this.port + "/pipelines";
-    var request = { method : "GET" };
-    return GstdClient.send_cmd(url, request);
+
+    return this.read("/pipelines");
   }
 
   /**
@@ -95,24 +194,14 @@ class GstdClient {
    * @param {String} pipe_name.
    * @param {String} pipe_desc.
    *
-   * @throws {GstdError} Error is triggered when Gstd IPC fails.
-   * @throws {GstcError} Error is triggered when GstClient fails.
+   * @throws {GstdError} Triggered when Gstd fails to process a request.
+   * @throws {GstcError} Triggered when GstClient fails.
    *
    * @return {object} Response from Gstd.
    */
   async pipeline_create(pipe_name, pipe_desc) {
 
-    var url = this.ip + ":" + this.port + "/pipelines?name=" + pipe_name +
-      "&description=" + pipe_desc;
-    var request = {
-      method: 'POST',
-      body : {
-        name : pipe_name,
-        description : pipe_desc
-      }
-    }
-
-    return GstdClient.send_cmd(url, request);
+    return this.create("/pipelines", pipe_name, pipe_desc);
   }
 
   /**
@@ -120,24 +209,14 @@ class GstdClient {
    *
    * @param {String} pipe_name.
    *
-   * @throws {GstdError} Error is triggered when Gstd IPC fails.
-   * @throws {GstcError} Error is triggered when GstClient fails.
+   * @throws {GstdError} Triggered when Gstd fails to process a request.
+   * @throws {GstcError} Triggered when GstClient fails.
    *
    * @return {object} Response from Gstd.
    */
   async pipeline_play(pipe_name) {
 
-    var url = this.ip + ":" + this.port + "/pipelines/" + pipe_name +
-      "/state?name=playing";
-    var request = {
-      method: 'PUT',
-      body: {
-        name : pipe_name,
-        status : 'playing'
-      },
-    }
-
-    return GstdClient.send_cmd(url, request);
+    return this.update("/pipelines/" + pipe_name + "/state", "playing");
   }
 
   /**
@@ -148,26 +227,16 @@ class GstdClient {
    * @param {String} prop.
    * @param {String} value.
    *
-   * @throws {GstdError} Error is triggered when Gstd IPC fails.
-   * @throws {GstcError} Error is triggered when GstClient fails.
+   * @throws {GstdError} Triggered when Gstd fails to process a request.
+   * @throws {GstcError} Triggered when GstClient fails.
    *
    * @return {object} Response from Gstd.
    */
   async element_set(pipe_name, element, prop, value) {
 
-    var url = this.ip + ":" + this.port + "/pipelines/" + pipe_name +
-    "/elements/" + element + "/properties/" + prop + "?name=" + value;
-    var request = {
-      method: 'PUT',
-      body: {
-        name : pipe_name,
-        element : element,
-        prop : prop,
-        value : value
-      },
-    }
-
-    return GstdClient.send_cmd(url, request);
+    var uri = "/pipelines/" + pipe_name + "/elements/" + element +
+      "/properties/" + prop;
+    return this.update(uri, value);
   }
 
   /**
@@ -175,24 +244,14 @@ class GstdClient {
    *
    * @param {String} pipe_name.
    *
-   * @throws {GstdError} Error is triggered when Gstd IPC fails.
-   * @throws {GstcError} Error is triggered when GstClient fails.
+   * @throws {GstdError} Triggered when Gstd fails to process a request.
+   * @throws {GstcError} Triggered when GstClient fails.
    *
    * @return {object} Response from Gstd.
    */
   async pipeline_pause(pipe_name) {
 
-    var url = this.ip + ":" + this.port + "/pipelines/" + pipe_name +
-    "/state?name=paused";
-    var request = {
-      method: 'PUT',
-      body: {
-        name : pipe_name,
-        status : 'paused'
-      },
-    }
-
-    return GstdClient.send_cmd(url, request);
+    return this.update("/pipelines/" + pipe_name + "/state", "paused");
   }
 
   /**
@@ -200,24 +259,14 @@ class GstdClient {
    *
    * @param {String} pipe_name.
    *
-   * @throws {GstdError} Error is triggered when Gstd IPC fails.
-   * @throws {GstcError} Error is triggered when GstClient fails.
+   * @throws {GstdError} Triggered when Gstd fails to process a request.
+   * @throws {GstcError} Triggered when GstClient fails.
    *
    * @return {object} Response from Gstd.
    */
   async pipeline_stop(pipe_name) {
 
-    var url = this.ip + ":" + this.port + "/pipelines/" + pipe_name +
-      "/state?name=null";
-    var request = {
-      method: 'PUT',
-      body: {
-        name : pipe_name,
-        status : 'null'
-      },
-    }
-
-    return GstdClient.send_cmd(url, request);
+    return this.update("/pipelines/" + pipe_name + "/state", "null");
   }
 
   /**
@@ -225,22 +274,14 @@ class GstdClient {
    *
    * @param {String} pipe_name.
    *
-   * @throws {GstdError} Error is triggered when Gstd IPC fails.
-   * @throws {GstcError} Error is triggered when GstClient fails.
+   * @throws {GstdError} Triggered when Gstd fails to process a request.
+   * @throws {GstcError} Triggered when GstClient fails.
    *
    * @return {object} Response from Gstd.
    */
   async pipeline_delete(pipe_name) {
 
-    var url = this.ip + ":" + this.port + "/pipelines?name=" + pipe_name;
-    var request = {
-      method: 'DELETE',
-      body: {
-        name : pipe_name
-      },
-    }
-
-    return GstdClient.send_cmd(url, request);
+    return this.delete("/pipelines", pipe_name);
   }
 
   /**
@@ -249,23 +290,14 @@ class GstdClient {
    * @param {String} pipe_name.
    * @param {String} filter.
    *
-   * @throws {GstdError} Error is triggered when Gstd IPC fails.
-   * @throws {GstcError} Error is triggered when GstClient fails.
+   * @throws {GstdError} Triggered when Gstd fails to process a request.
+   * @throws {GstcError} Triggered when GstClient fails.
    *
    * @return {object} Response from Gstd.
    */
   async bus_filter(pipe_name, filter) {
-    var url = this.ip + ":" + this.port + "/pipelines/" + pipe_name +
-      "/bus/types?name=" + filter;
-    var request = {
-      method: 'PUT',
-      body: {
-        name : pipe_name,
-        filter : filter
-      },
-    }
 
-    return GstdClient.send_cmd(url, request);
+    return this.update("/pipelines/" + pipe_name + "/bus/types", filter);
   }
 
   /**
@@ -273,19 +305,14 @@ class GstdClient {
    *
    * @param {String} pipe_name.
    *
-   * @throws {GstdError} Error is triggered when Gstd IPC fails.
-   * @throws {GstcError} Error is triggered when GstClient fails.
+   * @throws {GstdError} Triggered when Gstd fails to process a request.
+   * @throws {GstcError} Triggered when GstClient fails.
    *
    * @return {object} Response from Gstd.
    */
   async bus_read(pipe_name) {
-    var url = this.ip + ":" + this.port + "/pipelines/" + pipe_name +
-      "/bus/message";
-    var request = {
-      method: 'GET'
-    }
 
-    return GstdClient.send_cmd(url, request);
+    return this.read("/pipelines/" + pipe_name + "/bus/message");
   }
 
   /**
@@ -294,23 +321,14 @@ class GstdClient {
    * @param {String} pipe_name.
    * @param {Integer} timeout.
    *
-   * @throws {GstdError} Error is triggered when Gstd IPC fails.
-   * @throws {GstcError} Error is triggered when GstClient fails.
+   * @throws {GstdError} Triggered when Gstd fails to process a request.
+   * @throws {GstcError} Triggered when GstClient fails.
    *
    * @return {object} Response from Gstd.
    */
   async bus_timeout(pipe_name, timeout) {
-    var url = this.ip + ":" + this.port + "/pipelines/" + pipe_name +
-      "/bus/timeout?name=" + timeout;
-    var request = {
-      method: 'PUT',
-      body: {
-        name : pipe_name,
-        timeout : timeout
-      },
-    }
 
-    return GstdClient.send_cmd(url, request);
+    return this.update("/pipelines/" + pipe_name + "/bus/timeout", timeout);
   }
 
   /**
@@ -325,32 +343,18 @@ class GstdClient {
    * @param {Integer} end_type
    * @param {Integer} end
    *
-   * @throws {GstdError} Error is triggered when Gstd IPC fails.
-   * @throws {GstcError} Error is triggered when GstClient fails.
+   * @throws {GstdError} Triggered when Gstd fails to process a request.
+   * @throws {GstcError} Triggered when GstClient fails.
    *
    * @return {object} Response from Gstd.
    */
   async event_seek(pipe_name, rate=1.0, format=3, flags=1, start_type=1,
     start=0, end_type=1, end=-1) {
 
-      var url = this.ip + ":" + this.port + "/pipelines/" + pipe_name +
-      "/event?name=seek&description=" + rate + "%20" + format + "%20" +
-      flags + "%20" + start_type + "%20" + start + "%20" + end_type + "%20" + end;
-    var request = {
-      method : 'POST',
-      body : {
-        event: 'seek',
-        name : pipe_name,
-        rate : rate,
-        format : format,
-        flags : flags,
-        start_type : start_type,
-        end_type : end_type,
-        end : end
-      }
-    }
-
-    return GstdClient.send_cmd(url, request);
+    var uri = "/pipelines/" + pipe_name + "/event";
+    var description = rate + "%20" + format + "%20" + flags + "%20" +
+      start_type + "%20" + start + "%20" + end_type + "%20" + end;
+    return this.create(uri, "seek", description);
   }
 
   /**
@@ -358,21 +362,14 @@ class GstdClient {
    *
    * @param {Boolean} enable.
    *
-   * @throws {GstdError} Error is triggered when Gstd IPC fails.
-   * @throws {GstcError} Error is triggered when GstClient fails.
+   * @throws {GstdError} Triggered when Gstd fails to process a request.
+   * @throws {GstcError} Triggered when GstClient fails.
    *
    * @return {object} Response from Gstd.
    */
   async debug_color (enable) {
-    var url = this.ip + ":" + this.port + "/debug/color?name=" + enable;
-    var request = {
-      method: 'PUT',
-      body: {
-        name : enable,
-      },
-    }
 
-    return GstdClient.send_cmd(url, request);
+    return this.update("/debug/color", enable);
   }
 
   /**
@@ -380,21 +377,14 @@ class GstdClient {
    *
    * @param {Boolean} enable.
    *
-   * @throws {GstdError} Error is triggered when Gstd IPC fails.
-   * @throws {GstcError} Error is triggered when GstClient fails.
+   * @throws {GstdError} Triggered when Gstd fails to process a request.
+   * @throws {GstcError} Triggered when GstClient fails.
    *
    * @return {object} Response from Gstd.
    */
   async debug_enable(enable) {
-    var url = this.ip + ":" + this.port + "/debug/enable?name=" + enable;
-    var request = {
-      method: 'PUT',
-      body: {
-        name : enable,
-      },
-    }
 
-    return GstdClient.send_cmd(url, request);
+    return this.update("/debug/enable", enable);
   }
 
   /**
@@ -402,21 +392,14 @@ class GstdClient {
    *
    * @param {Boolean} reset
    *
-   * @throws {GstdError} Error is triggered when Gstd IPC fails.
-   * @throws {GstcError} Error is triggered when GstClient fails.
+   * @throws {GstdError} Triggered when Gstd fails to process a request.
+   * @throws {GstcError} Triggered when GstClient fails.
    *
    * @return {object} Response from Gstd.
    */
   async debug_reset(enable) {
-    var url = this.ip + ":" + this.port + "/debug/reset?name=" + enable;
-    var request = {
-      method: 'PUT',
-      body: {
-        name : enable,
-      },
-    }
 
-    return GstdClient.send_cmd(url, request);
+    return this.update("/debug/reset", enable);
   }
 
   /**
@@ -435,18 +418,14 @@ class GstdClient {
    *
    * @param {String} threshold.
    *
+   * @throws {GstdError} Triggered when Gstd fails to process a request.
+   * @throws {GstcError} Triggered when GstClient fails.
+   *
    * @return {object} Response from Gstd.
    */
   async debug_threshold(threshold) {
-    var url = this.ip + ":" + this.port + "/debug/threshold?name=" + threshold;
-    var request = {
-      method: 'PUT',
-      body: {
-        threshold : threshold,
-      },
-    }
 
-    return GstdClient.send_cmd(url, request);
+    return this.update("/debug/threshold", threshold);
   }
 
   /**
@@ -456,16 +435,16 @@ class GstdClient {
    * @param {String} element
    * @param {String} prop
    *
+   * @throws {GstdError} Triggered when Gstd fails to process a request.
+   * @throws {GstcError} Triggered when GstClient fails.
+   *
    * @return {object} Response from Gstd.
    */
   async element_get(pipe_name, element, prop) {
-    var url = this.ip + ":" + this.port + "/pipelines/" + pipe_name +
-      "/elements/" + element + "/properties/" + prop;
-    var request = {
-      method: 'GET'
-    }
 
-    return GstdClient.send_cmd(url, request);
+    var uri = "/pipelines/" + pipe_name + "/elements/" + element +
+      "/properties/" + prop;
+    return this.read(uri);
   }
 
   /**
@@ -473,16 +452,14 @@ class GstdClient {
    *
    * @param {String} pipe_name
    *
+   * @throws {GstdError} Triggered when Gstd fails to process a request.
+   * @throws {GstcError} Triggered when GstClient fails.
+   *
    * @return {object} Response from Gstd.
    */
   async list_elements(pipe_name) {
-    var url = this.ip + ":" + this.port + "/pipelines/" + pipe_name +
-      "/elements/";
-    var request = {
-      method: 'GET'
-    }
 
-    return GstdClient.send_cmd(url, request);
+    return this.read("/pipelines/" + pipe_name + "/elements/");
   }
 
   /**
@@ -491,16 +468,16 @@ class GstdClient {
    * @param {String} pipe_name
    * @param {String} element
    *
+   * @throws {GstdError} Triggered when Gstd fails to process a request.
+   * @throws {GstcError} Triggered when GstClient fails.
+   *
    * @return {object} Response from Gstd.
    */
   async list_properties(pipe_name, element) {
-    var url = this.ip + ":" + this.port + "/pipelines/" + pipe_name +
-      "/elements/" + element + "/properties";
-    var request = {
-      method: 'GET'
-    }
 
-    return GstdClient.send_cmd(url, request);
+    var uri = "/pipelines/" + pipe_name + "/elements/" + element +
+      "/properties";
+    return this.read(uri);
   }
 
   /**
@@ -509,16 +486,16 @@ class GstdClient {
    * @param {String} pipe_name
    * @param {String} element
    *
+   * @throws {GstdError} Triggered when Gstd fails to process a request.
+   * @throws {GstcError} Triggered when GstClient fails.
+   *
    * @return {object} Response from Gstd.
    */
   async list_signals(pipe_name, element) {
-    var url = this.ip + ":" + this.port + "/pipelines/" + pipe_name +
-      "/elements/" + element + "/signals";
-    var request = {
-      method: 'GET'
-    }
 
-    return GstdClient.send_cmd(url, request);
+    var uri = "/pipelines/" + pipe_name + "/elements/" + element +
+      "/signals";
+    return this.read(uri);
   }
 
   /**
@@ -528,16 +505,16 @@ class GstdClient {
    * @param {String} element
    * @param {String} signal
    *
+   * @throws {GstdError} Triggered when Gstd fails to process a request.
+   * @throws {GstcError} Triggered when GstClient fails.
+   *
    * @return {object} Response from Gstd.
    */
   async signal_connect(pipe_name, element, signal) {
-    var url = this.ip + ":" + this.port + "/pipelines/" + pipe_name +
-      "/elements/" + element + "/signals/" + signal + "/callback";
-    var request = {
-      method: 'GET'
-    }
 
-    return GstdClient.send_cmd(url, request);
+    var uri = "/pipelines/" + pipe_name + "/elements/" + element +
+      "/signals/" + signal + "/callback";
+    return this.read(uri);
   }
 
   /**
@@ -547,16 +524,16 @@ class GstdClient {
    * @param {String} element
    * @param {String} signal
    *
+   * @throws {GstdError} Triggered when Gstd fails to process a request.
+   * @throws {GstcError} Triggered when GstClient fails.
+   *
    * @return {object} Response from Gstd.
    */
   async signal_disconnect(pipe_name, element, signal) {
-    var url = this.ip + ":" + this.port + "/pipelines/" + pipe_name +
-      "/elements/" + element + "/signals/" + signal + "/disconnect";
-    var request = {
-      method: 'GET'
-    }
 
-    return GstdClient.send_cmd(url, request);
+    var uri = "/pipelines/" + pipe_name + "/elements/" + element +
+      "/signals/" + signal + "/disconnect";
+    return this.read(uri);
   }
 
   /**
@@ -567,24 +544,93 @@ class GstdClient {
    * @param {String} signal
    * @param {String} timeout
    *
+   * @throws {GstdError} Triggered when Gstd fails to process a request.
+   * @throws {GstcError} Triggered when GstClient fails.
+   *
    * @return {object} Response from Gstd.
    */
   async signal_timeout(pipe_name, element, signal, timeout) {
-    var url = this.ip + ":" + this.port + "/pipelines/" + pipe_name +
-      "/elements/" + element + "/signals/" + signal + "timeout?name=" +
-      timeout;
-    var request = {
-      method: 'PUT',
-      body: {
-        name : pipe_name,
-        element : element,
-        signal : signal,
-        timeout : timeout
-      },
-    }
 
-    return GstdClient.send_cmd(url, request);
+    var uri = "/pipelines/" + pipe_name + "/elements/" + element +
+      "/signals/" + signal + "/timeout";
+    return this.update(uri, timeout);
   }
+
+  /**
+   * Send an end-of-stream event.
+   *
+   * @param {String} pipe_name.
+   *
+   * @throws {GstdError} Triggered when Gstd fails to process a request.
+   * @throws {GstcError} Triggered when GstClient fails.
+   *
+   * @return {object} Response from Gstd.
+   */
+  async event_eos(pipe_name) {
+
+    return this.create("/pipelines/" + pipe_name + "/event", "eos", null);
+  }
+
+  /**
+   * Put the pipeline in flushing mode.
+   *
+   * @param {String} pipe_name.
+   *
+   * @throws {GstdError} Triggered when Gstd fails to process a request.
+   * @throws {GstcError} Triggered when GstClient fails.
+   *
+   * @return {object} Response from Gstd.
+   */
+  async event_flush_start(pipe_name) {
+
+    var uri = "/pipelines/" + pipe_name + "/event";
+    return this.create(uri, "flush_start", null);
+  }
+
+  /**
+   * Take the pipeline out from flushing mode.
+   *
+   * @param {String} pipe_name.
+   *
+   * @throws {GstdError} Triggered when Gstd fails to process a request.
+   * @throws {GstcError} Triggered when GstClient fails.
+   *
+   * @return {object} Response from Gstd.
+   */
+  async event_flush_stop(pipe_name) {
+
+    var uri = "/pipelines/" + pipe_name + "/event";
+    return this.create(uri, "flush_stop", "true");
+  }
+
+  /**
+   * Get the pipeline graph.
+   *
+   * @param {String} pipe_name.
+   *
+   * @throws {GstdError} Triggered when Gstd fails to process a request.
+   * @throws {GstcError} Triggered when GstClient fails.
+   *
+   * @return {object} Response from Gstd.
+   */
+  pipeline_get_graph(pipe_name) {
+    return this.read("/pipelines/" + pipe_name + "/graph");
+  }
+
+    /**
+   * Set the pipeline verbose mode.
+   *
+   * @param {String} pipe_name.
+   *
+   * @throws {GstdError} Triggered when Gstd fails to process a request.
+   * @throws {Boolean} Triggered when GstClient fails.
+   *
+   * @return {object} Response from Gstd.
+   */
+  pipeline_verbose(pipe_name, enable) {
+    return this.update("/pipelines/" + pipe_name + "/verbose", enable);
+  }
+
 }
 
 /** GstClient - GstcError Class */
@@ -599,13 +645,13 @@ class GstcError extends Error {
 
     super(...params)
 
-    /** Maintains proper stack trace */
+    /* Maintains proper stack trace */
     if (Error.captureStackTrace) {
       Error.captureStackTrace(this, GstcError)
     }
 
     this.name = 'GstcError'
-    /** Custom debugging information */
+    /* Custom debugging information */
     this.date = new Date()
   }
 }
@@ -622,13 +668,13 @@ class GstdError extends Error {
 
     super(...params)
 
-    /** Maintains proper stack trace */
+    /* Maintains proper stack trace */
     if (Error.captureStackTrace) {
       Error.captureStackTrace(this, GstdError)
     }
 
     this.name = 'GstdError'
-    /** Custom debugging information */
+    /* Custom debugging information */
     this.date = new Date()
   }
 }
