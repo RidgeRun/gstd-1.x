@@ -93,7 +93,7 @@ class GstdClient {
 
     var complete_uri = this.ip + ":" + this.port + uri + "?name=" + name;
 
-    /** Allow create without description */
+    /* Allow create without description */
     if (description != null) {
       complete_uri = complete_uri + "&description=" + description;
     }
@@ -568,7 +568,7 @@ class GstdClient {
    */
   async event_eos(pipe_name) {
 
-    return this.create("/pipelines/" + pipe_name + "/event", "eos");
+    return this.create("/pipelines/" + pipe_name + "/event", "eos", null);
   }
 
   /**
@@ -645,13 +645,13 @@ class GstcError extends Error {
 
     super(...params)
 
-    /** Maintains proper stack trace */
+    /* Maintains proper stack trace */
     if (Error.captureStackTrace) {
       Error.captureStackTrace(this, GstcError)
     }
 
     this.name = 'GstcError'
-    /** Custom debugging information */
+    /* Custom debugging information */
     this.date = new Date()
   }
 }
@@ -668,13 +668,13 @@ class GstdError extends Error {
 
     super(...params)
 
-    /** Maintains proper stack trace */
+    /* Maintains proper stack trace */
     if (Error.captureStackTrace) {
       Error.captureStackTrace(this, GstdError)
     }
 
     this.name = 'GstdError'
-    /** Custom debugging information */
+    /* Custom debugging information */
     this.date = new Date()
   }
 }
