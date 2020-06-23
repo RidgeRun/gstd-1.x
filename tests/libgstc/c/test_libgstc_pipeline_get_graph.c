@@ -158,7 +158,7 @@ GST_END_TEST;
 static Suite *
 libgstc_pipeline_suite (void)
 {
-  Suite *suite = suite_create ("libgstc_pipeline");
+  Suite *suite = suite_create ("libgstc_pipeline_get_graph");
   TCase *tc = tcase_create ("general");
 
   suite_add_tcase (suite, tc);

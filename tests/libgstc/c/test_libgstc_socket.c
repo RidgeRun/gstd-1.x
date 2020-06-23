@@ -86,7 +86,7 @@ mock_server_new (void)
   GError *error = NULL;
   gint64 start_time;
   gint64 start_timeout = 1000000;       /* 1s */
-  gint64 loop_wait_time = 5000;        /* 5ms */
+  gint64 loop_wait_time = 5000; /* 5ms */
   gint64 time_passed = 0;
 
   _mock_server = g_threaded_socket_service_new (-1);
@@ -108,12 +108,12 @@ mock_server_new (void)
    * This timeouts after 1s
    */
   start_time = g_get_monotonic_time ();
-  while (!g_main_loop_is_running (_loop) ) {
+  while (!g_main_loop_is_running (_loop)) {
     g_usleep (loop_wait_time);  /* Wait before checking again */
-      
+
     /* Exit if timeout is reached */
     time_passed = g_get_monotonic_time () - start_time;
-    g_return_if_fail(time_passed < start_timeout);
+    g_return_if_fail (time_passed < start_timeout);
   }
 }
 

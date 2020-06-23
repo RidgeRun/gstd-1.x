@@ -53,11 +53,12 @@ typedef struct _GstcSocket
 GstcSocket _socket;
 
 GstcStatus
-gstc_socket_new (const char *address, const unsigned int port, const int keep_connection_open, GstcSocket ** out)
+gstc_socket_new (const char *address, const unsigned int port,
+    const int keep_connection_open, GstcSocket ** out)
 {
   gstc_assert_and_ret_val (NULL != address, GSTC_NULL_ARGUMENT);
   gstc_assert_and_ret_val (NULL != out, GSTC_NULL_ARGUMENT);
-  
+
   *out = &_socket;
 
   return GSTC_OK;
@@ -69,8 +70,8 @@ gstc_socket_free (GstcSocket * socket)
 }
 
 GstcStatus
-gstc_socket_send (GstcSocket *socket, const char *request,
-    char ** response, const int timeout)
+gstc_socket_send (GstcSocket * socket, const char *request,
+    char **response, const int timeout)
 {
   gstc_assert_and_ret_val (NULL != socket, GSTC_NULL_ARGUMENT);
   gstc_assert_and_ret_val (NULL != request, GSTC_NULL_ARGUMENT);
@@ -99,14 +100,15 @@ gstc_json_is_null (const gchar * json, const gchar * name, gint * out)
   gstc_assert_and_ret_val (NULL != json, GSTC_NULL_ARGUMENT);
   gstc_assert_and_ret_val (NULL != name, GSTC_NULL_ARGUMENT);
   gstc_assert_and_ret_val (NULL != out, GSTC_NULL_ARGUMENT);
-  
+
   *out = 0;
   return GSTC_OK;
 }
 
 GstcStatus
-gstc_json_get_child_char_array(const char *json, const char* parent_name,
-  const char* array_name, const char *element_name, char **out[], int *array_lenght)
+gstc_json_get_child_char_array (const char *json, const char *parent_name,
+    const char *array_name, const char *element_name, char **out[],
+    int *array_lenght)
 {
   gstc_assert_and_ret_val (NULL != json, GSTC_NULL_ARGUMENT);
   gstc_assert_and_ret_val (NULL != parent_name, GSTC_NULL_ARGUMENT);
@@ -114,19 +116,19 @@ gstc_json_get_child_char_array(const char *json, const char* parent_name,
   gstc_assert_and_ret_val (NULL != element_name, GSTC_NULL_ARGUMENT);
   gstc_assert_and_ret_val (NULL != out, GSTC_NULL_ARGUMENT);
   gstc_assert_and_ret_val (NULL != array_lenght, GSTC_NULL_ARGUMENT);
-    
+
   return GSTC_OK;
 }
 
 GstcStatus
-gstc_json_child_string (const char * json, const char * parent_name,
-  const char * data_name, char ** out)
+gstc_json_child_string (const char *json, const char *parent_name,
+    const char *data_name, char **out)
 {
   gstc_assert_and_ret_val (NULL != json, GSTC_NULL_ARGUMENT);
   gstc_assert_and_ret_val (NULL != parent_name, GSTC_NULL_ARGUMENT);
   gstc_assert_and_ret_val (NULL != data_name, GSTC_NULL_ARGUMENT);
   gstc_assert_and_ret_val (NULL != out, GSTC_NULL_ARGUMENT);
-  
+
   return GSTC_OK;
 }
 
@@ -137,10 +139,10 @@ GST_START_TEST (test_pipeline_list_success)
   char **response;
   int array_lenght;
 
-  ret = gstc_pipeline_list(_client, &response, &array_lenght);
-  
+  ret = gstc_pipeline_list (_client, &response, &array_lenght);
+
   assert_equals_int (GSTC_OK, ret);
-  
+
   assert_equals_string (expected, _request);
 }
 
@@ -152,7 +154,7 @@ GST_START_TEST (test_pipeline_list_null_list_lenght)
   char **response;
   int *array_lenght = NULL;
 
-  ret = gstc_pipeline_list(_client, &response, array_lenght);
+  ret = gstc_pipeline_list (_client, &response, array_lenght);
   assert_equals_int (GSTC_NULL_ARGUMENT, ret);
 }
 
@@ -164,7 +166,7 @@ GST_START_TEST (test_pipeline_list_null_client)
   char **response;
   int array_lenght;
 
-  ret = gstc_pipeline_list(NULL, &response, &array_lenght);
+  ret = gstc_pipeline_list (NULL, &response, &array_lenght);
   assert_equals_int (GSTC_NULL_ARGUMENT, ret);
 }
 
@@ -176,7 +178,7 @@ GST_START_TEST (test_pipeline_list_null_pipelines)
   char ***response = NULL;
   int array_lenght;
 
-  ret = gstc_pipeline_list(_client, response, &array_lenght);
+  ret = gstc_pipeline_list (_client, response, &array_lenght);
   assert_equals_int (GSTC_NULL_ARGUMENT, ret);
 }
 

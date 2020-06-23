@@ -99,14 +99,14 @@ gstc_json_get_child_char_array (const char *json, const char *parent_name,
 }
 
 GstcStatus
-gstc_json_child_string (const char * json, const char * parent_name,
-  const char * data_name, char ** out)
+gstc_json_child_string (const char *json, const char *parent_name,
+    const char *data_name, char **out)
 {
   gstc_assert_and_ret_val (NULL != json, GSTC_NULL_ARGUMENT);
   gstc_assert_and_ret_val (NULL != parent_name, GSTC_NULL_ARGUMENT);
   gstc_assert_and_ret_val (NULL != data_name, GSTC_NULL_ARGUMENT);
   gstc_assert_and_ret_val (NULL != out, GSTC_NULL_ARGUMENT);
-  
+
   return GSTC_OK;
 }
 
@@ -169,7 +169,7 @@ GST_END_TEST;
 static Suite *
 libgstc_element_set_suite (void)
 {
-  Suite *suite = suite_create ("libgstc_slement_set");
+  Suite *suite = suite_create ("libgstc_element_set");
   TCase *tc = tcase_create ("general");
 
   suite_add_tcase (suite, tc);
