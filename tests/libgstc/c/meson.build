@@ -11,6 +11,7 @@ lib_gstc_tests = [
   ['test_libgstc_pipeline_delete.c'],
   ['test_libgstc_pipeline_flush_start.c'],
   ['test_libgstc_pipeline_flush_stop.c'],
+  ['test_libgstc_pipeline_get_graph.c'],
   ['test_libgstc_pipeline_inject_eos.c'],
   ['test_libgstc_pipeline_list.c'],
   ['test_libgstc_pipeline_list_elements.c'],
@@ -19,6 +20,7 @@ lib_gstc_tests = [
   ['test_libgstc_pipeline_play.c'],
   ['test_libgstc_pipeline_seek.c'],
   ['test_libgstc_pipeline_stop.c'],
+  ['test_libgstc_pipeline_verbose.c'],
 ]
 
 # These are specials tests since is required to re-compile libgstc
