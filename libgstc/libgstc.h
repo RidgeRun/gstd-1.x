@@ -293,6 +293,7 @@ gstc_pipeline_get_graph(GstClient *client, const char *pipeline_name, char **res
  * @pipeline_name: Name associated with the pipeline
  * @value: Pipeline verbose mode (true/false)
  * Attempts to update the verbose mode of the pipeline.
+ * Only supported on GST Version >= 1.10
  *
  * Returns: GstcStatus indicating success, daemon unreachable, daemon
  * timeout, bad pipeline name, null argument passed.

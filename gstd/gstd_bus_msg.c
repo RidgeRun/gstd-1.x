@@ -112,9 +112,11 @@ gstd_bus_msg_factory_make (GstMessage * target)
     case (GST_MESSAGE_STATE_CHANGED):
       msg = g_object_new (GSTD_TYPE_BUS_MSG_STATE_CHANGED, NULL);
       break;
+#if GST_VERSION_MINOR >= 10
     case (GST_MESSAGE_PROPERTY_NOTIFY):
       msg = g_object_new (GSTD_TYPE_BUS_MSG_NOTIFY, NULL);
       break;
+#endif
     default:
       msg = g_object_new (GSTD_TYPE_BUS_MSG, NULL);
       break;

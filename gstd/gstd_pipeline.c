@@ -397,7 +397,9 @@ gstd_pipeline_set_property (GObject * object,
     guint property_id, const GValue * value, GParamSpec * pspec)
 {
   GstdPipeline *self = GSTD_PIPELINE (object);
+#if GST_VERSION_MINOR >= 10
   gboolean verbose = FALSE;
+#endif
 
   switch (property_id) {
     case PROP_DESCRIPTION:
@@ -407,12 +409,15 @@ gstd_pipeline_set_property (GObject * object,
       GST_INFO_OBJECT (self, "Changed description to \"%s\"",
           self->description);
       break;
+
     case PROP_STATE:
       if (self->state) {
         g_object_unref (self->state);
       }
       self->state = g_value_get_object (value);
       break;
+
+#if GST_VERSION_MINOR >= 10
     case PROP_VERBOSE:
       verbose = g_value_get_boolean (value);
 
@@ -426,6 +431,8 @@ gstd_pipeline_set_property (GObject * object,
             TRUE);
       }
       break;
+#endif
+
     default:
       /* We don't have any other property... */
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);

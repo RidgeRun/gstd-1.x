@@ -73,6 +73,9 @@ static GstdReturnCode
 gstd_bus_msg_notify_to_string (GstdBusMsg * msg, GstdIFormatter * formatter,
     GstMessage * target)
 {
+  GstdReturnCode ret = GSTD_BAD_COMMAND;
+
+#if GST_VERSION_MINOR >= 10
   GstObject *object = NULL;
   const gchar *property_name = NULL;
   const GValue *property_value = NULL;
@@ -111,6 +114,7 @@ gstd_bus_msg_notify_to_string (GstdBusMsg * msg, GstdIFormatter * formatter,
   if (property_value_str) {
     g_free (property_value_str);
   }
+#endif
 
-  return GSTD_EOK;
+  return ret;
 }
