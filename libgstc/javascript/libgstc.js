@@ -619,6 +619,7 @@ class GstdClient {
 
     /**
    * Set the pipeline verbose mode.
+   * Only supported on GST Version >= 1.10
    *
    * @param {String} pipe_name.
    *
