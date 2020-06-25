@@ -155,6 +155,17 @@ GST_START_TEST (test_pipeline_get_graph_null_client)
 
 GST_END_TEST;
 
+GST_START_TEST (test_pipeline_get_graph_null_output)
+{
+  GstcStatus ret;
+  const gchar *pipeline_name = "pipe";
+
+  ret = gstc_pipeline_get_graph (_client, pipeline_name, NULL);
+  assert_equals_int (GSTC_NULL_ARGUMENT, ret);
+}
+
+GST_END_TEST;
+
 static Suite *
 libgstc_pipeline_suite (void)
 {
@@ -167,6 +178,7 @@ libgstc_pipeline_suite (void)
   tcase_add_test (tc, test_pipeline_get_graph_success);
   tcase_add_test (tc, test_pipeline_get_graph_null_name);
   tcase_add_test (tc, test_pipeline_get_graph_null_client);
+  tcase_add_test (tc, test_pipeline_get_graph_null_output);
 
   return suite;
 }

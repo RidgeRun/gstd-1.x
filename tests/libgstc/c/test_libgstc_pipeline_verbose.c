@@ -116,12 +116,27 @@ gstc_json_child_string (const char *json, const char *parent_name,
   return GSTC_OK;
 }
 
-GST_START_TEST (test_pipeline_verbose_success)
+GST_START_TEST (test_pipeline_verbose_true_success)
 {
   GstcStatus ret;
   const gchar *pipeline_name = "pipe";
   const gint value = 1;
   const gchar *expected = "update /pipelines/pipe/verbose true";
+
+  ret = gstc_pipeline_verbose (_client, pipeline_name, value);
+  assert_equals_int (GSTC_OK, ret);
+
+  assert_equals_string (expected, _request);
+}
+
+GST_END_TEST;
+
+GST_START_TEST (test_pipeline_verbose_false_success)
+{
+  GstcStatus ret;
+  const gchar *pipeline_name = "pipe";
+  const gint value = 0;
+  const gchar *expected = "update /pipelines/pipe/verbose false";
 
   ret = gstc_pipeline_verbose (_client, pipeline_name, value);
   assert_equals_int (GSTC_OK, ret);
@@ -164,7 +179,8 @@ libgstc_pipeline_suite (void)
   suite_add_tcase (suite, tc);
 
   tcase_add_checked_fixture (tc, setup, teardown);
-  tcase_add_test (tc, test_pipeline_verbose_success);
+  tcase_add_test (tc, test_pipeline_verbose_true_success);
+  tcase_add_test (tc, test_pipeline_verbose_false_success);
   tcase_add_test (tc, test_pipeline_verbose_null_name);
   tcase_add_test (tc, test_pipeline_verbose_null_client);
 
