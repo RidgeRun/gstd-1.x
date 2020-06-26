@@ -16,6 +16,30 @@ export default {
                 return;
             }
         },
+        send_eos: async function(event) {
+            try {
+                await this.$datas.gstc.event_eos("p0");
+            } catch (error) {
+                this.$root.$emit("console_write", "EOS", error);
+                return;
+            }
+        },
+        flush_start: async function(event) {
+            try {
+                await this.$datas.gstc.event_flush_start("p0");
+            } catch (error) {
+                this.$root.$emit("console_write", "Flush", error);
+                return;
+            }
+        },
+        flush_stop: async function(event) {
+            try {
+                await this.$datas.gstc.event_flush_stop("p0");
+            } catch (error) {
+                this.$root.$emit("console_write", "Flush", error);
+                return;
+            }
+        },
     },
     props: ['name', 'enable'],
     template: `
@@ -29,7 +53,21 @@ export default {
                         <b-input-group-append>
                         <b-button v-on:click="bus_filter()" variant="outline-secondary">Apply</b-button>
                     </b-input-group-append>
-                </b-input-group>
+                
+                </b-input-group label="hola">
+                
+                <div class="btn-group" role="group" style="display: block ruby;padding-bottom: 8px;padding-top: 8px;" aria-label="Basic example">
+                    <h3>Send EOS: </h3>
+                    <b-button v-on:click="send_eos()" variant="outline-secondary">Send</b-button>
+                </div>
+                <div class="btn-group" role="group" style="display: block ruby;padding-bottom: 8px;" aria-label="Basic example">
+                <h3>Flush start: </h3>
+                    <b-button v-on:click="flush_start()" variant="outline-secondary">Send</b-button>
+                </div>
+                <div class="btn-group" role="group" style="display: block ruby;padding-bottom: 8px;" aria-label="Basic example">
+                    <h3>Flush stop: </h3>
+                    <b-button v-on:click="flush_stop()" variant="outline-secondary">Send</b-button>
+                </div>
 
             </div>
         
