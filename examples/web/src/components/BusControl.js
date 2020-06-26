@@ -4,28 +4,18 @@ export default {
     data() {
         return {
             text: "",
-            text_tmp: "",
-            filter: '',
-            timeout: -1
+            filter: ''
         }
     },
     methods: {
-        bus_timeout: async function(event) {
-            var res = await this.$datas.gstc.bus_timeout("p0", this.timeout);
-            console.log(res);
-        },
         bus_filter: async function(event) {
-            var res = await this.$datas.gstc.bus_filter("p0", this.filter);
-            console.log(res);
-        },
-        bus_read_local: async function(event) {
-
-            while (true) {
-                var res = await this.$datas.gstc.bus_read("p0");
-                this.text_tmp = res.response;
-                this.text += JSON.stringify(this.text_tmp, null, 4) + "\n";
+            try {
+                await this.$datas.gstc.bus_filter("p0", this.filter);
+            } catch (error) {
+                this.$root.$emit("console_write", "Filter", error);
+                return;
             }
-        }
+        },
     },
     props: ['name', 'enable'],
     template: `

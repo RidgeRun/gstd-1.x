@@ -20,11 +20,20 @@ export default {
             this.$datas.paused = event.target.paused;
         },
         play: async function() {
-            var res = await this.name.pipeline_play("p0");
+            try {
+                await this.name.pipeline_play("p0");
+            } catch (error) {
+                this.$root.$emit("console_write", "Play", error);
+                return;
+            }
         },
         pause: async function() {
-            var res = await this.name.pipeline_pause("p0");
-            console.log(res);
+            try {
+                await this.name.pipeline_pause("p0");
+            } catch (error) {
+                this.$root.$emit("console_write", "Pause", error);
+                return;
+            }
         },
         create_pipeline: async function(event) {
             if (this.config == true) {
@@ -36,39 +45,54 @@ export default {
                     var pipe = "v4l2src device=" + this.text + " ! videoconvert ! textoverlay text=\"Room A\" valignment=top halignment=left font-desc=\"Sans, 72 \" ! autovideosink";
                 }
             }
-            var res = await this.name.pipeline_create("p0", pipe);
-            var res = await this.name.pipeline_play("p0");
-            this.forceRerender();
-            var res = this.name.pipeline_pause("p0");
-            console.log(res);
-            this.$root.$emit('myEvent', 'new message!');
-            this.$root.$emit('busevent', 'new message!');
-            this.$datas.bus_enable = true;
+            try {
+                await this.name.pipeline_create("p0", pipe);
+                var res = await this.name.pipeline_play("p0");
+                this.forceRerender();
+                var res = this.name.pipeline_pause("p0");
+                console.log(res);
+                this.$root.$emit('myEvent', 'new message!');
+                this.$root.$emit('busevent', 'new message!');
+                this.$datas.bus_enable = true;
+            } catch (error) {
+                this.$root.$emit("console_write", "Create", error);
+                return;
+            }
         },
         stop_video: async function(event) {
-            var res = await this.name.pipeline_stop("p0");
-            console.log(res);
-            if (event) {
-                alert(event.target.tagName)
+            try {
+                await this.name.pipeline_stop("p0");
+            } catch (error) {
+                this.$root.$emit("console_write", "Stop", error);
+                return;
             }
         },
         speed_video: async function(speed) {
-            var actual_position = await this.name.read("/pipelines/p0/position");
-            this.$datas.speed = speed;
-            if (this.$datas.direction == 1) {
-                var res = await this.name.event_seek("p0", speed, 3, 1, 1, actual_position.response.value, 1, -1)
-            } else {
-                var res = await this.name.event_seek("p0", -speed, 3, 1, 1, 0, 1, actual_position.response.value)
+            try {
+                var actual_position = await this.name.read("/pipelines/p0/position");
+                this.$datas.speed = speed;
+                if (this.$datas.direction == 1) {
+                    var res = await this.name.event_seek("p0", speed, 3, 1, 1, actual_position.response.value, 1, -1)
+                } else {
+                    var res = await this.name.event_seek("p0", -speed, 3, 1, 1, 0, 1, actual_position.response.value)
+                }
+            } catch (error) {
+                this.$root.$emit("console_write", "Speed", error);
+                return;
             }
-            console.log(res);
+
         },
         speed_direction: async function(direction) {
             this.$datas.direction = direction;
             this.speed_video(this.$datas.speed);
         },
         jump_to: async function(seconds) {
-            var res = await this.name.event_seek("p0", this.$datas.speed, 3, 1, 1, this.userId * 1000000000, 1, -1)
-            console.log(res);
+            try {
+                await this.name.event_seek("p0", this.$datas.speed, 3, 1, 1, this.userId * 1000000000, 1, -1)
+            } catch (error) {
+                this.$root.$emit("console_write", "Jump to", error);
+                return;
+            }
         }
     },
     computed: {

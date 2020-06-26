@@ -16,7 +16,7 @@ export default {
             console.log(res);
         },
         bus_filter: async function(event) {
-            var res = await this.$datas.gstc.bus_filter("p0", "any");
+            var res = await this.$datas.gstc.bus_filter("p0", "error");
             console.log(res);
         },
         bus_read_local: async function(event) {
@@ -27,6 +27,9 @@ export default {
                     this.text += JSON.stringify(this.text_tmp, null, 4) + "\n";
                 }
             }
+        },
+        console_write: function(msg) {
+            this.text += msg;
         }
     },
 
@@ -38,7 +41,6 @@ export default {
 
     props: ['name', 'enable'],
     mounted: function() {
-        console.log("*****************" + this.$datas.checked);
         if (this.$datas.checked) {
             this.$root.$on('busevent', (text) => {
                 this.bus_timeout();
@@ -48,7 +50,10 @@ export default {
                 }, 150);
             })
         }
+        this.$root.$on("console_write", (func, msg) => {
 
+            return this.console_write(func + ": " + msg + "\n");
+        });
     },
     template: `
     <div>
