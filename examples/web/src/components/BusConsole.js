@@ -16,7 +16,7 @@ export default {
             console.log(res);
         },
         bus_filter: async function(event) {
-            var res = await this.$datas.gstc.bus_filter("p0", "error");
+            var res = await this.$datas.gstc.bus_filter("p0", "error+warning+info");
             console.log(res);
         },
         bus_read_local: async function(event) {

@@ -8,7 +8,8 @@ export default {
             srcpath: "http://localhost:8080",
             componentKey: 0,
             text: '',
-            userId: 0
+            userId: 0,
+            placeholder: "Pipeline"
         }
     },
     methods: {
@@ -106,6 +107,13 @@ export default {
             }
         }
     },
+    created: function() {
+        if (this.config == true) {
+            this.placeholder = "Pipeline";
+        } else {
+            this.placeholder = "File or camera path";
+        }
+    },
     computed: {
         playing() { return !this.$datas.paused; }
     },
@@ -114,7 +122,7 @@ export default {
     template: `
     <div> 
     <div style="display:flex;height: 40px;">
-        <b-form-input v-model="text" placeholder="File or camera path"></b-form-input>    
+        <b-form-input v-model="text" :placeholder="placeholder"></b-form-input>    
         <b-button v-on:click="create_pipeline()">
             <b-icon icon="box-arrow-up-right"></b-icon>
         </b-button>
