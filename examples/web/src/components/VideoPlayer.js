@@ -59,9 +59,20 @@ export default {
                 return;
             }
         },
+        delete_pipeline: async function(event) {
+            try {
+                await this.name.pipeline_delete("p0");
+            } catch (error) {
+                this.$root.$emit("console_write", "Delete", error);
+                return;
+            }
+        },
         stop_video: async function(event) {
             try {
                 await this.name.pipeline_stop("p0");
+                if (this.config == false) {
+                    await this.name.pipeline_delete("p0");
+                }
             } catch (error) {
                 this.$root.$emit("console_write", "Stop", error);
                 return;
@@ -107,6 +118,9 @@ export default {
         <b-button v-on:click="create_pipeline()">
             <b-icon icon="box-arrow-up-right"></b-icon>
         </b-button>
+        <b-button v-on:click="delete_pipeline()">
+        <b-icon icon="trash"></b-icon>
+    </b-button>
     </div>
     
     <video style="max-width:100%; height: auto;" :key="componentKey" id="videoElement" poster="./resources/cover.png"
