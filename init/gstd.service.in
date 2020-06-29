@@ -4,6 +4,8 @@ PartOf=graphical-session.target
 
 [Service]
 Type=forking
+Restart=on-failure
+RestartSec=5s
 ExecStart=@prefix@/bin/gstd -e
 ExecStop=@prefix@/bin/gstd -k
 
