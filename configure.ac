@@ -203,25 +203,25 @@ AC_ARG_WITH([gstd-logstatedir],
   [AC_SUBST([GSTD_LOG_STATE_DIR], [$with_gstd_logstatedir])],
   [AC_SUBST([GSTD_LOG_STATE_DIR], [$default])])
 
-dnl allow the user to enable systemd gstd.service install
+dnl allow the user to disable systemd gstd.service install
 AC_ARG_ENABLE(systemd,
-  AS_HELP_STRING([--enable-systemd], [Enable install of systemd gstd.service]),
-  [ systemd=true ],
-  [ systemd=false ])
+  AS_HELP_STRING([--disable-systemd], [Disable install of systemd gstd.service (enabled by default)]),
+  [ systemd=false ],
+  [ systemd=true ])
 AM_CONDITIONAL(WITH_SYSTEMD, test "$systemd" = true)
 
-dnl if systemd option is enabled, check for libsystemd dependency
+dnl if systemd option is enabled, check for systemd dependency
 if test "$systemd" = true; then
   PKG_CHECK_MODULES(SYSTEMD, [
-      libsystemd >= $SYSTEMD_REQUIRED
+      systemd >= $SYSTEMD_REQUIRED
     ], [
     ], [
     AC_MSG_ERROR([
       Can't find systemd development packages:
 
-      libsystemd-dev >= $SYSTEMD_REQUIRED
+      systemd >= $SYSTEMD_REQUIRED
 
-      Please make sure you have the necessary libsystemd-dev
+      Please make sure you have the necessary systemd
       development headers installed.
     ])
   ])
