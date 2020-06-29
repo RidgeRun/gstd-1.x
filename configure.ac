@@ -291,8 +291,8 @@ docs/Makefile
 docs/reference/Makefile
 docs/reference/gstd/Makefile
 init/Makefile
-init/gstd:init/gstd.in
-init/gstd.service:init/gstd.service.in
-init/gstd.conf:init/gstd.conf.in
+init/gstd
+init/gstd.service
+init/gstd.conf
 ])
 AC_OUTPUT
