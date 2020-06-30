@@ -7,8 +7,7 @@ import BusConsole from './BusConsole.js'
 import BusControl from './BusControl.js'
 import FooterControl from './FooterControl.js'
 
-var gstcG = new GstdClient();
-
+var gstcG = new GstdClient("http://" + sessionStorage.address, sessionStorage.port);
 if (document.getElementById("video_player")) {
     Vue.prototype.$datas = {
         file: '',
