@@ -122,6 +122,7 @@ gstd_property_dispose (GObject * object)
   }
 
   self->pspec = NULL;
+
   G_OBJECT_CLASS (gstd_property_parent_class)->dispose (object);
 }
 
