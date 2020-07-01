@@ -5,9 +5,9 @@ cdata.set('prefix', prefix)
 cdata.set('GSTD_STATE_DIRS_OWNER', get_option('with-statedir-owner'))
 
 initd_enabled = get_option('enable-initd')
-systemd_enabled = get_option('enable-systemd')
+systemd_enabled = not get_option('enable-systemd').disabled()
 
-if systemd_enabled
+if systemd_enabled and systemd_dep.found()
    # Generate tmpfiles.d config file
    tmpfiles = configure_file(
    input: 'gstd.conf.in',

@@ -204,30 +204,47 @@ AC_ARG_WITH([gstd-logstatedir],
   [AC_SUBST([GSTD_LOG_STATE_DIR], [$default])])
 
 dnl allow the user to disable systemd gstd.service install
+systemd=true
+systemd_required=true
 AC_ARG_ENABLE(systemd,
-  AS_HELP_STRING([--disable-systemd], [Disable install of systemd gstd.service (enabled by default)]),
-  [ systemd=false ],
-  [ systemd=true ])
-AM_CONDITIONAL(WITH_SYSTEMD, test "$systemd" = true)
+  AS_HELP_STRING([--enable-systemd], [Enable/disable install of systemd gstd.service]),
+  [ if test "x$enable_systemd" = "xno" ; then
+      systemd=false
+      systemd_required=false
+    fi
+  ],
+  [
+    systemd_required=false
+  ])
 
-dnl if systemd option is enabled, check for systemd dependency
+dnl check for systemd dependency
 if test "$systemd" = true; then
   PKG_CHECK_MODULES(SYSTEMD, [
-      systemd >= $SYSTEMD_REQUIRED
+    systemd >= $SYSTEMD_REQUIRED
     ], [
+        AC_SUBST([GSTD_SYSTEMD_CONF_DIR], [$(pkg-config systemd --variable=tmpfilesdir)])
+        AC_SUBST([GSTD_SYSTEMD_DIR], [$(pkg-config systemd --variable=systemduserunitdir)])
     ], [
-    AC_MSG_ERROR([
-      Can't find systemd development packages:
+      systemd=false
+      if test "$systemd_required" = true; then
+        AC_MSG_ERROR([
+          Can't find systemd development packages:
 
-      systemd >= $SYSTEMD_REQUIRED
+          systemd >= $SYSTEMD_REQUIRED
 
-      Please make sure you have the necessary systemd
-      development headers installed.
+          Please make sure you have the necessary systemd
+          development headers installed.
+        ])
+      else
+        AC_MSG_WARN([
+          Can't find systemd development packages:
+
+          gstd.service will not be installed
+        ])
+      fi
     ])
-  ])
-  AC_SUBST([GSTD_SYSTEMD_CONF_DIR], [$(pkg-config systemd --variable=tmpfilesdir)])
-  AC_SUBST([GSTD_SYSTEMD_DIR], [$(pkg-config systemd --variable=systemduserunitdir)])
 fi
+AM_CONDITIONAL(WITH_SYSTEMD, test "$systemd" = true)
 
 dnl allow the user to specify systemd gstd.service file location
 AC_ARG_WITH([gstd-systemddir],

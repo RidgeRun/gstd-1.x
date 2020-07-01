@@ -25,7 +25,9 @@ jansson_dep   = dependency('jansson',            version : '>=2.7')
 gst_check_dep = dependency('gstreamer-check-1.0',version : '>=1.0.5')
 thread_dep    = dependency('threads')
 libsoup_dep = dependency('libsoup-2.4',		       version : '>=2.4')
-systemd_dep   = dependency('systemd', required : get_option('enable-systemd'), version : '>=232')
+
+systemd_required = get_option('enable-systemd').enabled()
+systemd_dep = dependency('systemd', required : systemd_required, version : '>=232')
 
 cc = meson.get_compiler('c')
 readline = cc.find_library('readline', required: true)
