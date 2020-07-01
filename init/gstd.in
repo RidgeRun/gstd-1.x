@@ -21,7 +21,7 @@ manage_dir()
     fi
 
     #Set the owner
-    chown "$user" "$dir";
+    chown -R "$user" "$dir";
     if [ $? -ne 0 ]; then
         echo "GstD init: Error, cannot change $dir owner to $user" 1>&2;
         exit 1
@@ -34,12 +34,9 @@ gstdlogstatedir=@GSTD_LOG_STATE_DIR@
 
 case "$1" in
     start)
-        directories=("$gstdrunstatedir" "$gstdlogstatedir")
-
         #Manage pid and log directories
-        for d in ${directories[@]}; do
-            manage_dir "$d" 777 @GSTD_STATE_DIRS_OWNER@
-        done
+        manage_dir "$gstdrunstatedir" 777 @GSTD_STATE_DIRS_OWNER@
+        manage_dir "$gstdlogstatedir" 777 @GSTD_STATE_DIRS_OWNER@
 
         #Start gstd
         @prefix@/bin/gstd -e;
