@@ -6,6 +6,7 @@ import ChangeProperty from './ChangeProperty.js';
 import BusConsole from './BusConsole.js'
 import BusControl from './BusControl.js'
 import FooterControl from './FooterControl.js'
+import GstdControl from './GstdControl.js'
 
 
 var gstcG = new GstdClient("http://" + sessionStorage.address, sessionStorage.port);
@@ -39,7 +40,8 @@ export default {
         ChangeProperty,
         BusConsole,
         BusControl,
-        FooterControl
+        FooterControl,
+        GstdControl
 
     },
     data() {
@@ -54,6 +56,7 @@ export default {
     template: `
     <div class="container mx-auto p-4">
     <nav-control name="GSTD HTTP controller" ></nav-control>
+    <gstd-control></gstd-control>
       <video-player :config="appConfig" :name="gstc" :enable="checked"></video-player>
       <elements-control :name="gstc"></elements-control>
       <change-property :name="gstc"></change-property>

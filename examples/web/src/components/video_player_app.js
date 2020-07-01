@@ -6,6 +6,7 @@ import ChangeProperty from './ChangeProperty.js';
 import BusConsole from './BusConsole.js'
 import BusControl from './BusControl.js'
 import FooterControl from './FooterControl.js'
+import GstdControl from './GstdControl.js'
 
 var gstcG = new GstdClient("http://" + sessionStorage.address, sessionStorage.port);
 if (document.getElementById("video_player")) {
@@ -39,7 +40,8 @@ export default {
         ChangeProperty,
         BusConsole,
         BusControl,
-        FooterControl
+        FooterControl,
+        GstdControl
 
 
     },
@@ -55,6 +57,7 @@ export default {
     template: `
         <div class="container mx-auto p-4">
           <nav-control name="GSTD HTTP Video Player" ></nav-control>
+          <gstd-control></gstd-control>
           <select-input v-model="checked" :config="appConfig" :selected="selected_input"></select-input>
           <video-player :config="appConfig" :name="gstc" :enable="checked"></video-player>
           <bus-console :myprop="bus_enable"></bus-console>
