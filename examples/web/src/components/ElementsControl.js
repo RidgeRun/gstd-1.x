@@ -48,7 +48,6 @@ export default {
         <b-form-select v-on:change="getSelectedItem" style="display:flex;width: auto;" v-model="selected" :options="elements"></b-form-select>
         <label style="padding-top: 10px;">Property selection</label>
         <b-form-select v-on:change="getSelectedItem_property" style="display:flex;width: auto;" v-model="selected_element" :options="properties"></b-form-select>
-
     </div>
   `,
 };

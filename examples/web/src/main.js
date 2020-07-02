@@ -13,5 +13,4 @@ if (document.getElementById("controller")) {
     new Vue({
         render: h => h(controller_app),
     }).$mount(`#controller`);
-
 }

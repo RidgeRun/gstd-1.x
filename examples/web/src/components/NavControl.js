@@ -9,18 +9,14 @@ export default {
     props: ['name'],
     template: `
     <b-navbar style="" type="light" variant="light">
-    <b-navbar-brand href="#">{{name}}</b-navbar-brand>
+        <b-navbar-brand href="#">{{name}}</b-navbar-brand>
         <b-navbar-toggle target="navbar-toggle-collapse">
-
-
-    </b-navbar-toggle>
-
-    <b-collapse id="navbar-toggle-collapse" is-nav>
-        <b-navbar-nav class="ml-auto">
-        <b-button size="sm" class="my-2 my-sm-0"  variant="light" href="https://www.ridgerun.com/" target="_blank"><img src="./resources/logo.png" alt="Ridgerun" ></b-button>
-
-        </b-navbar-nav>
-    </b-collapse>
-</b-navbar>
+        </b-navbar-toggle>
+        <b-collapse id="navbar-toggle-collapse" is-nav>
+            <b-navbar-nav class="ml-auto">
+            <b-button size="sm" class="my-2 my-sm-0"  variant="light" href="https://www.ridgerun.com/" target="_blank"><img src="./resources/logo.png" alt="Ridgerun" ></b-button>
+            </b-navbar-nav>
+        </b-collapse>
+    </b-navbar>
   `,
 };

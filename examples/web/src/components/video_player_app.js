@@ -26,10 +26,9 @@ if (document.getElementById("video_player")) {
         selected_input: "File",
         bus_enable: false,
         timeout: -1
-
     }
-
 }
+
 export default {
     name: 'video_player_app',
     components: {
@@ -42,8 +41,6 @@ export default {
         BusControl,
         FooterControl,
         GstdControl
-
-
     },
     data() {
         return {

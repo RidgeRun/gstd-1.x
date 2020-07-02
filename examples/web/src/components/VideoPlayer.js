@@ -50,7 +50,7 @@ export default {
                 await this.name.pipeline_create("p0", pipe);
                 var res = await this.name.pipeline_play("p0");
                 this.forceRerender();
-                var res = this.name.pipeline_pause("p0");
+                var res = await this.name.pipeline_pause("p0");
                 console.log(res);
                 this.$root.$emit('myEvent', 'new message!');
                 this.$root.$emit('busevent', 'new message!');

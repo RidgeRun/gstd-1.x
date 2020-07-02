@@ -8,7 +8,6 @@ import BusControl from './BusControl.js'
 import FooterControl from './FooterControl.js'
 import GstdControl from './GstdControl.js'
 
-
 var gstcG = new GstdClient("http://" + sessionStorage.address, sessionStorage.port);
 if (document.getElementById("controller")) {
     Vue.prototype.$datas = {

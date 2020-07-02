@@ -11,7 +11,6 @@ export default {
             var res = await this.name.element_set("p0", this.$datas.selected_element, this.$datas.selected_properties, this.text)
         }
     },
-
     props: ['name'],
     template: `
     <div style="display:contents;height: 40px;">

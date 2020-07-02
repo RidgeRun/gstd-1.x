@@ -68,15 +68,8 @@ export default {
                     <h3>Flush stop: </h3>
                     <b-button v-on:click="flush_stop()" variant="outline-secondary">Send</b-button>
                 </div>
-
             </div>
-        
-
     `,
 };
-
 Vue.component('console-control', {
-
-
-
 })

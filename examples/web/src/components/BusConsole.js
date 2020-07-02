@@ -8,7 +8,6 @@ export default {
             myToggle: false,
         }
     },
-
     methods: {
         bus_timeout: async function(event) {
             console.log(this.$datas.file);
@@ -70,6 +69,5 @@ export default {
             </b-button-group>-->
         </div>
     </div>
-
 `,
 };

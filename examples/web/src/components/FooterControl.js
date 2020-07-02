@@ -13,7 +13,6 @@ export default {
     <b-navbar-nav class="ml-auto">
       <b-button size="lg" class="my-2 my-sm-0"  variant="info" href="https://www.ridgerun.com/contact" target="_blank"> Contact us</b-button>
     </b-navbar-nav>
-  
 </b-navbar>
 `,
 };
