@@ -12,7 +12,7 @@ export default {
     methods: {
         getElements: async function() {
             this.elements = [];
-            var res = await this.name.list_elements("p0");
+            var res = await this.$datas.gstc.list_elements("p0");
             for (var i = 0; i < res.response.nodes.length; i++) {
                 this.elements.push({ value: res.response.nodes[i].name, text: res.response.nodes[i].name });
             }
@@ -21,7 +21,7 @@ export default {
         },
         getProperties: async function() {
             this.properties = [];
-            var res = await this.name.list_properties("p0", String(this.$datas.selected_element));
+            var res = await this.$datas.gstc.list_properties("p0", String(this.$datas.selected_element));
             for (var i = 0; i < res.response.nodes.length; i++) {
                 this.properties.push({ value: res.response.nodes[i].name, text: res.response.nodes[i].name });
             }

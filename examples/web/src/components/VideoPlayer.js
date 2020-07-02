@@ -22,7 +22,7 @@ export default {
         },
         play: async function() {
             try {
-                await this.name.pipeline_play("p0");
+                await this.$datas.gstc.pipeline_play("p0");
             } catch (error) {
                 this.$root.$emit("console_write", "Play", error);
                 return;
@@ -30,7 +30,7 @@ export default {
         },
         pause: async function() {
             try {
-                await this.name.pipeline_pause("p0");
+                await this.$datas.gstc.pipeline_pause("p0");
             } catch (error) {
                 this.$root.$emit("console_write", "Pause", error);
                 return;
@@ -47,10 +47,10 @@ export default {
                 }
             }
             try {
-                await this.name.pipeline_create("p0", pipe);
-                var res = await this.name.pipeline_play("p0");
+                await this.$datas.gstc.pipeline_create("p0", pipe);
+                var res = await this.$datas.gstc.pipeline_play("p0");
                 this.forceRerender();
-                var res = await this.name.pipeline_pause("p0");
+                var res = await this.$datas.gstc.pipeline_pause("p0");
                 console.log(res);
                 this.$root.$emit('myEvent', 'new message!');
                 this.$root.$emit('busevent', 'new message!');
@@ -62,7 +62,7 @@ export default {
         },
         delete_pipeline: async function(event) {
             try {
-                await this.name.pipeline_delete("p0");
+                await this.$datas.gstc.pipeline_delete("p0");
             } catch (error) {
                 this.$root.$emit("console_write", "Delete", error);
                 return;
@@ -70,9 +70,9 @@ export default {
         },
         stop_video: async function(event) {
             try {
-                await this.name.pipeline_stop("p0");
+                await this.$datas.gstc.pipeline_stop("p0");
                 if (this.config == false) {
-                    await this.name.pipeline_delete("p0");
+                    await this.$datas.gstc.pipeline_delete("p0");
                 }
             } catch (error) {
                 this.$root.$emit("console_write", "Stop", error);
@@ -81,12 +81,12 @@ export default {
         },
         speed_video: async function(speed) {
             try {
-                var actual_position = await this.name.read("/pipelines/p0/position");
+                var actual_position = await this.$datas.gstc.read("/pipelines/p0/position");
                 this.$datas.speed = speed;
                 if (this.$datas.direction == 1) {
-                    var res = await this.name.event_seek("p0", speed, 3, 1, 1, actual_position.response.value, 1, -1)
+                    var res = await this.$datas.gstc.event_seek("p0", speed, 3, 1, 1, actual_position.response.value, 1, -1)
                 } else {
-                    var res = await this.name.event_seek("p0", -speed, 3, 1, 1, 0, 1, actual_position.response.value)
+                    var res = await this.$datas.gstc.event_seek("p0", -speed, 3, 1, 1, 0, 1, actual_position.response.value)
                 }
             } catch (error) {
                 this.$root.$emit("console_write", "Speed", error);
@@ -100,7 +100,7 @@ export default {
         },
         jump_to: async function(seconds) {
             try {
-                await this.name.event_seek("p0", this.$datas.speed, 3, 1, 1, this.userId * 1000000000, 1, -1)
+                await this.$datas.gstc.event_seek("p0", this.$datas.speed, 3, 1, 1, this.userId * 1000000000, 1, -1)
             } catch (error) {
                 this.$root.$emit("console_write", "Jump to", error);
                 return;

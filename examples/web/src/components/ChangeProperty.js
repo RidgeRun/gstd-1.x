@@ -8,7 +8,7 @@ export default {
     },
     methods: {
         create_pipeline: async function(event) {
-            var res = await this.name.element_set("p0", this.$datas.selected_element, this.$datas.selected_properties, this.text)
+            var res = await this.$datas.gstc.element_set("p0", this.$datas.selected_element, this.$datas.selected_properties, this.text)
         }
     },
     props: ['name'],
