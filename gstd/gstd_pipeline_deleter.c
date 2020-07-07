@@ -46,12 +46,12 @@ typedef struct _GstdPipelineDeleterClass GstdPipelineDeleterClass;
  */
 struct _GstdPipelineDeleter
 {
-  GObject parent;
+  GstObject parent;
 };
 
 struct _GstdPipelineDeleterClass
 {
-  GObjectClass parent_class;
+  GstObjectClass parent_class;
 };
 
 
@@ -62,7 +62,7 @@ gstd_ideleter_interface_init (GstdIDeleterInterface * iface)
 }
 
 G_DEFINE_TYPE_WITH_CODE (GstdPipelineDeleter, gstd_pipeline_deleter,
-    G_TYPE_OBJECT, G_IMPLEMENT_INTERFACE (GSTD_TYPE_IDELETER,
+    GST_TYPE_OBJECT, G_IMPLEMENT_INTERFACE (GSTD_TYPE_IDELETER,
         gstd_ideleter_interface_init));
 
 static void
@@ -85,23 +85,33 @@ gstd_pipeline_deleter_init (GstdPipelineDeleter * self)
 static GstdReturnCode
 gstd_pipeline_deleter_delete (GstdIDeleter * iface, GstdObject * object)
 {
+  GstdPipelineDeleter *self = NULL;
   GstdObject *state;
-  GstdReturnCode ret;
+  GstdReturnCode ret = GSTD_EOK;
 
   g_return_val_if_fail (iface, GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (object, GSTD_NULL_ARGUMENT);
 
+  self = GSTD_PIPELINE_DELETER (iface);
+
+  GST_OBJECT_LOCK (self);
+
   /* Stop the pipe if playing */
   ret = gstd_object_read (object, "state", &state);
-  if (ret)
-    return ret;
+  if (GSTD_EOK != ret) {
+    goto output;
+  }
 
   ret = gstd_object_update (state, "NULL");
-  if (ret)
-    return ret;
+  if (GSTD_EOK != ret) {
+    goto output;
+  }
 
   g_object_unref (state);
   g_object_unref (object);
+
+output:
+  GST_OBJECT_UNLOCK (self);
 
   return ret;
 }

@@ -51,12 +51,12 @@ typedef struct _GstdListReaderClass GstdListReaderClass;
  */
 struct _GstdListReader
 {
-  GObject parent;
+  GstObject parent;
 };
 
 struct _GstdListReaderClass
 {
-  GObjectClass parent_class;
+  GstObjectClass parent_class;
 };
 
 
@@ -67,7 +67,7 @@ gstd_ireader_interface_init (GstdIReaderInterface * iface)
 }
 
 G_DEFINE_TYPE_WITH_CODE (GstdListReader, gstd_list_reader,
-    G_TYPE_OBJECT, G_IMPLEMENT_INTERFACE (GSTD_TYPE_IREADER,
+    GST_TYPE_OBJECT, G_IMPLEMENT_INTERFACE (GSTD_TYPE_IREADER,
         gstd_ireader_interface_init));
 
 static void
@@ -91,6 +91,7 @@ static GstdReturnCode
 gstd_list_reader_read (GstdIReader * iface, GstdObject * object,
     const gchar * name, GstdObject ** out)
 {
+  GstdListReader *self = NULL;
   GstdObject *resource;
   GstdReturnCode ret;
 
@@ -98,6 +99,12 @@ gstd_list_reader_read (GstdIReader * iface, GstdObject * object,
   g_return_val_if_fail (GSTD_IS_LIST (object), GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (name, GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (out, GSTD_NULL_ARGUMENT);
+
+  self = GSTD_LIST_READER (iface);
+
+  GST_OBJECT_LOCK (self);
+  GST_OBJECT_LOCK (object);
+  GST_OBJECT_LOCK (&out);
 
   /* In the case of lists, "count" is a keyword */
   if (!g_strcmp0 ("count", name)) {
@@ -120,6 +127,11 @@ gstd_list_reader_read (GstdIReader * iface, GstdObject * object,
 
 out:
   *out = resource;
+
+  GST_OBJECT_UNLOCK (&out);
+  GST_OBJECT_UNLOCK (object);
+  GST_OBJECT_UNLOCK (self);
+
   return ret;
 }
 

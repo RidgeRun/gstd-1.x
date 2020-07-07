@@ -223,6 +223,8 @@ gstd_pipeline_init (GstdPipeline * self)
   self->graph = NULL;
   self->deep_notify_id = 0;
 
+  GST_OBJECT_LOCK (self);
+
   self->elements = g_object_new (GSTD_TYPE_LIST, "name", "elements",
       "node-type", GSTD_TYPE_ELEMENT, "flags", GSTD_PARAM_READ, NULL);
 
@@ -230,6 +232,8 @@ gstd_pipeline_init (GstdPipeline * self)
       g_object_new (GSTD_TYPE_LIST_READER, NULL));
   gstd_object_set_reader (GSTD_OBJECT (self),
       g_object_new (GSTD_TYPE_PROPERTY_READER, NULL));
+
+  GST_OBJECT_UNLOCK (self);
 }
 
 GstdReturnCode
@@ -237,6 +241,8 @@ gstd_pipeline_build (GstdPipeline * object)
 {
   GstdPipeline *self = object;
   GstdReturnCode ret;
+
+  GST_OBJECT_LOCK (self);
 
   ret =
       gstd_pipeline_create (self, GSTD_OBJECT_NAME (self), 0,
@@ -272,6 +278,8 @@ out1:
   self->pipeline = NULL;
 
 out:
+  GST_OBJECT_UNLOCK (self);
+
   return ret;
 }
 
@@ -281,6 +289,8 @@ gstd_pipeline_dispose (GObject * object)
   GstdPipeline *self = GSTD_PIPELINE (object);
 
   GST_INFO_OBJECT (self, "Disposing %s pipeline", GSTD_OBJECT_NAME (self));
+
+  GST_OBJECT_LOCK (self);
 
   /* Stop the pipe if playing */
   if (self->state) {
@@ -318,6 +328,9 @@ gstd_pipeline_dispose (GObject * object)
     g_object_unref (self->graph);
     self->graph = NULL;
   }
+
+  GST_OBJECT_UNLOCK (self);
+
   G_OBJECT_CLASS (gstd_pipeline_parent_class)->dispose (object);
 }
 
@@ -326,6 +339,8 @@ gstd_pipeline_get_property (GObject * object,
     guint property_id, GValue * value, GParamSpec * pspec)
 {
   GstdPipeline *self = GSTD_PIPELINE (object);
+
+  GST_OBJECT_LOCK (self);
 
   switch (property_id) {
     case PROP_DESCRIPTION:
@@ -390,6 +405,7 @@ gstd_pipeline_get_property (GObject * object,
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
       break;
   }
+  GST_OBJECT_UNLOCK (self);
 }
 
 static void
@@ -400,6 +416,8 @@ gstd_pipeline_set_property (GObject * object,
 #if GST_VERSION_MINOR >= 10
   gboolean verbose = FALSE;
 #endif
+
+  GST_OBJECT_LOCK (self);
 
   switch (property_id) {
     case PROP_DESCRIPTION:
@@ -438,6 +456,7 @@ gstd_pipeline_set_property (GObject * object,
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
       break;
   }
+  GST_OBJECT_UNLOCK (self);
 }
 
 /**
@@ -460,6 +479,7 @@ static GstdReturnCode
 gstd_pipeline_create (GstdPipeline * self, const gchar * name,
     const gint index, const gchar * description)
 {
+  GstdReturnCode ret = GSTD_EOK;
   GError *error;
   gchar *pipename;
   GstParseFlags flags;
@@ -468,11 +488,15 @@ gstd_pipeline_create (GstdPipeline * self, const gchar * name,
   g_return_val_if_fail (index != -1, GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (description, GSTD_NULL_ARGUMENT);
 
+  GST_OBJECT_LOCK (self);
+
   error = NULL;
   flags = GST_PARSE_FLAG_FATAL_ERRORS | GST_PARSE_FLAG_NO_SINGLE_ELEMENT_BINS;
   self->pipeline = gst_parse_launch_full (description, NULL, flags, &error);
-  if (!self->pipeline)
+  if (!self->pipeline) {
+    ret = GSTD_BAD_DESCRIPTION;
     goto wrong_pipeline;
+  }
 
   /* Single element descriptions (i.e.: playbin) aren't returned in a
      pipeline. This is a problem for us since we concepts like the bus
@@ -503,7 +527,9 @@ gstd_pipeline_create (GstdPipeline * self, const gchar * name,
   GST_INFO_OBJECT (self, "Created pipeline \"%s\": \"%s\"",
       GSTD_OBJECT_NAME (self), description);
 
-  return gstd_pipeline_fill_elements (self, self->pipeline);
+  ret = gstd_pipeline_fill_elements (self, self->pipeline);
+
+  goto output;
 
 wrong_pipeline:
   {
@@ -511,13 +537,18 @@ wrong_pipeline:
       GST_ERROR_OBJECT (self, "Unable to create pipeline: %s", error->message);
       g_error_free (error);
     }
-    return GSTD_BAD_DESCRIPTION;
   }
+
+output:
+  GST_OBJECT_UNLOCK (self);
+
+  return ret;
 }
 
 static GstdReturnCode
 gstd_pipeline_fill_elements (GstdPipeline * self, GstElement * element)
 {
+  GstdReturnCode ret = GSTD_EOK;
   GstPipeline *pipe;
   GstIterator *it;
   GValue item = G_VALUE_INIT;
@@ -529,6 +560,9 @@ gstd_pipeline_fill_elements (GstdPipeline * self, GstElement * element)
   g_return_val_if_fail (GST_IS_ELEMENT (element), GSTD_NULL_ARGUMENT);
 
   GST_DEBUG_OBJECT (self, "Gathering \"%s\" elements", GSTD_OBJECT_NAME (self));
+
+  GST_OBJECT_LOCK (self);
+  GST_OBJECT_LOCK (element);
 
   if (!GST_IS_PIPELINE (element))
     goto singleelement;
@@ -576,12 +610,21 @@ singleelement:
   {
     GST_INFO_OBJECT (self, "The pipeline \"%s\" doesn't contain elements!",
         GSTD_OBJECT_NAME (self));
-    return GSTD_EOK;
+    ret = GSTD_EOK;
+    goto output;
   }
 noiter:
   {
     GST_ERROR_OBJECT (self, "Malformed pipeline \"%s\"",
         GSTD_OBJECT_NAME (self));
-    return GSTD_NO_PIPELINE;
+    ret = GSTD_NO_PIPELINE;
+  }
+
+output:
+  {
+    GST_OBJECT_UNLOCK (element);
+    GST_OBJECT_UNLOCK (self);
+
+    return ret;
   }
 }

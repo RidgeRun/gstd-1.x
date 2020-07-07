@@ -55,11 +55,6 @@ struct _GstdObject
   gchar *name;
 
   /**
-   * A protection for the object's lock
-   */
-  GMutex codelock;
-
-  /**
    * The return code set by the last function
    */
   GstdReturnCode code;

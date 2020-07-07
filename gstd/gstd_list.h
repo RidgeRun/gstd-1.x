@@ -52,11 +52,8 @@ struct _GstdList
   GstdObject parent;
 
   guint count;
-
   GType node_type;
-
   GParamFlags flags;
-
   GList *list;
 };
 

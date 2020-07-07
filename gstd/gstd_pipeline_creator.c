@@ -38,12 +38,12 @@ typedef struct _GstdPipelineCreatorClass GstdPipelineCreatorClass;
  */
 struct _GstdPipelineCreator
 {
-  GObject parent;
+  GstObject parent;
 };
 
 struct _GstdPipelineCreatorClass
 {
-  GObjectClass parent_class;
+  GstObjectClass parent_class;
 };
 
 
@@ -54,7 +54,7 @@ gstd_icreator_interface_init (GstdICreatorInterface * iface)
 }
 
 G_DEFINE_TYPE_WITH_CODE (GstdPipelineCreator, gstd_pipeline_creator,
-    G_TYPE_OBJECT, G_IMPLEMENT_INTERFACE (GSTD_TYPE_ICREATOR,
+    GST_TYPE_OBJECT, G_IMPLEMENT_INTERFACE (GSTD_TYPE_ICREATOR,
         gstd_icreator_interface_init));
 
 static void
@@ -78,24 +78,37 @@ static GstdReturnCode
 gstd_pipeline_creator_create (GstdICreator * iface, const gchar * name,
     const gchar * description, GstdObject ** out)
 {
+  GstdPipelineCreator *self = NULL;
+  GstdReturnCode ret = GSTD_EOK;
   GstdPipeline *pipeline;
   *out = NULL;
 
   g_return_val_if_fail (iface, GSTD_NULL_ARGUMENT);
 
+  self = GSTD_PIPELINE_CREATOR (iface);
+
+  GST_OBJECT_LOCK (self);
+
   if (NULL == name) {
     GST_ERROR_OBJECT (iface, "Pipeline name not provided");
-    return GSTD_MISSING_NAME;
+    ret = GSTD_MISSING_NAME;
+    goto output;
   }
 
   if (NULL == description) {
     GST_ERROR_OBJECT (iface, "Pipeline description not provided");
-    return GSTD_MISSING_ARGUMENT;
+    ret = GSTD_MISSING_ARGUMENT;
+    goto output;
   }
 
   pipeline = g_object_new (GSTD_TYPE_PIPELINE, "name", name, "description",
       description, NULL);
   *out = GSTD_OBJECT (pipeline);
 
-  return gstd_pipeline_build (pipeline);
+  ret = gstd_pipeline_build (pipeline);
+
+output:
+  GST_OBJECT_UNLOCK (self);
+
+  return ret;
 }

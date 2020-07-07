@@ -21,9 +21,7 @@
 #include "config.h"
 #endif
 
-#include <gobject/gvaluecollector.h>
 #include <gst/gst.h>
-#include <string.h>
 
 #include "gstd_list.h"
 #include "gstd_object.h"
@@ -124,10 +122,14 @@ gstd_list_dispose (GObject * object)
 
   GST_INFO_OBJECT (self, "Disposing %s list", GSTD_OBJECT_NAME (self));
 
+  GST_OBJECT_LOCK (self);
+
   if (self->list) {
     g_list_free_full (self->list, g_object_unref);
     self->list = NULL;
   }
+
+  GST_OBJECT_UNLOCK (self);
 
   G_OBJECT_CLASS (gstd_list_parent_class)->dispose (object);
 }
@@ -137,6 +139,8 @@ gstd_list_get_property (GObject * object,
     guint property_id, GValue * value, GParamSpec * pspec)
 {
   GstdList *self = GSTD_LIST (object);
+
+  GST_OBJECT_LOCK (self);
 
   switch (property_id) {
     case PROP_COUNT:
@@ -157,6 +161,8 @@ gstd_list_get_property (GObject * object,
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
       break;
   }
+
+  GST_OBJECT_UNLOCK (self);
 }
 
 static void
@@ -164,6 +170,8 @@ gstd_list_set_property (GObject * object,
     guint property_id, const GValue * value, GParamSpec * pspec)
 {
   GstdList *self = GSTD_LIST (object);
+
+  GST_OBJECT_LOCK (self);
 
   switch (property_id) {
     case PROP_NODE_TYPE:
@@ -180,17 +188,21 @@ gstd_list_set_property (GObject * object,
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
       break;
   }
+  GST_OBJECT_UNLOCK (self);
 }
 
 static gint
 gstd_list_find_node (gconstpointer _obj, gconstpointer _name)
 {
+  gint ret = 0;
   GstdObject *obj = GSTD_OBJECT (_obj);
   gchar *name = (gchar *) _name;
 
   GST_LOG ("Comparing %s vs %s", GSTD_OBJECT_NAME (obj), name);
 
-  return strcmp (GSTD_OBJECT_NAME (obj), name);
+  ret = strcmp (GSTD_OBJECT_NAME (obj), name);
+
+  return ret;
 }
 
 static GstdReturnCode
@@ -205,9 +217,11 @@ gstd_list_create (GstdObject * object, const gchar * name,
 
   self = GSTD_LIST (object);
 
+  GST_OBJECT_LOCK (self);
+
   g_return_val_if_fail (object->creator, GSTD_MISSING_INITIALIZATION);
   ret = gstd_icreator_create (object->creator, name, description, &out);
-  if (ret) {
+  if (GSTD_EOK != ret) {
     goto error;
   }
   if (NULL == out) {
@@ -217,13 +231,16 @@ gstd_list_create (GstdObject * object, const gchar * name,
 
   self->count++;
 
+  GST_OBJECT_UNLOCK (self);
+
   if (!gstd_list_append_child (self, out)) {
     g_object_unref (out);
     ret = GSTD_EXISTING_RESOURCE;
-    return ret;
+    goto output;
   }
 
-  return ret;
+  goto output;
+
 error:
   {
     if (out)
@@ -231,8 +248,11 @@ error:
 
     GST_ERROR_OBJECT (object, "Could not create the resource  \"%s\" on \"%s\"",
         name, GSTD_OBJECT_NAME (self));
-    return ret;
   }
+
+output:
+
+  return ret;
 }
 
 
@@ -251,11 +271,14 @@ gstd_list_delete (GstdObject * object, const gchar * node)
 
   g_return_val_if_fail (object->deleter, GSTD_MISSING_INITIALIZATION);
 
+  GST_OBJECT_LOCK (self);
+
   /* Test if the resource to delete exists */
   found = g_list_find_custom (self->list, node, gstd_list_find_node);
 
-  if (!found)
+  if (!found) {
     goto unexisting;
+  }
 
   todelete = GSTD_OBJECT (found->data);
 
@@ -263,26 +286,33 @@ gstd_list_delete (GstdObject * object, const gchar * node)
       GSTD_OBJECT_NAME (self));
 
   ret = gstd_ideleter_delete (object->deleter, todelete);
-  if (ret)
-    return ret;
+  if (GSTD_EOK != ret) {
+    goto output;
+  }
 
   self->count--;
 
   self->list = g_list_delete_link (self->list, found);
 
-  return ret;
+  goto output;
 
 unexisting:
   {
     GST_ERROR_OBJECT (object, "The resource \"%s\" doesn't exists in \"%s\"",
         node, GSTD_OBJECT_NAME (self));
-    return GSTD_NO_RESOURCE;
+    ret = GSTD_NO_RESOURCE;
   }
+
+output:
+  GST_OBJECT_UNLOCK (self);
+
+  return ret;
 }
 
 static GstdReturnCode
 gstd_list_to_string (GstdObject * object, gchar ** outstring)
 {
+  GstdReturnCode ret = GSTD_EOK;
   GstdList *self = GSTD_LIST (object);
   gchar *props;
   gchar *acc;
@@ -292,6 +322,8 @@ gstd_list_to_string (GstdObject * object, gchar ** outstring)
 
   g_return_val_if_fail (GSTD_IS_OBJECT (object), GSTD_NULL_ARGUMENT);
   g_warn_if_fail (!*outstring);
+
+  GST_OBJECT_LOCK (self);
 
   /* Lets leverage the parent's class implementation */
   GSTD_OBJECT_CLASS (gstd_list_parent_class)->to_string (GSTD_OBJECT (object),
@@ -315,7 +347,9 @@ gstd_list_to_string (GstdObject * object, gchar ** outstring)
   g_free (props);
   g_free (acc);
 
-  return GSTD_EOK;
+  GST_OBJECT_UNLOCK (self);
+
+  return ret;
 }
 
 GstdObject *
@@ -327,6 +361,8 @@ gstd_list_find_child (GstdList * self, const gchar * name)
   g_return_val_if_fail (self, NULL);
   g_return_val_if_fail (name, NULL);
 
+  GST_OBJECT_LOCK (self);
+
   result = g_list_find_custom (self->list, name, gstd_list_find_node);
 
 
@@ -336,35 +372,50 @@ gstd_list_find_child (GstdList * self, const gchar * name)
     child = NULL;
   }
 
+  GST_OBJECT_UNLOCK (self);
+
   return child;
 }
 
 gboolean
 gstd_list_append_child (GstdList * self, GstdObject * child)
 {
+  gboolean ret = TRUE;
   GList *found;
 
   g_return_val_if_fail (self, GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (child, GSTD_NULL_ARGUMENT);
 
+  GST_OBJECT_LOCK (self);
+  GST_OBJECT_LOCK (child);
+
   /* Test if the resource to create already exists */
   found =
       g_list_find_custom (self->list, GSTD_OBJECT_NAME (child),
       gstd_list_find_node);
-  if (found)
+  if (found) {
     goto exists;
+  }
 
   self->list = g_list_append (self->list, child);
   self->count = g_list_length (self->list);
   GST_INFO_OBJECT (self, "Appended %s to %s list", GSTD_OBJECT_NAME (child),
       GSTD_OBJECT_NAME (self));
 
-  return TRUE;
+  goto output;
 
 exists:
   {
     GST_ERROR_OBJECT (self, "The resource \"%s\" already exists in \"%s\"",
         GSTD_OBJECT_NAME (child), GSTD_OBJECT_NAME (self));
-    return FALSE;
+    ret = FALSE;
+  }
+
+output:
+  {
+    GST_OBJECT_UNLOCK (child);
+    GST_OBJECT_UNLOCK (self);
+
+    return ret;
   }
 }
