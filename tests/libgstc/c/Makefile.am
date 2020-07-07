@@ -6,6 +6,7 @@ TESTS = 				\
 	libgstc_pipeline_play   	\
 	libgstc_pipeline_pause		\
 	libgstc_pipeline_stop		\
+	libgstc_pipeline_get_graph	\
 	libgstc_json			\
 	libgstc_socket			\
 	libgstc_element_set		\
@@ -20,7 +21,8 @@ TESTS = 				\
 	libgstc_pipeline_list_elements	\
 	libgstc_pipeline_list 		\
 	libgstc_pipeline_list_properties\
-	libgstc_pipeline_element_get
+	libgstc_pipeline_element_get	\
+	libgstc_pipeline_verbose
 
 check_PROGRAMS = $(TESTS)
 
@@ -67,6 +69,11 @@ libgstc_pipeline_stop_SOURCES = 		\
 	test_libgstc_pipeline_stop.c		\
 	@top_srcdir@/libgstc/c/libgstc.c	\
 	$(COMMON_SOURCES)
+
+libgstc_pipeline_get_graph_SOURCES =	\
+	test_libgstc_pipeline_get_graph.c	\
+	@top_srcdir@/libgstc/c/libgstc.c	\
+		$(COMMON_SOURCES)
 
 libgstc_json_SOURCES =		 		\
 	test_libgstc_json.c			\
@@ -140,3 +147,7 @@ libgstc_pipeline_element_get_SOURCES =		\
 	@top_srcdir@/libgstc/c/libgstc.c	\
 		$(COMMON_SOURCES)
 
+libgstc_pipeline_verbose_SOURCES =	\
+	test_libgstc_pipeline_verbose.c	\
+	@top_srcdir@/libgstc/c/libgstc.c	\
+		$(COMMON_SOURCES)

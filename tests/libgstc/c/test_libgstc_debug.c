@@ -123,14 +123,14 @@ gstc_json_get_child_char_array (const char *json, const char *parent_name,
 }
 
 GstcStatus
-gstc_json_child_string (const char * json, const char * parent_name,
-  const char * data_name, char ** out)
+gstc_json_child_string (const char *json, const char *parent_name,
+    const char *data_name, char **out)
 {
   gstc_assert_and_ret_val (NULL != json, GSTC_NULL_ARGUMENT);
   gstc_assert_and_ret_val (NULL != parent_name, GSTC_NULL_ARGUMENT);
   gstc_assert_and_ret_val (NULL != data_name, GSTC_NULL_ARGUMENT);
   gstc_assert_and_ret_val (NULL != out, GSTC_NULL_ARGUMENT);
-  
+
   return GSTC_OK;
 }
 

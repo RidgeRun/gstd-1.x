@@ -121,14 +121,14 @@ gstc_json_get_child_char_array (const char *json, const char *parent_name,
 }
 
 GstcStatus
-gstc_json_child_string (const char * json, const char * parent_name,
-  const char * data_name, char ** out)
+gstc_json_child_string (const char *json, const char *parent_name,
+    const char *data_name, char **out)
 {
   gstc_assert_and_ret_val (NULL != json, GSTC_NULL_ARGUMENT);
   gstc_assert_and_ret_val (NULL != parent_name, GSTC_NULL_ARGUMENT);
   gstc_assert_and_ret_val (NULL != data_name, GSTC_NULL_ARGUMENT);
   gstc_assert_and_ret_val (NULL != out, GSTC_NULL_ARGUMENT);
-  
+
   return GSTC_OK;
 }
 
@@ -142,8 +142,8 @@ GST_START_TEST (test_pipeline_list_properties_success)
   int array_lenght;
 
   ret =
-      gstc_element_properties_list (_client, (gchar*)pipeline_name, (gchar*)element_name,
-      &response, &array_lenght);
+      gstc_element_properties_list (_client, (gchar *) pipeline_name,
+      (gchar *) element_name, &response, &array_lenght);
 
   assert_equals_int (GSTC_OK, ret);
 
@@ -161,8 +161,8 @@ GST_START_TEST (test_pipeline_list_properties_null_list_lenght)
   int *array_lenght = NULL;
 
   ret =
-      gstc_element_properties_list (_client, (gchar*)pipeline_name, (gchar*)element_name,
-      &response, array_lenght);
+      gstc_element_properties_list (_client, (gchar *) pipeline_name,
+      (gchar *) element_name, &response, array_lenght);
 
   assert_equals_int (GSTC_NULL_ARGUMENT, ret);
 }
@@ -178,8 +178,8 @@ GST_START_TEST (test_pipeline_list_properties_null_client)
   int array_lenght;
 
   ret =
-      gstc_element_properties_list (NULL, (gchar*)pipeline_name, (gchar*)element_name,
-      &response, &array_lenght);
+      gstc_element_properties_list (NULL, (gchar *) pipeline_name,
+      (gchar *) element_name, &response, &array_lenght);
 
   assert_equals_int (GSTC_NULL_ARGUMENT, ret);
 }
@@ -195,8 +195,8 @@ GST_START_TEST (test_pipeline_list_properties_null_pipeline_name)
   int array_lenght;
 
   ret =
-      gstc_element_properties_list (_client, pipeline_name, (gchar*)element_name,
-      &response, &array_lenght);
+      gstc_element_properties_list (_client, pipeline_name,
+      (gchar *) element_name, &response, &array_lenght);
 
   assert_equals_int (GSTC_NULL_ARGUMENT, ret);
 }
@@ -212,8 +212,8 @@ GST_START_TEST (test_pipeline_list_properties_null_element_name)
   int array_lenght;
 
   ret =
-      gstc_element_properties_list (_client, (gchar*)pipeline_name, element_name,
-      &response, &array_lenght);
+      gstc_element_properties_list (_client, (gchar *) pipeline_name,
+      element_name, &response, &array_lenght);
 
   assert_equals_int (GSTC_NULL_ARGUMENT, ret);
 }

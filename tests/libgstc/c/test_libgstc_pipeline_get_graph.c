@@ -20,9 +20,9 @@
 #include <string.h>
 
 #include "libgstc.h"
-#include "libgstc_json.h"
 #include "libgstc_socket.h"
 #include "libgstc_assert.h"
+#include "libgstc_json.h"
 
 /* Test Fixture */
 static gchar _request[512];
@@ -56,9 +56,6 @@ GstcStatus
 gstc_socket_new (const char *address, const unsigned int port,
     const int keep_connection_open, GstcSocket ** out)
 {
-  gstc_assert_and_ret_val (NULL != address, GSTC_NULL_ARGUMENT);
-  gstc_assert_and_ret_val (NULL != out, GSTC_NULL_ARGUMENT);
-
   *out = &_socket;
 
   return GSTC_OK;
@@ -73,10 +70,6 @@ GstcStatus
 gstc_socket_send (GstcSocket * socket, const gchar * request, gchar ** response,
     const int timeout)
 {
-  gstc_assert_and_ret_val (NULL != socket, GSTC_NULL_ARGUMENT);
-  gstc_assert_and_ret_val (NULL != request, GSTC_NULL_ARGUMENT);
-  gstc_assert_and_ret_val (NULL != response, GSTC_NULL_ARGUMENT);
-
   *response = malloc (1);
 
   memcpy (_request, request, strlen (request));
@@ -87,20 +80,12 @@ gstc_socket_send (GstcSocket * socket, const gchar * request, gchar ** response,
 GstcStatus
 gstc_json_get_int (const gchar * json, const gchar * name, gint * out)
 {
-  gstc_assert_and_ret_val (NULL != json, GSTC_NULL_ARGUMENT);
-  gstc_assert_and_ret_val (NULL != name, GSTC_NULL_ARGUMENT);
-  gstc_assert_and_ret_val (NULL != out, GSTC_NULL_ARGUMENT);
-
   return *out = GSTC_OK;
 }
 
 GstcStatus
 gstc_json_is_null (const gchar * json, const gchar * name, gint * out)
 {
-  gstc_assert_and_ret_val (NULL != json, GSTC_NULL_ARGUMENT);
-  gstc_assert_and_ret_val (NULL != name, GSTC_NULL_ARGUMENT);
-  gstc_assert_and_ret_val (NULL != out, GSTC_NULL_ARGUMENT);
-
   *out = 0;
   return GSTC_OK;
 }
@@ -116,7 +101,6 @@ gstc_json_get_child_char_array (const char *json, const char *parent_name,
   gstc_assert_and_ret_val (NULL != element_name, GSTC_NULL_ARGUMENT);
   gstc_assert_and_ret_val (NULL != out, GSTC_NULL_ARGUMENT);
   gstc_assert_and_ret_val (NULL != array_lenght, GSTC_NULL_ARGUMENT);
-
   return GSTC_OK;
 }
 
@@ -132,23 +116,14 @@ gstc_json_child_string (const char *json, const char *parent_name,
   return GSTC_OK;
 }
 
-GST_START_TEST (test_seek_success)
+GST_START_TEST (test_pipeline_get_graph_success)
 {
   GstcStatus ret;
-  const gchar *pipe_name = "pipe";
-  const double rate = 1.0;
-  const int format = 3;
-  const int flags = 1;
-  const int start_type = 1;
-  const long long start = 0;
-  const int end_type = 1;
-  const long long end = 9999;
-  const gchar *expected =
-      "create /pipelines/pipe/event seek 1.000000 3 1 1 0 1 9999";
+  const gchar *pipeline_name = "pipe";
+  const gchar *expected = "read /pipelines/pipe/graph";
+  char *pipe_description = NULL;
 
-  ret =
-      gstc_pipeline_seek (_client, pipe_name, rate, format, flags, start_type,
-      start, end_type, end);
+  ret = gstc_pipeline_get_graph (_client, pipeline_name, &pipe_description);
   assert_equals_int (GSTC_OK, ret);
 
   assert_equals_string (expected, _request);
@@ -156,59 +131,56 @@ GST_START_TEST (test_seek_success)
 
 GST_END_TEST;
 
-GST_START_TEST (test_null_client)
+GST_START_TEST (test_pipeline_get_graph_null_name)
 {
   GstcStatus ret;
-  const gchar *pipe_name = "pipe";
-  const double rate = 1.0;
-  const int format = 3;
-  const int flags = 1;
-  const int start_type = 1;
-  const long long start = 0;
-  const int end_type = 1;
-  const long long end = 9999;
+  const gchar *pipeline_name = NULL;
+  char *pipe_description = NULL;
 
-  ret =
-      gstc_pipeline_seek (NULL, pipe_name, rate, format, flags, start_type,
-      start, end_type, end);
+  ret = gstc_pipeline_get_graph (_client, pipeline_name, &pipe_description);
   assert_equals_int (GSTC_NULL_ARGUMENT, ret);
 }
 
 GST_END_TEST;
 
-GST_START_TEST (test_null_pipe_name)
+GST_START_TEST (test_pipeline_get_graph_null_client)
 {
   GstcStatus ret;
-  const double rate = 1.0;
-  const int format = 3;
-  const int flags = 1;
-  const int start_type = 1;
-  const long long start = 0;
-  const int end_type = 1;
-  const long long end = 9999;
+  const gchar *pipeline_name = "pipe";
+  char *pipe_description = NULL;
 
-  ret =
-      gstc_pipeline_seek (_client, NULL, rate, format, flags, start_type, start,
-      end_type, end);
+  ret = gstc_pipeline_get_graph (NULL, pipeline_name, &pipe_description);
+  assert_equals_int (GSTC_NULL_ARGUMENT, ret);
+}
+
+GST_END_TEST;
+
+GST_START_TEST (test_pipeline_get_graph_null_output)
+{
+  GstcStatus ret;
+  const gchar *pipeline_name = "pipe";
+
+  ret = gstc_pipeline_get_graph (_client, pipeline_name, NULL);
   assert_equals_int (GSTC_NULL_ARGUMENT, ret);
 }
 
 GST_END_TEST;
 
 static Suite *
-libgstc_pipeline_seek_suite (void)
+libgstc_pipeline_suite (void)
 {
-  Suite *suite = suite_create ("libgstc_pipeline_seek");
+  Suite *suite = suite_create ("libgstc_pipeline_get_graph");
   TCase *tc = tcase_create ("general");
 
   suite_add_tcase (suite, tc);
 
   tcase_add_checked_fixture (tc, setup, teardown);
-  tcase_add_test (tc, test_seek_success);
-  tcase_add_test (tc, test_null_client);
-  tcase_add_test (tc, test_null_pipe_name);
+  tcase_add_test (tc, test_pipeline_get_graph_success);
+  tcase_add_test (tc, test_pipeline_get_graph_null_name);
+  tcase_add_test (tc, test_pipeline_get_graph_null_client);
+  tcase_add_test (tc, test_pipeline_get_graph_null_output);
 
   return suite;
 }
 
-GST_CHECK_MAIN (libgstc_pipeline_seek);
+GST_CHECK_MAIN (libgstc_pipeline);

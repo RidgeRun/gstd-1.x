@@ -38,27 +38,7 @@ autoregen.sh
 tests/gstd/test_gstd_no_create
 tests/gstd/test_gstd_pipeline_create
 tests/gstd/test_gstd_state
-tests/libgstc/libgstc_client
-tests/libgstc/libgstc_pipeline_create
-tests/libgstc/libgstc_pipeline_delete
-tests/libgstc/libgstc_ping
-tests/libgstc/libgstc_pipeline_play
-tests/libgstc/libgstc_pipeline_pause
-tests/libgstc/libgstc_pipeline_stop
-tests/libgstc/libgstc_json
-tests/libgstc/libgstc_socket
-tests/libgstc/libgstc_element_set
-tests/libgstc/libgstc_pipeline_inject_eos
-tests/libgstc/libgstc_pipeline_bus_wait_async
-tests/libgstc/libgstc_pipeline_bus_wait
-tests/libgstc/libgstc_pipeline_seek
-tests/libgstc/libgstc_pipeline_flush_start
-tests/libgstc/libgstc_pipeline_flush_stop
-tests/libgstc/libgstc_pipeline_list
-tests/libgstc/libgstc_debug
-tests/libgstc/libgstc_pipeline_list_elements
-tests/libgstc/libgstc_pipeline_list_properties
-tests/libgstc/libgstc_pipeline_element_get
+tests/libgstc/c/libgstc*
 
 # Examples
 examples/libgstc/simple_pipeline
