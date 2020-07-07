@@ -1,4 +1,6 @@
 /*
+ * Created by RidgeRun, 2020
+ *
  * The software contained in this file is free and unencumbered software
  * released into the public domain. Anyone is free to use the software
  * contained in this file as they choose, including incorporating it into
@@ -11,7 +13,7 @@ export default {
     data() {
         return {
             selected: null,
-            selected_element: null,
+            selectedElement: null,
             properties: [{ value: null, text: "Property" }],
             elements: [{ value: null, text: "Elements" }],
         }
@@ -19,7 +21,7 @@ export default {
     methods: {
         getElements: async function() {
             this.elements = [];
-            var res = await this.$datas.gstc.list_elements("p0");
+            var res = await this.$datas.gstc.list_elements(this.$datas.pipeName);
             for (var i = 0; i < res.response.nodes.length; i++) {
                 this.elements.push({ value: res.response.nodes[i].name, text: res.response.nodes[i].name });
             }
@@ -28,7 +30,7 @@ export default {
         },
         getProperties: async function() {
             this.properties = [];
-            var res = await this.$datas.gstc.list_properties("p0", String(this.$datas.selected_element));
+            var res = await this.$datas.gstc.list_properties(this.$datas.pipeName, String(this.$datas.selectedElement));
             for (var i = 0; i < res.response.nodes.length; i++) {
                 this.properties.push({ value: res.response.nodes[i].name, text: res.response.nodes[i].name });
             }
@@ -36,11 +38,11 @@ export default {
 
         },
         getSelectedItem: function() {
-            this.$datas.selected_element = this.selected;
+            this.$datas.selectedElement = this.selected;
             this.getProperties();
         },
         getSelectedItem_property: function() {
-            this.$datas.selected_properties = this.selected_element;
+            this.$datas.selectedProperties = this.selectedElement;
         }
     },
     mounted: function() {
@@ -54,7 +56,7 @@ export default {
         <label>Element selection</label>
         <b-form-select v-on:change="getSelectedItem" style="display:flex;width: auto;" v-model="selected" :options="elements"></b-form-select>
         <label style="padding-top: 10px;">Property selection</label>
-        <b-form-select v-on:change="getSelectedItem_property" style="display:flex;width: auto;" v-model="selected_element" :options="properties"></b-form-select>
+        <b-form-select v-on:change="getSelectedItem_property" style="display:flex;width: auto;" v-model="selectedElement" :options="properties"></b-form-select>
     </div>
   `,
 };

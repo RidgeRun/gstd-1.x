@@ -1,7 +1,10 @@
+# Created by RidgeRun, 2020
+#
 # The software contained in this file is free and unencumbered software
 # released into the public domain. Anyone is free to use the software contained
 # in this file as they choose, including incorporating it into proprietary
 # software.
+
 import sys
 import threading
 from pygstc.gstc import GstcError, GstdError, GstdClient

@@ -1,4 +1,6 @@
 /*
+ * Created by RidgeRun, 2020
+ *
  * The software contained in this file is free and unencumbered software
  * released into the public domain. Anyone is free to use the software
  * contained in this file as they choose, including incorporating it into
@@ -11,26 +13,23 @@
     data() {
         return {
             text: "",
-            text_tmp: "",
+            textTmp: "",
             myToggle: false,
         }
     },
     methods: {
         bus_timeout: async function(event) {
-            console.log(this.$datas.file);
-            var res = await this.$datas.gstc.bus_timeout("p0", this.$datas.timeout);
-            console.log(res);
+            var res = await this.$datas.gstc.bus_timeout(this.$datas.pipeName, this.$datas.timeout);
         },
         bus_filter: async function(event) {
-            var res = await this.$datas.gstc.bus_filter("p0", "error+warning+info");
-            console.log(res);
+            var res = await this.$datas.gstc.bus_filter(this.$datas.pipeName, "error+warning+info");
         },
         bus_read_local: async function(event) {
             while (true) {
-                var res = await this.$datas.gstc.bus_read("p0");
+                var res = await this.$datas.gstc.bus_read(this.$datas.pipeName);
                 if (res.response != null) {
-                    this.text_tmp = res.response;
-                    this.text += JSON.stringify(this.text_tmp, null, 4) + "\n";
+                    this.textTmp = res.response;
+                    this.text += JSON.stringify(this.textTmp, null, 4) + "\n";
                 }
             }
         },

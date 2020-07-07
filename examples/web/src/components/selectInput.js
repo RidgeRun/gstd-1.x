@@ -1,4 +1,6 @@
 /*
+ * Created by RidgeRun, 2020
+ *
  * The software contained in this file is free and unencumbered software
  * released into the public domain. Anyone is free to use the software
  * contained in this file as they choose, including incorporating it into
@@ -19,11 +21,11 @@ export default {
 
             this.$emit('input', !this.value)
             if (this.value) {
-                this.$datas.selected_input = "Camera";
+                this.$datas.selectedInput = "Camera";
                 this.count = "Camera";
 
             } else {
-                this.$datas.selected_input = "File";
+                this.$datas.selectedInput = "File";
                 this.count = "File";
             }
         }

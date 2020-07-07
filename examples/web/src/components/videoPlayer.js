@@ -1,4 +1,6 @@
 /*
+ * Created by RidgeRun, 2020
+ *
  * The software contained in this file is free and unencumbered software
  * released into the public domain. Anyone is free to use the software
  * contained in this file as they choose, including incorporating it into
@@ -10,9 +12,6 @@ export default {
     components: {},
     data() {
         return {
-
-            newpath: "http://localhost:8080",
-            srcpath: "http://localhost:8080",
             componentKey: 0,
             text: '',
             userId: 0,
@@ -29,7 +28,7 @@ export default {
         },
         play: async function() {
             try {
-                await this.$datas.gstc.pipeline_play("p0");
+                await this.$datas.gstc.pipeline_play(this.$datas.pipeName);
             } catch (error) {
                 this.$root.$emit("console_write", "Play", error);
                 return;
@@ -37,7 +36,7 @@ export default {
         },
         pause: async function() {
             try {
-                await this.$datas.gstc.pipeline_pause("p0");
+                await this.$datas.gstc.pipeline_pause(this.$datas.pipeName);
             } catch (error) {
                 this.$root.$emit("console_write", "Pause", error);
                 return;
@@ -47,21 +46,20 @@ export default {
             if (this.config == true) {
                 var pipe = this.text;
             } else {
-                if (this.$datas.selected_input == "File") {
+                if (this.$datas.selectedInput == "File") {
                     var pipe = "filesrc location=" + this.text + " ! decodebin ! videoconvert ! autovideosink";
                 } else {
                     var pipe = "v4l2src device=" + this.text + " ! videoconvert ! textoverlay text=\"Room A\" valignment=top halignment=left font-desc=\"Sans, 72 \" ! autovideosink";
                 }
             }
             try {
-                await this.$datas.gstc.pipeline_create("p0", pipe);
-                var res = await this.$datas.gstc.pipeline_play("p0");
+                await this.$datas.gstc.pipeline_create(this.$datas.pipeName, pipe);
+                var res = await this.$datas.gstc.pipeline_play(this.$datas.pipeName);
                 this.forceRerender();
-                var res = await this.$datas.gstc.pipeline_pause("p0");
-                console.log(res);
+                var res = await this.$datas.gstc.pipeline_pause(this.$datas.pipeName);
                 this.$root.$emit('myEvent', 'new message!');
                 this.$root.$emit('busevent', 'new message!');
-                this.$datas.bus_enable = true;
+                this.$datas.busEnable = true;
             } catch (error) {
                 this.$root.$emit("console_write", "Create", error);
                 return;
@@ -69,7 +67,7 @@ export default {
         },
         delete_pipeline: async function(event) {
             try {
-                await this.$datas.gstc.pipeline_delete("p0");
+                await this.$datas.gstc.pipeline_delete(this.$datas.pipeName);
             } catch (error) {
                 this.$root.$emit("console_write", "Delete", error);
                 return;
@@ -77,9 +75,9 @@ export default {
         },
         stop_video: async function(event) {
             try {
-                await this.$datas.gstc.pipeline_stop("p0");
+                await this.$datas.gstc.pipeline_stop(this.$datas.pipeName);
                 if (this.config == false) {
-                    await this.$datas.gstc.pipeline_delete("p0");
+                    await this.$datas.gstc.pipeline_delete(this.$datas.pipeName);
                 }
             } catch (error) {
                 this.$root.$emit("console_write", "Stop", error);
@@ -88,13 +86,14 @@ export default {
         },
         speed_video: async function(speed) {
             try {
-                var actual_position = await this.$datas.gstc.read("/pipelines/p0/position");
+                var actual_position = await this.$datas.gstc.read("/pipelines/"+this.$datas.pipeName+"/position")
                 this.$datas.speed = speed;
                 if (this.$datas.direction == 1) {
-                    var res = await this.$datas.gstc.event_seek("p0", speed, 3, 1, 1, actual_position.response.value, 1, -1)
+                    var res = await this.$datas.gstc.event_seek(this.$datas.pipeName, speed, 3, 1, 1, actual_position.response.value, 1, -1)
                 } else {
-                    var res = await this.$datas.gstc.event_seek("p0", -speed, 3, 1, 1, 0, 1, actual_position.response.value)
+                    var res = await this.$datas.gstc.event_seek(this.$datas.pipeName, -speed, 3, 1, 1, 0, 1, actual_position.response.value);
                 }
+
             } catch (error) {
                 this.$root.$emit("console_write", "Speed", error);
                 return;
@@ -107,7 +106,7 @@ export default {
         },
         jump_to: async function(seconds) {
             try {
-                await this.$datas.gstc.event_seek("p0", this.$datas.speed, 3, 1, 1, this.userId * 1000000000, 1, -1)
+                await this.$datas.gstc.event_seek(this.$datas.pipeName, this.$datas.speed, 3, 1, 1, this.userId * 1000000000, 1, -1)
             } catch (error) {
                 this.$root.$emit("console_write", "Jump to", error);
                 return;
@@ -137,12 +136,7 @@ export default {
         <b-icon icon="trash"></b-icon>
     </b-button>
     </div>
-    
-    <video style="max-width:100%; height: auto;" :key="componentKey" id="videoElement" poster="./resources/cover.png"
-        @canplay="updatePaused" @playing="updatePaused" @pause="updatePaused">
-            <source :src=newpath type="video/mp4" codecs="avc1.4D401E, mp4a.40.2">
-    </video>
-    
+
     <b-button-group class="mx-1">
         <b-button  v-on:click="play()">
             <b-icon icon="play-fill"></b-icon>

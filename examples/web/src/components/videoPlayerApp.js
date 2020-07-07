@@ -1,43 +1,49 @@
 /*
+ * Created by RidgeRun, 2020
+ *
  * The software contained in this file is free and unencumbered software
  * released into the public domain. Anyone is free to use the software
  * contained in this file as they choose, including incorporating it into
  * proprietary software.
  */
 
-import NavControl from './NavControl.js';
-import VideoPlayer from './VideoPlayer.js';
-import SelectInput from './SelectInput.js';
-import ElementsControl from './ElementsControl.js';
-import ChangeProperty from './ChangeProperty.js';
-import BusConsole from './BusConsole.js'
-import BusControl from './BusControl.js'
-import FooterControl from './FooterControl.js'
-import GstdControl from './GstdControl.js'
+import NavControl from './navControl.js';
+import VideoPlayer from './videoPlayer.js';
+import SelectInput from './selectInput.js';
+import ElementsControl from './elementsControl.js';
+import ChangeProperty from './changeProperty.js';
+import BusConsole from './busConsole.js'
+import BusControl from './busControl.js'
+import FooterControl from './footerControl.js'
+import GstdControl from './gstdControl.js'
 
-var gstcG = new GstdClient("http://" + sessionStorage.address, sessionStorage.port);
-if (document.getElementById("video_player")) {
+var gstc = new GstdClient("http://" + sessionStorage.address, sessionStorage.port);
+
+if (document.getElementById("videoPlayer")) {
     Vue.prototype.$datas = {
         file: '',
         videoElement: null,
         paused: false,
-        gstc: gstcG,
+        gstc: gstc,
+        pipeName: "jsgstcPlayer",
+        defaultAddress: "127.0.0.1",
+        defaultPort: "5000",
         componentKey: 0,
-        selected_element: null,
+        selectedElement: null,
         elements: [],
-        selected_properties: null,
+        selectedProperties: null,
         properties: [],
         speed: 1,
         direction: 1,
         checked: true,
-        selected_input: "File",
-        bus_enable: false,
+        selectedInput: "File",
+        busEnable: false,
         timeout: -1
     }
 }
 
 export default {
-    name: 'video_player_app',
+    name: 'videoPlayerApp',
     components: {
         NavControl,
         VideoPlayer,
@@ -53,8 +59,8 @@ export default {
         return {
             gstc: this.$datas.gstc,
             checked: this.$datas.checked,
-            selected_input: this.$datas.selected_input,
-            bus_enable: this.$datas.bus_enable,
+            selectedInput: this.$datas.selectedInput,
+            busEnable: this.$datas.busEnable,
             appConfig: false
         }
     },
@@ -62,9 +68,9 @@ export default {
         <div class="container mx-auto p-4">
           <nav-control name="Gstd HTTP Video Player" ></nav-control>
           <gstd-control></gstd-control>
-          <select-input v-model="checked" :config="appConfig" :selected="selected_input"></select-input>
+          <select-input v-model="checked" :config="appConfig" :selected="selectedInput"></select-input>
           <video-player :config="appConfig" :name="gstc" :enable="checked"></video-player>
-          <bus-console :myprop="bus_enable"></bus-console>
+          <bus-console :myprop="busEnable"></bus-console>
           <footer-control></footer-control>
         </div>
       `,

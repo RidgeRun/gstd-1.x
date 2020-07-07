@@ -1,4 +1,6 @@
 /*
+ * Created by RidgeRun, 2020
+ *
  * The software contained in this file is free and unencumbered software
  * released into the public domain. Anyone is free to use the software
  * contained in this file as they choose, including incorporating it into
@@ -15,7 +17,7 @@
     },
     methods: {
         create_pipeline: async function(event) {
-            var res = await this.$datas.gstc.element_set("p0", this.$datas.selected_element, this.$datas.selected_properties, this.text)
+            var res = await this.$datas.gstc.element_set(this.$datas.pipeName, this.$datas.selectedElement, this.$datas.selectedProperties, this.text)
         }
     },
     props: ['name'],
