@@ -1,4 +1,11 @@
-export default {
+/*
+ * The software contained in this file is free and unencumbered software
+ * released into the public domain. Anyone is free to use the software
+ * contained in this file as they choose, including incorporating it into
+ * proprietary software.
+ */
+
+ export default {
     name: 'BusControl',
     components: {},
     data() {
@@ -53,9 +60,6 @@ export default {
                         <b-input-group-append>
                         <b-button v-on:click="bus_filter()" variant="outline-secondary">Apply</b-button>
                     </b-input-group-append>
-                
-                </b-input-group label="hola">
-                
                 <div class="btn-group" role="group" style="display: block ruby;padding-bottom: 8px;padding-top: 8px;" aria-label="Basic example">
                     <h3>Send EOS: </h3>
                     <b-button v-on:click="send_eos()" variant="outline-secondary">Send</b-button>

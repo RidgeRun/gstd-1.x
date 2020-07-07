@@ -6,8 +6,8 @@
 # software.
 
 # Default values
-ADDRESS="127.0.0.1"
-PORT="5000"
+ADDRESS="0.0.0.0"
+PORT="8000"
 
 function usage {
   echo 'execute:'

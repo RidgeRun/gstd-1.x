@@ -1,4 +1,11 @@
-export default {
+/*
+ * The software contained in this file is free and unencumbered software
+ * released into the public domain. Anyone is free to use the software
+ * contained in this file as they choose, including incorporating it into
+ * proprietary software.
+ */
+
+ export default {
     name: 'BusConsole',
     components: {},
     data() {

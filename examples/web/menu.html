@@ -7,7 +7,9 @@ software.-->
 <html>
 
 <head>
-    <title>GSTD HTTP server examples</title>
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+    <meta content="utf-8" http-equiv="encoding">
+    <title>Gstd HTTP Server Examples</title>
 </head>
 
 <body>
@@ -26,18 +28,11 @@ software.-->
 
         <nav style="padding-bottom: 76px;" class="navbar navbar-light" style="background-color: #ffffff;">
             <a class="navbar-brand" style="font-size: x-large;" href="https://www.ridgerun.com/" target="_blank">
-                <img src="src/resources/logo.png" width="250" height="auto" style="padding-bottom: 15px;" class="d-inline-block align-top" alt=""> GSTD HTTP client examples
+                <img src="src/resources/logo.png" width="250" height="auto" style="padding-bottom: 15px;" class="d-inline-block align-top" alt=""> Gstd HTTP Client Examples
             </a>
         </nav>
-        <p>
-            <label for="quantity">Address:</label>
-            <input id="address" type="text" minlength="7" maxlength="15" size="15" pattern="^((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$">
-        </p>
 
-        <label for="quantity">Port:</label>
-        <input type="number" id="port">
-
-        <h3>Examples</h3>
+        <h1>Examples</h1>
         <div class="container">
             <div class="row">
                 <div class="col-12">
@@ -52,7 +47,9 @@ software.-->
                         <tbody>
                             <tr>
                                 <th scope="row"> Video player </th>
-                                <td>Basic video player (camera or file)</td>
+                                <td>Example showing how to perform video
+                                playback with trick modes from a file or a
+                                camera.</td>
                                 <td>
                                     <a type="button" class="btn btn-primary" onclick="newwin()" href="./src/video_player_app.html">
                                         <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-play" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
@@ -62,25 +59,16 @@ software.-->
                                 </td>
                             </tr>
                             <tr>
-                                <th scope="row"> GSTD controller</th>
-                                <td>Create and control pipelines, modify the elements properties</td>
+                                <th scope="row"> Gstd Controller</th>
+                                <td>Example showing how to create and control
+                                pipelines, modify their state, send events,
+                                modify element properties, and more.</td>
                                 <td>
                                     <a type="button" class="btn btn-primary" onclick="newwin()" href="./src/controller_app.html">
                                         <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-play" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                                             <path fill-rule="evenodd" d="M10.804 8L5 4.633v6.734L10.804 8zm.792-.696a.802.802 0 0 1 0 1.392l-6.363 3.692C4.713 12.69 4 12.345 4 11.692V4.308c0-.653.713-.998 1.233-.696l6.363 3.692z"/>
                                         </svg>
                                     </a>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th scope="row">New example</th>
-                                <td>Add new examples</td>
-                                <td>
-                                    <button type="button" class="btn btn-primary">
-                                        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-play" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                                            <path fill-rule="evenodd" d="M10.804 8L5 4.633v6.734L10.804 8zm.792-.696a.802.802 0 0 1 0 1.392l-6.363 3.692C4.713 12.69 4 12.345 4 11.692V4.308c0-.653.713-.998 1.233-.696l6.363 3.692z"/>
-                                        </svg>
-                                    </button>
                                 </td>
                             </tr>
                         </tbody>
@@ -95,12 +83,5 @@ software.-->
 
     </div>
 </body>
-<script>
-    function newwin() {
-        console.log("pressed");
-        sessionStorage.address = document.getElementById("address").value;
-        sessionStorage.port = document.getElementById("port").value;
-    }
-</script>
 
 </html>

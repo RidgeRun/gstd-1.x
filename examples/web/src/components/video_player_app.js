@@ -1,3 +1,10 @@
+/*
+ * The software contained in this file is free and unencumbered software
+ * released into the public domain. Anyone is free to use the software
+ * contained in this file as they choose, including incorporating it into
+ * proprietary software.
+ */
+
 import NavControl from './NavControl.js';
 import VideoPlayer from './VideoPlayer.js';
 import SelectInput from './SelectInput.js';
@@ -53,7 +60,7 @@ export default {
     },
     template: `
         <div class="container mx-auto p-4">
-          <nav-control name="GSTD HTTP Video Player" ></nav-control>
+          <nav-control name="Gstd HTTP Video Player" ></nav-control>
           <gstd-control></gstd-control>
           <select-input v-model="checked" :config="appConfig" :selected="selected_input"></select-input>
           <video-player :config="appConfig" :name="gstc" :enable="checked"></video-player>
