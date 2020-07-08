@@ -122,7 +122,6 @@ gstd_property_dispose (GObject * object)
   }
 
   self->pspec = NULL;
-
   G_OBJECT_CLASS (gstd_property_parent_class)->dispose (object);
 }
 
@@ -190,6 +189,8 @@ gstd_property_to_string (GstdObject * obj, gchar ** outstring)
   self = GSTD_PROPERTY (obj);
   klass = GSTD_PROPERTY_GET_CLASS (self);
 
+  GST_OBJECT_LOCK (self);
+
   if (self->pspec)
     property = self->pspec;
   else
@@ -241,6 +242,8 @@ gstd_property_to_string (GstdObject * obj, gchar ** outstring)
 
   gstd_iformatter_generate (obj->formatter, outstring);
 
+  GST_OBJECT_UNLOCK (self);
+
   return GSTD_EOK;
 }
 
@@ -272,6 +275,8 @@ gstd_property_update_default (GstdObject * object, const gchar * svalue)
 
   prop = GSTD_PROPERTY (object);
 
+  GST_OBJECT_LOCK (prop);
+
   if (prop->pspec) {
     pspec = prop->pspec;
   } else {
@@ -287,6 +292,8 @@ gstd_property_update_default (GstdObject * object, const gchar * svalue)
     g_object_set_property (prop->target, pspec->name, &value);
     ret = GSTD_EOK;
   }
+
+  GST_OBJECT_UNLOCK (prop);
 
   return ret;
 }
