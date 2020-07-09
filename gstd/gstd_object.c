@@ -24,7 +24,6 @@
 #include <string.h>
 #include <stdarg.h>
 #include <gst/gst.h>
-#include <gobject/gvaluecollector.h>
 #include <json-glib/json-glib.h>
 
 #include "gstd_object.h"
@@ -47,7 +46,7 @@ GST_DEBUG_CATEGORY_STATIC (gstd_object_debug);
 
 #define GSTD_DEBUG_DEFAULT_LEVEL GST_LEVEL_INFO
 
-G_DEFINE_TYPE (GstdObject, gstd_object, G_TYPE_OBJECT);
+G_DEFINE_TYPE (GstdObject, gstd_object, GST_TYPE_OBJECT);
 
 /* VTable */
 static void

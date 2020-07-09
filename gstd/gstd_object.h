@@ -19,7 +19,6 @@
 #ifndef __GSTD_OBJECT_H__
 #define __GSTD_OBJECT_H__
 
-#include <glib-object.h>
 #include <gstd_return_codes.h>
 
 #include "gstd_icreator.h"
@@ -48,7 +47,7 @@ typedef struct _GstdObjectClass GstdObjectClass;
 
 struct _GstdObject
 {
-  GObject parent;
+  GstObject parent;
 
   /**
    * The name of the object
@@ -79,7 +78,7 @@ struct _GstdObject
 
 struct _GstdObjectClass
 {
-  GObjectClass parent_class;
+  GstObjectClass parent_class;
 
     GstdReturnCode (*create) (GstdObject * object, const gchar * name,
       const gchar * description);
