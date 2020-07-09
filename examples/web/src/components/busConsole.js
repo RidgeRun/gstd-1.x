@@ -19,17 +19,31 @@
     },
     methods: {
         bus_timeout: async function(event) {
-            var res = await this.$datas.gstc.bus_timeout(this.$datas.pipeName, this.$datas.timeout);
+            try {
+                var res = await this.$datas.gstc.bus_timeout(this.$datas.pipeName, this.$datas.timeout);
+            } catch (error) {
+                this.$root.$emit("bus_timeout", "BusTimeout", error);
+            }
         },
         bus_filter: async function(event) {
-            var res = await this.$datas.gstc.bus_filter(this.$datas.pipeName, "error+warning+info");
+            try {
+                var res = await this.$datas.gstc.bus_filter(this.$datas.pipeName, "error+warning+info");
+            } catch (error) {
+                this.$root.$emit("bus_filter", "BusFilter", error);
+            }
         },
         bus_read_local: async function(event) {
             while (true) {
-                var res = await this.$datas.gstc.bus_read(this.$datas.pipeName);
-                if (res.response != null) {
-                    this.textTmp = res.response;
-                    this.text += JSON.stringify(this.textTmp, null, 4) + "\n";
+                try{
+                    var res = await this.$datas.gstc.bus_read(this.$datas.pipeName);
+                    if (res.response != null) {
+                        this.textTmp = res.response;
+                        this.text += JSON.stringify(this.textTmp, null, 4) + "\n";
+                    }
+                } catch (error) {
+                    // If the pipe is deleted break
+                    this.$root.$emit("bus_read", "BusRead");
+                    break;
                 }
             }
         },
