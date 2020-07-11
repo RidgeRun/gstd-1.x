@@ -4,7 +4,7 @@ cdata.set('GSTD_LOG_STATE_DIR', logstatedir)
 cdata.set('prefix', prefix)
 cdata.set('GSTD_STATE_DIRS_OWNER', get_option('with-statedir-owner'))
 
-initd_enabled = get_option('enable-initd')
+initd_enabled = get_option('enable-initd').enabled()
 systemd_enabled = not get_option('enable-systemd').disabled()
 
 if systemd_enabled and systemd_dep.found()
