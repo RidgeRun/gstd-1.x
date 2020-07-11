@@ -270,7 +270,7 @@ AC_ARG_WITH([gstd-initddir],
 dnl allow the user to specify the owner of the state dirs
 AC_ARG_WITH([statedir-owner],
   AS_HELP_STRING([--with-statedir-owner@<:@=USERNAME@:>@],
-  [Set the state dir ownership to @<:@USERNAME@:>@, @<:@default=root@:>@]),
+  [Set the state initd created dirs ownership to @<:@USERNAME@:>@, @<:@default=root@:>@]),
   [AC_SUBST([GSTD_STATE_DIRS_OWNER], [$with_statedir_owner])],
   [AC_SUBST([GSTD_STATE_DIRS_OWNER], ["root"])])
 
