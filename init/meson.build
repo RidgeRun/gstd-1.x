@@ -8,17 +8,6 @@ initd_enabled = get_option('enable-initd')
 systemd_enabled = not get_option('enable-systemd').disabled()
 
 if systemd_enabled and systemd_dep.found()
-   # Generate tmpfiles.d config file
-   tmpfiles = configure_file(
-   input: 'gstd.conf.in',
-   output: 'gstd.conf',
-   configuration: cdata)
-
-   # Install tmpfiles config file
-   tmpfiles_dir = systemd_dep.get_pkgconfig_variable('tmpfilesdir')
-   install_data(tmpfiles,
-   install_dir: tmpfiles_dir)
-
    # Generate service file
    service_file = configure_file(
    input: 'gstd.service.in',

@@ -1,13 +1,11 @@
 [Unit]
-Description=Systemd service to launch GstD
+Description=GStreamer Daemon
 PartOf=graphical-session.target
 
 [Service]
-Type=forking
 Restart=on-failure
 RestartSec=5s
-ExecStart=@prefix@/bin/gstd -e
-ExecStop=@prefix@/bin/gstd -k
+ExecStart=@prefix@/bin/gstd
 
 [Install]
 WantedBy=graphical-session.target

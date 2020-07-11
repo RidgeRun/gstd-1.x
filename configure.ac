@@ -310,6 +310,5 @@ docs/reference/gstd/Makefile
 init/Makefile
 init/gstd
 init/gstd.service
-init/gstd.conf
 ])
 AC_OUTPUT
