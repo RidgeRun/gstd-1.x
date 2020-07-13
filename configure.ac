@@ -200,7 +200,7 @@ default=${localstatedir}/log/gstd/
 AC_ARG_WITH([gstd-logstatedir],
   [AS_HELP_STRING([--with-gstd-logstatedir],
     [Specify the location of gstd's log files @<:@default=${default}@:>@])],
-  [AC_SUBST([GSTD_LOG_STATE_DIR], [$with_gstd_logstatedir])],
+  [AC_SUBST([GSTD_LOG_STATE_DIR], [$with_gstd_logstatedir/])],
   [AC_SUBST([GSTD_LOG_STATE_DIR], [$default])])
 
 dnl allow the user to disable systemd gstd.service install
