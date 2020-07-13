@@ -20,4 +20,4 @@ logic, it is easy to create automated A/V tests, extend a product's
 features to support remote control, and allow the control application
 the streaming daemon to be developed independently.
 
-The official documentation is held in [RidgeRun Developer's Wiki.](http://developer.ridgerun.com/wiki/index.php?title=Gstd-1.0)
+The official documentation is held in [RidgeRun Developer's Wiki.](https://developer.ridgerun.com/wiki/index.php?title=GStreamer_Daemon)
