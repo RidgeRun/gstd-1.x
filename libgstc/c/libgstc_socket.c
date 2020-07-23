@@ -70,10 +70,17 @@ create_new_socket (void)
 static GstcStatus
 open_socket (GstcSocket * self)
 {
+  int buffsize = GSTC_MAX_RESPONSE_LENGTH;
   gstc_assert_and_ret_val (NULL != self, GSTC_NULL_ARGUMENT);
 
   self->socket = create_new_socket ();
   if (-1 == self->socket) {
+    return GSTC_SOCKET_ERROR;
+  }
+
+  if (setsockopt (self->socket, SOL_SOCKET, SO_RCVBUF, &buffsize,
+          sizeof (buffsize))) {
+    close (self->socket);
     return GSTC_SOCKET_ERROR;
   }
 
