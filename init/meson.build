@@ -8,6 +8,14 @@ initd_enabled = get_option('enable-initd').enabled()
 systemd_enabled = not get_option('enable-systemd').disabled()
 
 if systemd_enabled and systemd_dep.found()
+   # Find user unit dir
+   systemd_dir = get_option('with-gstd-systemddir')
+   if systemd_dir == 'Systemd default systemduserunitdir'
+      systemd_dir = systemd_dep.get_pkgconfig_variable( \
+      'systemduserunitdir')
+   endif
+   cdata.set('GSTD_SYSTEMD_DIR', systemd_dir)
+
    # Generate service file
    service_file = configure_file(
    input: 'gstd.service.in',
@@ -15,12 +23,10 @@ if systemd_enabled and systemd_dep.found()
    configuration: cdata)
 
    # Install service file
-   systemd_dir = get_option('with-gstd-systemddir')
-   if systemd_dir == 'Systemd default systemduserunitdir'
-      systemd_dir = systemd_dep.get_pkgconfig_variable( \
-      'systemduserunitdir')
-   endif
    install_data(service_file,
+   install_dir: systemd_dir)
+
+   install_data('gstd-check-user-xenv.sh',
    install_dir: systemd_dir)
 endif
 
