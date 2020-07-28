@@ -24,6 +24,7 @@
 #include <gio/gio.h>
 #include <gio/gunixsocketaddress.h>
 #include <glib/gstdio.h>
+#include <gmodule.h>
 #include <locale.h>
 #include <setjmp.h>
 #include <stdio.h>
@@ -62,6 +63,10 @@ extern gint read_history ();
 #define GSTD_CLIENT_DEFAULT_UNIX_BASE_NAME "gstd_unix_socket"
 #define GSTD_CLIENT_DEFAULT_TCP_PORT 5000
 #define GSTD_CLIENT_DEFAULT_UNIX_PORT 0
+#define GSTD_CLIENT_MAX_RESPONSE 10485760       /* 10*1024*1024 */
+#define GSTD_CLIENT_DOMAIN "gst-client"
+
+static GQuark quark;
 
 typedef struct _GstdClientData GstdClientData;
 typedef struct _GstdClientCmd GstdClientCmd;
@@ -281,6 +286,7 @@ main (gint argc, gchar * argv[])
   const gchar *history_env = "GSTC_HISTORY";
   gchar *history_full = NULL;
   GstdClientData *data;
+  quark = g_quark_from_static_string (GSTD_CLIENT_DOMAIN);
 
   /* Cmdline options */
   gboolean quiet;
@@ -569,9 +575,14 @@ gstd_client_cmd_socket (gchar * name, gchar * arg, GstdClientData * data)
   GError *err = NULL;
   GInputStream *istream;
   GOutputStream *ostream;
-  gchar buffer[1024 * 1024];
-  gint read;
+  gchar buffer[1024];
+  GString *response = NULL;
+  gchar *array = NULL;
+  gint read = 0;
+  gint acc_read = 0;
   gchar *path_name;
+  const gchar terminator = '\0';
+  gint ret = -1;
 
   g_return_val_if_fail (name, -1);
   g_return_val_if_fail (arg, -1);
@@ -610,29 +621,47 @@ gstd_client_cmd_socket (gchar * name, gchar * arg, GstdClientData * data)
   //Paranoia flush
   g_output_stream_flush (ostream, NULL, NULL);
 
-  read = g_input_stream_read (istream, &buffer, sizeof (buffer), NULL, &err);
-  if (err)
-    goto error;
+  response = g_string_new ("");
 
-  //Make sure it has its sentinel and print
-  buffer[read] = '\0';
-  g_print ("%s\n", buffer);
+  do {
+    read = g_input_stream_read (istream, &buffer, sizeof (buffer), NULL, &err);
+    if (err) {
+      goto error;
+    }
 
-  // FIXME: Hack to open a new connection with every message
-  g_object_unref (data->con);
-  data->con = NULL;
+    g_string_append_len (response, buffer, read);
 
-  return 0;
+    acc_read += read;
+    if (acc_read >= GSTD_CLIENT_MAX_RESPONSE) {
+      g_set_error (&err, quark, -1,
+          "Response exceeded %d bytes limit, probably the trailing "
+          "NULL character was missing.", GSTD_CLIENT_MAX_RESPONSE);
+      goto error;
+    }
+
+  } while (buffer[read - 1] != terminator);
+
+  array = g_string_free (response, FALSE);
+  g_print ("%s\n", array);
+  g_free (array);
+
+  ret = 0;
+  goto out;
 
 error:
   {
+    g_string_free (response, TRUE);
     g_printerr ("%s\n", err->message);
     g_error_free (err);
+  }
+out:
+  {
     if (data->con) {
+      g_io_stream_close (G_IO_STREAM (data->con), NULL, NULL);
       g_object_unref (data->con);
       data->con = NULL;
     }
-    return -1;
+    return ret;
   }
 }
 
