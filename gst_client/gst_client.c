@@ -102,6 +102,7 @@ static gint gstd_client_cmd_source (gchar *, gchar *, GstdClientData *);
 static gchar *gstd_client_completer (const gchar *, gint);
 static gint gstd_client_execute (gchar *, GstdClientData *);
 static void gstd_client_header (gboolean quiet);
+static void gstd_client_process_error (GError * error);
 
 /* Global variables */
 
@@ -568,6 +569,15 @@ gstd_client_cmd_help (gchar * name, gchar * arg, GstdClientData * data)
   return 0;
 }
 
+static void
+gstd_client_process_error (GError * error)
+{
+  g_return_if_fail (error);
+
+  g_printerr ("%s\n", error->message);
+  g_error_free (error);
+}
+
 static gint
 gstd_client_cmd_socket (gchar * name, gchar * arg, GstdClientData * data)
 {
@@ -588,35 +598,38 @@ gstd_client_cmd_socket (gchar * name, gchar * arg, GstdClientData * data)
   g_return_val_if_fail (arg, -1);
   g_return_val_if_fail (data, -1);
 
-  cmd = g_strconcat (name, " ", arg, NULL);
+  if (data->use_unix) {
+    GSocketAddress *socket_address;
+    g_socket_client_set_family (data->client, G_SOCKET_FAMILY_UNIX);
+    path_name = g_strdup_printf ("%s_%d", data->address, data->unix_port);
+    socket_address = g_unix_socket_address_new (path_name);
+    g_free (path_name);
 
-  if (!data->con) {
-    if (data->use_unix) {
-      GSocketAddress *socket_address;
-      g_socket_client_set_family (data->client, G_SOCKET_FAMILY_UNIX);
-      path_name = g_strdup_printf ("%s_%d", data->address, data->unix_port);
-      socket_address = g_unix_socket_address_new (path_name);
-      g_free (path_name);
-
-      data->con = g_socket_client_connect (data->client,
-          (GSocketConnectable *) socket_address, NULL, &err);
-    } else {
-      data->con = g_socket_client_connect_to_host (data->client,
-          data->address, data->tcp_port, NULL, &err);
-    }
+    data->con = g_socket_client_connect (data->client,
+        (GSocketConnectable *) socket_address, NULL, &err);
+  } else {
+    data->con = g_socket_client_connect_to_host (data->client,
+        data->address, data->tcp_port, NULL, &err);
   }
 
-  if (err)
-    goto error;
+  if (err) {
+    gstd_client_process_error (err);
+    goto out;
+  }
 
   istream = g_io_stream_get_input_stream (G_IO_STREAM (data->con));
   ostream = g_io_stream_get_output_stream (G_IO_STREAM (data->con));
 
+  cmd = g_strconcat (name, " ", arg, NULL);
+
   err = NULL;
   g_output_stream_write (ostream, cmd, strlen (cmd), NULL, &err);
   g_free (cmd);
-  if (err)
-    goto error;
+
+  if (err) {
+    gstd_client_process_error (err);
+    goto write_error;
+  }
 
   //Paranoia flush
   g_output_stream_flush (ostream, NULL, NULL);
@@ -626,7 +639,8 @@ gstd_client_cmd_socket (gchar * name, gchar * arg, GstdClientData * data)
   do {
     read = g_input_stream_read (istream, &buffer, sizeof (buffer), NULL, &err);
     if (err) {
-      goto error;
+      gstd_client_process_error (err);
+      goto read_error;
     }
 
     g_string_append_len (response, buffer, read);
@@ -636,7 +650,8 @@ gstd_client_cmd_socket (gchar * name, gchar * arg, GstdClientData * data)
       g_set_error (&err, quark, -1,
           "Response exceeded %d bytes limit, probably the trailing "
           "NULL character was missing.", GSTD_CLIENT_MAX_RESPONSE);
-      goto error;
+      gstd_client_process_error (err);
+      goto read_error;
     }
 
   } while (buffer[read - 1] != terminator);
@@ -648,21 +663,16 @@ gstd_client_cmd_socket (gchar * name, gchar * arg, GstdClientData * data)
   ret = 0;
   goto out;
 
-error:
-  {
-    g_string_free (response, TRUE);
-    g_printerr ("%s\n", err->message);
-    g_error_free (err);
-  }
+read_error:
+  g_string_free (response, TRUE);
+
+write_error:
+  g_io_stream_close (G_IO_STREAM (data->con), NULL, NULL);
+  g_object_unref (data->con);
+  data->con = NULL;
+
 out:
-  {
-    if (data->con) {
-      g_io_stream_close (G_IO_STREAM (data->con), NULL, NULL);
-      g_object_unref (data->con);
-      data->con = NULL;
-    }
-    return ret;
-  }
+  return ret;
 }
 
 static gint
