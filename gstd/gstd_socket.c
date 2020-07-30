@@ -147,11 +147,6 @@ gstd_socket_start (GstdIpc * base, GstdSession * session)
   GSocketService *service;
   GstdReturnCode ret;
 
-  if (!base->enabled) {
-    GST_DEBUG_OBJECT (self, "SOCKET not enabled, skipping");
-    goto out;
-  }
-
   GST_DEBUG_OBJECT (self, "Starting SOCKET");
 
   /* Close any existing connection */
@@ -170,7 +165,6 @@ gstd_socket_start (GstdIpc * base, GstdSession * session)
   /* start the socket service */
   g_socket_service_start (service);
 
-out:
   return GSTD_EOK;
 }
 
