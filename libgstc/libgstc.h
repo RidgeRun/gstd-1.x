@@ -100,6 +100,8 @@ extern "C"
  * @GSTC_SOCKET_ERROR: Unable to open the network socket
  * @GSTC_THREAD_ERROR: Unable to create a new thread
  * @GSTC_BUS_TIMEOUT: A timeout was received while waiting on the bus
+ * @GSTC_LONG_RESPONSE: The response exceeds our maximum, typically
+ * meaning a missing null terminator
  *
  * Return codes for the different libgstc operations
  */
@@ -118,7 +120,8 @@ typedef enum
   GSTC_SOCKET_ERROR = -10,
   GSTC_THREAD_ERROR = -11,
   GSTC_BUS_TIMEOUT = -12,
-  GSTC_SOCKET_TIMEOUT = -13
+  GSTC_SOCKET_TIMEOUT = -13,
+  GSTC_LONG_RESPONSE = -14
 } GstcStatus;
 
 /**

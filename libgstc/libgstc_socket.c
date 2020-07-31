@@ -42,13 +42,14 @@
 
 /* Allow the user to override this value at build time */
 #ifndef GSTC_MAX_RESPONSE_LENGTH
-#  define GSTC_MAX_RESPONSE_LENGTH 8192
+#  define GSTC_MAX_RESPONSE_LENGTH 10485760 //10 * 1024 * 1024
 #endif
 
 #define NUMBER_OF_SOCKETS (1)
 
 static int create_new_socket ();
 static GstcStatus open_socket (GstcSocket * self);
+static GstcStatus accumulate_response (int socket, char **response);
 
 struct _GstcSocket
 {
@@ -129,6 +130,47 @@ out:
   return ret;
 }
 
+static GstcStatus
+accumulate_response (int socket, char **response)
+{
+  char buffer[1024];
+  ssize_t read = 0;
+  size_t acc = 0;
+  int flags = 0;
+  const char terminator = '\0';
+  GstcStatus ret = GSTC_OK;
+  char *dst = NULL;
+
+  gstc_assert_and_ret_val (NULL != response, GSTC_NULL_ARGUMENT);
+
+  *response = NULL;
+
+  do {
+    read = recv (socket, buffer, sizeof(buffer), flags);
+
+    if (read < 0) {
+      ret = GSTC_RECV_ERROR;
+      break;
+    }
+
+    *response = realloc (*response, acc + read);
+
+    dst = *response + acc;
+    acc += read;
+
+    if (acc >= GSTC_MAX_RESPONSE_LENGTH) {
+      ret = GSTC_LONG_RESPONSE;
+      free (*response);
+      *response = NULL;
+      break;
+    }
+
+    memcpy (dst, buffer, read);
+  } while (buffer[read - 1] != terminator);
+
+  return ret;
+}
+
 GstcStatus
 gstc_socket_send (GstcSocket * self, const char *request, char **response,
     const int timeout)
@@ -150,10 +192,8 @@ gstc_socket_send (GstcSocket * self, const char *request, char **response,
 
   if (send (self->socket, request, strlen (request), 0) < 0) {
     ret = GSTC_SEND_ERROR;
-    goto out;
+    goto close_con;
   }
-
-  *response = malloc (GSTC_MAX_RESPONSE_LENGTH);
 
   ufds[0].fd = self->socket;
   ufds[0].events = POLLIN;
@@ -162,29 +202,30 @@ gstc_socket_send (GstcSocket * self, const char *request, char **response,
 
   /* Error ocurred in poll */
   if (rv == -1) {
-    return GSTC_SOCKET_ERROR;
+    ret = GSTC_SOCKET_ERROR;
+    goto close_con;
   }
+
   /* Timeout ocurred */
-  else if (rv == 0) {
-    return GSTC_SOCKET_TIMEOUT;
-  } else {
-    /* Check for events on the socket */
-    if (ufds[0].revents & POLLIN) {
-      if (recv (self->socket, *response, GSTC_MAX_RESPONSE_LENGTH, 0) < 0) {
-        return GSTC_RECV_ERROR;
-      }
-    } else {
-      return GSTC_SOCKET_ERROR;
-    }
+  if (rv == 0) {
+    ret = GSTC_SOCKET_TIMEOUT;
+    goto close_con;
   }
 
-  ret = GSTC_OK;
+  /* Check for events on the socket */
+  if (0 == (ufds[0].revents & POLLIN)) {
+    ret = GSTC_SOCKET_ERROR;
+    goto close_con;
+  }
 
-out:
+  ret = accumulate_response (self->socket, response);
+
+close_con:
   if (!self->keep_connection_open) {
     close (self->socket);
   }
 
+out:
   return ret;
 }
 
