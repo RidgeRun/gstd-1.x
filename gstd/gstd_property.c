@@ -22,6 +22,7 @@
 #endif
 
 #include "gstd_property.h"
+#include "gstd_json_builder.h"
 
 enum
 {
@@ -182,6 +183,7 @@ gstd_property_to_string (GstdObject * obj, gchar ** outstring)
   GValue value = G_VALUE_INIT;
   gchar *sflags;
   const gchar *typename;
+  GstdIFormatter *formatter = g_object_new (GSTD_TYPE_JSON_BUILDER, NULL);
 
   g_return_val_if_fail (GSTD_IS_OBJECT (obj), GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (outstring, GSTD_NULL_ARGUMENT);
@@ -198,52 +200,54 @@ gstd_property_to_string (GstdObject * obj, gchar ** outstring)
         GSTD_OBJECT_NAME (self));
 
   /* Describe each parameter using a structure */
-  gstd_iformatter_begin_object (obj->formatter);
+  gstd_iformatter_begin_object (formatter);
 
-  gstd_iformatter_set_member_name (obj->formatter, "name");
-  gstd_iformatter_set_string_value (obj->formatter, property->name);
+  gstd_iformatter_set_member_name (formatter, "name");
+  gstd_iformatter_set_string_value (formatter, property->name);
 
-  gstd_iformatter_set_member_name (obj->formatter, "value");
+  gstd_iformatter_set_member_name (formatter, "value");
 
   g_value_init (&value, property->value_type);
   g_object_get_property (G_OBJECT (self->target), property->name, &value);
 
   g_assert (klass->add_value);
-  klass->add_value (self, obj->formatter, &value);
+  klass->add_value (self, formatter, &value);
 
   g_value_unset (&value);
 
-  gstd_iformatter_set_member_name (obj->formatter, "param");
+  gstd_iformatter_set_member_name (formatter, "param");
   /* Describe the parameter specs using a structure */
-  gstd_iformatter_begin_object (obj->formatter);
+  gstd_iformatter_begin_object (formatter);
 
-  gstd_iformatter_set_member_name (obj->formatter, "description");
-  gstd_iformatter_set_string_value (obj->formatter, property->_blurb);
+  gstd_iformatter_set_member_name (formatter, "description");
+  gstd_iformatter_set_string_value (formatter, property->_blurb);
 
   typename = g_type_name (property->value_type);
-  gstd_iformatter_set_member_name (obj->formatter, "type");
-  gstd_iformatter_set_string_value (obj->formatter, typename);
+  gstd_iformatter_set_member_name (formatter, "type");
+  gstd_iformatter_set_string_value (formatter, typename);
 
   g_value_init (&value, GSTD_TYPE_PARAM_FLAGS);
   g_value_set_flags (&value, property->flags);
   sflags = g_strdup_value_contents (&value);
   g_value_unset (&value);
 
-  gstd_iformatter_set_member_name (obj->formatter, "access");
-  gstd_iformatter_set_string_value (obj->formatter, sflags);
+  gstd_iformatter_set_member_name (formatter, "access");
+  gstd_iformatter_set_string_value (formatter, sflags);
 
   g_free (sflags);
 
   /* Close parameter specs structure */
-  gstd_iformatter_end_object (obj->formatter);
+  gstd_iformatter_end_object (formatter);
 
   /* Close parameter structure */
-  gstd_iformatter_end_object (obj->formatter);
+  gstd_iformatter_end_object (formatter);
 
-  gstd_iformatter_generate (obj->formatter, outstring);
+  gstd_iformatter_generate (formatter, outstring);
 
   GST_OBJECT_UNLOCK (self);
 
+  /* Free formatter */
+  g_object_unref (formatter);
   return GSTD_EOK;
 }
 

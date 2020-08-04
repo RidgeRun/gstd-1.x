@@ -126,7 +126,6 @@ gstd_object_init (GstdObject * self)
   self->reader = g_object_new (GSTD_TYPE_NO_READER, NULL);
   self->updater = g_object_new (GSTD_TYPE_NO_UPDATER, NULL);
   self->deleter = g_object_new (GSTD_TYPE_NO_DELETER, NULL);
-  self->formatter = g_object_new (GSTD_TYPE_JSON_BUILDER, NULL);
 }
 
 void
@@ -134,9 +133,6 @@ gstd_object_finalize (GObject * object)
 {
   GstdObject *self = GSTD_OBJECT (object);
   GST_DEBUG_OBJECT (self, "finalize");
-
-  /* Free formatter */
-  g_object_unref (self->formatter);
 
   G_OBJECT_CLASS (gstd_object_parent_class)->finalize (object);
 }
@@ -268,31 +264,32 @@ gstd_object_to_string_default (GstdObject * self, gchar ** outstring)
   gchar *sflags;
   guint n, i;
   const gchar *typename;
+  GstdIFormatter *formatter = g_object_new (GSTD_TYPE_JSON_BUILDER, NULL);
 
-  gstd_iformatter_begin_object (self->formatter);
-  gstd_iformatter_set_member_name (self->formatter, "properties");
-  gstd_iformatter_begin_array (self->formatter);
+  gstd_iformatter_begin_object (formatter);
+  gstd_iformatter_set_member_name (formatter, "properties");
+  gstd_iformatter_begin_array (formatter);
 
   properties = g_object_class_list_properties (G_OBJECT_GET_CLASS (self), &n);
   for (i = 0; i < n; i++) {
     /* Describe each parameter using a structure */
-    gstd_iformatter_begin_object (self->formatter);
+    gstd_iformatter_begin_object (formatter);
 
-    gstd_iformatter_set_member_name (self->formatter, "name");
+    gstd_iformatter_set_member_name (formatter, "name");
 
-    gstd_iformatter_set_string_value (self->formatter, properties[i]->name);
+    gstd_iformatter_set_string_value (formatter, properties[i]->name);
 
     typename = g_type_name (properties[i]->value_type);
 
     g_value_init (&value, properties[i]->value_type);
     g_object_get_property (G_OBJECT (self), properties[i]->name, &value);
 
-    gstd_iformatter_set_member_name (self->formatter, "value");
-    gstd_iformatter_set_value (self->formatter, &value);
+    gstd_iformatter_set_member_name (formatter, "value");
+    gstd_iformatter_set_value (formatter, &value);
 
-    gstd_iformatter_set_member_name (self->formatter, "param");
+    gstd_iformatter_set_member_name (formatter, "param");
     /* Describe the parameter specs using a structure */
-    gstd_iformatter_begin_object (self->formatter);
+    gstd_iformatter_begin_object (formatter);
 
     g_value_unset (&value);
 
@@ -301,29 +298,31 @@ gstd_object_to_string_default (GstdObject * self, gchar ** outstring)
     sflags = g_strdup_value_contents (&flags);
     g_value_unset (&flags);
 
-    gstd_iformatter_set_member_name (self->formatter, "description");
-    gstd_iformatter_set_string_value (self->formatter, properties[i]->_blurb);
+    gstd_iformatter_set_member_name (formatter, "description");
+    gstd_iformatter_set_string_value (formatter, properties[i]->_blurb);
 
-    gstd_iformatter_set_member_name (self->formatter, "type");
-    gstd_iformatter_set_string_value (self->formatter, typename);
+    gstd_iformatter_set_member_name (formatter, "type");
+    gstd_iformatter_set_string_value (formatter, typename);
 
-    gstd_iformatter_set_member_name (self->formatter, "access");
-    gstd_iformatter_set_string_value (self->formatter, sflags);
+    gstd_iformatter_set_member_name (formatter, "access");
+    gstd_iformatter_set_string_value (formatter, sflags);
 
     /* Close parameter specs structure */
-    gstd_iformatter_end_object (self->formatter);
+    gstd_iformatter_end_object (formatter);
 
     g_free (sflags);
     /* Close parameter structure */
-    gstd_iformatter_end_object (self->formatter);
+    gstd_iformatter_end_object (formatter);
   }
   g_free (properties);
 
-  gstd_iformatter_end_array (self->formatter);
-  gstd_iformatter_end_object (self->formatter);
+  gstd_iformatter_end_array (formatter);
+  gstd_iformatter_end_object (formatter);
 
-  gstd_iformatter_generate (self->formatter, outstring);
+  gstd_iformatter_generate (formatter, outstring);
 
+  /* Free formatter */
+  g_object_unref (formatter);
   return GSTD_EOK;
 }
 

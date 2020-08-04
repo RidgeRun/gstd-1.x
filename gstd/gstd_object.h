@@ -70,7 +70,6 @@ struct _GstdObject
   GstdIUpdater *updater;
   GstdIDeleter *deleter;
 
-  GstdIFormatter *formatter;
 };
 
 #define GSTD_OBJECT_NAME(obj) (GSTD_OBJECT(obj)->name)
