@@ -136,6 +136,7 @@ gstd_bus_msg_to_string (GstdObject * object, gchar ** outstring)
   GstMessage *target;
   gchar *ts;
   GValue value = G_VALUE_INIT;
+  GstdIFormatter *formatter = g_object_new (object->formatter_factory, NULL);
 
   g_return_val_if_fail (object, GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (outstring, GSTD_NULL_ARGUMENT);
@@ -145,33 +146,33 @@ gstd_bus_msg_to_string (GstdObject * object, gchar ** outstring)
   g_return_val_if_fail (self->target, GSTD_MISSING_INITIALIZATION);
   target = self->target;
 
-  gstd_iformatter_begin_object (object->formatter);
-  gstd_iformatter_set_member_name (object->formatter, "type");
-  gstd_iformatter_set_string_value (object->formatter,
-      GST_MESSAGE_TYPE_NAME (target));
+  gstd_iformatter_begin_object (formatter);
+  gstd_iformatter_set_member_name (formatter, "type");
+  gstd_iformatter_set_string_value (formatter, GST_MESSAGE_TYPE_NAME (target));
 
-  gstd_iformatter_set_member_name (object->formatter, "source");
-  gstd_iformatter_set_string_value (object->formatter,
-      GST_MESSAGE_SRC_NAME (target));
+  gstd_iformatter_set_member_name (formatter, "source");
+  gstd_iformatter_set_string_value (formatter, GST_MESSAGE_SRC_NAME (target));
 
   ts = g_strdup_printf ("%" GST_TIME_FORMAT, GST_TIME_ARGS (target->timestamp));
-  gstd_iformatter_set_member_name (object->formatter, "timestamp");
-  gstd_iformatter_set_string_value (object->formatter, ts);
+  gstd_iformatter_set_member_name (formatter, "timestamp");
+  gstd_iformatter_set_string_value (formatter, ts);
   g_free (ts);
 
   g_value_init (&value, G_TYPE_INT);
   g_value_set_int (&value, target->seqnum);
-  gstd_iformatter_set_member_name (object->formatter, "seqnum");
-  gstd_iformatter_set_value (object->formatter, &value);
+  gstd_iformatter_set_member_name (formatter, "seqnum");
+  gstd_iformatter_set_value (formatter, &value);
   g_value_unset (&value);
 
   if (GSTD_BUS_MSG_GET_CLASS (self)->to_string) {
-    GSTD_BUS_MSG_GET_CLASS (self)->to_string (self, object->formatter, target);
+    GSTD_BUS_MSG_GET_CLASS (self)->to_string (self, formatter, target);
   }
 
-  gstd_iformatter_end_object (object->formatter);
+  gstd_iformatter_end_object (formatter);
 
-  gstd_iformatter_generate (object->formatter, outstring);
+  gstd_iformatter_generate (formatter, outstring);
 
+  /* Free formatter */
+  g_object_unref (formatter);
   return GSTD_EOK;
 }

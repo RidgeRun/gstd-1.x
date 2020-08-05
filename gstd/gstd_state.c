@@ -117,6 +117,7 @@ gstd_state_to_string (GstdObject * obj, gchar ** outstring)
   GValue value = G_VALUE_INIT;
   gchar *svalue;
   const gchar *typename;
+  GstdIFormatter *formatter = g_object_new (obj->formatter_factory, NULL);
 
   g_return_val_if_fail (GSTD_IS_OBJECT (obj), GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (outstring, GSTD_NULL_ARGUMENT);
@@ -124,12 +125,12 @@ gstd_state_to_string (GstdObject * obj, gchar ** outstring)
   self = GSTD_STATE (obj);
 
   /* Describe each parameter using a structure */
-  gstd_iformatter_begin_object (obj->formatter);
+  gstd_iformatter_begin_object (formatter);
 
-  gstd_iformatter_set_member_name (obj->formatter, "name");
-  gstd_iformatter_set_string_value (obj->formatter, GSTD_OBJECT_NAME (self));
+  gstd_iformatter_set_member_name (formatter, "name");
+  gstd_iformatter_set_string_value (formatter, GSTD_OBJECT_NAME (self));
 
-  gstd_iformatter_set_member_name (obj->formatter, "value");
+  gstd_iformatter_set_member_name (formatter, "value");
 
   /* The state of the pipeline might have changed autonomously,
      refresh the value */
@@ -138,41 +139,42 @@ gstd_state_to_string (GstdObject * obj, gchar ** outstring)
   g_value_init (&value, GSTD_TYPE_STATE_ENUM);
   g_value_set_enum (&value, self->state);
   svalue = gst_value_serialize (&value);
-  gstd_iformatter_set_string_value (obj->formatter, svalue);
+  gstd_iformatter_set_string_value (formatter, svalue);
 
   g_free (svalue);
   g_value_unset (&value);
 
-  gstd_iformatter_set_member_name (obj->formatter, "param");
+  gstd_iformatter_set_member_name (formatter, "param");
   /* Describe the parameter specs using a structure */
-  gstd_iformatter_begin_object (obj->formatter);
+  gstd_iformatter_begin_object (formatter);
 
-  gstd_iformatter_set_member_name (obj->formatter, "description");
-  gstd_iformatter_set_string_value (obj->formatter,
-      "The state of the pipeline");
+  gstd_iformatter_set_member_name (formatter, "description");
+  gstd_iformatter_set_string_value (formatter, "The state of the pipeline");
 
   typename = g_type_name (GSTD_TYPE_STATE_ENUM);
-  gstd_iformatter_set_member_name (obj->formatter, "type");
-  gstd_iformatter_set_string_value (obj->formatter, typename);
+  gstd_iformatter_set_member_name (formatter, "type");
+  gstd_iformatter_set_string_value (formatter, typename);
 
   g_value_init (&value, GSTD_TYPE_PARAM_FLAGS);
   g_value_set_flags (&value, G_PARAM_READWRITE);
   svalue = g_strdup_value_contents (&value);
   g_value_unset (&value);
 
-  gstd_iformatter_set_member_name (obj->formatter, "access");
-  gstd_iformatter_set_string_value (obj->formatter, svalue);
+  gstd_iformatter_set_member_name (formatter, "access");
+  gstd_iformatter_set_string_value (formatter, svalue);
 
   g_free (svalue);
 
   /* Close parameter specs structure */
-  gstd_iformatter_end_object (obj->formatter);
+  gstd_iformatter_end_object (formatter);
 
   /* Close parameter structure */
-  gstd_iformatter_end_object (obj->formatter);
+  gstd_iformatter_end_object (formatter);
 
-  gstd_iformatter_generate (obj->formatter, outstring);
+  gstd_iformatter_generate (formatter, outstring);
 
+  /* Free formatter */
+  g_object_unref (formatter);
   return GSTD_EOK;
 }
 
