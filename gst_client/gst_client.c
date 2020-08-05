@@ -24,6 +24,7 @@
 #include <gio/gio.h>
 #include <gio/gunixsocketaddress.h>
 #include <glib/gstdio.h>
+#include <gmodule.h>
 #include <locale.h>
 #include <setjmp.h>
 #include <stdio.h>
@@ -62,6 +63,10 @@ extern gint read_history ();
 #define GSTD_CLIENT_DEFAULT_UNIX_BASE_NAME "gstd_unix_socket"
 #define GSTD_CLIENT_DEFAULT_TCP_PORT 5000
 #define GSTD_CLIENT_DEFAULT_UNIX_PORT 0
+#define GSTD_CLIENT_MAX_RESPONSE 10485760       /* 10*1024*1024 */
+#define GSTD_CLIENT_DOMAIN "gst-client"
+
+static GQuark quark;
 
 typedef struct _GstdClientData GstdClientData;
 typedef struct _GstdClientCmd GstdClientCmd;
@@ -97,6 +102,7 @@ static gint gstd_client_cmd_source (gchar *, gchar *, GstdClientData *);
 static gchar *gstd_client_completer (const gchar *, gint);
 static gint gstd_client_execute (gchar *, GstdClientData *);
 static void gstd_client_header (gboolean quiet);
+static void gstd_client_process_error (GError * error);
 
 /* Global variables */
 
@@ -281,6 +287,7 @@ main (gint argc, gchar * argv[])
   const gchar *history_env = "GSTC_HISTORY";
   gchar *history_full = NULL;
   GstdClientData *data;
+  quark = g_quark_from_static_string (GSTD_CLIENT_DOMAIN);
 
   /* Cmdline options */
   gboolean quiet;
@@ -562,6 +569,15 @@ gstd_client_cmd_help (gchar * name, gchar * arg, GstdClientData * data)
   return 0;
 }
 
+static void
+gstd_client_process_error (GError * error)
+{
+  g_return_if_fail (error);
+
+  g_printerr ("%s\n", error->message);
+  g_error_free (error);
+}
+
 static gint
 gstd_client_cmd_socket (gchar * name, gchar * arg, GstdClientData * data)
 {
@@ -569,71 +585,94 @@ gstd_client_cmd_socket (gchar * name, gchar * arg, GstdClientData * data)
   GError *err = NULL;
   GInputStream *istream;
   GOutputStream *ostream;
-  gchar buffer[1024 * 1024];
-  gint read;
+  gchar buffer[1024];
+  GString *response = NULL;
+  gchar *array = NULL;
+  gint read = 0;
+  gint acc_read = 0;
   gchar *path_name;
+  const gchar terminator = '\0';
+  gint ret = -1;
 
   g_return_val_if_fail (name, -1);
   g_return_val_if_fail (arg, -1);
   g_return_val_if_fail (data, -1);
 
-  cmd = g_strconcat (name, " ", arg, NULL);
+  if (data->use_unix) {
+    GSocketAddress *socket_address;
+    g_socket_client_set_family (data->client, G_SOCKET_FAMILY_UNIX);
+    path_name = g_strdup_printf ("%s_%d", data->address, data->unix_port);
+    socket_address = g_unix_socket_address_new (path_name);
+    g_free (path_name);
 
-  if (!data->con) {
-    if (data->use_unix) {
-      GSocketAddress *socket_address;
-      g_socket_client_set_family (data->client, G_SOCKET_FAMILY_UNIX);
-      path_name = g_strdup_printf ("%s_%d", data->address, data->unix_port);
-      socket_address = g_unix_socket_address_new (path_name);
-      g_free (path_name);
-
-      data->con = g_socket_client_connect (data->client,
-          (GSocketConnectable *) socket_address, NULL, &err);
-    } else {
-      data->con = g_socket_client_connect_to_host (data->client,
-          data->address, data->tcp_port, NULL, &err);
-    }
+    data->con = g_socket_client_connect (data->client,
+        (GSocketConnectable *) socket_address, NULL, &err);
+  } else {
+    data->con = g_socket_client_connect_to_host (data->client,
+        data->address, data->tcp_port, NULL, &err);
   }
 
-  if (err)
-    goto error;
+  if (err) {
+    gstd_client_process_error (err);
+    goto out;
+  }
 
   istream = g_io_stream_get_input_stream (G_IO_STREAM (data->con));
   ostream = g_io_stream_get_output_stream (G_IO_STREAM (data->con));
 
+  cmd = g_strconcat (name, " ", arg, NULL);
+
   err = NULL;
   g_output_stream_write (ostream, cmd, strlen (cmd), NULL, &err);
   g_free (cmd);
-  if (err)
-    goto error;
+
+  if (err) {
+    gstd_client_process_error (err);
+    goto write_error;
+  }
 
   //Paranoia flush
   g_output_stream_flush (ostream, NULL, NULL);
 
-  read = g_input_stream_read (istream, &buffer, sizeof (buffer), NULL, &err);
-  if (err)
-    goto error;
+  response = g_string_new ("");
 
-  //Make sure it has its sentinel and print
-  buffer[read] = '\0';
-  g_print ("%s\n", buffer);
+  do {
+    read = g_input_stream_read (istream, &buffer, sizeof (buffer), NULL, &err);
+    if (err) {
+      gstd_client_process_error (err);
+      goto read_error;
+    }
 
-  // FIXME: Hack to open a new connection with every message
+    g_string_append_len (response, buffer, read);
+
+    acc_read += read;
+    if (acc_read >= GSTD_CLIENT_MAX_RESPONSE) {
+      g_set_error (&err, quark, -1,
+          "Response exceeded %d bytes limit, probably the trailing "
+          "NULL character was missing.", GSTD_CLIENT_MAX_RESPONSE);
+      gstd_client_process_error (err);
+      goto read_error;
+    }
+
+  } while (buffer[read - 1] != terminator);
+
+  array = g_string_free (response, FALSE);
+  g_print ("%s\n", array);
+  g_free (array);
+
+  ret = 0;
+  goto out;
+
+read_error:
+  g_string_free (response, TRUE);
+
+write_error:
+  g_io_stream_close (G_IO_STREAM (data->con), NULL, NULL);
   g_object_unref (data->con);
   data->con = NULL;
 
-  return 0;
-
-error:
-  {
-    g_printerr ("%s\n", err->message);
-    g_error_free (err);
-    if (data->con) {
-      g_object_unref (data->con);
-      data->con = NULL;
-    }
-    return -1;
-  }
+out:
+  return ret;
 }
 
 static gint

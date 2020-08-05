@@ -438,6 +438,44 @@ GST_START_TEST (test_socket_null_resp_placeholder)
 
 GST_END_TEST;
 
+GST_START_TEST (test_socket_long_response)
+{
+  GstcSocket *gstc_socket;
+  GstcStatus ret;
+  const gchar *address = "127.0.0.1";
+  const gint port = 54321;
+  const long wait_time = -1;
+  const gint keep_open = FALSE;
+  const gchar *request = "ping";
+  gchar *expected;
+  gint size = 1024*1024;
+  gchar *response;
+  int i = 0;
+
+  ret = gstc_socket_new (address, port, keep_open, &gstc_socket);
+  assert_equals_int (GSTC_OK, ret);
+  fail_if (NULL == gstc_socket);
+
+  expected = g_malloc (size);
+  for (i = 0; i < size; ++i) {
+    expected[i] = 'a' + (i%10);
+  }
+  expected[size - 1] = '\0';
+  
+  _mock_expected = expected;
+  ret = gstc_socket_send (gstc_socket, request, &response, wait_time);
+
+  assert_equals_int (GSTC_OK, ret);
+  assert_equals_string (expected, response);
+
+  g_free (expected);
+
+  g_free (response);
+  gstc_socket_free (gstc_socket);
+}
+
+GST_END_TEST;
+
 static Suite *
 libgstc_client_suite (void)
 {
@@ -459,6 +497,7 @@ libgstc_client_suite (void)
   tcase_add_test (tc, test_socket_null_socket);
   tcase_add_test (tc, test_socket_null_request);
   tcase_add_test (tc, test_socket_null_resp_placeholder);
+  tcase_add_test (tc, test_socket_long_response);
 
   return suite;
 }
