@@ -28,7 +28,6 @@
 #include "gstd_bus_msg_simple.h"
 #include "gstd_bus_msg_state_changed.h"
 #include "gstd_bus_msg_stream_status.h"
-#include "gstd_json_builder.h"
 
 /* Gstd Bus Msg debugging category */
 GST_DEBUG_CATEGORY_STATIC (gstd_bus_msg_debug);
@@ -137,7 +136,7 @@ gstd_bus_msg_to_string (GstdObject * object, gchar ** outstring)
   GstMessage *target;
   gchar *ts;
   GValue value = G_VALUE_INIT;
-  GstdIFormatter *formatter = g_object_new (GSTD_TYPE_JSON_BUILDER, NULL);
+  GstdIFormatter *formatter = g_object_new (object->formatter_factory, NULL);
 
   g_return_val_if_fail (object, GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (outstring, GSTD_NULL_ARGUMENT);

@@ -22,7 +22,6 @@
 #endif
 
 #include "gstd_callback.h"
-#include "gstd_json_builder.h"
 
 /* Gstd Bus Msg debugging category */
 GST_DEBUG_CATEGORY_STATIC (gstd_callback_debug);
@@ -94,7 +93,7 @@ gstd_callback_to_string (GstdObject * object, gchar ** outstring)
 {
   GstdCallback *self;
   guint i;
-  GstdIFormatter *formatter = g_object_new (GSTD_TYPE_JSON_BUILDER, NULL);
+  GstdIFormatter *formatter = g_object_new (object->formatter_factory, NULL);
 
   g_return_val_if_fail (object, GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (outstring, GSTD_NULL_ARGUMENT);

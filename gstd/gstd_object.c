@@ -126,6 +126,7 @@ gstd_object_init (GstdObject * self)
   self->reader = g_object_new (GSTD_TYPE_NO_READER, NULL);
   self->updater = g_object_new (GSTD_TYPE_NO_UPDATER, NULL);
   self->deleter = g_object_new (GSTD_TYPE_NO_DELETER, NULL);
+  self->formatter_factory = GSTD_TYPE_JSON_BUILDER;
 }
 
 void
@@ -264,7 +265,7 @@ gstd_object_to_string_default (GstdObject * self, gchar ** outstring)
   gchar *sflags;
   guint n, i;
   const gchar *typename;
-  GstdIFormatter *formatter = g_object_new (GSTD_TYPE_JSON_BUILDER, NULL);
+  GstdIFormatter *formatter = g_object_new (self->formatter_factory, NULL);
 
   gstd_iformatter_begin_object (formatter);
   gstd_iformatter_set_member_name (formatter, "properties");
