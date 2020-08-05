@@ -148,15 +148,19 @@ GstdReturnCode
 gstd_ipc_start (GstdIpc * ipc, GstdSession * session)
 {
   GstdIpcClass *klass;
+  GstdReturnCode ret = GSTD_EOK;
 
   g_return_val_if_fail (ipc, GSTD_IPC_ERROR);
   g_return_val_if_fail (session, GSTD_IPC_ERROR);
 
-
   ipc->session = g_object_ref (session);
 
-  klass = GSTD_IPC_GET_CLASS (ipc);
-  return klass->start (ipc, session);
+  if (TRUE == ipc->enabled) {
+    klass = GSTD_IPC_GET_CLASS (ipc);
+    ret = klass->start (ipc, session);
+  }
+
+  return ret;
 }
 
 GstdReturnCode

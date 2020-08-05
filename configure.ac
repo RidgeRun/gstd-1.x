@@ -2,7 +2,7 @@ dnl required version of autoconf
 AC_PREREQ([2.53])
 
 dnl Gstreamer's daemon package name and version
-AC_INIT([gstd],[0.10.1])
+AC_INIT([gstd],[0.11.0])
 
 dnl required version of gstreamer and gst-plugins-base
 GST_REQUIRED=1.0.0
@@ -71,6 +71,10 @@ PKG_CHECK_MODULES(GST, [
     'gstreamer-devel-1.0' package.
   ])
 ])
+
+PKG_CHECK_MODULES(LIBSOUP, [libsoup-2.4 >= 2.32])
+AC_SUBST(LIBSOUP_CFLAGS)
+AC_SUBST(LIBSOUP_LIBS)
 
 PKG_CHECK_MODULES(GIO, [
     gio-2.0              >= $GST_REQUIRED
@@ -216,12 +220,16 @@ Makefile
 gstd/Makefile
 gst_client/Makefile
 libgstc/Makefile
+libgstc/c/Makefile
+libgstc/javascript/Makefile
+libgstc/python/Makefile
 examples/Makefile
 examples/libgstc/Makefile
 tests/Makefile
 tests/gstd/Makefile
 tests/libgstc/Makefile
-tests/libgstc/pygstc/Makefile
+tests/libgstc/c/Makefile
+tests/libgstc/python/Makefile
 docs/Makefile
 docs/reference/Makefile
 docs/reference/gstd/Makefile

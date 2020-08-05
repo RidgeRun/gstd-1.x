@@ -73,7 +73,6 @@ struct _GstdElement
    */
   GstElement *element;
 
-  GstdIFormatter *formatter;
     /**
    * The gstd event handler for this element
    */
@@ -106,8 +105,10 @@ gstd_element_set_property (GObject *, guint, const GValue *, GParamSpec *);
 static void gstd_element_dispose (GObject *);
 static GstdReturnCode gstd_element_to_string (GstdObject *, gchar **);
 void gstd_element_internal_to_string (GstdElement *, gchar **);
-void gstd_element_properties_to_string (GstdElement * self);
-void gstd_element_signals_to_string (GstdElement * self);
+void gstd_element_properties_to_string (GstdElement * self,
+    GstdIFormatter * formatter);
+void gstd_element_signals_to_string (GstdElement * self,
+    GstdIFormatter * formatter);
 static GstdReturnCode gstd_element_fill_properties (GstdElement * self);
 static GstdReturnCode gstd_element_fill_signals (GstdElement * self);
 static GType gstd_element_property_get_type (GType g_type);
@@ -167,7 +168,6 @@ gstd_element_init (GstdElement * self)
   GST_INFO_OBJECT (self, "Initializing element");
   self->element = GSTD_ELEMENT_DEFAULT_GSTELEMENT;
   self->event_handler = NULL;
-  self->formatter = g_object_new (GSTD_TYPE_JSON_BUILDER, NULL);
 
   gstd_object_set_reader (GSTD_OBJECT (self),
       g_object_new (GSTD_TYPE_PROPERTY_READER, NULL));
@@ -205,8 +205,6 @@ gstd_element_dispose (GObject * object)
     self->event_handler = NULL;
   }
 
-  /* Free formatter */
-  g_object_unref (self->formatter);
   g_object_unref (self->element_properties);
   g_object_unref (self->element_signals);
 
@@ -301,7 +299,8 @@ gstd_element_to_string (GstdObject * object, gchar ** outstring)
 }
 
 void
-gstd_element_properties_to_string (GstdElement * self)
+gstd_element_properties_to_string (GstdElement * self,
+    GstdIFormatter * formatter)
 {
   GList *list;
   GParamSpec *pspec;
@@ -312,8 +311,8 @@ gstd_element_properties_to_string (GstdElement * self)
 
   g_return_if_fail (GSTD_IS_OBJECT (self));
 
-  gstd_iformatter_set_member_name (self->formatter, "element_properties");
-  gstd_iformatter_begin_array (self->formatter);
+  gstd_iformatter_set_member_name (formatter, "element_properties");
+  gstd_iformatter_begin_array (formatter);
 
   list = self->element_properties->list;
   while (list) {
@@ -326,24 +325,23 @@ gstd_element_properties_to_string (GstdElement * self)
           g_object_class_find_property (G_OBJECT_GET_CLASS (property->target),
           GSTD_OBJECT_NAME (property));
     /* Describe each parameter using a structure */
-    gstd_iformatter_begin_object (self->formatter);
+    gstd_iformatter_begin_object (formatter);
 
-    gstd_iformatter_set_member_name (self->formatter, "name");
+    gstd_iformatter_set_member_name (formatter, "name");
 
-    gstd_iformatter_set_string_value (self->formatter,
-        GSTD_OBJECT_NAME (property));
+    gstd_iformatter_set_string_value (formatter, GSTD_OBJECT_NAME (property));
 
     typename = g_type_name (pspec->value_type);
 
     g_value_init (&value, pspec->value_type);
     g_object_get_property (G_OBJECT (property->target), pspec->name, &value);
 
-    gstd_iformatter_set_member_name (self->formatter, "value");
-    gstd_iformatter_set_value (self->formatter, &value);
+    gstd_iformatter_set_member_name (formatter, "value");
+    gstd_iformatter_set_value (formatter, &value);
 
-    gstd_iformatter_set_member_name (self->formatter, "param");
+    gstd_iformatter_set_member_name (formatter, "param");
     /* Describe the parameter specs using a structure */
-    gstd_iformatter_begin_object (self->formatter);
+    gstd_iformatter_begin_object (formatter);
 
     g_value_unset (&value);
 
@@ -352,32 +350,32 @@ gstd_element_properties_to_string (GstdElement * self)
     sflags = g_strdup_value_contents (&flags);
     g_value_unset (&flags);
 
-    gstd_iformatter_set_member_name (self->formatter, "description");
-    gstd_iformatter_set_string_value (self->formatter, pspec->_blurb);
+    gstd_iformatter_set_member_name (formatter, "description");
+    gstd_iformatter_set_string_value (formatter, pspec->_blurb);
 
-    gstd_iformatter_set_member_name (self->formatter, "type");
-    gstd_iformatter_set_string_value (self->formatter, typename);
+    gstd_iformatter_set_member_name (formatter, "type");
+    gstd_iformatter_set_string_value (formatter, typename);
 
-    gstd_iformatter_set_member_name (self->formatter, "access");
-    gstd_iformatter_set_string_value (self->formatter, sflags);
+    gstd_iformatter_set_member_name (formatter, "access");
+    gstd_iformatter_set_string_value (formatter, sflags);
 
     /* Close parameter specs structure */
-    gstd_iformatter_end_object (self->formatter);
+    gstd_iformatter_end_object (formatter);
 
     g_free (sflags);
 
     /* Close parameter structure */
-    gstd_iformatter_end_object (self->formatter);
+    gstd_iformatter_end_object (formatter);
 
     list = list->next;
   }
 
-  gstd_iformatter_end_array (self->formatter);
+  gstd_iformatter_end_array (formatter);
 
 }
 
 void
-gstd_element_signals_to_string (GstdElement * self)
+gstd_element_signals_to_string (GstdElement * self, GstdIFormatter * formatter)
 {
   GSignalQuery *query = NULL;
   GList *signal_list;
@@ -386,8 +384,8 @@ gstd_element_signals_to_string (GstdElement * self)
 
   g_return_if_fail (GSTD_IS_OBJECT (self));
 
-  gstd_iformatter_set_member_name (self->formatter, "element_signals");
-  gstd_iformatter_begin_array (self->formatter);
+  gstd_iformatter_set_member_name (formatter, "element_signals");
+  gstd_iformatter_begin_array (formatter);
 
   signal_list = self->element_signals->list;
   while (signal_list) {
@@ -399,27 +397,27 @@ gstd_element_signals_to_string (GstdElement * self)
     g_signal_query (signal_id, query);
 
     /* Describe each signal using a structure */
-    gstd_iformatter_begin_object (self->formatter);
+    gstd_iformatter_begin_object (formatter);
 
-    gstd_iformatter_set_member_name (self->formatter, "name");
-    gstd_iformatter_set_string_value (self->formatter, query->signal_name);
+    gstd_iformatter_set_member_name (formatter, "name");
+    gstd_iformatter_set_string_value (formatter, query->signal_name);
 
-    gstd_iformatter_set_member_name (self->formatter, "arguments");
-    gstd_iformatter_begin_array (self->formatter);
+    gstd_iformatter_set_member_name (formatter, "arguments");
+    gstd_iformatter_begin_array (formatter);
     for (j = 0; j < query->n_params; j++) {
       typename = g_type_name (query->param_types[j]);
-      gstd_iformatter_set_string_value (self->formatter, typename);
+      gstd_iformatter_set_string_value (formatter, typename);
     }
-    gstd_iformatter_end_array (self->formatter);
+    gstd_iformatter_end_array (formatter);
 
     /* Close signal structure */
-    gstd_iformatter_end_object (self->formatter);
+    gstd_iformatter_end_object (formatter);
 
     g_free (query);
     signal_list = signal_list->next;
   }
 
-  gstd_iformatter_end_array (self->formatter);
+  gstd_iformatter_end_array (formatter);
 }
 
 void
@@ -428,14 +426,18 @@ gstd_element_internal_to_string (GstdElement * self, gchar ** outstring)
 
   g_return_if_fail (GSTD_IS_OBJECT (self));
 
-  gstd_iformatter_begin_object (self->formatter);
+  GstdIFormatter *formatter = g_object_new (GSTD_TYPE_JSON_BUILDER, NULL);
+  gstd_iformatter_begin_object (formatter);
 
-  gstd_element_properties_to_string (self);
-  gstd_element_signals_to_string (self);
+  gstd_element_properties_to_string (self, formatter);
+  gstd_element_signals_to_string (self, formatter);
 
-  gstd_iformatter_end_object (self->formatter);
+  gstd_iformatter_end_object (formatter);
 
-  gstd_iformatter_generate (self->formatter, outstring);
+  gstd_iformatter_generate (formatter, outstring);
+
+  /* Free formatter */
+  g_object_unref (formatter);
 }
 
 static GstdReturnCode

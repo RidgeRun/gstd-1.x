@@ -1,0 +1,87 @@
+/*
+ * Created by RidgeRun, 2020
+ *
+ * The software contained in this file is free and unencumbered software
+ * released into the public domain. Anyone is free to use the software
+ * contained in this file as they choose, including incorporating it into
+ * proprietary software.
+ */
+
+html,
+body {
+    margin: 5px;
+    padding: 0;
+}
+
+#inner {
+    display: table;
+    margin: 0 auto;
+    border: 1px solid black;
+}
+
+#outer {
+    border: 1px solid red;
+    width: 100%
+}
+
+* {
+    box-sizing: border-box
+}
+
+.toggle-wrapper {
+    display: inline-block;
+    position: relative;
+    cursor: pointer;
+    height: 2rem;
+    width: 4rem;
+    border-radius: 9999px;
+}
+
+.toggle-wrapper:focus {
+    outline: 0;
+    box-shadow: 0 0 0 4px rgba(52, 144, 220, .5);
+}
+
+.toggle-background {
+    display: inline-block;
+    border-radius: 9999px;
+    height: 100%;
+    width: 100%;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: background-color .2s ease;
+}
+
+.toggle-indicator {
+    position: absolute;
+    top: .25rem;
+    left: .25rem;
+    height: 1.5rem;
+    width: 1.5rem;
+    background-color: #fff;
+    border-radius: 9999px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: transform .2s ease;
+}
+
+.btn-sq-lg {
+    width: 150px !important;
+    height: 150px !important;
+}
+
+.btn-sq {
+    width: 100px !important;
+    height: 100px !important;
+    font-size: 10px;
+}
+
+.btn-sq-sm {
+    width: 50px !important;
+    height: 50px !important;
+    font-size: 10px;
+}
+
+.btn-sq-xs {
+    width: 25px !important;
+    height: 25px !important;
+    padding: 2px;
+}

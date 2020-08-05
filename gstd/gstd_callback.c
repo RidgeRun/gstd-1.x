@@ -93,6 +93,7 @@ gstd_callback_to_string (GstdObject * object, gchar ** outstring)
 {
   GstdCallback *self;
   guint i;
+  GstdIFormatter *formatter = g_object_new (object->formatter_factory, NULL);
 
   g_return_val_if_fail (object, GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (outstring, GSTD_NULL_ARGUMENT);
@@ -101,30 +102,32 @@ gstd_callback_to_string (GstdObject * object, gchar ** outstring)
 
   GST_DEBUG_OBJECT (self, "Callback to string %p", object);
 
-  gstd_iformatter_begin_object (object->formatter);
-  gstd_iformatter_set_member_name (object->formatter, "name");
-  gstd_iformatter_set_string_value (object->formatter, self->signal_name);
+  gstd_iformatter_begin_object (formatter);
+  gstd_iformatter_set_member_name (formatter, "name");
+  gstd_iformatter_set_string_value (formatter, self->signal_name);
 
-  gstd_iformatter_set_member_name (object->formatter, "arguments");
-  gstd_iformatter_begin_array (object->formatter);
+  gstd_iformatter_set_member_name (formatter, "arguments");
+  gstd_iformatter_begin_array (formatter);
 
   for (i = 0; i < self->n_params; i++) {
-    gstd_iformatter_begin_object (object->formatter);
-    gstd_iformatter_set_member_name (object->formatter, "type");
-    gstd_iformatter_set_string_value (object->formatter,
+    gstd_iformatter_begin_object (formatter);
+    gstd_iformatter_set_member_name (formatter, "type");
+    gstd_iformatter_set_string_value (formatter,
         G_VALUE_TYPE_NAME (&self->param_values[i]));
 
-    gstd_iformatter_set_member_name (object->formatter, "value");
-    gstd_iformatter_set_value (object->formatter, &self->param_values[i]);
-    gstd_iformatter_end_object (object->formatter);
+    gstd_iformatter_set_member_name (formatter, "value");
+    gstd_iformatter_set_value (formatter, &self->param_values[i]);
+    gstd_iformatter_end_object (formatter);
   }
 
-  gstd_iformatter_end_array (object->formatter);
+  gstd_iformatter_end_array (formatter);
 
-  gstd_iformatter_end_object (object->formatter);
+  gstd_iformatter_end_object (formatter);
 
-  gstd_iformatter_generate (object->formatter, outstring);
+  gstd_iformatter_generate (formatter, outstring);
 
+  /* Free formatter */
+  g_object_unref (formatter);
   return GSTD_EOK;
 }
 
