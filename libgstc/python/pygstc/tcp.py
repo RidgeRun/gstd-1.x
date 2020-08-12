@@ -107,8 +107,9 @@ class Ipc:
         self._logger.debug('GSTD socket sending line: %s' % line)
         try:
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
             s.connect((self._ip, self._port))
-            s.send(' '.join(line).encode('utf-8'))
+            s.sendall(' '.join(line).encode('utf-8'))
             data = self._recvall(s, timeout)
             if not data:
                 raise socket.error("Socket read error happened")
