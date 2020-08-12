@@ -136,7 +136,7 @@ class GstdClient:
         ip='localhost',
         port=5000,
         logger=None,
-        timeout=0,
+        timeout=None,
     ):
         """
         Initialize new GstdClient.
