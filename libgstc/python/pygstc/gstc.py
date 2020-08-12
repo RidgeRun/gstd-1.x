@@ -244,7 +244,7 @@ class GstdClient:
                             GstcErrorCode.GSTC_RECV_ERROR) from e
         except TimeoutError as e:
             raise GstcError('GstClient time out ocurred',
-                            GstcErrorCode.GSTC_BUS_TIMEOUT) from e
+                            GstcErrorCode.GSTC_TIMEOUT) from e
 
     def ping_gstd(self):
         """
