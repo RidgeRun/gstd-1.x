@@ -34,5 +34,5 @@ jobs:
       run: sudo make install
     - name: List Pipelines Verification
       run: |
-        gstd
+        gstd -e
         gstd-client list_pipelines

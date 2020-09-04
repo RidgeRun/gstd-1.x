@@ -5,6 +5,7 @@ SUBDIRS=gstd		\
 	libgstc		\
 	tests		\
 	examples	\
-	docs
+	docs      	\
+	init
 
 EXTRA_DIST=autogen.sh

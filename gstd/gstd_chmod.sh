@@ -3,4 +3,4 @@
 # $1 mode
 # $2 file
 
-chmod $1 "${DESTDIR}/${MESON_INSTALL_PREFIX}/$2"
+chmod $1 $2

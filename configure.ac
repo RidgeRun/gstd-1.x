@@ -22,6 +22,9 @@ LIBD_REQUIRED=0.14
 dnl required version of jansson
 JANSSON_REQUIRED=2.7
 
+dnl required version of systemd
+SYSTEMD_REQUIRED=232
+
 AC_CONFIG_SRCDIR([gstd/gstd.c])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIRS([m4])
@@ -189,16 +192,87 @@ default=${localstatedir}/run/gstd/
 AC_ARG_WITH([gstd-runstatedir],
   [AS_HELP_STRING([--with-gstd-runstatedir],
     [Specify the location of the gstd's PID file @<:@default=${default}@:>@])],
-  [AC_SUBST(gstdrunstatedir, [$with_gstd_runstatedir])],
-  [AC_SUBST(gstdrunstatedir, [$default])])
+  [AC_SUBST(GSTD_RUN_STATE_DIR, [$with_gstd_runstatedir])],
+  [AC_SUBST(GSTD_RUN_STATE_DIR, [$default])])
 
 dnl allow the user to specify the location of the log files
 default=${localstatedir}/log/gstd/
 AC_ARG_WITH([gstd-logstatedir],
   [AS_HELP_STRING([--with-gstd-logstatedir],
     [Specify the location of gstd's log files @<:@default=${default}@:>@])],
-  [AC_SUBST([gstdlogstatedir], [$with_gstd_logstatedir])],
-  [AC_SUBST([gstdlogstatedir], [$default])])
+  [AC_SUBST([GSTD_LOG_STATE_DIR], [$with_gstd_logstatedir/])],
+  [AC_SUBST([GSTD_LOG_STATE_DIR], [$default])])
+
+dnl allow the user to disable systemd gstd.service install
+systemd=true
+systemd_required=true
+AC_ARG_ENABLE(systemd,
+  AS_HELP_STRING([--enable-systemd], [Enable/disable install of systemd gstd.service]),
+  [ if test "x$enable_systemd" = "xno" ; then
+      systemd=false
+      systemd_required=false
+    fi
+  ],
+  [
+    systemd_required=false
+  ])
+
+dnl check for systemd dependency
+if test "$systemd" = true; then
+  PKG_CHECK_MODULES(SYSTEMD, [
+    systemd >= $SYSTEMD_REQUIRED
+    ], [
+        AC_SUBST([GSTD_SYSTEMD_CONF_DIR], [$(pkg-config systemd --variable=tmpfilesdir)])
+        AC_SUBST([GSTD_SYSTEMD_DIR], [$(pkg-config systemd --variable=systemduserunitdir)])
+    ], [
+      systemd=false
+      if test "$systemd_required" = true; then
+        AC_MSG_ERROR([
+          Can't find systemd development packages:
+
+          systemd >= $SYSTEMD_REQUIRED
+
+          Please make sure you have the necessary systemd
+          development headers installed.
+        ])
+      else
+        AC_MSG_WARN([
+          Can't find systemd development packages:
+
+          gstd.service will not be installed
+        ])
+      fi
+    ])
+fi
+AM_CONDITIONAL(WITH_SYSTEMD, test "$systemd" = true)
+
+dnl allow the user to specify systemd gstd.service file location
+AC_ARG_WITH([gstd-systemddir],
+  AS_HELP_STRING([--with-gstd-systemddir@<:@=DIR@:>@],
+  [Install systemd gstd.service @<:@to DIR if specified@:>@, otherwise defaults to systemd variable systemduserunitdir]),
+  [AC_SUBST([GSTD_SYSTEMD_DIR], [$with_gstd_systemddir])], [])
+
+dnl allow the user to enable init script install
+AC_ARG_ENABLE(initd,
+  AS_HELP_STRING([--enable-initd], [Enable install of init.d script]),
+  [ initd=true ],
+  [ initd=false ])
+AM_CONDITIONAL(WITH_INITD, test "$initd" = true)
+
+dnl allow the user to specify init script location
+default=${sysconfdir}/init.d/
+AC_ARG_WITH([gstd-initddir],
+  AS_HELP_STRING([--with-gstd-initddir@<:@=DIR@:>@],
+  [Install init script @<:@to DIR if specified@:>@, otherwise defaults to ${sysconfdir}/init.d/]),
+  [AC_SUBST([GSTD_INITD_DIR], [$with_gstd_initddir])],
+  [AC_SUBST([GSTD_INITD_DIR], [$default])])
+
+dnl allow the user to specify the owner of the state dirs
+AC_ARG_WITH([statedir-owner],
+  AS_HELP_STRING([--with-statedir-owner@<:@=USERNAME@:>@],
+  [Set the state initd created dirs ownership to @<:@USERNAME@:>@, @<:@default=root@:>@]),
+  [AC_SUBST([GSTD_STATE_DIRS_OWNER], [$with_statedir_owner])],
+  [AC_SUBST([GSTD_STATE_DIRS_OWNER], ["root"])])
 
 dnl check if compiler understands -Wall (if yes, add -Wall to GST_CFLAGS)
 AC_MSG_CHECKING([to see if compiler understands -Wall])
@@ -233,5 +307,8 @@ tests/libgstc/python/Makefile
 docs/Makefile
 docs/reference/Makefile
 docs/reference/gstd/Makefile
+init/Makefile
+init/gstd
+init/gstd.service
 ])
 AC_OUTPUT
