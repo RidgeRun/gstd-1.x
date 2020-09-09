@@ -333,6 +333,8 @@ main (gint argc, gchar * argv[])
   };
   quark = g_quark_from_static_string (GSTD_CLIENT_DOMAIN);
 
+  quark = g_quark_from_static_string (GSTD_CLIENT_DOMAIN);
+
   /* Internationalization */
   setlocale (LC_ALL, "");
 
