@@ -72,5 +72,6 @@ jobs:
       run: sudo ninja -C build install
     - name: List Pipelines Verification
       run: |
+        export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib/
         gstd -e
         gstd-client list_pipelines
