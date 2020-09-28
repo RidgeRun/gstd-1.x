@@ -81,7 +81,7 @@ class Ipc:
         self._maxsize = maxsize
         self._terminator = terminator
 
-    def send(self, line, timeout=0):
+    def send(self, line, timeout=None):
         """
         Create a socket and sends a message through it
 
@@ -89,8 +89,8 @@ class Ipc:
         ----------
         line : string
             Message to send through the socket
-        timeout : int
-            Timeout in seconds to wait for a response. 0: infinite
+        timeout : float
+            Timeout in seconds to wait for a response. 0: non-blocking, None: blocking (default)
 
         Raises
         -------
@@ -107,8 +107,9 @@ class Ipc:
         self._logger.debug('GSTD socket sending line: %s' % line)
         try:
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
             s.connect((self._ip, self._port))
-            s.send(' '.join(line).encode('utf-8'))
+            s.sendall(' '.join(line).encode('utf-8'))
             data = self._recvall(s, timeout)
             if not data:
                 raise socket.error("Socket read error happened")
@@ -143,8 +144,8 @@ class Ipc:
         ----------
         sock : string
             The socket to poll
-        timeout : int
-            Timeout in seconds to wait for a response. 0: infinite
+        timeout : float
+            Timeout in seconds to wait for a response. 0: non-blocking, None: blocking
 
         Raises
         ------
@@ -168,19 +169,16 @@ class Ipc:
         while True:
             if (self._maxsize and self._maxsize > len(newbuf)):
                 raise BufferError
-            # Timeout to perform non-blocking read
-            ready = select.select([sock], [], [], timeout)
 
-            if ready[0]:
-                try:
-                    newbuf = sock.recv(self._socket_read_size)
+            try:
+                newbuf = sock.recv(self._socket_read_size)
                 # Raise an exception timeout
-                except socket.error as e:
-                    raise TimeoutError from e
+            except socket.error as e:
+                raise TimeoutError from e
 
-                if self._terminator in newbuf:
-                    buf += newbuf[:newbuf.find(self._terminator)]
-                    break
-                else:
-                    buf += newbuf
+            if self._terminator in newbuf:
+                buf += newbuf[:newbuf.find(self._terminator)]
+                break
+            else:
+                buf += newbuf
         return buf
