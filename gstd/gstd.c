@@ -131,8 +131,10 @@ ipc_stop (GstdIpc * ipc[], guint num_ipcs)
 
   /* Run stop for each IPC */
   for (i = 0; i < num_ipcs; i++) {
-    gstd_ipc_stop (ipc[i]);
-    g_object_unref (ipc[i]);
+    if (TRUE == ipc[i]->enabled) {
+      gstd_ipc_stop (ipc[i]);
+      g_object_unref (ipc[i]);
+    }
   }
 }
 
@@ -233,7 +235,7 @@ main (gint argc, gchar * argv[])
     }
   }
 
-  gstd_debug_init();
+  gstd_debug_init ();
 
   if (kill) {
     if (gstd_daemon_stop ()) {
