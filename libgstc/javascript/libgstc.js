@@ -39,7 +39,7 @@ class GstdClient {
    * @param {String} ip.
    * @param {Number} port.
   */
-  constructor(ip='127.0.0.1',port=5000) {
+  constructor(ip = '127.0.0.1', port = 5000) {
 
     this.ip = ip;
     this.port = port;
@@ -60,19 +60,19 @@ class GstdClient {
     /* Add scheme to the address (authority + path + query) */
     const url = `http://${address}`;
     try {
-      var response = await fetch (url, request);
+      var response = await fetch(url, request);
       var j_resp = await response.json();
     } catch (e) {
-      if(e instanceof TypeError &&
-         e.message.includes("NetworkError")) {
+      if (e instanceof TypeError &&
+        e.message.includes("NetworkError")) {
         throw new GstcError(['Gstd did not respond. Is it up?',
-        GstcErrorCode.GSTC_UNREACHABLE]);
+          GstcErrorCode.GSTC_UNREACHABLE]);
       } else {
         throw new GstcError(['Gstd corrupted response',
-        GstcErrorCode.GSTC_RECV_ERROR]);
+          GstcErrorCode.GSTC_RECV_ERROR]);
       }
     }
-    if (j_resp["code"] !== GstcErrorCode.GSTC_OK ) {
+    if (j_resp["code"] !== GstcErrorCode.GSTC_OK) {
       throw new GstdError([j_resp["description"], j_resp["code"]]);
     }
     return j_resp;
@@ -92,19 +92,21 @@ class GstdClient {
    */
   async create(uri, name, description) {
 
-    var complete_address = this.ip + ":" + this.port + uri + "?name=" + name;
+    var complete_address = this.ip + ":" + this.port + uri + "?name=" +
+      name;
 
     /* Allow create without description */
     if (description != null) {
-      complete_address = complete_address + "&description=" + description;
+      complete_address = complete_address + "&description=" +
+        description;
     }
 
     var request = {
       method: 'POST',
-      body : {
-        uri : uri,
-        name : name,
-        description : description
+      body: {
+        uri: uri,
+        name: name,
+        description: description
       }
     }
 
@@ -124,7 +126,7 @@ class GstdClient {
   async read(uri) {
 
     var complete_address = this.ip + ":" + this.port + uri;
-    var request = { method : "GET" };
+    var request = { method: "GET" };
     return GstdClient.send_cmd(complete_address, request);
   }
 
@@ -139,14 +141,15 @@ class GstdClient {
    *
    * @return {object} Response from Gstd.
    */
-  async update(uri, description){
+  async update(uri, description) {
 
-    var complete_address = this.ip + ":" + this.port + uri + "?name=" + description;
+    var complete_address = this.ip + ":" + this.port + uri + "?name=" +
+      description;
     var request = {
       method: 'PUT',
       body: {
-        uri : uri,
-        description : description
+        uri: uri,
+        description: description
       },
     }
 
@@ -164,12 +167,13 @@ class GstdClient {
    * @return {object} Response from Gstd.
    */
   async delete(uri, name) {
-    var complete_address = this.ip + ":" + this.port + uri + "?name=" + name;
+    var complete_address = this.ip + ":" + this.port + uri + "?name="
+      + name;
     var request = {
       method: 'DELETE',
       body: {
-        uri : uri,
-        name : name
+        uri: uri,
+        name: name
       },
     }
 
@@ -349,8 +353,8 @@ class GstdClient {
    *
    * @return {object} Response from Gstd.
    */
-  async event_seek(pipe_name, rate=1.0, format=3, flags=1, start_type=1,
-    start=0, end_type=1, end=-1) {
+  async event_seek(pipe_name, rate = 1.0, format = 3, flags = 1,
+    start_type = 1, start = 0, end_type = 1, end = -1) {
 
     var uri = "/pipelines/" + pipe_name + "/event";
     var description = rate + "%20" + format + "%20" + flags + "%20" +
@@ -368,7 +372,7 @@ class GstdClient {
    *
    * @return {object} Response from Gstd.
    */
-  async debug_color (enable) {
+  async debug_color(enable) {
 
     return this.update("/debug/color", enable);
   }
@@ -618,17 +622,17 @@ class GstdClient {
     return this.read("/pipelines/" + pipe_name + "/graph");
   }
 
-    /**
-   * Set the pipeline verbose mode.
-   * Only supported on GST Version >= 1.10
-   *
-   * @param {String} pipe_name.
-   *
-   * @throws {GstdError} Triggered when Gstd fails to process a request.
-   * @throws {Boolean} Triggered when GstClient fails.
-   *
-   * @return {object} Response from Gstd.
-   */
+/**
+ * Set the pipeline verbose mode.
+ * Only supported on GST Version >= 1.10
+ *
+ * @param {String} pipe_name.
+ *
+ * @throws {GstdError} Triggered when Gstd fails to process a request.
+ * @throws {Boolean} Triggered when GstClient fails.
+ *
+ * @return {object} Response from Gstd.
+ */
   pipeline_verbose(pipe_name, enable) {
     return this.update("/pipelines/" + pipe_name + "/verbose", enable);
   }
