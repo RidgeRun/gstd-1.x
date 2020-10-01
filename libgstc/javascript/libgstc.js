@@ -39,7 +39,7 @@ class GstdClient {
    * @param {String} ip.
    * @param {Number} port.
   */
-  constructor(ip='http://localhost',port=5000) {
+  constructor(ip='127.0.0.1',port=5000) {
 
     this.ip = ip;
     this.port = port;
@@ -48,7 +48,7 @@ class GstdClient {
   /**
    * Send Command.
    *
-   * @param {String} url.
+   * @param {String} address.
    * @param {Array} request.
    *
    * @throws {GstdError} Triggered when Gstd fails to process a request.
@@ -56,8 +56,9 @@ class GstdClient {
    *
    * @return {object} Response from Gstd.
    */
-  static async send_cmd(url, request) {
-
+  static async send_cmd(address, request) {
+    /* Add scheme to the address (authority + path + query) */
+    const url = `http://${address}`
     try {
       var response = await fetch (url, request);
       var j_resp = await response.json();
