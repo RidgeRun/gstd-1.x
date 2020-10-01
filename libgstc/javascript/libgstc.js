@@ -58,7 +58,7 @@ class GstdClient {
    */
   static async send_cmd(address, request) {
     /* Add scheme to the address (authority + path + query) */
-    const url = `http://${address}`
+    const url = `http://${address}`;
     try {
       var response = await fetch (url, request);
       var j_resp = await response.json();
@@ -92,11 +92,11 @@ class GstdClient {
    */
   async create(uri, name, description) {
 
-    var complete_uri = this.ip + ":" + this.port + uri + "?name=" + name;
+    var complete_address = this.ip + ":" + this.port + uri + "?name=" + name;
 
     /* Allow create without description */
     if (description != null) {
-      complete_uri = complete_uri + "&description=" + description;
+      complete_address = complete_address + "&description=" + description;
     }
 
     var request = {
@@ -108,7 +108,7 @@ class GstdClient {
       }
     }
 
-    return GstdClient.send_cmd(complete_uri, request);
+    return GstdClient.send_cmd(complete_address, request);
   }
 
   /**
@@ -123,9 +123,9 @@ class GstdClient {
    */
   async read(uri) {
 
-    var complete_uri = this.ip + ":" + this.port + uri;
+    var complete_address = this.ip + ":" + this.port + uri;
     var request = { method : "GET" };
-    return GstdClient.send_cmd(complete_uri, request);
+    return GstdClient.send_cmd(complete_address, request);
   }
 
   /**
@@ -141,7 +141,7 @@ class GstdClient {
    */
   async update(uri, description){
 
-    var complete_uri = this.ip + ":" + this.port + uri + "?name=" + description;
+    var complete_address = this.ip + ":" + this.port + uri + "?name=" + description;
     var request = {
       method: 'PUT',
       body: {
@@ -150,7 +150,7 @@ class GstdClient {
       },
     }
 
-    return GstdClient.send_cmd(complete_uri, request);
+    return GstdClient.send_cmd(complete_address, request);
   }
 
   /**
@@ -164,7 +164,7 @@ class GstdClient {
    * @return {object} Response from Gstd.
    */
   async delete(uri, name) {
-    var complete_uri = this.ip + ":" + this.port + uri + "?name=" + name;
+    var complete_address = this.ip + ":" + this.port + uri + "?name=" + name;
     var request = {
       method: 'DELETE',
       body: {
@@ -173,7 +173,7 @@ class GstdClient {
       },
     }
 
-    return GstdClient.send_cmd(complete_uri, request);
+    return GstdClient.send_cmd(complete_address, request);
   }
 
   /**
