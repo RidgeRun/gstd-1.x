@@ -68,11 +68,11 @@
 
 
 static GstcStatus gstc_cmd_send (GstClient * client, const char *request);
-static GstcStatus gstc_cmd_send_get_response (GstClient * client,
+static GstcStatus gstc_cmd_send_get_response (GstcSocket * socket,
     const char *request, char **reponse, const int timeout);
 static GstcStatus gstc_cmd_create (GstClient * client, const char *where,
     const char *what);
-static GstcStatus gstc_cmd_read (GstClient * client, const char *what,
+static GstcStatus gstc_cmd_read (GstcSocket * socket, const char *what,
     char **response, const int timeout);
 static GstcStatus gstc_cmd_update (GstClient * client, const char *what,
     const char *how);
@@ -90,6 +90,7 @@ gstc_pipeline_bus_wait_callback (GstClient * _client, const char *pipeline_name,
 struct _GstClient
 {
   GstcSocket *socket;
+  GstcSocket *bus_socket;
   int timeout;
 };
 
@@ -126,17 +127,17 @@ gstc_response_get_code (const char *response, int *code)
 }
 
 static GstcStatus
-gstc_cmd_send_get_response (GstClient * client, const char *request,
+gstc_cmd_send_get_response (GstcSocket * socket, const char *request,
     char **response, const int timeout)
 {
   GstcStatus ret;
   int code = GSTC_NOT_FOUND;
 
-  gstc_assert_and_ret_val (NULL != client, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != socket, GSTC_NULL_ARGUMENT);
   gstc_assert_and_ret_val (NULL != request, GSTC_NULL_ARGUMENT);
   gstc_assert_and_ret_val (NULL != response, GSTC_NULL_ARGUMENT);
 
-  ret = gstc_socket_send (client->socket, request, response, timeout);
+  ret = gstc_socket_send (socket, request, response, timeout);
   if (GSTC_OK != ret) {
     goto out;
   }
@@ -163,7 +164,8 @@ gstc_cmd_send (GstClient * client, const char *request)
   gstc_assert_and_ret_val (NULL != request, GSTC_NULL_ARGUMENT);
 
   ret =
-      gstc_cmd_send_get_response (client, request, &response, client->timeout);
+      gstc_cmd_send_get_response (client->socket, request, &response,
+      client->timeout);
 
   free (response);
 
@@ -195,14 +197,14 @@ gstc_cmd_create (GstClient * client, const char *where, const char *what)
 }
 
 static GstcStatus
-gstc_cmd_read (GstClient * client, const char *what, char **response,
+gstc_cmd_read (GstcSocket * socket, const char *what, char **response,
     const int timeout)
 {
   GstcStatus ret;
   int asprintf_ret;
   char *request;
 
-  gstc_assert_and_ret_val (NULL != client, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != socket, GSTC_NULL_ARGUMENT);
   gstc_assert_and_ret_val (NULL != what, GSTC_NULL_ARGUMENT);
 
   /* Concatenate pieces into request */
@@ -211,7 +213,7 @@ gstc_cmd_read (GstClient * client, const char *what, char **response,
     return GSTC_OOM;
   }
 
-  ret = gstc_cmd_send_get_response (client, request, response, timeout);
+  ret = gstc_cmd_send_get_response (socket, request, response, timeout);
 
   free (request);
 
@@ -287,6 +289,13 @@ gstc_client_new (const char *address, const unsigned int port,
 
   ret =
       gstc_socket_new (address, port, keep_connection_open, &(client->socket));
+  if (GSTC_OK != ret) {
+    free (client);
+    return ret;
+  }
+  ret =
+      gstc_socket_new (address, port, keep_connection_open,
+      &(client->bus_socket));
   if (GSTC_OK != ret) {
     free (client);
     return ret;
@@ -412,7 +421,7 @@ gstc_pipeline_get_graph (GstClient * client, const char *pipeline_name,
     return GSTC_OOM;
   }
 
-  ret = gstc_cmd_read (client, what, response, client->timeout);
+  ret = gstc_cmd_read (client->socket, what, response, client->timeout);
   if (GSTC_OK != ret) {
     goto out;
   }
@@ -533,7 +542,7 @@ gstc_element_get (GstClient * client, const char *pname,
     return GSTC_OOM;
   }
 
-  ret = gstc_cmd_read (client, what, &response, client->timeout);
+  ret = gstc_cmd_read (client->socket, what, &response, client->timeout);
   if (ret != GSTC_OK) {
     goto unref;
   }
@@ -668,7 +677,7 @@ gstc_element_properties_list (GstClient * client,
     return GSTC_OOM;
   }
 
-  ret = gstc_cmd_read (client, what, &response, client->timeout);
+  ret = gstc_cmd_read (client->socket, what, &response, client->timeout);
   if (GSTC_OK != ret) {
     goto out;
   }
@@ -754,7 +763,7 @@ gstc_pipeline_list_elements (GstClient * client,
     return GSTC_OOM;
   }
 
-  ret = gstc_cmd_read (client, what, &response, client->timeout);
+  ret = gstc_cmd_read (client->socket, what, &response, client->timeout);
   if (GSTC_OK != ret) {
     goto out;
   }
@@ -782,6 +791,7 @@ gstc_bus_thread (void *user_data)
   const char *message_name = data->message;
   long long timeout = data->timeout;
   GstClient *client = data->client;
+  GstcSocket *socket = client->bus_socket;
 
   asprintf_ret = asprintf (&where, PIPELINE_BUS_MSG_FORMAT, pipeline_name);
   if (asprintf_ret == PRINTF_ERROR) {
@@ -789,7 +799,7 @@ gstc_bus_thread (void *user_data)
   }
 
   /* -1 is used in this function so that the socket has an unlimited timeout */
-  gstc_cmd_read (client, where, &response, -1);
+  gstc_cmd_read (socket, where, &response, -1);
   data->func (client, pipeline_name, message_name, timeout, response,
       data->user_data);
 
@@ -940,7 +950,8 @@ gstc_pipeline_list (GstClient * client, char **pipelines[], int *list_lenght)
   gstc_assert_and_ret_val (NULL != list_lenght, GSTC_NULL_ARGUMENT);
   gstc_assert_and_ret_val (NULL != pipelines, GSTC_NULL_ARGUMENT);
 
-  ret = gstc_cmd_read (client, "/pipelines", &response, client->timeout);
+  ret =
+      gstc_cmd_read (client->socket, "/pipelines", &response, client->timeout);
   if (GSTC_OK != ret) {
     goto out;
   }
