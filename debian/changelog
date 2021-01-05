@@ -1,3 +1,14 @@
+gstd (0.11.3-1) unstable; urgency=medium
+
+  * Fix Javascript library for Gstd
+  * Fix for pygstc where the poll call timed out immediately, rather
+than using the user's value.
+  * Fix for gstd where the the IPC is stopped before unreffing it. Fixes
+an ugly assert failure given by the HTTP IPC
+
+ -- RidgeRun Engineering <support@ridgerun.com>  Tue, 5 Jan 2021 17:00:00 -0600
+
+
 gstd (0.11.0-1) unstable; urgency=medium
 
   * Gstd v0.11.0 release
