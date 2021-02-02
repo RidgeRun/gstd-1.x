@@ -62,6 +62,7 @@ static void gstd_list_get_property (GObject *, guint, GValue *, GParamSpec *);
 static void
 gstd_list_set_property (GObject *, guint, const GValue *, GParamSpec *);
 static void gstd_list_dispose (GObject *);
+static void gstd_list_finalize (GObject *);
 
 static void
 gstd_list_class_init (GstdListClass * klass)
@@ -74,6 +75,7 @@ gstd_list_class_init (GstdListClass * klass)
   object_class->set_property = gstd_list_set_property;
   object_class->get_property = gstd_list_get_property;
   object_class->dispose = gstd_list_dispose;
+  object_class->finalize = gstd_list_finalize;
 
   properties[PROP_COUNT] =
       g_param_spec_uint ("count",
@@ -115,6 +117,8 @@ gstd_list_init (GstdList * self)
   self->list = NULL;
   self->count = GSTD_LIST_DEFAULT_COUNT;
   self->node_type = GSTD_LIST_DEFAULT_NODE_TYPE;
+
+  g_mutex_init (&self->mutex);
 }
 
 static void
@@ -124,12 +128,23 @@ gstd_list_dispose (GObject * object)
 
   GST_INFO_OBJECT (self, "Disposing %s list", GSTD_OBJECT_NAME (self));
 
+  g_mutex_lock (&self->mutex);
   if (self->list) {
     g_list_free_full (self->list, g_object_unref);
     self->list = NULL;
   }
+  g_mutex_unlock (&self->mutex);
 
   G_OBJECT_CLASS (gstd_list_parent_class)->dispose (object);
+}
+
+static void
+gstd_list_finalize (GObject * object)
+{
+  GstdList *self = GSTD_LIST (object);
+  g_mutex_clear (&self->mutex);
+
+  G_OBJECT_CLASS (gstd_list_parent_class)->finalize (object);
 }
 
 static void
@@ -252,10 +267,13 @@ gstd_list_delete (GstdObject * object, const gchar * node)
   g_return_val_if_fail (object->deleter, GSTD_MISSING_INITIALIZATION);
 
   /* Test if the resource to delete exists */
+  g_mutex_lock (&self->mutex);
   found = g_list_find_custom (self->list, node, gstd_list_find_node);
 
-  if (!found)
+  if (!found) {
+    g_mutex_unlock (&self->mutex);
     goto unexisting;
+  }
 
   todelete = GSTD_OBJECT (found->data);
 
@@ -263,12 +281,15 @@ gstd_list_delete (GstdObject * object, const gchar * node)
       GSTD_OBJECT_NAME (self));
 
   ret = gstd_ideleter_delete (object->deleter, todelete);
-  if (ret)
+  if (ret) {
+    g_mutex_unlock (&self->mutex);
     return ret;
+  }
 
   self->count--;
 
   self->list = g_list_delete_link (self->list, found);
+  g_mutex_unlock (&self->mutex);
 
   return ret;
 
@@ -327,6 +348,7 @@ gstd_list_find_child (GstdList * self, const gchar * name)
   g_return_val_if_fail (self, NULL);
   g_return_val_if_fail (name, NULL);
 
+  g_mutex_lock (&self->mutex);
   result = g_list_find_custom (self->list, name, gstd_list_find_node);
 
 
@@ -335,6 +357,7 @@ gstd_list_find_child (GstdList * self, const gchar * name)
   } else {
     child = NULL;
   }
+  g_mutex_unlock (&self->mutex);
 
   return child;
 }
@@ -348,14 +371,18 @@ gstd_list_append_child (GstdList * self, GstdObject * child)
   g_return_val_if_fail (child, GSTD_NULL_ARGUMENT);
 
   /* Test if the resource to create already exists */
+  g_mutex_lock (&self->mutex);
   found =
       g_list_find_custom (self->list, GSTD_OBJECT_NAME (child),
       gstd_list_find_node);
-  if (found)
+  if (found) {
+    g_mutex_unlock (&self->mutex);
     goto exists;
+  }
 
   self->list = g_list_append (self->list, child);
   self->count = g_list_length (self->list);
+  g_mutex_unlock (&self->mutex);
   GST_INFO_OBJECT (self, "Appended %s to %s list", GSTD_OBJECT_NAME (child),
       GSTD_OBJECT_NAME (self));
 
