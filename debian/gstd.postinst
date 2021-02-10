@@ -1,0 +1,58 @@
+#!/bin/sh
+
+# Create gstd group for permissions
+groupadd -f gstd &>/dev/null
+adduser $SUDO_USER gstd &>/dev/null
+
+# Modify /var/log/gstd and /var/run/gstd permissions
+if [ "$1" = "configure" ] || [ "$1" = "abort-upgrade" ] || [ "$1" = "abort-deconfigure" ] || [ "$1" = "abort-remove" ]; then
+(
+	while read line; do
+		set -- $line
+		dir="$1"; mode="$2"; user="$3"; group="$4"
+		if [ ! -e "$dir" ]; then
+			if mkdir "$dir" 2>/dev/null; then
+				chown "$user":"$group" "$dir"
+				chmod -R "$mode" "$dir"
+			fi
+		else
+                        chown "$user":"$group" "$dir"
+                        chmod -R "$mode" "$dir"		
+		fi
+	done
+) << DATA
+/var/log/gstd 770 root $SUDO_USER
+/var/run/gstd 775 root $SUDO_USER
+DATA
+fi
+
+# Delete broken symlinks
+find /usr/bin/ -xtype l -delete
+
+# Create symbolic links
+if [ ! -f /usr/bin/gstd-client ]; then
+  ln -s /usr/bin/gst-client-1.0 /usr/bin/gstd-client
+fi
+if [ ! -f /usr/bin/gst-client ]; then
+  ln -s /usr/bin/gst-client-1.0 /usr/bin/gst-client
+fi
+
+# Daemon handling
+if [ "$1" = "configure" ] || [ "$1" = "abort-upgrade" ] || [ "$1" = "abort-deconfigure" ] || [ "$1" = "abort-remove" ] ; then
+	# This will only remove masks created by d-s-h on package removal.
+	deb-systemd-helper unmask 'init-gstd.service' >/dev/null 
+
+	# was-enabled defaults to true, so new installations run enable.
+	if deb-systemd-helper --quiet was-enabled 'init-gstd.service'; then
+		# Enables the unit on first installation, creates new
+		# symlinks on upgrades if the unit file has changed.
+		deb-systemd-helper enable 'init-gstd.service' >/dev/null 
+	else
+		# Update the statefile to add new symlinks (if any), which need to be
+		# cleaned up on purge. Also remove old symlinks.
+		deb-systemd-helper update-state 'init-gstd.service' >/dev/null 
+	fi
+	if [ -d /run/systemd/system ]; then
+		systemctl --system daemon-reload >/dev/null 
+	fi
+fi

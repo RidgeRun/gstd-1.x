@@ -1,0 +1,13 @@
+#!/usr/bin/make -f
+
+export DEB_BUILD_OPTIONS := nocheck
+export DEB_DH_AUTORECONF_ARGS += --as-needed
+
+%:
+	dh $@ --with autoreconf,systemd
+
+override_dh_systemd_enable:
+	dh_systemd_enable --name=init-gstd
+
+override_dh_systemd_start:
+	dh_systemd_start --name=init-gstd --no-start
