@@ -1,0 +1,47 @@
+Source: gstd
+Priority: optional
+Maintainer: RidgeRun Engineering <support@ridgerun.com>
+Build-Depends: debhelper (>= 10), 
+          automake,
+          libtool,
+          pkg-config,
+          libgstreamer1.0-dev,
+          libgstreamer-plugins-base1.0-dev,
+          libglib2.0-dev,
+          libjson-glib-dev,
+          gtk-doc-tools,
+          libreadline-dev,
+          libncursesw5-dev,
+          libdaemon-dev,
+          libjansson-dev,
+          python3-pip
+Standards-Version: 4.1.2
+Section: libs
+Homepage: https://developer.ridgerun.com/wiki/index.php?title=GStreamer_Daemon_-_GStreamer_Daemon_Basics
+
+Package: gstd
+Architecture: any
+Multi-arch: same
+Depends: ${shlibs:Depends}, ${misc:Depends},
+          automake,
+          libtool,
+          pkg-config,
+          libgstreamer1.0-dev,
+          libgstreamer-plugins-base1.0-dev,
+          libglib2.0-dev,
+          libjson-glib-dev,
+          gtk-doc-tools,
+          libreadline-dev,
+          libncursesw5-dev,
+          libdaemon-dev,
+          libjansson-dev
+Description: GStreamer Daemon 
+  GStreamer Daemon, also called gstd, is a GStreamer 
+  framework for controlling audio and video streaming 
+  using TCP connection messages. Qt applications, web 
+  interfaces, and GStreamer element test suites show 
+  different ways the framework can be utilized. 
+  GStreamer Daemon is gst-launch on steroids where you 
+  can create a GStreamer pipeline, play, pause, change 
+  speed, skip around, and even change element parameter 
+  settings all while the pipeline is active.

@@ -1,0 +1,20 @@
+#!/bin/sh
+
+manage_permissions() 
+{
+  dir="$1"; mode="$2"; user="$3"; group="$4"
+
+  { test -d "$dir" || mkdir $dir ; } ||
+  { 
+    echo "Error, cannot create directory $dir" &>2
+    exit 1
+  }
+  echo "Changing $dir permissions to $mode $user:$group"
+  chown "$user":"$group" "$dir"
+  chmod -R "$mode" "$dir"
+}
+
+manage_permissions /var/log/gstd 770 root gstd
+manage_permissions /var/run/gstd 775 root gstd
+
+exit 0
