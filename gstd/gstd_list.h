@@ -58,8 +58,6 @@ struct _GstdList
   GParamFlags flags;
 
   GList *list;
-
-  GMutex mutex;
 };
 
 struct _GstdListClass
