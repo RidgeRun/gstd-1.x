@@ -200,6 +200,9 @@ static GstdClientCmd cmds[] = {
   {"signal_disconnect", gstd_client_cmd_socket, "Disconnect from signal",
       "signal_disconnect <pipe> <element> <signal>"},
 
+  {"action_emit", gstd_client_cmd_socket, "Emit action",
+      "action_emit <pipe> <element> <action>"},
+
   {"debug_enable", gstd_client_cmd_socket,
         "Enable/Disable GStreamer debug",
       "debug_enable <enable>"},
@@ -630,7 +633,6 @@ gstd_client_cmd_socket (gchar * name, gchar * arg, GstdClientData * data)
     gstd_client_process_error (err);
     goto write_error;
   }
-
   //Paranoia flush
   g_output_stream_flush (ostream, NULL, NULL);
 
