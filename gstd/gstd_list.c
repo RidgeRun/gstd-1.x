@@ -124,10 +124,12 @@ gstd_list_dispose (GObject * object)
 
   GST_INFO_OBJECT (self, "Disposing %s list", GSTD_OBJECT_NAME (self));
 
+  GST_OBJECT_LOCK (self);
   if (self->list) {
     g_list_free_full (self->list, g_object_unref);
     self->list = NULL;
   }
+  GST_OBJECT_UNLOCK (self);
 
   G_OBJECT_CLASS (gstd_list_parent_class)->dispose (object);
 }
@@ -252,10 +254,13 @@ gstd_list_delete (GstdObject * object, const gchar * node)
   g_return_val_if_fail (object->deleter, GSTD_MISSING_INITIALIZATION);
 
   /* Test if the resource to delete exists */
+  GST_OBJECT_LOCK (self);
   found = g_list_find_custom (self->list, node, gstd_list_find_node);
 
-  if (!found)
+  if (!found) {
+    GST_OBJECT_UNLOCK (self);
     goto unexisting;
+  }
 
   todelete = GSTD_OBJECT (found->data);
 
@@ -263,12 +268,15 @@ gstd_list_delete (GstdObject * object, const gchar * node)
       GSTD_OBJECT_NAME (self));
 
   ret = gstd_ideleter_delete (object->deleter, todelete);
-  if (ret)
+  if (ret) {
+    GST_OBJECT_UNLOCK (self);
     return ret;
+  }
 
   self->count--;
 
   self->list = g_list_delete_link (self->list, found);
+  GST_OBJECT_UNLOCK (self);
 
   return ret;
 
@@ -327,6 +335,7 @@ gstd_list_find_child (GstdList * self, const gchar * name)
   g_return_val_if_fail (self, NULL);
   g_return_val_if_fail (name, NULL);
 
+  GST_OBJECT_LOCK (self);
   result = g_list_find_custom (self->list, name, gstd_list_find_node);
 
 
@@ -335,6 +344,7 @@ gstd_list_find_child (GstdList * self, const gchar * name)
   } else {
     child = NULL;
   }
+  GST_OBJECT_UNLOCK (self);
 
   return child;
 }
@@ -348,14 +358,18 @@ gstd_list_append_child (GstdList * self, GstdObject * child)
   g_return_val_if_fail (child, GSTD_NULL_ARGUMENT);
 
   /* Test if the resource to create already exists */
+  GST_OBJECT_LOCK (self);
   found =
       g_list_find_custom (self->list, GSTD_OBJECT_NAME (child),
       gstd_list_find_node);
-  if (found)
+  if (found) {
+    GST_OBJECT_UNLOCK (self);
     goto exists;
+  }
 
   self->list = g_list_append (self->list, child);
   self->count = g_list_length (self->list);
+  GST_OBJECT_UNLOCK (self);
   GST_INFO_OBJECT (self, "Appended %s to %s list", GSTD_OBJECT_NAME (child),
       GSTD_OBJECT_NAME (self));
 
