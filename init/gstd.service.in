@@ -1,0 +1,13 @@
+[Unit]
+Description=GStreamer Daemon
+StartLimitBurst=3
+StartLimitIntervalSec=30
+
+[Service]
+Restart=on-failure
+RestartSec=5s
+ExecStartPre=@GSTD_SYSTEMD_DIR@/gstd-check-user-xenv.sh
+ExecStart=@prefix@/bin/gstd
+
+[Install]
+WantedBy=default.target
