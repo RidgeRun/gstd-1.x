@@ -527,6 +527,23 @@ gstc_pipeline_bus_wait (GstClient *client,
     const char *pipeline_name, const char *message_name,
     const long long timeout, char **message);
 
+/**
+ * gstc_pipeline_emit_action:
+ * @client: The client returned by gstc_client_new()
+ * @pipeline_name: Name associated with the pipeline
+ * @element_name: Element name
+ * @action_name: Action name
+ *
+ * Emits action for the named element into the named pipeline. Currently,
+ * only actions with no arguments are supported.
+ *
+ * Returns: GstcStatus indicating success, daemon unreachable, daemon
+ * timeout, bad pipeline name, bad element name, bad value
+ */
+GstcStatus gstc_pipeline_emit_action (GstClient *client,
+   const char *pipeline_name, const char *element,
+   const char *action);
+
 #ifdef __cplusplus
 }
 #endif
