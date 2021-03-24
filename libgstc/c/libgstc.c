@@ -594,7 +594,7 @@ unref_response:
 unref:
   free (what);
   va_end (ap);
-  return GSTC_OK;
+  return ret;
 }
 
 GstcStatus
