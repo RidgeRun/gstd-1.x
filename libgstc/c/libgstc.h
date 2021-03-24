@@ -527,6 +527,10 @@ gstc_pipeline_bus_wait (GstClient *client,
     const char *pipeline_name, const char *message_name,
     const long long timeout, char **message);
 
+GstcStatus
+gst_pipeline_get_state (GstClient * client, const char *pipeline_name,
+    char *out);
+
 #ifdef __cplusplus
 }
 #endif

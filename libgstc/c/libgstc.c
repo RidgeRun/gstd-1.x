@@ -424,6 +424,47 @@ out:
 }
 
 GstcStatus
+gst_pipeline_get_state (GstClient * client, const char *pipeline_name,
+    char *out)
+{
+  GstcStatus ret = GSTC_OK;
+  int asprintf_ret;
+  char *what;
+  char *response;
+  char *val;
+
+  gstc_assert_and_ret_val (client != NULL, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (pipeline_name != NULL, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (out != NULL, GSTC_NULL_ARGUMENT);
+
+  asprintf_ret = asprintf (&what, PIPELINE_STATE_FORMAT, pipeline_name);
+  if (asprintf_ret == PRINTF_ERROR) {
+    return GSTC_OOM;
+  }
+
+  ret = gstc_cmd_read (client, what, &response, client->timeout);
+  if (ret != GSTC_OK) {
+    goto unref;
+  }
+
+  ret = gstc_json_child_string (response, "response", "value", &val);
+  if (ret != GSTC_OK) {
+    goto unref_response;
+  }
+
+  sscanf (val, "%s", out);
+
+  free (val);
+
+unref_response:
+  free (response);
+
+unref:
+  free (what);
+  return ret;
+}
+
+GstcStatus
 gstc_pipeline_verbose (GstClient * client, const char *pipeline_name,
     const int value)
 {
