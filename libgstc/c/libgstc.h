@@ -527,6 +527,16 @@ gstc_pipeline_bus_wait (GstClient *client,
     const char *pipeline_name, const char *message_name,
     const long long timeout, char **message);
 
+/**
+ * gst_pipeline_get_state:
+ * @client: The client returned by gstc_client_new()
+ * @pipeline_name: Name associated with the pipeline
+ * @out: Pipeline state value
+ * Attempts to get the state (e.g PLAYING) of the pipeline.
+ *
+ * Returns: GstcStatus indicating success, daemon unreachable, daemon
+ * timeout, bad pipeline name, unable to get the pipeline state
+ */
 GstcStatus
 gst_pipeline_get_state (GstClient * client, const char *pipeline_name,
     char *out);
