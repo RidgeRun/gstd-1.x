@@ -23,6 +23,7 @@
 
 #include "gstd_event_handler.h"
 #include "gstd_parser.h"
+#include "gstd_refcount.h"
 #include "gstd_session.h"
 
 #define check_argument(arg, code) \
@@ -361,9 +362,7 @@ gstd_parser_pipeline_create (GstdSession * session, gchar * action,
   g_return_val_if_fail (GSTD_IS_SESSION (session), GSTD_NULL_ARGUMENT);
 
   uri = g_strdup_printf ("/pipelines %s", args ? args : "");
-
   ret = gstd_parser_parse_raw_cmd (session, (gchar *) "create", uri, response);
-
   g_free (uri);
 
   return ret;
@@ -958,14 +957,23 @@ gstd_parser_pipeline_create_ref (GstdSession * session, gchar * action,
 {
   GstdReturnCode ret;
   gchar *uri;
+  guint refcount;
+  gchar **tokens;
 
   g_return_val_if_fail (GSTD_IS_SESSION (session), GSTD_NULL_ARGUMENT);
 
-  uri = g_strdup_printf ("/pipelines %s", args ? args : "");
-
-  ret = gstd_parser_parse_raw_cmd (session, (gchar *) "create", uri, response);
-
-  g_free (uri);
+  tokens = g_strsplit (args, " ", 2);
+  refcount = gstd_refcount_get_create_refcount (session->refcount, tokens[0]);
+  if (refcount == 0) {
+    uri = g_strdup_printf ("/pipelines %s", args ? args : "");
+    ret =
+        gstd_parser_parse_raw_cmd (session, (gchar *) "create", uri, response);
+    g_free (uri);
+  } else {
+    ret = GSTD_EOK;
+  }
+  gstd_refcount_increment_create_refcount (session->refcount, tokens[0]);
+  g_strfreev (tokens);
 
   return ret;
 }
@@ -976,13 +984,21 @@ gstd_parser_pipeline_delete_ref (GstdSession * session, gchar * action,
 {
   GstdReturnCode ret;
   gchar *uri;
+  guint refcount;
 
   g_return_val_if_fail (GSTD_IS_SESSION (session), GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (args, GSTD_NULL_ARGUMENT);
 
-  uri = g_strdup_printf ("/pipelines %s", args);
-  ret = gstd_parser_parse_raw_cmd (session, (gchar *) "delete", uri, response);
-  g_free (uri);
+  refcount = gstd_refcount_get_create_refcount (session->refcount, args);
+  if (refcount == 1) {
+    uri = g_strdup_printf ("/pipelines %s", args);
+    ret =
+        gstd_parser_parse_raw_cmd (session, (gchar *) "delete", uri, response);
+    g_free (uri);
+  } else {
+    ret = GSTD_EOK;
+  }
+  gstd_refcount_decrement_create_refcount (session->refcount, args);
 
   return ret;
 }
@@ -993,13 +1009,21 @@ gstd_parser_pipeline_play_ref (GstdSession * session, gchar * action,
 {
   GstdReturnCode ret;
   gchar *uri;
+  guint refcount;
 
   g_return_val_if_fail (GSTD_IS_SESSION (session), GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (args, GSTD_NULL_ARGUMENT);
 
-  uri = g_strdup_printf ("/pipelines/%s/state playing", args);
-  ret = gstd_parser_parse_raw_cmd (session, (gchar *) "update", uri, response);
-  g_free (uri);
+  refcount = gstd_refcount_get_play_refcount (session->refcount, args);
+  if (refcount == 0) {
+    uri = g_strdup_printf ("/pipelines/%s/state playing", args);
+    ret =
+        gstd_parser_parse_raw_cmd (session, (gchar *) "update", uri, response);
+    g_free (uri);
+  } else {
+    ret = GSTD_EOK;
+  }
+  gstd_refcount_increment_play_refcount (session->refcount, args);
 
   return ret;
 }
@@ -1010,13 +1034,21 @@ gstd_parser_pipeline_stop_ref (GstdSession * session, gchar * action,
 {
   GstdReturnCode ret;
   gchar *uri;
+  guint refcount;
 
   g_return_val_if_fail (GSTD_IS_SESSION (session), GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (args, GSTD_NULL_ARGUMENT);
 
-  uri = g_strdup_printf ("/pipelines/%s/state null", args);
-  ret = gstd_parser_parse_raw_cmd (session, (gchar *) "update", uri, response);
-  g_free (uri);
+  refcount = gstd_refcount_get_play_refcount (session->refcount, args);
+  if (refcount == 1) {
+    uri = g_strdup_printf ("/pipelines/%s/state null", args);
+    ret =
+        gstd_parser_parse_raw_cmd (session, (gchar *) "update", uri, response);
+    g_free (uri);
+  } else {
+    ret = GSTD_EOK;
+  }
+  gstd_refcount_decrement_play_refcount (session->refcount, args);
 
   return ret;
 }
