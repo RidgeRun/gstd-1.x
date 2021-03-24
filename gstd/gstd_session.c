@@ -154,6 +154,8 @@ gstd_session_init (GstdSession * self)
       GSTD_DEBUG (g_object_new (GSTD_TYPE_DEBUG, "name", "Debug", NULL));
 
   self->pid = (GPid) getpid ();
+
+  self->refcount = g_object_new (TYPE_GSTD_REFCOUNT, NULL);
 }
 
 static void
@@ -221,6 +223,11 @@ gstd_session_dispose (GObject * object)
   if (self->debug) {
     g_object_unref (self->debug);
     self->debug = NULL;
+  }
+
+  if (self->refcount) {
+    g_object_unref (self->refcount);
+    self->refcount = NULL;
   }
 
   G_OBJECT_CLASS (gstd_session_parent_class)->dispose (object);
