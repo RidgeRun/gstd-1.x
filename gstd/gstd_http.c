@@ -27,6 +27,7 @@
 #include <libsoup/soup.h>
 
 #include "gstd_http.h"
+#include "gstd_parser.h"
 
 /* Gstd HTTP debugging category */
 GST_DEBUG_CATEGORY_STATIC (gstd_http_debug);
