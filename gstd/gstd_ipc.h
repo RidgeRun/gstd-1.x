@@ -57,7 +57,6 @@
 #include "gstd_object.h"
 #include "gstd_pipeline.h"
 #include "gstd_session.h"
-#include "gstd_parser.h"
 
 G_BEGIN_DECLS
 #define GSTD_TYPE_IPC \
