@@ -76,9 +76,16 @@ static void
 gstd_refcount_finalize (GObject * object)
 {
   GstdRefcount *refcount;
+  GHashTableIter iter;
+  gpointer key, value;
 
   refcount = _GSTD_REFCOUNT (object);
 
+  g_hash_table_iter_init (&iter, refcount->hash);
+  while (g_hash_table_iter_next (&iter, &key, &value)) {
+    g_free (key);
+    g_free (value);
+  }
   g_hash_table_destroy (refcount->hash);
 
   g_mutex_clear (&refcount->mutex);
@@ -94,10 +101,10 @@ gstd_refcount_get_hash_value (GstdRefcount * refcount, gchar * key)
 
   if ((value = g_hash_table_lookup (refcount->hash, key)) == NULL) {
     /* key not found */
-    value = (HashValue *) malloc (sizeof (HashValue));
+    value = (HashValue *) g_malloc (sizeof (HashValue));
     value->create_refcount = 0;
     value->play_refcount = 0;
-    g_hash_table_insert (refcount->hash, key, value);
+    g_hash_table_insert (refcount->hash, g_strdup (key), value);
   }
   return value;
 }
