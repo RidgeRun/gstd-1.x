@@ -829,6 +829,26 @@ class GstdClient:
         parameters = self._check_parameters([pipe_name, pipe_desc], [str, str])
         self._send_cmd_line(['pipeline_create'] + parameters)
 
+    def pipeline_create_ref(self, pipe_name, pipe_desc):
+        """
+        Create a new pipeline based on the name and description using refcount.
+        The refcount works similarly to GObject references. If the command
+        is called but the refcount is greter than 0 nothing will happen
+        and the refcount will increment.
+
+        Parameters
+        ----------
+        pipe_name: string
+            The name of the pipeline
+        pipe_desc: string
+            Pipeline description (same as gst-launch-1.0)
+        """
+
+        self._logger.info('Creating pipeline %s with description "%s"'
+                          % (pipe_name, pipe_desc))
+        parameters = self._check_parameters([pipe_name, pipe_desc], [str, str])
+        self._send_cmd_line(['pipeline_create_ref'] + parameters)
+
     def pipeline_delete(self, pipe_name):
         """
         Delete the pipeline with the given name.
@@ -849,6 +869,30 @@ class GstdClient:
         self._logger.info('Deleting pipeline %s' % pipe_name)
         parameters = self._check_parameters([pipe_name], [str])
         self._send_cmd_line(['pipeline_delete'] + parameters)
+
+    def pipeline_delete_ref(self, pipe_name):
+        """
+        Delete the pipeline with the given name using refcount.
+        The refcount works similarly to GObject references. If the command
+        is called but the refcount is greter than 1 nothing will happen
+        and the refcount will decrement.
+
+        Parameters
+        ----------
+        pipe_name: string
+            The name of the pipeline
+
+        Raises
+        ------
+        GstdError
+            Error is triggered when Gstd IPC fails
+        GstcError
+            Error is triggered when the Gstd python client fails internally
+        """
+
+        self._logger.info('Deleting pipeline %s' % pipe_name)
+        parameters = self._check_parameters([pipe_name], [str])
+        self._send_cmd_line(['pipeline_delete_ref'] + parameters)
 
     def pipeline_pause(self, pipe_name):
         """
@@ -892,6 +936,30 @@ class GstdClient:
         parameters = self._check_parameters([pipe_name], [str])
         self._send_cmd_line(['pipeline_play'] + parameters)
 
+    def pipeline_play_ref(self, pipe_name):
+        """
+        Set the pipeline to playing using refcount.
+        The refcount works similarly to GObject references. If the command
+        is called but the refcount is greter than 0 nothing will happen
+        and the refcount will increment.
+
+        Parameters
+        ----------
+        pipe_name: string
+            The name of the pipeline
+
+        Raises
+        ------
+        GstdError
+            Error is triggered when Gstd IPC fails
+        GstcError
+            Error is triggered when the Gstd python client fails internally
+        """
+
+        self._logger.info('Playing pipeline %s' % pipe_name)
+        parameters = self._check_parameters([pipe_name], [str])
+        self._send_cmd_line(['pipeline_play_ref'] + parameters)
+
     def pipeline_stop(self, pipe_name):
         """
         Set the pipeline to null.
@@ -912,6 +980,30 @@ class GstdClient:
         self._logger.info('Stoping pipeline %s' % pipe_name)
         parameters = self._check_parameters([pipe_name], [str])
         self._send_cmd_line(['pipeline_stop'] + parameters)
+
+    def pipeline_stop_ref(self, pipe_name):
+        """
+        Set the pipeline to null using refcount.
+        The refcount works similarly to GObject references. If the command
+        is called but the refcount is greter than 1 nothing will happen
+        and the refcount will decrement.
+
+        Parameters
+        ----------
+        pipe_name: string
+            The name of the pipeline
+
+        Raises
+        ------
+        GstdError
+            Error is triggered when Gstd IPC fails
+        GstcError
+            Error is triggered when the Gstd python client fails internally
+        """
+
+        self._logger.info('Stoping pipeline %s' % pipe_name)
+        parameters = self._check_parameters([pipe_name], [str])
+        self._send_cmd_line(['pipeline_stop_ref'] + parameters)
 
     def pipeline_get_graph(self, pipe_name):
         """
