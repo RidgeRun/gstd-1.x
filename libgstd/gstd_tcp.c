@@ -40,7 +40,6 @@
 
 #include "gstd_ipc.h"
 #include "gstd_tcp.h"
-#include "gstd_parser.h"
 #include "gstd_element.h"
 #include "gstd_pipeline_bus.h"
 #include "gstd_event_handler.h"

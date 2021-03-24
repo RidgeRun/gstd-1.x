@@ -36,6 +36,7 @@
 
 #include <string.h>
 
+#include "gstd_parser.h"
 #include "gstd_socket.h"
 
 /* Gstd SOCKET debugging category */
