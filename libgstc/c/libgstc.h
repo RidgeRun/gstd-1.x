@@ -531,7 +531,9 @@ gstc_pipeline_bus_wait (GstClient *client,
  * gst_pipeline_get_state:
  * @client: The client returned by gstc_client_new()
  * @pipeline_name: Name associated with the pipeline
- * @out: Pipeline state value
+ * @out: pointer to output string memory representing a pipeline state value,
+ * this memory should be freed by the user.
+ *
  * Attempts to get the state (e.g PLAYING) of the pipeline.
  *
  * Returns: GstcStatus indicating success, daemon unreachable, daemon
@@ -539,7 +541,7 @@ gstc_pipeline_bus_wait (GstClient *client,
  */
 GstcStatus
 gst_pipeline_get_state (GstClient * client, const char *pipeline_name,
-    char *out);
+    char **out);
 
 #ifdef __cplusplus
 }
