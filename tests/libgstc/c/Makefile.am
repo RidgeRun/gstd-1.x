@@ -22,7 +22,8 @@ TESTS = 				\
 	libgstc_pipeline_list 		\
 	libgstc_pipeline_list_properties\
 	libgstc_pipeline_element_get	\
-	libgstc_pipeline_verbose
+	libgstc_pipeline_verbose        \
+	libgstc_pipeline_get_state
 
 check_PROGRAMS = $(TESTS)
 
@@ -149,5 +150,10 @@ libgstc_pipeline_element_get_SOURCES =		\
 
 libgstc_pipeline_verbose_SOURCES =	\
 	test_libgstc_pipeline_verbose.c	\
+	@top_srcdir@/libgstc/c/libgstc.c	\
+		$(COMMON_SOURCES)
+
+libgstc_pipeline_get_state_SOURCES =	\
+	test_libgstc_pipeline_get_state.c	\
 	@top_srcdir@/libgstc/c/libgstc.c	\
 		$(COMMON_SOURCES)
