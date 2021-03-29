@@ -447,11 +447,7 @@ gst_pipeline_get_state (GstClient * client, const char *pipeline_name,
   }
 
   ret = gstc_json_child_string (response, "response", "value", out);
-  if (ret != GSTC_OK) {
-    goto unref_response;
-  }
 
-unref_response:
   free (response);
 
 unref:
