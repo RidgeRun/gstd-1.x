@@ -21,9 +21,9 @@
 #include <stdio.h>
 
 #include "libgstc.h"
+#include "libgstc_assert.h"
 #include "libgstc_json.h"
 #include "libgstc_socket.h"
-#include "libgstc_assert.h"
 
 /* Mock implementation of a socket */
 static gchar _request[512];
