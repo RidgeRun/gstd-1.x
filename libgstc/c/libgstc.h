@@ -2,7 +2,7 @@
  * GStreamer Daemon - gst-launch on steroids
  * C client library abstracting gstd interprocess communication
  *
- * Copyright (c) 2015-2020 RidgeRun, LLC (http://www.ridgerun.com)
+ * Copyright (c) 2015-2021 RidgeRun, LLC (http://www.ridgerun.com)
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -526,6 +526,22 @@ GstcStatus
 gstc_pipeline_bus_wait (GstClient *client,
     const char *pipeline_name, const char *message_name,
     const long long timeout, char **message);
+
+/**
+ * gst_pipeline_get_state:
+ * @client: The client returned by gstc_client_new()
+ * @pipeline_name: Name associated with the pipeline
+ * @out: pointer to output string memory representing a pipeline state value,
+ * this memory should be freed by the user.
+ *
+ * Attempts to get the state (e.g PLAYING) of the pipeline.
+ *
+ * Returns: GstcStatus indicating success, daemon unreachable, daemon
+ * timeout, bad pipeline name, unable to get the pipeline state
+ */
+GstcStatus
+gst_pipeline_get_state (GstClient * client, const char *pipeline_name,
+    char **out);
 
 #ifdef __cplusplus
 }
