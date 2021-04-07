@@ -1,6 +1,6 @@
 /*
  * Gstreamer Daemon - Gst Launch under steroids
- * Copyright (C) 2017 RidgeRun Engineering <support@ridgerun.com>
+ * Copyright (C) 2017-2021 RidgeRun Engineering <support@ridgerun.com>
  *
  * This file is part of Gstd.
  *
@@ -23,10 +23,13 @@
 #endif
 
 #include <gst/gst.h>
+
 #include "gstd_state.h"
 
 enum
 {
+  PROP_0,
+  PROP_REFCOUNT,
   N_PROPERTIES
 };
 
@@ -36,6 +39,13 @@ struct _GstdState
 
   GstState state;
   GstElement *target;
+
+  /**
+   * Reference count of pipeline play. It is incremented with pipeline_play_ref
+   * and decremented with pipeline_stop_ref. When it reaches 0 the pipeline
+   * is stoped.
+   */
+  guint refcount;
 };
 
 struct _GstdStateClass
@@ -81,6 +91,7 @@ gstd_state_to_string (GstdObject * obj, gchar ** outstring);
 static GstdReturnCode
 gstd_state_update (GstdObject * object, const gchar * sstate);
 static void gstd_state_dispose (GObject * obj);
+static void gstd_state_get_property (GObject *, guint, GValue *, GParamSpec *);
 static GstState gstd_state_read (GstdState * state);
 
 static void
@@ -91,6 +102,7 @@ gstd_state_class_init (GstdStateClass * klass)
   guint debug_color;
 
   oclass->dispose = gstd_state_dispose;
+  oclass->get_property = gstd_state_get_property;
 
   gstdc->to_string = GST_DEBUG_FUNCPTR (gstd_state_to_string);
   gstdc->update = GST_DEBUG_FUNCPTR (gstd_state_update);
@@ -100,6 +112,29 @@ gstd_state_class_init (GstdStateClass * klass)
   GST_DEBUG_CATEGORY_INIT (gstd_state_debug, "gstdstate", debug_color,
       "Gstd State category");
 
+  g_object_class_install_property (oclass, PROP_REFCOUNT,
+      g_param_spec_int ("refcount", "Reference Count",
+          "Reference count of pipeline play", 0, G_MAXINT, 0,
+          G_PARAM_READABLE | G_PARAM_STATIC_STRINGS));
+}
+
+static void
+gstd_state_get_property (GObject * object,
+    guint property_id, GValue * value, GParamSpec * pspec)
+{
+  GstdState *self = GSTD_STATE (object);
+
+  switch (property_id) {
+    case PROP_REFCOUNT:
+      GST_DEBUG_OBJECT (self, "Returning refcount %u", self->refcount);
+      g_value_set_int (value, self->refcount);
+      break;
+
+    default:
+      /* We don't have any other property... */
+      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
+      break;
+  }
 }
 
 static void
@@ -108,6 +143,7 @@ gstd_state_init (GstdState * self)
   GST_INFO_OBJECT (self, "Initializing state");
   self->state = GST_STATE_NULL;
   self->target = NULL;
+  self->refcount = 0;
 }
 
 static GstdReturnCode

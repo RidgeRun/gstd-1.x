@@ -1,6 +1,6 @@
 /*
  * GStreamer Daemon - Gst Launch under steroids
- * Copyright (c) 2015-2020 Ridgerun, LLC (http://www.ridgerun.com)
+ * Copyright (c) 2015-2021 Ridgerun, LLC (http://www.ridgerun.com)
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -24,13 +24,13 @@
 #include <string.h>
 #include <gst/gst.h>
 
-#include "gstd_pipeline.h"
-#include "gstd_object.h"
-#include "gstd_list.h"
 #include "gstd_element.h"
 #include "gstd_event_handler.h"
-#include "gstd_pipeline_bus.h"
+#include "gstd_list.h"
 #include "gstd_list_reader.h"
+#include "gstd_object.h"
+#include "gstd_pipeline.h"
+#include "gstd_pipeline_bus.h"
 #include "gstd_property_reader.h"
 #include "gstd_state.h"
 
@@ -45,6 +45,7 @@ enum
   PROP_DURATION,
   PROP_GRAPH,
   PROP_VERBOSE,
+  PROP_REFCOUNT,
   N_PROPERTIES                  // NOT A PROPERTY
 };
 
@@ -120,6 +121,13 @@ struct _GstdPipeline
    * Id to enable/disable deep notify logging (similar to adding -v to get-launch-1.0)
    */
   gulong deep_notify_id;
+
+  /**
+   * Reference count of pipeline creation. It is incremented with pipeline_create_ref
+   * and decremented with pipeline_delete_ref. When it reaches 0 the pipeline
+   * is deleted.
+   */
+  guint refcount;
 };
 
 struct _GstdPipelineClass
@@ -203,6 +211,11 @@ gstd_pipeline_class_init (GstdPipelineClass * klass)
       "Verbose state for the media stream pipeline",
       GSTD_PIPELINE_DEFAULT_VERBOSE, G_PARAM_READWRITE | GSTD_PARAM_READ);
 
+  properties[PROP_REFCOUNT] =
+      g_param_spec_int ("refcount", "Reference Count",
+      "Reference count of pipeline creation",
+      0, G_MAXINT, 0, G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
+
   g_object_class_install_properties (object_class, N_PROPERTIES, properties);
 
   /* Initialize debug category with nice colors */
@@ -222,6 +235,7 @@ gstd_pipeline_init (GstdPipeline * self)
   self->state = NULL;
   self->graph = NULL;
   self->deep_notify_id = 0;
+  self->refcount = 0;
 
   self->elements = g_object_new (GSTD_TYPE_LIST, "name", "elements",
       "node-type", GSTD_TYPE_ELEMENT, "flags", GSTD_PARAM_READ, NULL);
@@ -363,6 +377,11 @@ gstd_pipeline_get_property (GObject * object,
       GST_DEBUG_OBJECT (self, "Returning verbose handler %lu",
           self->deep_notify_id);
       g_value_set_boolean (value, 0 != self->deep_notify_id);
+      break;
+
+    case PROP_REFCOUNT:
+      GST_DEBUG_OBJECT (self, "Returning refcount %u", self->refcount);
+      g_value_set_int (value, self->refcount);
       break;
 
     case PROP_POSITION:
