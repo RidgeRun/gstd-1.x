@@ -61,6 +61,9 @@
 #define PIPELINE_ELEMENTS_PROPERTY_FORMAT    "/pipelines/%s/elements/%s/properties/%s"
 #define PIPELINE_EVENT_FORMAT                "/pipelines/%s/event"
 #define PIPELINE_VERBOSE_FORMAT              "/pipelines/%s/verbose"
+#define PIPELINE_SIGNAL_CONNECT_FORMAT       "/pipelines/%s/elements/%s/signals/%s/callback"
+#define PIPELINE_SIGNAL_TIMEOUT_FORMAT       "/pipelines/%s/elements/%s/signals/%s/timeout"
+#define PIPELINE_SIGNAL_DISCONNECT_FORMAT    "/pipelines/%s/elements/%s/signals/%s/disconnect"
 
 #define SEEK_FORMAT        "seek %f %d %d %d %lld %d %lld"
 #define FLUSH_STOP_FORMAT  "flush_stop %s"
@@ -982,4 +985,112 @@ gstc_pipeline_list (GstClient * client, char **pipelines[], int *list_lenght)
 
 out:
   return ret;
+}
+
+GstcStatus
+gst_pipeline_signal_connect (GstClient * client, const char *pipeline_name,
+    const char *element, const char *signal, char **response)
+{
+  GstcStatus ret;
+  char *what;
+  int asprintf_ret;
+
+  gstc_assert_and_ret_val (NULL != client, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != pipeline_name, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != element, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != signal, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != response, GSTC_NULL_ARGUMENT);
+
+  asprintf_ret =
+      asprintf (&what, PIPELINE_SIGNAL_CONNECT_FORMAT, pipeline_name, element,
+      signal);
+  if (PRINTF_ERROR == asprintf_ret) {
+    return GSTC_OOM;
+  }
+
+  ret = gstc_cmd_read (client, what, response, client->timeout);
+  if (GSTC_OK != ret) {
+    goto out;
+  }
+
+out:
+  free (what);
+
+  return ret;
+
+}
+
+
+GstcStatus
+gst_pipeline_signal_timeout (GstClient * client, const char *pipeline_name,
+    const char *element, const char *signal, const int value)
+{
+  GstcStatus ret;
+  char *what;
+  char *how;
+  int asprintf_ret;
+
+  gstc_assert_and_ret_val (NULL != client, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != pipeline_name, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != element, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != signal, GSTC_NULL_ARGUMENT);
+
+  asprintf_ret =
+      asprintf (&what, PIPELINE_SIGNAL_TIMEOUT_FORMAT, pipeline_name, element,
+      signal);
+  if (PRINTF_ERROR == asprintf_ret) {
+    return GSTC_OOM;
+  }
+
+  asprintf_ret = asprintf (&how, "%d", value);
+  if (PRINTF_ERROR == asprintf_ret) {
+    ret = GSTC_OOM;
+    goto out;
+  }
+
+  ret = gstc_cmd_update (client, what, how);
+  if (GSTC_OK != ret) {
+    goto out;
+  }
+
+out:
+  free (what);
+  free (how);
+
+  return ret;
+
+}
+
+
+GstcStatus
+gst_pipeline_signal_disconnect (GstClient * client, const char *pipeline_name,
+    const char *element, const char *signal)
+{
+  GstcStatus ret;
+  char *what;
+  char *response;
+  int asprintf_ret;
+
+  gstc_assert_and_ret_val (NULL != client, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != pipeline_name, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != element, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != signal, GSTC_NULL_ARGUMENT);
+
+  asprintf_ret =
+      asprintf (&what, PIPELINE_SIGNAL_DISCONNECT_FORMAT, pipeline_name,
+      element, signal);
+  if (PRINTF_ERROR == asprintf_ret) {
+    return GSTC_OOM;
+  }
+
+  ret = gstc_cmd_read (client, what, &response, client->timeout);
+  if (GSTC_OK != ret) {
+    goto out;
+  }
+
+out:
+  free (what);
+
+  return ret;
+
 }

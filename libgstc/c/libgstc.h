@@ -543,6 +543,15 @@ GstcStatus
 gst_pipeline_get_state (GstClient * client, const char *pipeline_name,
     char **out);
 
+GstcStatus
+gst_pipeline_signal_connect (GstClient * client, const char *pipeline_name, const char* element, const char* signal, char **response);
+
+GstcStatus
+gst_pipeline_signal_timeout (GstClient * client, const char *pipeline_name, const char* element, const char* signal, const int value);
+
+GstcStatus
+gst_pipeline_signal_disconnect (GstClient * client, const char *pipeline_name, const char* element, const char* signal);
+
 #ifdef __cplusplus
 }
 #endif
