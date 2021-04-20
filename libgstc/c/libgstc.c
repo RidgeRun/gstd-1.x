@@ -1125,6 +1125,7 @@ gstc_pipeline_signal_disconnect (GstClient * client, const char *pipeline_name,
 
 out:
   free (what);
+  free (response);
 
   return ret;
 
