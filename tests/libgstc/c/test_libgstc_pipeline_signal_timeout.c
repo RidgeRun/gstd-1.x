@@ -127,7 +127,7 @@ GST_START_TEST (test_pipeline_signal_timeout_success)
       "update /pipelines/pipe/elements/element_name/signals/signal_name/timeout 100";
 
   ret =
-      gst_pipeline_signal_timeout (_client, pipeline_name, element_name,
+      gstc_pipeline_signal_timeout (_client, pipeline_name, element_name,
       signal_name, timeout);
   assert_equals_int (GSTC_OK, ret);
 
@@ -145,7 +145,7 @@ GST_START_TEST (test_pipeline_signal_timeout_null_pipeline)
   const gint timeout = 100;
 
   ret =
-      gst_pipeline_signal_timeout (_client, pipeline_name, element_name,
+      gstc_pipeline_signal_timeout (_client, pipeline_name, element_name,
       signal_name, timeout);
   assert_equals_int (GSTC_NULL_ARGUMENT, ret);
 }
@@ -161,7 +161,7 @@ GST_START_TEST (test_pipeline_signal_timeout_null_element)
   const gint timeout = 100;
 
   ret =
-      gst_pipeline_signal_timeout (_client, pipeline_name, element_name,
+      gstc_pipeline_signal_timeout (_client, pipeline_name, element_name,
       signal_name, timeout);
   assert_equals_int (GSTC_NULL_ARGUMENT, ret);
 }
@@ -177,7 +177,7 @@ GST_START_TEST (test_pipeline_signal_timeout_null_signal)
   const gint timeout = 100;
 
   ret =
-      gst_pipeline_signal_timeout (_client, pipeline_name, element_name,
+      gstc_pipeline_signal_timeout (_client, pipeline_name, element_name,
       signal_name, timeout);
   assert_equals_int (GSTC_NULL_ARGUMENT, ret);
 }
@@ -193,7 +193,7 @@ GST_START_TEST (test_pipeline_signal_timeout_null_client)
   const gint timeout = 100;
 
   ret =
-      gst_pipeline_signal_timeout (NULL, pipeline_name, element_name,
+      gstc_pipeline_signal_timeout (NULL, pipeline_name, element_name,
       signal_name, timeout);
   assert_equals_int (GSTC_NULL_ARGUMENT, ret);
 }

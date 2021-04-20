@@ -532,7 +532,7 @@ gstc_pipeline_bus_wait (GstClient *client,
  * @client: The client returned by gstc_client_new()
  * @pipeline_name: Name associated with the pipeline
  * @out: pointer to output string memory representing a pipeline state value,
- * this memory should be freed by the user.
+ * this memory should be freed by the user.`
  *
  * Attempts to get the state (e.g PLAYING) of the pipeline.
  *
@@ -544,13 +544,16 @@ gst_pipeline_get_state (GstClient * client, const char *pipeline_name,
     char **out);
 
 GstcStatus
-gst_pipeline_signal_connect (GstClient * client, const char *pipeline_name, const char* element, const char* signal, char **response);
+gstc_pipeline_list_signals (GstClient * client, const char *pipeline_name, const char* element, char **signals[], int *list_lenght);
 
 GstcStatus
-gst_pipeline_signal_timeout (GstClient * client, const char *pipeline_name, const char* element, const char* signal, const int value);
+gstc_pipeline_signal_connect (GstClient * client, const char *pipeline_name, const char* element, const char* signal, char **response);
 
 GstcStatus
-gst_pipeline_signal_disconnect (GstClient * client, const char *pipeline_name, const char* element, const char* signal);
+gstc_pipeline_signal_timeout (GstClient * client, const char *pipeline_name, const char* element, const char* signal, const int value);
+
+GstcStatus
+gstc_pipeline_signal_disconnect (GstClient * client, const char *pipeline_name, const char* element, const char* signal);
 
 #ifdef __cplusplus
 }

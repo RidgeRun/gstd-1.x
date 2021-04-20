@@ -61,6 +61,7 @@
 #define PIPELINE_ELEMENTS_PROPERTY_FORMAT    "/pipelines/%s/elements/%s/properties/%s"
 #define PIPELINE_EVENT_FORMAT                "/pipelines/%s/event"
 #define PIPELINE_VERBOSE_FORMAT              "/pipelines/%s/verbose"
+#define PIPELINE_SIGNAL_LIST_FORMAT          "/pipelines/%s/elements/%s/signals"
 #define PIPELINE_SIGNAL_CONNECT_FORMAT       "/pipelines/%s/elements/%s/signals/%s/callback"
 #define PIPELINE_SIGNAL_TIMEOUT_FORMAT       "/pipelines/%s/elements/%s/signals/%s/timeout"
 #define PIPELINE_SIGNAL_DISCONNECT_FORMAT    "/pipelines/%s/elements/%s/signals/%s/disconnect"
@@ -988,7 +989,42 @@ out:
 }
 
 GstcStatus
-gst_pipeline_signal_connect (GstClient * client, const char *pipeline_name,
+gstc_pipeline_list_signals (GstClient * client, const char *pipeline_name,
+    const char *element, char **signals[], int *list_lenght)
+{
+  GstcStatus ret;
+  char *what;
+  int asprintf_ret;
+  char *response;
+
+  gstc_assert_and_ret_val (NULL != client, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != pipeline_name, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != element, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != signals, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != list_lenght, GSTC_NULL_ARGUMENT);
+
+  asprintf_ret =
+      asprintf (&what, PIPELINE_SIGNAL_LIST_FORMAT, pipeline_name, element);
+  if (PRINTF_ERROR == asprintf_ret) {
+    return GSTC_OOM;
+  }
+
+  ret = gstc_cmd_read (client, what, &response, client->timeout);
+  if (GSTC_OK != ret) {
+    goto out;
+  }
+
+  ret = gstc_json_get_child_char_array (response, "response", "nodes",
+      "name", signals, list_lenght);
+
+out:
+  free (what);
+
+  return ret;
+}
+
+GstcStatus
+gstc_pipeline_signal_connect (GstClient * client, const char *pipeline_name,
     const char *element, const char *signal, char **response)
 {
   GstcStatus ret;
@@ -1017,12 +1053,11 @@ out:
   free (what);
 
   return ret;
-
 }
 
 
 GstcStatus
-gst_pipeline_signal_timeout (GstClient * client, const char *pipeline_name,
+gstc_pipeline_signal_timeout (GstClient * client, const char *pipeline_name,
     const char *element, const char *signal, const int value)
 {
   GstcStatus ret;
@@ -1063,7 +1098,7 @@ out:
 
 
 GstcStatus
-gst_pipeline_signal_disconnect (GstClient * client, const char *pipeline_name,
+gstc_pipeline_signal_disconnect (GstClient * client, const char *pipeline_name,
     const char *element, const char *signal)
 {
   GstcStatus ret;

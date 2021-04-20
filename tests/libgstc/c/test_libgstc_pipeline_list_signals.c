@@ -116,18 +116,18 @@ gstc_json_child_string (const char *json, const char *parent_name,
   return GSTC_OK;
 }
 
-GST_START_TEST (test_pipeline_signal_disconnect_success)
+GST_START_TEST (test_pipeline_list_signals_success)
 {
   GstcStatus ret;
   const gchar *pipeline_name = "pipe";
   const gchar *element_name = "element_name";
-  const gchar *signal_name = "signal_name";
-  const gchar *expected =
-      "read /pipelines/pipe/elements/element_name/signals/signal_name/disconnect";
+  const gchar *expected = "read /pipelines/pipe/elements/element_name/signals";
+  char **response;
+  int array_lenght;
 
   ret =
-      gstc_pipeline_signal_disconnect (_client, pipeline_name, element_name,
-      signal_name);
+      gstc_pipeline_list_signals (_client, pipeline_name, element_name,
+      &response, &array_lenght);
   assert_equals_int (GSTC_OK, ret);
 
   assert_equals_string (expected, _request);
@@ -135,61 +135,81 @@ GST_START_TEST (test_pipeline_signal_disconnect_success)
 
 GST_END_TEST;
 
-GST_START_TEST (test_pipeline_signal_disconnect_null_pipeline)
+GST_START_TEST (test_pipeline_list_signals_null_pipeline)
 {
   GstcStatus ret;
   const gchar *pipeline_name = NULL;
   const gchar *element_name = "element_name";
-  const gchar *signal_name = "signal_name";
+  char **response;
+  int array_lenght;
 
   ret =
-      gstc_pipeline_signal_disconnect (_client, pipeline_name, element_name,
-      signal_name);
+      gstc_pipeline_list_signals (_client, pipeline_name, element_name,
+      &response, &array_lenght);
   assert_equals_int (GSTC_NULL_ARGUMENT, ret);
 }
 
 GST_END_TEST;
 
-GST_START_TEST (test_pipeline_signal_disconnect_null_element)
+GST_START_TEST (test_pipeline_list_signals_null_element)
 {
   GstcStatus ret;
   const gchar *pipeline_name = "pipe";
   const gchar *element_name = NULL;
-  const gchar *signal_name = "signal_name";
+  char **response;
+  int array_lenght;
 
   ret =
-      gstc_pipeline_signal_disconnect (_client, pipeline_name, element_name,
-      signal_name);
+      gstc_pipeline_list_signals (_client, pipeline_name, element_name,
+      &response, &array_lenght);
   assert_equals_int (GSTC_NULL_ARGUMENT, ret);
 }
 
 GST_END_TEST;
 
-GST_START_TEST (test_pipeline_signal_disconnect_null_signal)
+GST_START_TEST (test_pipeline_list_signals_null_response)
 {
   GstcStatus ret;
   const gchar *pipeline_name = "pipe";
-  const gchar *element_name = "element_name";
-  const gchar *signal_name = NULL;
+  const gchar *element_name = NULL;
+  char ***response = NULL;
+  int array_lenght;
 
   ret =
-      gstc_pipeline_signal_disconnect (_client, pipeline_name, element_name,
-      signal_name);
+      gstc_pipeline_list_signals (_client, pipeline_name, element_name,
+      response, &array_lenght);
   assert_equals_int (GSTC_NULL_ARGUMENT, ret);
 }
 
 GST_END_TEST;
 
-GST_START_TEST (test_pipeline_signal_disconnect_null_client)
+GST_START_TEST (test_pipeline_list_signals_null_list_lenght)
+{
+  GstcStatus ret;
+  const gchar *pipeline_name = "pipe";
+  const gchar *element_name = NULL;
+  char **response;
+  int *array_lenght = NULL;
+
+  ret =
+      gstc_pipeline_list_signals (_client, pipeline_name, element_name,
+      &response, array_lenght);
+  assert_equals_int (GSTC_NULL_ARGUMENT, ret);
+}
+
+GST_END_TEST;
+
+GST_START_TEST (test_pipeline_list_signals_null_client)
 {
   GstcStatus ret;
   const gchar *pipeline_name = "pipe";
   const gchar *element_name = "element_name";
-  const gchar *signal_name = "signal_name";
+  char **response;
+  int array_lenght;
 
   ret =
-      gstc_pipeline_signal_disconnect (NULL, pipeline_name, element_name,
-      signal_name);
+      gstc_pipeline_list_signals (NULL, pipeline_name, element_name,
+      &response, &array_lenght);
   assert_equals_int (GSTC_NULL_ARGUMENT, ret);
 }
 
@@ -204,11 +224,12 @@ libgstc_pipeline_suite (void)
   suite_add_tcase (suite, tc);
 
   tcase_add_checked_fixture (tc, setup, teardown);
-  tcase_add_test (tc, test_pipeline_signal_disconnect_success);
-  tcase_add_test (tc, test_pipeline_signal_disconnect_null_pipeline);
-  tcase_add_test (tc, test_pipeline_signal_disconnect_null_element);
-  tcase_add_test (tc, test_pipeline_signal_disconnect_null_signal);
-  tcase_add_test (tc, test_pipeline_signal_disconnect_null_client);
+  tcase_add_test (tc, test_pipeline_list_signals_success);
+  tcase_add_test (tc, test_pipeline_list_signals_null_pipeline);
+  tcase_add_test (tc, test_pipeline_list_signals_null_element);
+  tcase_add_test (tc, test_pipeline_list_signals_null_client);
+  tcase_add_test (tc, test_pipeline_list_signals_null_list_lenght);
+  tcase_add_test (tc, test_pipeline_list_signals_null_response);
 
   return suite;
 }

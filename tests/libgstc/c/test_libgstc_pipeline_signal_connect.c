@@ -127,7 +127,7 @@ GST_START_TEST (test_pipeline_signal_connect_success)
   gchar *response;
 
   ret =
-      gst_pipeline_signal_connect (_client, pipeline_name, element_name,
+      gstc_pipeline_signal_connect (_client, pipeline_name, element_name,
       signal_name, &response);
   assert_equals_int (GSTC_OK, ret);
 
@@ -145,7 +145,7 @@ GST_START_TEST (test_pipeline_signal_connect_null_pipeline)
   gchar *response;
 
   ret =
-      gst_pipeline_signal_connect (_client, pipeline_name, element_name,
+      gstc_pipeline_signal_connect (_client, pipeline_name, element_name,
       signal_name, &response);
   assert_equals_int (GSTC_NULL_ARGUMENT, ret);
 }
@@ -161,7 +161,7 @@ GST_START_TEST (test_pipeline_signal_connect_null_element)
   gchar *response;
 
   ret =
-      gst_pipeline_signal_connect (_client, pipeline_name, element_name,
+      gstc_pipeline_signal_connect (_client, pipeline_name, element_name,
       signal_name, &response);
   assert_equals_int (GSTC_NULL_ARGUMENT, ret);
 }
@@ -177,7 +177,7 @@ GST_START_TEST (test_pipeline_signal_connect_null_signal)
   gchar *response;
 
   ret =
-      gst_pipeline_signal_connect (_client, pipeline_name, element_name,
+      gstc_pipeline_signal_connect (_client, pipeline_name, element_name,
       signal_name, &response);
   assert_equals_int (GSTC_NULL_ARGUMENT, ret);
 }
@@ -193,7 +193,7 @@ GST_START_TEST (test_pipeline_signal_connect_null_client)
   gchar *response;
 
   ret =
-      gst_pipeline_signal_connect (NULL, pipeline_name, element_name,
+      gstc_pipeline_signal_connect (NULL, pipeline_name, element_name,
       signal_name, &response);
   assert_equals_int (GSTC_NULL_ARGUMENT, ret);
 }
