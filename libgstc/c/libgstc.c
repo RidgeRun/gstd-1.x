@@ -1045,9 +1045,6 @@ gstc_pipeline_signal_connect (GstClient * client, const char *pipeline_name,
   }
 
   ret = gstc_cmd_read (client, what, response, client->timeout);
-  if (GSTC_OK != ret) {
-    goto out;
-  }
 
 out:
   free (what);
@@ -1084,9 +1081,6 @@ gstc_pipeline_signal_timeout (GstClient * client, const char *pipeline_name,
   }
 
   ret = gstc_cmd_update (client, what, how);
-  if (GSTC_OK != ret) {
-    goto out;
-  }
 
 out:
   free (what);
@@ -1119,9 +1113,6 @@ gstc_pipeline_signal_disconnect (GstClient * client, const char *pipeline_name,
   }
 
   ret = gstc_cmd_read (client, what, &response, client->timeout);
-  if (GSTC_OK != ret) {
-    goto out;
-  }
 
 out:
   free (what);
