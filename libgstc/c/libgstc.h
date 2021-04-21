@@ -532,7 +532,7 @@ gstc_pipeline_bus_wait (GstClient *client,
  * @client: The client returned by gstc_client_new()
  * @pipeline_name: Name associated with the pipeline
  * @out: pointer to output string memory representing a pipeline state value,
- * this memory should be freed by the user.`
+ * this memory should be freed by the user.
  *
  * Attempts to get the state (e.g PLAYING) of the pipeline.
  *
@@ -569,7 +569,7 @@ gstc_pipeline_list_signals (GstClient * client, const char *pipeline_name, const
  * @element: Name associated with the element
  * @signal: Name associated with the signal
  * @response: pointer to output string memory representing a pipeline state value,
- * this memory should be freed by the user.`
+ * this memory should be freed by the user.
  *
  * Attempts to get a signal from a pipeline
  *
