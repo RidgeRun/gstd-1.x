@@ -1046,7 +1046,6 @@ gstc_pipeline_signal_connect (GstClient * client, const char *pipeline_name,
 
   ret = gstc_cmd_read (client, what, response, client->timeout);
 
-out:
   free (what);
 
   return ret;
@@ -1114,7 +1113,6 @@ gstc_pipeline_signal_disconnect (GstClient * client, const char *pipeline_name,
 
   ret = gstc_cmd_read (client, what, &response, client->timeout);
 
-out:
   free (what);
   free (response);
 
