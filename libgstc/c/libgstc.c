@@ -1025,10 +1025,11 @@ out:
 
 GstcStatus
 gstc_pipeline_signal_connect (GstClient * client, const char *pipeline_name,
-    const char *element, const char *signal, char **response)
+    const char *element, const char *signal, const int timeout, char **response)
 {
   GstcStatus ret;
-  char *what;
+  char *what = NULL;
+  char *how = NULL;
   int asprintf_ret;
 
   gstc_assert_and_ret_val (NULL != client, GSTC_NULL_ARGUMENT);
@@ -1037,6 +1038,26 @@ gstc_pipeline_signal_connect (GstClient * client, const char *pipeline_name,
   gstc_assert_and_ret_val (NULL != signal, GSTC_NULL_ARGUMENT);
   gstc_assert_and_ret_val (NULL != response, GSTC_NULL_ARGUMENT);
 
+  /* Update the timeout */
+  asprintf_ret =
+      asprintf (&what, PIPELINE_SIGNAL_TIMEOUT_FORMAT, pipeline_name, element,
+      signal);
+  if (PRINTF_ERROR == asprintf_ret) {
+    return GSTC_OOM;
+  }
+
+  asprintf_ret = asprintf (&how, "%d", timeout);
+  if (PRINTF_ERROR == asprintf_ret) {
+    ret = GSTC_OOM;
+    goto out;
+  }
+
+  ret = gstc_cmd_update (client, what, how);
+  if (GSTC_OK != ret) {
+    goto out;
+  }
+
+  /* Start the signal connect */
   asprintf_ret =
       asprintf (&what, PIPELINE_SIGNAL_CONNECT_FORMAT, pipeline_name, element,
       signal);
@@ -1046,49 +1067,12 @@ gstc_pipeline_signal_connect (GstClient * client, const char *pipeline_name,
 
   ret = gstc_cmd_read (client, what, response, client->timeout);
 
-  free (what);
-
-  return ret;
-}
-
-
-GstcStatus
-gstc_pipeline_signal_timeout (GstClient * client, const char *pipeline_name,
-    const char *element, const char *signal, const int value)
-{
-  GstcStatus ret;
-  char *what;
-  char *how;
-  int asprintf_ret;
-
-  gstc_assert_and_ret_val (NULL != client, GSTC_NULL_ARGUMENT);
-  gstc_assert_and_ret_val (NULL != pipeline_name, GSTC_NULL_ARGUMENT);
-  gstc_assert_and_ret_val (NULL != element, GSTC_NULL_ARGUMENT);
-  gstc_assert_and_ret_val (NULL != signal, GSTC_NULL_ARGUMENT);
-
-  asprintf_ret =
-      asprintf (&what, PIPELINE_SIGNAL_TIMEOUT_FORMAT, pipeline_name, element,
-      signal);
-  if (PRINTF_ERROR == asprintf_ret) {
-    return GSTC_OOM;
-  }
-
-  asprintf_ret = asprintf (&how, "%d", value);
-  if (PRINTF_ERROR == asprintf_ret) {
-    ret = GSTC_OOM;
-    goto out;
-  }
-
-  ret = gstc_cmd_update (client, what, how);
-
 out:
   free (what);
   free (how);
 
   return ret;
-
 }
-
 
 GstcStatus
 gstc_pipeline_signal_disconnect (GstClient * client, const char *pipeline_name,

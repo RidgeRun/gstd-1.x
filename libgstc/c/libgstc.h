@@ -568,6 +568,7 @@ gstc_pipeline_list_signals (GstClient * client, const char *pipeline_name, const
  * @pipeline_name: Name associated with the pipeline
  * @element: Name associated with the element
  * @signal: Name associated with the signal
+ * @timeout: Timeout for the signal
  * @response: pointer to output string memory representing a pipeline state value,
  * this memory should be freed by the user.
  *
@@ -577,24 +578,7 @@ gstc_pipeline_list_signals (GstClient * client, const char *pipeline_name, const
  * timeout, bad pipeline name
  */
 GstcStatus
-gstc_pipeline_signal_connect (GstClient * client, const char *pipeline_name, const char* element, const char* signal, char **response);
-
-/**
- * gstc_pipeline_signal_timeout:
- * @client: The client returned by gstc_client_new()
- * @pipeline_name: Name associated with the pipeline
- * @element: Name associated with the element
- * @signal: Name associated with the signal
- * @value: value to update 
- *
- * Changes the timeout for signal reading in the pipelien
- *
- * Returns: GstcStatus indicating success, daemon unreachable, daemon
- * timeout, bad pipeline name
- */
-GstcStatus
-gstc_pipeline_signal_timeout (GstClient * client, const char *pipeline_name, const char* element, const char* signal, const int value);
-
+gstc_pipeline_signal_connect (GstClient * client, const char *pipeline_name, const char* element, const char* signal, const int value, char **response);
 
 /**
  * gstc_pipeline_signal_disconnect:

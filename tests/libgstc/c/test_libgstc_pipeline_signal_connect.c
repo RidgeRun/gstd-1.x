@@ -20,12 +20,12 @@
 #include <string.h>
 
 #include "libgstc.h"
-#include "libgstc_socket.h"
 #include "libgstc_assert.h"
 #include "libgstc_json.h"
+#include "libgstc_socket.h"
 
 /* Test Fixture */
-static gchar _request[512];
+static gchar _request[3][512];
 static GstClient *_client;
 
 static void
@@ -67,12 +67,16 @@ gstc_socket_free (GstcSocket * socket)
 }
 
 GstcStatus
-gstc_socket_send (GstcSocket * socket, const gchar * request, gchar ** response,
-    const int timeout)
+gstc_socket_send (GstcSocket * socket, const gchar * request,
+    gchar ** response, const int timeout)
 {
+  static int reqnum = 0;
+
   *response = malloc (1);
 
-  memcpy (_request, request, strlen (request));
+  memcpy (_request[reqnum], request, strlen (request));
+
+  reqnum++;
 
   return GSTC_OK;
 }
@@ -91,9 +95,10 @@ gstc_json_is_null (const gchar * json, const gchar * name, gint * out)
 }
 
 GstcStatus
-gstc_json_get_child_char_array (const char *json, const char *parent_name,
-    const char *array_name, const char *element_name, char **out[],
-    int *array_lenght)
+gstc_json_get_child_char_array (const char *json,
+    const char *parent_name,
+    const char *array_name,
+    const char *element_name, char **out[], int *array_lenght)
 {
   gstc_assert_and_ret_val (NULL != json, GSTC_NULL_ARGUMENT);
   gstc_assert_and_ret_val (NULL != parent_name, GSTC_NULL_ARGUMENT);
@@ -122,16 +127,19 @@ GST_START_TEST (test_pipeline_signal_connect_success)
   const gchar *pipeline_name = "pipe";
   const gchar *element_name = "element_name";
   const gchar *signal_name = "signal_name";
-  const gchar *expected =
-      "read /pipelines/pipe/elements/element_name/signals/signal_name/callback";
+  const gchar *expected[] = {
+    "update /pipelines/pipe/elements/element_name/signals/signal_name/timeout 100",
+    "read /pipelines/pipe/elements/element_name/signals/signal_name/callback"
+  };
+  gint signal_timeout = 100;
   gchar *response;
 
-  ret =
-      gstc_pipeline_signal_connect (_client, pipeline_name, element_name,
-      signal_name, &response);
+  ret = gstc_pipeline_signal_connect (_client, pipeline_name, element_name,
+      signal_name, signal_timeout, &response);
   assert_equals_int (GSTC_OK, ret);
 
-  assert_equals_string (expected, _request);
+  assert_equals_string (expected[0], _request[0]);
+  assert_equals_string (expected[1], _request[1]);
 }
 
 GST_END_TEST;
@@ -142,11 +150,11 @@ GST_START_TEST (test_pipeline_signal_connect_null_pipeline)
   const gchar *pipeline_name = NULL;
   const gchar *element_name = "element_name";
   const gchar *signal_name = "signal_name";
+  gint signal_timeout = -1;
   gchar *response;
 
-  ret =
-      gstc_pipeline_signal_connect (_client, pipeline_name, element_name,
-      signal_name, &response);
+  ret = gstc_pipeline_signal_connect (_client, pipeline_name, element_name,
+      signal_name, signal_timeout, &response);
   assert_equals_int (GSTC_NULL_ARGUMENT, ret);
 }
 
@@ -158,11 +166,11 @@ GST_START_TEST (test_pipeline_signal_connect_null_element)
   const gchar *pipeline_name = "pipe";
   const gchar *element_name = NULL;
   const gchar *signal_name = "signal_name";
+  gint signal_timeout = -1;
   gchar *response;
 
-  ret =
-      gstc_pipeline_signal_connect (_client, pipeline_name, element_name,
-      signal_name, &response);
+  ret = gstc_pipeline_signal_connect (_client, pipeline_name, element_name,
+      signal_name, signal_timeout, &response);
   assert_equals_int (GSTC_NULL_ARGUMENT, ret);
 }
 
@@ -174,11 +182,11 @@ GST_START_TEST (test_pipeline_signal_connect_null_signal)
   const gchar *pipeline_name = "pipe";
   const gchar *element_name = "element_name";
   const gchar *signal_name = NULL;
+  gint signal_timeout = -1;
   gchar *response;
 
-  ret =
-      gstc_pipeline_signal_connect (_client, pipeline_name, element_name,
-      signal_name, &response);
+  ret = gstc_pipeline_signal_connect (_client, pipeline_name, element_name,
+      signal_name, signal_timeout, &response);
   assert_equals_int (GSTC_NULL_ARGUMENT, ret);
 }
 
@@ -190,11 +198,11 @@ GST_START_TEST (test_pipeline_signal_connect_null_client)
   const gchar *pipeline_name = "pipe";
   const gchar *element_name = "element_name";
   const gchar *signal_name = "signal_name";
+  gint signal_timeout = -1;
   gchar *response;
 
-  ret =
-      gstc_pipeline_signal_connect (NULL, pipeline_name, element_name,
-      signal_name, &response);
+  ret = gstc_pipeline_signal_connect (NULL, pipeline_name, element_name,
+      signal_name, signal_timeout, &response);
   assert_equals_int (GSTC_NULL_ARGUMENT, ret);
 }
 
