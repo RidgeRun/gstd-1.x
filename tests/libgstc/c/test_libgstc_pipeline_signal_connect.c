@@ -132,7 +132,7 @@ GST_START_TEST (test_pipeline_signal_connect_success)
     "read /pipelines/pipe/elements/element_name/signals/signal_name/callback"
   };
   gint signal_timeout = 100;
-  gchar *response;
+  gchar *response = NULL;
 
   ret = gstc_pipeline_signal_connect (_client, pipeline_name, element_name,
       signal_name, signal_timeout, &response);
@@ -140,6 +140,8 @@ GST_START_TEST (test_pipeline_signal_connect_success)
 
   assert_equals_string (expected[0], _request[0]);
   assert_equals_string (expected[1], _request[1]);
+
+  free (response);
 }
 
 GST_END_TEST;

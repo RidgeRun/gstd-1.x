@@ -122,8 +122,8 @@ GST_START_TEST (test_pipeline_list_signals_success)
   const gchar *pipeline_name = "pipe";
   const gchar *element_name = "element_name";
   const gchar *expected = "read /pipelines/pipe/elements/element_name/signals";
-  char **response;
-  int array_lenght;
+  char **response = NULL;
+  int array_lenght = 0;
 
   ret =
       gstc_pipeline_list_signals (_client, pipeline_name, element_name,
@@ -131,6 +131,11 @@ GST_START_TEST (test_pipeline_list_signals_success)
   assert_equals_int (GSTC_OK, ret);
 
   assert_equals_string (expected, _request);
+
+  for (int i = 0; i < array_lenght; i++) {
+    free (response[i]);
+  }
+  free (response);
 }
 
 GST_END_TEST;
