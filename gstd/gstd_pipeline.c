@@ -326,6 +326,7 @@ gstd_pipeline_get_property (GObject * object,
     guint property_id, GValue * value, GParamSpec * pspec)
 {
   GstdPipeline *self = GSTD_PIPELINE (object);
+  gchar *dot;
 
   switch (property_id) {
     case PROP_DESCRIPTION:
@@ -352,9 +353,10 @@ gstd_pipeline_get_property (GObject * object,
       break;
     case PROP_GRAPH:
       GST_DEBUG_OBJECT (self, "Returning graph handler %p", self->graph);
-      g_value_set_string (value,
-          gst_debug_bin_to_dot_data (GST_BIN (self->pipeline),
-              GST_DEBUG_GRAPH_SHOW_ALL));
+      dot = gst_debug_bin_to_dot_data (GST_BIN (self->pipeline),
+          GST_DEBUG_GRAPH_SHOW_ALL);
+      g_value_set_string (value, dot);
+      g_free (dot);
       break;
 
     case PROP_VERBOSE:
