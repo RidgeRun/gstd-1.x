@@ -23,7 +23,10 @@ TESTS = 				\
 	libgstc_pipeline_list_properties\
 	libgstc_pipeline_element_get	\
 	libgstc_pipeline_verbose        \
-	libgstc_pipeline_get_state
+	libgstc_pipeline_get_state      \
+	libgstc_pipeline_list_signals   \
+	libgstc_pipeline_signal_connect \
+	libgstc_pipeline_signal_disconnect
 
 check_PROGRAMS = $(TESTS)
 
@@ -157,3 +160,19 @@ libgstc_pipeline_get_state_SOURCES =	\
 	test_libgstc_pipeline_get_state.c	\
 	@top_srcdir@/libgstc/c/libgstc.c	\
 		$(COMMON_SOURCES)
+
+libgstc_pipeline_signal_connect_SOURCES =       \
+        test_libgstc_pipeline_signal_connect.c  \
+        @top_srcdir@/libgstc/c/libgstc.c        \
+        $(COMMON_SOURCES)
+
+libgstc_pipeline_signal_disconnect_SOURCES =      \
+        test_libgstc_pipeline_signal_disconnect.c \
+        @top_srcdir@/libgstc/c/libgstc.c          \
+        $(COMMON_SOURCES)
+
+libgstc_pipeline_list_signals_SOURCES =         \
+        test_libgstc_pipeline_list_signals.c    \
+        @top_srcdir@/libgstc/c/libgstc.c        \
+        $(COMMON_SOURCES)
+
