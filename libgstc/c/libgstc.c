@@ -1029,6 +1029,7 @@ gstc_pipeline_signal_connect (GstClient * client, const char *pipeline_name,
 {
   GstcStatus ret;
   char *what = NULL;
+  char *what2 = NULL;
   char *how = NULL;
   int asprintf_ret;
 
@@ -1059,17 +1060,17 @@ gstc_pipeline_signal_connect (GstClient * client, const char *pipeline_name,
   }
 
   /* Start the signal connect */
-  free (what);
   asprintf_ret =
-      asprintf (&what, PIPELINE_SIGNAL_CONNECT_FORMAT, pipeline_name, element,
+      asprintf (&what2, PIPELINE_SIGNAL_CONNECT_FORMAT, pipeline_name, element,
       signal);
   if (PRINTF_ERROR == asprintf_ret) {
     ret = GSTC_OOM;
-    free (how);
-    goto out;
+    goto free_how;
   }
 
-  ret = gstc_cmd_read (client, what, response, client->timeout);
+  ret = gstc_cmd_read (client, what2, response, client->timeout);
+
+  free (what2);
 
 free_how:
   free (how);
