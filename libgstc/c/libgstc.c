@@ -1043,34 +1043,41 @@ gstc_pipeline_signal_connect (GstClient * client, const char *pipeline_name,
       asprintf (&what, PIPELINE_SIGNAL_TIMEOUT_FORMAT, pipeline_name, element,
       signal);
   if (PRINTF_ERROR == asprintf_ret) {
-    return GSTC_OOM;
+    ret = GSTC_OOM;
+    goto out;
   }
 
   asprintf_ret = asprintf (&how, "%d", timeout);
   if (PRINTF_ERROR == asprintf_ret) {
     ret = GSTC_OOM;
-    goto out;
+    goto free_what;
   }
 
   ret = gstc_cmd_update (client, what, how);
   if (GSTC_OK != ret) {
-    goto out;
+    goto free_how;
   }
 
   /* Start the signal connect */
+  free (what);
   asprintf_ret =
       asprintf (&what, PIPELINE_SIGNAL_CONNECT_FORMAT, pipeline_name, element,
       signal);
   if (PRINTF_ERROR == asprintf_ret) {
-    return GSTC_OOM;
+    ret = GSTC_OOM;
+    free (how);
+    goto out;
   }
 
   ret = gstc_cmd_read (client, what, response, client->timeout);
 
-out:
-  free (what);
+free_how:
   free (how);
 
+free_what:
+  free (what);
+
+out:
   return ret;
 }
 
