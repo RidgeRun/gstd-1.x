@@ -46,5 +46,23 @@ GType gstd_pipeline_get_type (void);
 
 GstdReturnCode gstd_pipeline_build (GstdPipeline * object);
 
+/**
+ * Increment the create refcount stored in the pipeline
+ *
+ * \param self GstdPipeline object
+ *
+ * \return GstdReturnCode
+ **/
+GstdReturnCode gstd_pipeline_increment_refcount (GstdPipeline * self);
+
+/**
+ * Decrement the create refcount stored in the pipeline
+ *
+ * \param self GstdPipeline object
+ *
+ * \return GstdReturnCode
+ **/
+GstdReturnCode gstd_pipeline_decrement_refcount (GstdPipeline * self);
+
 G_END_DECLS
 #endif // __GSTD_PIPELINE_H__

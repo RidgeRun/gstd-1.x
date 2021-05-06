@@ -606,3 +606,21 @@ noiter:
     return GSTD_NO_PIPELINE;
   }
 }
+
+GstdReturnCode
+gstd_pipeline_increment_refcount (GstdPipeline * self)
+{
+  g_return_val_if_fail (self, GSTD_NULL_ARGUMENT);
+  self->refcount++;
+  return GSTD_EOK;
+}
+
+GstdReturnCode
+gstd_pipeline_decrement_refcount (GstdPipeline * self)
+{
+  g_return_val_if_fail (self, GSTD_NULL_ARGUMENT);
+  if (0 < self->refcount) {
+    self->refcount--;
+  }
+  return GSTD_EOK;
+}

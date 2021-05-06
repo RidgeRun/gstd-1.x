@@ -285,3 +285,21 @@ gstd_state_read (GstdState * self)
 
   return current;
 }
+
+GstdReturnCode
+gstd_state_increment_refcount (GstdState * self)
+{
+  g_return_val_if_fail (self, GSTD_NULL_ARGUMENT);
+  self->refcount++;
+  return GSTD_EOK;
+}
+
+GstdReturnCode
+gstd_state_decrement_refcount (GstdState * self)
+{
+  g_return_val_if_fail (self, GSTD_NULL_ARGUMENT);
+  if (0 < self->refcount) {
+    self->refcount--;
+  }
+  return GSTD_EOK;
+}

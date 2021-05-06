@@ -23,8 +23,10 @@
 
 #include "gstd_event_handler.h"
 #include "gstd_parser.h"
+#include "gstd_pipeline.h"
 #include "gstd_refcount.h"
 #include "gstd_session.h"
+#include "gstd_state.h"
 
 #define check_argument(arg, code) \
     if (NULL == (arg)) return (code)
@@ -955,26 +957,53 @@ static GstdReturnCode
 gstd_parser_pipeline_create_ref (GstdSession * session, gchar * action,
     gchar * args, gchar ** response)
 {
-  GstdReturnCode ret;
-  gchar *uri;
-  guint refcount;
   gchar **tokens;
+  gchar *description;
+  gchar *uri;
+  GstdObject *pipeline_list_node;
+  GstdObject *pipeline_node;
+  GstdReturnCode ret;
 
   g_return_val_if_fail (GSTD_IS_SESSION (session), GSTD_NULL_ARGUMENT);
 
   tokens = g_strsplit (args, " ", 2);
-  refcount = gstd_refcount_get_create_refcount (session->refcount, tokens[0]);
-  if (refcount == 0) {
+
+  /* Get the pipeline list node */
+  ret = gstd_get_by_uri (session, "/pipelines", &pipeline_list_node);
+  if (ret) {
+    goto pipeline_list_node_error;
+  }
+
+  GST_OBJECT_LOCK (session);
+
+  /* Look for the pipeline node */
+  pipeline_node =
+      gstd_list_find_child (GSTD_LIST (pipeline_list_node), tokens[0]);
+
+  /* Pipeline doesn't exist */
+  if (!pipeline_node) {
     uri = g_strdup_printf ("/pipelines %s", args ? args : "");
     ret =
         gstd_parser_parse_raw_cmd (session, (gchar *) "create", uri, response);
     g_free (uri);
+    if (ret) {
+      goto create_error;
+    }
+    pipeline_node =
+        gstd_list_find_child (GSTD_LIST (pipeline_list_node), tokens[0]);
   } else {
-    ret = GSTD_EOK;
+    /* Log a warning if the descriptions don't match */
+    g_object_get (pipeline_node, "description", &description, NULL);
+    g_warn_if_fail (0 == g_strcmp0 (description, tokens[1]));
+    g_free (description);
   }
-  gstd_refcount_increment_create_refcount (session->refcount, tokens[0]);
-  g_strfreev (tokens);
+  ret = gstd_pipeline_increment_refcount (GSTD_PIPELINE (pipeline_node));
 
+create_error:
+  GST_OBJECT_UNLOCK (session);
+pipeline_list_node_error:
+  gst_object_unref (pipeline_list_node);
+  g_strfreev (tokens);
   return ret;
 }
 
@@ -982,24 +1011,43 @@ static GstdReturnCode
 gstd_parser_pipeline_delete_ref (GstdSession * session, gchar * action,
     gchar * args, gchar ** response)
 {
-  GstdReturnCode ret;
   gchar *uri;
+  GstdObject *pipeline_list_node;
+  GstdObject *pipeline_node;
+  GstdReturnCode ret;
   guint refcount;
 
   g_return_val_if_fail (GSTD_IS_SESSION (session), GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (args, GSTD_NULL_ARGUMENT);
 
-  refcount = gstd_refcount_get_create_refcount (session->refcount, args);
-  if (refcount == 1) {
+  /* Get the pipeline list node */
+  ret = gstd_get_by_uri (session, "/pipelines", &pipeline_list_node);
+  if (ret) {
+    goto pipeline_list_node_error;
+  }
+
+  GST_OBJECT_LOCK (session);
+
+  /* Look for the pipeline node */
+  pipeline_node = gstd_list_find_child (GSTD_LIST (pipeline_list_node), args);
+  if (!pipeline_node) {
+    goto pipeline_node_error;
+  }
+
+  g_object_get (pipeline_node, "refcount", &refcount, NULL);
+  if (1 == refcount) {
     uri = g_strdup_printf ("/pipelines %s", args);
     ret =
         gstd_parser_parse_raw_cmd (session, (gchar *) "delete", uri, response);
     g_free (uri);
   } else {
-    ret = GSTD_EOK;
+    ret = gstd_pipeline_decrement_refcount (GSTD_PIPELINE (pipeline_node));
   }
-  gstd_refcount_decrement_create_refcount (session->refcount, args);
 
+pipeline_node_error:
+  GST_OBJECT_UNLOCK (session);
+pipeline_list_node_error:
+  gst_object_unref (pipeline_list_node);
   return ret;
 }
 
@@ -1007,24 +1055,51 @@ static GstdReturnCode
 gstd_parser_pipeline_play_ref (GstdSession * session, gchar * action,
     gchar * args, gchar ** response)
 {
-  GstdReturnCode ret;
   gchar *uri;
+  GstdObject *pipeline_node;
+  GstdObject *state_node;
+  GstdReturnCode ret;
   guint refcount;
 
   g_return_val_if_fail (GSTD_IS_SESSION (session), GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (args, GSTD_NULL_ARGUMENT);
 
-  refcount = gstd_refcount_get_play_refcount (session->refcount, args);
-  if (refcount == 0) {
+  /* Get the pipeline node */
+  uri = g_strdup_printf ("/pipelines/%s", args);
+  ret = gstd_get_by_uri (session, uri, &pipeline_node);
+  g_free (uri);
+  if (ret) {
+    goto pipeline_node_error;
+  }
+
+  /* Get the state node */
+  uri = g_strdup_printf ("/pipelines/%s/state", args);
+  ret = gstd_get_by_uri (session, uri, &state_node);
+  g_free (uri);
+  if (ret) {
+    goto state_node_error;
+  }
+
+  GST_OBJECT_LOCK (pipeline_node);
+
+  g_object_get (state_node, "refcount", &refcount, NULL);
+  if (0 == refcount) {
     uri = g_strdup_printf ("/pipelines/%s/state playing", args);
     ret =
         gstd_parser_parse_raw_cmd (session, (gchar *) "update", uri, response);
     g_free (uri);
-  } else {
-    ret = GSTD_EOK;
+    if (ret) {
+      goto play_error;
+    }
   }
-  gstd_refcount_increment_play_refcount (session->refcount, args);
+  ret = gstd_state_increment_refcount (GSTD_STATE (state_node));
 
+play_error:
+  GST_OBJECT_UNLOCK (pipeline_node);
+state_node_error:
+  gst_object_unref (state_node);
+pipeline_node_error:
+  gst_object_unref (pipeline_node);
   return ret;
 }
 
@@ -1032,23 +1107,50 @@ static GstdReturnCode
 gstd_parser_pipeline_stop_ref (GstdSession * session, gchar * action,
     gchar * args, gchar ** response)
 {
-  GstdReturnCode ret;
   gchar *uri;
+  GstdObject *pipeline_node;
+  GstdObject *state_node;
+  GstdReturnCode ret;
   guint refcount;
 
   g_return_val_if_fail (GSTD_IS_SESSION (session), GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (args, GSTD_NULL_ARGUMENT);
 
-  refcount = gstd_refcount_get_play_refcount (session->refcount, args);
-  if (refcount == 1) {
+  /* Get the pipeline node */
+  uri = g_strdup_printf ("/pipelines/%s", args);
+  ret = gstd_get_by_uri (session, uri, &pipeline_node);
+  g_free (uri);
+  if (ret) {
+    goto pipeline_node_error;
+  }
+
+  /* Get the state node */
+  uri = g_strdup_printf ("/pipelines/%s/state", args);
+  ret = gstd_get_by_uri (session, uri, &state_node);
+  g_free (uri);
+  if (ret) {
+    goto state_node_error;
+  }
+
+  GST_OBJECT_LOCK (pipeline_node);
+
+  g_object_get (state_node, "refcount", &refcount, NULL);
+  if (1 == refcount) {
     uri = g_strdup_printf ("/pipelines/%s/state null", args);
     ret =
         gstd_parser_parse_raw_cmd (session, (gchar *) "update", uri, response);
     g_free (uri);
-  } else {
-    ret = GSTD_EOK;
+    if (ret) {
+      goto stop_error;
+    }
   }
-  gstd_refcount_decrement_play_refcount (session->refcount, args);
+  ret = gstd_state_decrement_refcount (GSTD_STATE (state_node));
 
+stop_error:
+  GST_OBJECT_UNLOCK (pipeline_node);
+state_node_error:
+  gst_object_unref (state_node);
+pipeline_node_error:
+  gst_object_unref (pipeline_node);
   return ret;
 }

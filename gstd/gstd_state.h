@@ -24,7 +24,6 @@
 #include "gstd_object.h"
 
 G_BEGIN_DECLS
-
 /*
  * Type declaration.
  */
@@ -40,7 +39,6 @@ G_BEGIN_DECLS
   (G_TYPE_CHECK_CLASS_TYPE((klass),GSTD_TYPE_STATE))
 #define GSTD_STATE_GET_CLASS(obj) \
   (G_TYPE_INSTANCE_GET_CLASS ((obj), GSTD_TYPE_STATE, GstdStateClass))
-
 typedef struct _GstdState GstdState;
 typedef struct _GstdStateClass GstdStateClass;
 
@@ -48,6 +46,23 @@ GType gstd_state_get_type (void);
 
 GstdState *gstd_state_new (GstElement * target);
 
-G_END_DECLS
+/**
+ * Increment the play refcount stored in the state
+ *
+ * \param self GstdState object
+ *
+ * \return GstdReturnCode
+ **/
+GstdReturnCode gstd_state_increment_refcount (GstdState * self);
 
+/**
+ * Decrement the play refcount stored in the state
+ *
+ * \param self GstdState object
+ *
+ * \return GstdReturnCode
+ **/
+GstdReturnCode gstd_state_decrement_refcount (GstdState * self);
+
+G_END_DECLS
 #endif // __GSTD_STATE_H__
