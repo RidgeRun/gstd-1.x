@@ -24,7 +24,6 @@
 #include "gstd_event_handler.h"
 #include "gstd_parser.h"
 #include "gstd_pipeline.h"
-#include "gstd_refcount.h"
 #include "gstd_session.h"
 #include "gstd_state.h"
 

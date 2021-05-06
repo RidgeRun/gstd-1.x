@@ -175,7 +175,6 @@
 #include "gstd_pipeline.h"
 #include "gstd_list.h"
 #include "gstd_debug.h"
-#include "gstd_refcount.h"
 
 G_BEGIN_DECLS
 #define GSTD_TYPE_SESSION \
@@ -211,11 +210,6 @@ struct _GstdSession
    * Object containing debug options
    */
   GstdDebug *debug;
-
-  /*
-   * Object containing the refcount utility
-   */
-  GstdRefcount *refcount;
 };
 
 struct _GstdSessionClass
