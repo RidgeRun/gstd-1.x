@@ -833,7 +833,7 @@ class GstdClient:
         """
         Create a new pipeline based on the name and description using refcount.
         The refcount works similarly to GObject references. If the command
-        is called but the refcount is greter than 0 nothing will happen
+        is called but the refcount is greater than 0 nothing will happen
         and the refcount will increment.
 
         Parameters
@@ -874,7 +874,7 @@ class GstdClient:
         """
         Delete the pipeline with the given name using refcount.
         The refcount works similarly to GObject references. If the command
-        is called but the refcount is greter than 1 nothing will happen
+        is called but the refcount is greater than 1 nothing will happen
         and the refcount will decrement.
 
         Parameters
@@ -940,7 +940,7 @@ class GstdClient:
         """
         Set the pipeline to playing using refcount.
         The refcount works similarly to GObject references. If the command
-        is called but the refcount is greter than 0 nothing will happen
+        is called but the refcount is greater than 0 nothing will happen
         and the refcount will increment.
 
         Parameters
@@ -985,7 +985,7 @@ class GstdClient:
         """
         Set the pipeline to null using refcount.
         The refcount works similarly to GObject references. If the command
-        is called but the refcount is greter than 1 nothing will happen
+        is called but the refcount is greater than 1 nothing will happen
         and the refcount will decrement.
 
         Parameters
