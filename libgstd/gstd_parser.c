@@ -1035,9 +1035,13 @@ gstd_parser_pipeline_create_ref (GstdSession * session, gchar * action,
     pipeline_node =
         gstd_list_find_child (GSTD_LIST (pipeline_list_node), tokens[0]);
   } else {
-    /* Log a warning if the descriptions don't match */
     g_object_get (pipeline_node, "description", &description, NULL);
-    g_warn_if_fail (0 == g_strcmp0 (description, tokens[1]));
+    /* Return error code if the descriptions don't match */
+    if (0 != g_strcmp0 (description, tokens[1])) {
+      ret = GSTD_EXISTING_NAME;
+      g_free (description);
+      goto create_error;
+    }
     g_free (description);
   }
   ret = gstd_pipeline_increment_refcount (GSTD_PIPELINE (pipeline_node));
