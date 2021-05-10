@@ -55,7 +55,7 @@ struct _GstdState
   /**
    * Reference count of pipeline play. It is incremented with pipeline_play_ref
    * and decremented with pipeline_stop_ref. When it reaches 0 the pipeline
-   * is stoped.
+   * is stopped.
    */
   guint refcount;
 };
