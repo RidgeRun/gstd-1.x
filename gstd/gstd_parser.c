@@ -1005,8 +1005,8 @@ gstd_parser_pipeline_create_ref (GstdSession * session, gchar * action,
 
 create_error:
   GST_OBJECT_UNLOCK (session);
-pipeline_list_node_error:
   gst_object_unref (pipeline_list_node);
+pipeline_list_node_error:
   g_strfreev (tokens);
   return ret;
 }
@@ -1052,8 +1052,8 @@ gstd_parser_pipeline_delete_ref (GstdSession * session, gchar * action,
 
 pipeline_node_error:
   GST_OBJECT_UNLOCK (session);
-pipeline_list_node_error:
   gst_object_unref (pipeline_list_node);
+pipeline_list_node_error:
   return ret;
 }
 
@@ -1104,10 +1104,10 @@ gstd_parser_pipeline_play_ref (GstdSession * session, gchar * action,
 
 play_error:
   GST_OBJECT_UNLOCK (pipeline_node);
-state_node_error:
   gst_object_unref (state_node);
-pipeline_node_error:
+state_node_error:
   gst_object_unref (pipeline_node);
+pipeline_node_error:
   return ret;
 }
 
@@ -1158,9 +1158,9 @@ gstd_parser_pipeline_stop_ref (GstdSession * session, gchar * action,
 
 stop_error:
   GST_OBJECT_UNLOCK (pipeline_node);
-state_node_error:
   gst_object_unref (state_node);
-pipeline_node_error:
+state_node_error:
   gst_object_unref (pipeline_node);
+pipeline_node_error:
   return ret;
 }
