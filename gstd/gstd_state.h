@@ -1,6 +1,6 @@
 /*
  * Gstreamer Daemon - Gst Launch under steroids
- * Copyright (C) 2017 RidgeRun Engineering <support@ridgerun.com>
+ * Copyright (C) 2017-2021 RidgeRun Engineering <support@ridgerun.com>
  *
  * This file is part of Gstd.
  *
