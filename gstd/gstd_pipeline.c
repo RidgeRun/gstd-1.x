@@ -380,8 +380,10 @@ gstd_pipeline_get_property (GObject * object,
       break;
 
     case PROP_REFCOUNT:
+      GST_OBJECT_LOCK (self);
       GST_DEBUG_OBJECT (self, "Returning refcount %u", self->refcount);
       g_value_set_int (value, self->refcount);
+      GST_OBJECT_UNLOCK (self);
       break;
 
     case PROP_POSITION:
@@ -611,7 +613,9 @@ GstdReturnCode
 gstd_pipeline_increment_refcount (GstdPipeline * self)
 {
   g_return_val_if_fail (self, GSTD_NULL_ARGUMENT);
+  GST_OBJECT_LOCK (self);
   self->refcount++;
+  GST_OBJECT_UNLOCK (self);
   return GSTD_EOK;
 }
 
@@ -619,8 +623,10 @@ GstdReturnCode
 gstd_pipeline_decrement_refcount (GstdPipeline * self)
 {
   g_return_val_if_fail (self, GSTD_NULL_ARGUMENT);
+  GST_OBJECT_LOCK (self);
   if (0 < self->refcount) {
     self->refcount--;
   }
+  GST_OBJECT_UNLOCK (self);
   return GSTD_EOK;
 }
