@@ -1099,6 +1099,8 @@ gstd_parser_pipeline_play_ref (GstdSession * session, gchar * action,
     if (ret) {
       goto play_error;
     }
+  } else {
+    gstd_object_to_string (state_node, response);
   }
   ret = gstd_state_increment_refcount (GSTD_STATE (state_node));
 
@@ -1153,6 +1155,8 @@ gstd_parser_pipeline_stop_ref (GstdSession * session, gchar * action,
     if (ret) {
       goto stop_error;
     }
+  } else {
+    gstd_object_to_string (state_node, response);
   }
   ret = gstd_state_decrement_refcount (GSTD_STATE (state_node));
 
