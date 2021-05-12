@@ -998,11 +998,11 @@ gstd_parser_pipeline_create_ref (GstdSession * session, gchar * action,
     gchar * args, gchar ** response)
 {
   gchar **tokens = NULL;
-  gchar *description;
-  gchar *uri;
-  GstdObject *pipeline_list_node;
-  GstdObject *pipeline_node;
-  GstdReturnCode ret;
+  gchar *description = NULL;
+  gchar *uri = NULL;
+  GstdObject *pipeline_list_node = NULL;
+  GstdObject *pipeline_node = NULL;
+  GstdReturnCode ret = GSTD_EOK;
 
   g_return_val_if_fail (GSTD_IS_SESSION (session), GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (action, GSTD_NULL_ARGUMENT);
@@ -1058,11 +1058,11 @@ static GstdReturnCode
 gstd_parser_pipeline_delete_ref (GstdSession * session, gchar * action,
     gchar * args, gchar ** response)
 {
-  gchar *uri;
-  GstdObject *pipeline_list_node;
-  GstdObject *pipeline_node;
-  GstdReturnCode ret;
-  guint refcount;
+  gchar *uri = NULL;
+  GstdObject *pipeline_list_node = NULL;
+  GstdObject *pipeline_node = NULL;
+  GstdReturnCode ret = GSTD_EOK;
+  guint refcount = 0;
 
   g_return_val_if_fail (GSTD_IS_SESSION (session), GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (action, GSTD_NULL_ARGUMENT);
@@ -1104,11 +1104,11 @@ static GstdReturnCode
 gstd_parser_pipeline_play_ref (GstdSession * session, gchar * action,
     gchar * args, gchar ** response)
 {
-  gchar *uri;
-  GstdObject *pipeline_node;
-  GstdObject *state_node;
-  GstdReturnCode ret;
-  guint refcount;
+  gchar *uri = NULL;
+  GstdObject *pipeline_node = NULL;
+  GstdObject *state_node = NULL;
+  GstdReturnCode ret = GSTD_EOK;
+  guint refcount = 0;
 
   g_return_val_if_fail (GSTD_IS_SESSION (session), GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (action, GSTD_NULL_ARGUMENT);
@@ -1158,11 +1158,11 @@ static GstdReturnCode
 gstd_parser_pipeline_stop_ref (GstdSession * session, gchar * action,
     gchar * args, gchar ** response)
 {
-  gchar *uri;
-  GstdObject *pipeline_node;
-  GstdObject *state_node;
-  GstdReturnCode ret;
-  guint refcount;
+  gchar *uri = NULL;
+  GstdObject *pipeline_node = NULL;
+  GstdObject *state_node = NULL;
+  GstdReturnCode ret = GSTD_EOK;
+  guint refcount = 0;
 
   g_return_val_if_fail (GSTD_IS_SESSION (session), GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (action, GSTD_NULL_ARGUMENT);
