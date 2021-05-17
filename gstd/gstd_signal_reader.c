@@ -197,6 +197,7 @@ gstd_signal_reader_read_signal (GstdIReader * iface,
   self->callback = NULL;
 
 out:
+  g_object_unref (target);
   g_signal_handler_disconnect (target, handler_id);
   g_mutex_unlock (&self->signal_lock);
 
