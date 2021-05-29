@@ -290,10 +290,11 @@ do_request (gpointer data_request, gpointer eval)
   GstdSession *session = NULL;
   const char *path = NULL;
   GHashTable *query = NULL;
+  GstdHttpRequest *data_request_local = NULL;
 
   g_return_if_fail (data_request);
 
-  GstdHttpRequest *data_request_local = (GstdHttpRequest *) data_request;
+  data_request_local = (GstdHttpRequest *) data_request;
   g_mutex_lock (data_request_local->mutex);
   server = data_request_local->server;
   g_mutex_unlock (data_request_local->mutex);
@@ -353,15 +354,16 @@ server_callback (SoupServer * server, SoupMessage * msg,
     SoupClientContext * context, gpointer data)
 {
   GstdSession *session = NULL;
+  GstdHttp *self = NULL;
+  GstdHttpRequest *data_request = NULL;
 
   g_return_if_fail (server);
   g_return_if_fail (msg);
   g_return_if_fail (data);
 
-  GstdHttp *self = GSTD_HTTP (data);
+  self = GSTD_HTTP (data);
   session = self->session;
 
-  GstdHttpRequest *data_request;
   data_request = (GstdHttpRequest *) malloc (sizeof (GstdHttpRequest));
 
   data_request->msg = msg;
@@ -394,14 +396,17 @@ static GstdReturnCode
 gstd_http_start (GstdIpc * base, GstdSession * session)
 {
   GError *error = NULL;
-  GSocketAddress *sa;
+  GSocketAddress *sa = NULL;
+  GstdHttp *self = NULL;
+  gchar *address = NULL;
+  guint16 port = 0;
 
   g_return_val_if_fail (base, GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (session, GSTD_NULL_ARGUMENT);
 
-  GstdHttp *self = GSTD_HTTP (base);
-  guint16 port = self->port;
-  gchar *address = self->address;
+  self = GSTD_HTTP (base);
+  port = self->port;
+  address = self->address;
 
   self->session = session;
   gstd_http_stop (base);
@@ -445,11 +450,7 @@ noconnection:
 static gboolean
 gstd_http_init_get_option_group (GstdIpc * base, GOptionGroup ** group)
 {
-  g_return_val_if_fail (base, FALSE);
-  g_return_val_if_fail (group, FALSE);
-
-  GstdHttp *self = GSTD_HTTP (base);
-
+  GstdHttp *self = NULL;
   GOptionEntry http_args[] = {
     {"enable-http-protocol", 't', 0, G_OPTION_ARG_NONE, &base->enabled,
         "Enable attach the server through given HTTP ports ", NULL}
@@ -469,6 +470,12 @@ gstd_http_init_get_option_group (GstdIpc * base, GOptionGroup ** group)
     ,
     {NULL}
   };
+
+  g_return_val_if_fail (base, FALSE);
+  g_return_val_if_fail (group, FALSE);
+
+  self = GSTD_HTTP (base);
+
   GST_DEBUG_OBJECT (self, "HTTP init group callback ");
   *group = g_option_group_new ("gstd-http", ("HTTP Options"),
       ("Show HTTP Options"), NULL, NULL);
@@ -480,10 +487,13 @@ gstd_http_init_get_option_group (GstdIpc * base, GOptionGroup ** group)
 static GstdReturnCode
 gstd_http_stop (GstdIpc * base)
 {
+  GstdHttp *self = NULL;
+  GstdSession *session = NULL;
+
   g_return_val_if_fail (base, GSTD_NULL_ARGUMENT);
 
-  GstdHttp *self = GSTD_HTTP (base);
-  GstdSession *session = base->session;
+  self = GSTD_HTTP (base);
+  session = base->session;
 
   GST_INFO_OBJECT (session, "Closing HTTP server connection for %s",
       GSTD_OBJECT_NAME (session));

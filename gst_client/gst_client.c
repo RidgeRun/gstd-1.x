@@ -287,7 +287,6 @@ main (gint argc, gchar * argv[])
   const gchar *history_env = "GSTC_HISTORY";
   gchar *history_full = NULL;
   GstdClientData *data;
-  quark = g_quark_from_static_string (GSTD_CLIENT_DOMAIN);
 
   /* Cmdline options */
   gboolean quiet;
@@ -342,6 +341,8 @@ main (gint argc, gchar * argv[])
     ,
     {NULL}
   };
+
+  quark = g_quark_from_static_string (GSTD_CLIENT_DOMAIN);
 
   /* Internationalization */
   setlocale (LC_ALL, "");
@@ -630,7 +631,6 @@ gstd_client_cmd_socket (gchar * name, gchar * arg, GstdClientData * data)
     gstd_client_process_error (err);
     goto write_error;
   }
-
   //Paranoia flush
   g_output_stream_flush (ostream, NULL, NULL);
 
