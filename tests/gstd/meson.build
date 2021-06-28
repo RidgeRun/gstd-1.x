@@ -11,8 +11,11 @@ test_defines = [
   '-DTESTFILE="' + meson.current_source_dir() + '/meson.build"',
 ]
 
+plugins_dir = []
 # Define plugins path
-plugins_dir = gst_dep.get_pkgconfig_variable('pluginsdir')
+if gst_dep.type_name() == 'pkgconfig'
+   plugins_dir =[gst_dep.get_pkgconfig_variable('pluginsdir')]
+endif
 
 # Create environment object to  stores information about the environment
 # variables set during tests.
@@ -20,7 +23,7 @@ plugins_dir = gst_dep.get_pkgconfig_variable('pluginsdir')
 env = environment()
 env.set('GST_PLUGIN_SYSTEM_PATH_1_0', '')
 env.set('CK_DEFAULT_TIMEOUT', '120')
-env.set('GST_PLUGIN_PATH_1_0', lib_gstd_dir + ':' + plugins_dir)
+env.set('GST_PLUGIN_PATH_1_0',  [meson.build_root()] + plugins_dir)
 
 # Build and run tests
 foreach t : gstd_tests
