@@ -15,7 +15,6 @@ TESTS = 				\
 	libgstc_pipeline_bus_wait 	\
 	libgstc_pipeline_flush_start 	\
 	libgstc_pipeline_flush_stop 	\
-	libgstc_pipeline_list		\
 	libgstc_pipeline_seek		\
 	libgstc_debug			\
 	libgstc_pipeline_list_elements	\
