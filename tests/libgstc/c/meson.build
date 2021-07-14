@@ -27,7 +27,6 @@ lib_gstc_tests = [
   ['test_libgstc_pipeline_signal_disconnect.c'],
 ]
 
-
 # These are specials tests since is required to re-compile libgstc
 lib_gstc_client = [
   ['test_libgstc_client.c', lib_gstc_dir + '/libgstc_assert.c', lib_gstc_dir + '/libgstc_thread.c', lib_gstc_dir + '/libgstc.c'],
