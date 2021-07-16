@@ -75,6 +75,7 @@ lib_install_dir = get_option('libdir')
 # Internal installation directory
 lib_gstd_dir = []
 lib_gstc_dir = []
+lib_gstd_manager_dir = []
 
 # Define compiler args and include directories
 runstatedir = get_option('with-gstd-runstatedir') + '/'
@@ -242,6 +243,7 @@ configure_file(output : 'config.h', configuration : cdata)
 # Enter to each subdirectory and execute the meson.build
 subdir('gstd')
 subdir('libgstc')
+subdir('libgstd')
 subdir('gst_client')
 subdir('tests')
 subdir('examples')

@@ -1,0 +1,11 @@
+prefix=/usr/local
+libdir=${prefix}/lib/x86_64-linux-gnu
+includedir=${prefix}/include
+
+Name: gstc-1.0
+Description: GStreamer Client library to control Gstd
+Version: 0.12.0
+Requires.private: gstreamer-base-1.0 >= 1.0.0, json-glib-1.0 >= 0.16.2, jansson >= 2.7
+Libs: -L${prefix}/lib/x86_64-linux-gnu -lgstc-1.0
+Libs.private: -pthread
+Cflags: -I${includedir}
