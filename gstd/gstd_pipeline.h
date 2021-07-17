@@ -1,6 +1,6 @@
 /*
  * GStreamer Daemon - Gst Launch under steroids
- * Copyright (c) 2015-2017 Ridgerun, LLC (http://www.ridgerun.com)
+ * Copyright (c) 2015-2021 Ridgerun, LLC (http://www.ridgerun.com)
  * 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -45,6 +45,24 @@ typedef struct _GstdPipelineClass GstdPipelineClass;
 GType gstd_pipeline_get_type (void);
 
 GstdReturnCode gstd_pipeline_build (GstdPipeline * object);
+
+/**
+ * Increment the create refcount stored in the pipeline
+ *
+ * \param self GstdPipeline object
+ *
+ * \return GstdReturnCode
+ **/
+GstdReturnCode gstd_pipeline_increment_refcount (GstdPipeline * self);
+
+/**
+ * Decrement the create refcount stored in the pipeline
+ *
+ * \param self GstdPipeline object
+ *
+ * \return GstdReturnCode
+ **/
+GstdReturnCode gstd_pipeline_decrement_refcount (GstdPipeline * self);
 
 G_END_DECLS
 #endif // __GSTD_PIPELINE_H__

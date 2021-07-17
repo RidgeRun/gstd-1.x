@@ -1,6 +1,6 @@
 /*
  * GStreamer Daemon - Gst Launch under steroids
- * Copyright (c) 2015-2020 Ridgerun, LLC (http://www.ridgerun.com)
+ * Copyright (c) 2015-2021 Ridgerun, LLC (http://www.ridgerun.com)
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -27,6 +27,7 @@
 #include <libsoup/soup.h>
 
 #include "gstd_http.h"
+#include "gstd_parser.h"
 
 /* Gstd HTTP debugging category */
 GST_DEBUG_CATEGORY_STATIC (gstd_http_debug);
