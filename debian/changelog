@@ -1,3 +1,13 @@
+gstd (0.13.0-1) unstable; urgency=medium
+
+  * Add libgstc support to get pipeline state
+  * Fix memory leak in gstd pipeline get property
+  * Add libgstc signals support
+  * Remove compilation warnings
+  * Fix tests to build inside gst-build
+
+ -- RidgeRun Engineering <support@ridgerun.com>  Mon, 19 Jul 14:30:00  -0600
+
 gstd (0.12.0-1) unstable; urgency=medium
 
   * Inint scripts support
