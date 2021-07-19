@@ -2,7 +2,7 @@
  * GStreamer Daemon - gst-launch on steroids
  * C client library abstracting gstd interprocess communication
  *
- * Copyright (c) 2015-2020 RidgeRun, LLC (http://www.ridgerun.com)
+ * Copyright (c) 2015-2021 RidgeRun, LLC (http://www.ridgerun.com)
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -526,6 +526,74 @@ GstcStatus
 gstc_pipeline_bus_wait (GstClient *client,
     const char *pipeline_name, const char *message_name,
     const long long timeout, char **message);
+
+/**
+ * gst_pipeline_get_state:
+ * @client: The client returned by gstc_client_new()
+ * @pipeline_name: Name associated with the pipeline
+ * @out: pointer to output string memory representing a pipeline state value,
+ * this memory should be freed by the user.
+ *
+ * Attempts to get the state (e.g PLAYING) of the pipeline.
+ *
+ * Returns: GstcStatus indicating success, daemon unreachable, daemon
+ * timeout, bad pipeline name, unable to get the pipeline state
+ */
+GstcStatus
+gst_pipeline_get_state (GstClient * client, const char *pipeline_name,
+    char **out);
+
+
+/**
+ * gstc_pipeline_list_signals:
+ * @client: The client returned by gstc_client_new()
+ * @pipeline_name: Name associated with the pipeline
+ * @element: Name associated with the element
+ * @signals: List of existing signals for the given element in the pipeline
+ * @list_lenght: Number of elements in the signals list
+ *
+ * Returns a list of the names of the existing signals in an element.The client
+ * application needs to do a free(*signals) and a free(*signals[idx]) to
+ * release the resources used to hold the list and its elements
+ *
+ * Returns: GstcStatus indicating success, daemon unreachable, daemon timeout,
+ * bad pipeline name
+ */
+GstcStatus
+gstc_pipeline_list_signals (GstClient * client, const char *pipeline_name, const char* element, char **signals[], int *list_lenght);
+
+/**
+ * gstc_pipeline_signal_connect:
+ * @client: The client returned by gstc_client_new()
+ * @pipeline_name: Name associated with the pipeline
+ * @element: Name associated with the element
+ * @signal: Name associated with the signal
+ * @timeout: Timeout for the signal
+ * @response: pointer to output string memory representing a pipeline state value,
+ * this memory should be freed by the user.
+ *
+ * Attempts to get a signal from a pipeline
+ *
+ * Returns: GstcStatus indicating success, daemon unreachable, daemon
+ * timeout, bad pipeline name
+ */
+GstcStatus
+gstc_pipeline_signal_connect (GstClient * client, const char *pipeline_name, const char* element, const char* signal, const int value, char **response);
+
+/**
+ * gstc_pipeline_signal_disconnect:
+ * @client: The client returned by gstc_client_new()
+ * @pipeline_name: Name associated with the pipeline
+ * @element: Name associated with the element
+ * @signal: Name associated with the signal
+ *
+ * Attempts to disconnect from signal from a pipeline
+ *
+ * Returns: GstcStatus indicating success, daemon unreachable, daemon
+ * timeout, bad pipeline name
+ */
+GstcStatus
+gstc_pipeline_signal_disconnect (GstClient * client, const char *pipeline_name, const char* element, const char* signal);
 
 #ifdef __cplusplus
 }

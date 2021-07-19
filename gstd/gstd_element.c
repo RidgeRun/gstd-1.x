@@ -423,10 +423,10 @@ gstd_element_signals_to_string (GstdElement * self, GstdIFormatter * formatter)
 void
 gstd_element_internal_to_string (GstdElement * self, gchar ** outstring)
 {
-
+  GstdIFormatter *formatter = NULL;
   g_return_if_fail (GSTD_IS_OBJECT (self));
 
-  GstdIFormatter *formatter = g_object_new (GSTD_TYPE_JSON_BUILDER, NULL);
+  formatter = g_object_new (GSTD_TYPE_JSON_BUILDER, NULL);
   gstd_iformatter_begin_object (formatter);
 
   gstd_element_properties_to_string (self, formatter);
