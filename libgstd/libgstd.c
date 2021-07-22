@@ -30,12 +30,34 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <glib-unix.h>
 
 #include "libgstd.h"
-#include <glib-unix.h>
+#include "gstd_ipc.h"
+#include "gstd_tcp.h"
+#include "gstd_unix.h"
+#include "gstd_http.h"
+
+static GType
+gstd_supported_ipc_to_ipc (Supported_IPCs code)
+{
+  GType code_description[] = {
+    [TYPE_TCP] = GSTD_TYPE_TCP,
+    [TYPE_UNIX] = GSTD_TYPE_UNIX,
+    [TYPE_HTTP] = GSTD_TYPE_HTTP
+  };
+
+  const gint size = sizeof (code_description) / sizeof (gchar *);
+
+  g_return_val_if_fail (0 <= code, GSTD_TYPE_IPC);      // TODO: Proponer un GSTD_TYPE_DEFAULT
+  g_return_val_if_fail (size > code, GSTD_TYPE_IPC);
+
+  return code_description[code];
+}
 
 void
 myPrint (void)
 {
-  g_print ("HELLO THERE!");
+  g_print ("%ld\n", gstd_supported_ipc_to_ipc (TYPE_TCP));
+  g_print ("HELLO THERE!\n");
 }

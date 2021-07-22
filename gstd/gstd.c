@@ -79,7 +79,7 @@ ipc_add_option_groups (GstdIpc * ipc[], GType factory[], guint num_ipcs,
   g_return_if_fail (groups);
 
   for (i = 0; i < num_ipcs; i++) {
-    ipc[i] = GSTD_IPC (g_object_new (factory[i], NULL));
+    ipc[i] = GSTD_IPC (g_object_new (factory[i], NULL));        // QST: Es este cast necesario?
     gstd_ipc_get_option_group (ipc[i], &groups[i]);
     g_option_context_add_group (context, groups[i]);
   }
@@ -268,7 +268,7 @@ main (gint argc, gchar * argv[])
   session = gstd_session_new ("Session0");
 
   /* Start IPC subsystem */
-  if (!ipc_start (ipc_array, num_ipcs, session)) {
+  if (!ipc_start (ipc_array, num_ipcs, session)) {      //QST: Este es el método importante que debe ir en libgstd.h
     goto error;
   }
 
