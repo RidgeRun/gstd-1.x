@@ -14,6 +14,7 @@ else
 endif
 gstd_version_is_dev = gstd_version_minor % 2 == 1 and gstd_version_micro < 90
 
+message('HELLO THERE!')
 
 # Find external dependencies
 gst_dep       = dependency('gstreamer-1.0',      version : '>=1.0.0')
@@ -25,6 +26,7 @@ jansson_dep   = dependency('jansson',            version : '>=2.7')
 gst_check_dep = dependency('gstreamer-check-1.0',version : '>=1.0.5')
 thread_dep    = dependency('threads')
 libsoup_dep = dependency('libsoup-2.4',		       version : '>=2.4')
+#gstd_dep = dependency('gstd-1.0')
 
 systemd_required = get_option('enable-systemd').enabled()
 systemd_dep = dependency('systemd', required : systemd_required, version : '>=232')

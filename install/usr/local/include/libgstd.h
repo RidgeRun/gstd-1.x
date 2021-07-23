@@ -42,9 +42,9 @@ typedef enum _Supported_IPCs Supported_IPCs;
 
 enum _Supported_IPCs
 {
-    GSTD_IPC_TYPE_TCP,
-    GSTD_IPC_TYPE_UNIX,
-    GSTD_IPC_TYPE_HTTP,
+    TYPE_TCP,
+    TYPE_UNIX,
+    TYPE_HTTP,
 };
 
 /**
@@ -53,7 +53,10 @@ enum _Supported_IPCs
  * @gstd_NULL_ARGUMENT: A mandatory argument was passed in as NULL
  * @gstd_OOM: The system has run out of memory
  * @gstd_TYPE_ERROR: An error occurred parsing a type from a string
+ * @gstd_MALFORMED: An attempt to parse a malformed JSON was made
  * @gstd_NOT_FOUND: The response is missing the field requested
+ * @gstd_SEND_ERROR: There was a problem sending the request
+ * @gstd_RECV_ERROR: There was a problem receiving the response
  * @gstd_THREAD_ERROR: Unable to create a new thread
  * @gstd_BUS_TIMEOUT: A timeout was received while waiting on the bus
  * @gstd_LONG_RESPONSE: The response exceeds our maximum, typically
@@ -67,7 +70,10 @@ typedef enum
   GSTD_LIB_NULL_ARGUMENT = -1,
   GSTD_LIB_OOM = -4,
   GSTD_LIB_TYPE_ERROR = -5,
+  GSTD_LIB_MALFORMED = -6,
   GSTD_LIB_NOT_FOUND = -7,
+  GSTD_LIB_SEND_ERROR = -8,
+  GSTD_LIB_RECV_ERROR = -9,
   GSTD_LIB_THREAD_ERROR = -11,
   GSTD_LIB_BUS_TIMEOUT = -12,
   GSTD_LIB_SOCKET_TIMEOUT = -13,
@@ -93,25 +99,25 @@ gstd_manager_new (Supported_IPCs supported_ipcs[], uint num_ipcs, GstDManager **
 
 /**
  * gstd_manager_ipc_start:
- * @manager: The manager returned by gstd_manager_new()
+ * @manager: placeholder for newly allocated gstd manager.
  * 
  * Starts the ipc in GstdIpc array
  *
  * Returns: GstdStatus indicating success or fail
  */
 GstdStatus
-gstd_manager_ipc_start (GstDManager * manager);
+gstd_manager_ipc_start (GstDManager ** manager);
 
 /**
  * gstd_manager_ipc_start:
- * @manager: The manager returned by gstd_manager_new()
+ * @manager: placeholder for newly allocated gstd manager.
  * 
  * Stops the ipc in GstdIpc array
  *
  * Returns: GstdStatus indicating success or fail
  */
 GstdStatus
-gstd_manager_ipc_stop (GstDManager * manager);
+gstd_manager_ipc_stop (GstDManager ** manager);
 
 
 /**
@@ -153,7 +159,7 @@ GstdStatus gstd_manager_debug (const char* threshold,
  * Returns: GstdStatus indicating success or some failure
  */
 GstdStatus
-gstd_pipeline_create (GstDManager * manager, const char *pipeline_name,
+gstd_pipeline_create (GstDManager ** manager, const char *pipeline_name,
     const char *pipeline_desc);
   
 /**
@@ -170,7 +176,7 @@ gstd_pipeline_create (GstDManager * manager, const char *pipeline_name,
  *
  * Returns: GstdStatus indicating success or some failure
  */
-GstdStatus gstd_pipeline_list(GstDManager * manager, char **pipelines[],
+GstdStatus gstd_pipeline_list(GstDManager ** manager, char **pipelines[],
   int *list_lenght);
 
 /**
@@ -183,7 +189,7 @@ GstdStatus gstd_pipeline_list(GstDManager * manager, char **pipelines[],
  * Returns: GstdStatus indicating success or some failure
  */
 GstdStatus
-gstd_pipeline_delete(GstDManager * manager, const char *pipeline_name);
+gstd_pipeline_delete(GstDManager ** manager, const char *pipeline_name);
 
 /**
  * gstd_pipeline_play:
@@ -195,7 +201,7 @@ gstd_pipeline_delete(GstDManager * manager, const char *pipeline_name);
  * Returns: GstdStatus indicating success or some failure
  */
 GstdStatus
-gstd_pipeline_play(GstDManager * manager, const char *pipeline_name);
+gstd_pipeline_play(GstDManager ** manager, const char *pipeline_name);
 
 /**
  * gstd_pipeline_pause:
@@ -207,7 +213,7 @@ gstd_pipeline_play(GstDManager * manager, const char *pipeline_name);
  * Returns: GstdStatus indicating success or some failure
  */
 GstdStatus
-gstd_pipeline_pause(GstDManager * manager, const char *pipeline_name);
+gstd_pipeline_pause(GstDManager ** manager, const char *pipeline_name);
 
 /**
  * gstd_pipeline_stop:
@@ -219,7 +225,7 @@ gstd_pipeline_pause(GstDManager * manager, const char *pipeline_name);
  * Returns: GstdStatus indicating success or some failure
  */
 GstdStatus
-gstd_pipeline_stop(GstDManager * manager, const char *pipeline_name);
+gstd_pipeline_stop(GstDManager ** manager, const char *pipeline_name);
 
 /**
  * gstd_pipeline_get_graph:
@@ -231,7 +237,7 @@ gstd_pipeline_stop(GstDManager * manager, const char *pipeline_name);
  * Returns: GstdStatus indicating success or some failure
  */
 GstdStatus
-gstd_pipeline_get_graph(GstDManager * manager, const char *pipeline_name, char **response);
+gstd_pipeline_get_graph(GstDManager ** manager, const char *pipeline_name, char **response);
 
 /**
  * gstd_pipeline_verbose:
@@ -244,7 +250,7 @@ gstd_pipeline_get_graph(GstDManager * manager, const char *pipeline_name, char *
  * Returns: GstdStatus indicating success or some failure
  */
 GstdStatus
-gstd_pipeline_verbose(GstDManager * manager, const char *pipeline_name, int value);
+gstd_pipeline_verbose(GstDManager ** manager, const char *pipeline_name, int value);
 
 /**
  * gstd_element_get:
@@ -261,7 +267,7 @@ gstd_pipeline_verbose(GstDManager * manager, const char *pipeline_name, int valu
  *
  * Returns: GstdStatus indicating success or some failure
  */
-GstdStatus gstd_element_get (GstDManager * manager, const char *pname,
+GstdStatus gstd_element_get (GstDManager ** manager, const char *pname,
   const char *element, const char *property, const char *format, ...);
 
 /**
@@ -282,7 +288,7 @@ GstdStatus gstd_element_get (GstDManager * manager, const char *pname,
  *
  * Returns: GstdStatus indicating success or some failure
  */
-GstdStatus gstd_element_set(GstDManager * manager, const char *pname,
+GstdStatus gstd_element_set(GstDManager ** manager, const char *pname,
     const char *element, const char *parameter, const char *format, ...);
     
 /**
@@ -302,7 +308,7 @@ GstdStatus gstd_element_set(GstDManager * manager, const char *pname,
  *
  * Returns: GstdStatus indicating success or some failure
  */
-GstdStatus gstd_element_properties_list(GstDManager * manager, const char *pipeline_name, 
+GstdStatus gstd_element_properties_list(GstDManager ** manager, const char *pipeline_name, 
     char *element, char **properties[], int *list_lenght);
 
 /**
@@ -314,7 +320,7 @@ GstdStatus gstd_element_properties_list(GstDManager * manager, const char *pipel
  * Returns: GstdStatus indicating success or some failure
  *
  */
-GstdStatus gstd_pipeline_flush_start(GstDManager * manager, 
+GstdStatus gstd_pipeline_flush_start(GstDManager ** manager, 
     const char *pipeline_name);
 
 /**
@@ -327,7 +333,7 @@ GstdStatus gstd_pipeline_flush_start(GstDManager * manager,
  *
  * Returns: GstdStatus indicating success or some failure
  */
-GstdStatus gstd_pipeline_flush_stop(GstDManager * manager, const char *pipeline_name,
+GstdStatus gstd_pipeline_flush_stop(GstDManager ** manager, const char *pipeline_name,
   const int reset);
 
 /**
@@ -343,7 +349,7 @@ GstdStatus gstd_pipeline_flush_stop(GstDManager * manager, const char *pipeline_
  *
  * Returns: GstdStatus indicating success or some failure
  */
-GstdStatus gstd_pipeline_inject_eos (GstDManager * manager, const char *pipeline_name);
+GstdStatus gstd_pipeline_inject_eos (GstDManager ** manager, const char *pipeline_name);
 
 /**
  * gstd_pipeline_seek:
@@ -380,7 +386,7 @@ GstdStatus gstd_pipeline_inject_eos (GstDManager * manager, const char *pipeline
  *
  * Returns: GstdStatus indicating success or some failure.
  */
-GstdStatus gstd_pipeline_seek(GstDManager * manager, const char *pname,
+GstdStatus gstd_pipeline_seek(GstDManager ** manager, const char *pname,
     double rate, int format, int flags, int start_type, long long start,
     int stop_type, long long stop);
 
@@ -399,7 +405,7 @@ GstdStatus gstd_pipeline_seek(GstDManager * manager, const char *pname,
  *
  * Returns: GstdStatus indicating success or some failure
  */
-GstdStatus gstd_pipeline_list_elements(GstDManager * manager, const char *pipeline_name,
+GstdStatus gstd_pipeline_list_elements(GstDManager ** manager, const char *pipeline_name,
  char **elements[], int* list_lenght);
 
 /**
@@ -417,7 +423,7 @@ GstdStatus gstd_pipeline_list_elements(GstDManager * manager, const char *pipeli
  * Returns: GstdStatus indicating success or some failure
  */
 typedef GstdStatus
-(*gstdPipelineBusWaitCallback) (GstDManager * manager,
+(*gstdPipelineBusWaitCallback) (GstDManager ** manager,
     const char *pipeline_name, const char *message_name,
     const long long timeout, char *message, void *user_data);
 
@@ -438,7 +444,7 @@ typedef GstdStatus
  * Returns: GstdStatus indicating success, thread error or timeout.
  */
 GstdStatus
-gstd_pipeline_bus_wait_async (GstDManager * manager,
+gstd_pipeline_bus_wait_async (GstDManager ** manager,
     const char *pipeline_name, const char *message_name,
     const long long timeout, gstdPipelineBusWaitCallback callback,
     void *user_data);
@@ -457,7 +463,7 @@ gstd_pipeline_bus_wait_async (GstDManager * manager,
  * Returns: GstdStatus indicating success, thread error or timeout.
  */
 GstdStatus
-gstd_pipeline_bus_wait (GstDManager * manager,
+gstd_pipeline_bus_wait (GstDManager ** manager,
     const char *pipeline_name, const char *message_name,
     const long long timeout, char **message);
 
@@ -474,7 +480,7 @@ gstd_pipeline_bus_wait (GstDManager * manager,
  * timeout, bad pipeline name, unable to get the pipeline state
  */
 GstdStatus
-gstd_pipeline_get_state (GstDManager * manager, const char *pipeline_name,
+gstd_pipeline_get_state (GstDManager ** manager, const char *pipeline_name,
     char **out);
 
 
@@ -494,7 +500,7 @@ gstd_pipeline_get_state (GstDManager * manager, const char *pipeline_name,
  * bad pipeline name
  */
 GstdStatus
-gstd_pipeline_list_signals (GstDManager * manager, const char *pipeline_name, const char* element, char **signals[], int *list_lenght);
+gstd_pipeline_list_signals (GstDManager ** manager, const char *pipeline_name, const char* element, char **signals[], int *list_lenght);
 
 /**
  * gstd_pipeline_signal_connect:
@@ -512,7 +518,7 @@ gstd_pipeline_list_signals (GstDManager * manager, const char *pipeline_name, co
  * timeout, bad pipeline name
  */
 GstdStatus
-gstd_pipeline_signal_connect (GstDManager * manager, const char *pipeline_name, const char* element, const char* signal, const int value, char **response);
+gstd_pipeline_signal_connect (GstDManager ** manager, const char *pipeline_name, const char* element, const char* signal, const int value, char **response);
 
 /**
  * gstd_pipeline_signal_disconnect:
@@ -527,7 +533,7 @@ gstd_pipeline_signal_connect (GstDManager * manager, const char *pipeline_name, 
  * timeout, bad pipeline name
  */
 GstdStatus
-gstd_pipeline_signal_disconnect (GstDManager * manager, const char *pipeline_name, const char* element, const char* signal);
+gstd_pipeline_signal_disconnect (GstDManager ** manager, const char *pipeline_name, const char* element, const char* signal);
 
 #ifdef __cplusplus
 }

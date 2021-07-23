@@ -38,13 +38,21 @@
 #include "gstd_unix.h"
 #include "gstd_http.h"
 
+struct _GstDManager
+{
+  GstdSession *session;
+  GstdIpc **ipc_array;
+  guint num_ipcs;
+  int timeout;
+};
+
 static GType
 gstd_supported_ipc_to_ipc (Supported_IPCs code)
 {
   GType code_description[] = {
-    [TYPE_TCP] = GSTD_TYPE_TCP,
-    [TYPE_UNIX] = GSTD_TYPE_UNIX,
-    [TYPE_HTTP] = GSTD_TYPE_HTTP
+    [GSTD_IPC_TYPE_TCP] = GSTD_TYPE_TCP,
+    [GSTD_IPC_TYPE_UNIX] = GSTD_TYPE_UNIX,
+    [GSTD_IPC_TYPE_HTTP] = GSTD_TYPE_HTTP
   };
 
   const gint size = sizeof (code_description) / sizeof (gchar *);
@@ -55,9 +63,36 @@ gstd_supported_ipc_to_ipc (Supported_IPCs code)
   return code_description[code];
 }
 
+GstdStatus
+gstd_manager_new (Supported_IPCs supported_ipcs[], guint num_ipcs,
+    GstDManager ** out)
+{
+  GstDManager *manager;
+  GstdSession *session;
+  GstdStatus ret = GSTD_LIB_OK;
+  GstdIpc **ipc_array = g_malloc (num_ipcs * sizeof (GstdIpc *));
+
+  manager = (GstDManager *) malloc (sizeof (GstDManager));
+  session = gstd_session_new ("Session0");
+
+  for (int i = 0; i < num_ipcs; i++) {
+    ipc_array[i] =
+        GSTD_IPC (g_object_new (gstd_supported_ipc_to_ipc (supported_ipcs[i]),
+            NULL));
+  }
+
+  manager->session = session;
+  manager->ipc_array = ipc_array;
+  manager->num_ipcs = num_ipcs;
+
+  *out = manager;
+
+  return ret;
+}
+
 void
 myPrint (void)
 {
-  g_print ("%ld\n", gstd_supported_ipc_to_ipc (TYPE_TCP));
+  g_print ("%ld\n", gstd_supported_ipc_to_ipc (GSTD_IPC_TYPE_TCP));
   g_print ("HELLO THERE!\n");
 }

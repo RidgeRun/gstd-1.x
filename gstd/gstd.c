@@ -33,6 +33,8 @@
 #include "gstd_daemon.h"
 #include "gstd_log.h"
 
+#include "libgstd.h"
+
 static gboolean int_term_handler (gpointer user_data);
 static void ipc_add_option_groups (GstdIpc * ipc[], GType factory[],
     guint num_ipcs, GOptionContext * context, GOptionGroup * groups[]);
@@ -156,6 +158,8 @@ main (gint argc, gchar * argv[])
   gint ret = EXIT_SUCCESS;
   gchar *current_filename = NULL;
 
+  // GstDManager *manager;
+
   /* Array to specify gstd how many IPCs are supported, 
    * IPCs should be added this array.
    */
@@ -164,6 +168,12 @@ main (gint argc, gchar * argv[])
     GSTD_TYPE_UNIX,
     GSTD_TYPE_HTTP,
   };
+
+  // Supported_IPCs test_supported_ipcs[] = {
+  //   TYPE_TCP,
+  //   TYPE_UNIX,
+  //   TYPE_HTTP,
+  // };
 
   guint num_ipcs = (sizeof (supported_ipcs) / sizeof (GType));
   GstdIpc **ipc_array = g_malloc (num_ipcs * sizeof (GstdIpc *));
@@ -194,6 +204,8 @@ main (gint argc, gchar * argv[])
     ,
     {NULL}
   };
+
+  // gstd_manager_new (test_supported_ipcs, num_ipcs, &manager);
 
   /* Initialize default */
   context = g_option_context_new (" - gst-launch under steroids");
@@ -266,6 +278,7 @@ main (gint argc, gchar * argv[])
 
   /*Create session */
   session = gstd_session_new ("Session0");
+  myPrint ();
 
   /* Start IPC subsystem */
   if (!ipc_start (ipc_array, num_ipcs, session)) {      //QST: Este es el método importante que debe ir en libgstd.h
