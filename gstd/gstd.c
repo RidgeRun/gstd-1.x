@@ -248,6 +248,8 @@ main (gint argc, gchar * argv[])
   }
 
   gstd_debug_init ();
+  myPrint ();
+  g_print ("IT WORKS!\n");
 
   if (kill) {
     if (gstd_daemon_stop ()) {
@@ -278,7 +280,6 @@ main (gint argc, gchar * argv[])
 
   /*Create session */
   session = gstd_session_new ("Session0");
-  myPrint ();
 
   /* Start IPC subsystem */
   if (!ipc_start (ipc_array, num_ipcs, session)) {

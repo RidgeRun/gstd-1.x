@@ -100,6 +100,6 @@ gstd_manager_free (GstDManager * manager)
 void
 myPrint (void)
 {
-  g_print ("%ld\n", gstd_supported_ipc_to_ipc (GSTD_IPC_TYPE_TCP));
+  g_print ("TEST: %ld\n", gstd_supported_ipc_to_ipc (GSTD_IPC_TYPE_TCP));
   g_print ("HELLO THERE!\n");
 }

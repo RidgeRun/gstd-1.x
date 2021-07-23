@@ -58,8 +58,7 @@ libgstd_src_files = [
   'gstd_signal_reader.c',
   'gstd_session.c',
   'gstd_socket.c',
-  'gstd_unix.c',
-  '../libgstd/libgstd.c'
+  'gstd_unix.c'
 ]
 
 libgstd_header_files = [
@@ -117,6 +116,10 @@ libgstd_header_files = [
   'gstd_unix.h'
 ]
 
+gstd_src = [
+  '../libgstd/libgstd.c'
+]
+
 gstd_headers = [
   '../libgstd/libgstd.h',
 ]
@@ -128,7 +131,7 @@ gstd_headers = [
 # Build and install library and pkgconfig file
 # Build library
 gstd_lib_manager = library('gstd-@0@'.format(apiversion),
-  libgstd_src_files,
+  [libgstd_src_files, gstd_src],
   c_args : gst_d_args,
   version : gstd_version,
   include_directories : [configinc, gstd_inc_dir],
@@ -137,7 +140,7 @@ gstd_lib_manager = library('gstd-@0@'.format(apiversion),
   dependencies : [libgstd_deps],
 )
 
-install_headers('../libgstd/libgstd.h')
+install_headers(gstd_headers)
 
 # Generate pkgconfig file
 pkgconfig.generate(gstd_lib_manager, description : 'GStreamer Manager library to control Gstd')
@@ -170,10 +173,10 @@ lib_gstd_dep = declare_dependency(link_with: gstd_lib,
 # Create gstd application
 exe_name = '@0@-@1@'.format(gstd_name, apiversion)
 executable(exe_name,
-  gstd_src_files,
+  [gstd_src_files, gstd_src],
   install: true,
-  include_directories : [configinc],
-  dependencies : [gstd_deps, lib_gstd_dep, lib_gstd_manager_dep],
+  include_directories : [configinc,libgstd_inc_dir],
+  dependencies : [gstd_deps, lib_gstd_dep],
   c_args: gst_c_args,
 )
 lib_gstd_dir = meson.current_build_dir()
