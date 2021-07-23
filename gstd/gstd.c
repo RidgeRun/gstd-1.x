@@ -281,7 +281,7 @@ main (gint argc, gchar * argv[])
   myPrint ();
 
   /* Start IPC subsystem */
-  if (!ipc_start (ipc_array, num_ipcs, session)) {      //QST: Este es el método importante que debe ir en libgstd.h
+  if (!ipc_start (ipc_array, num_ipcs, session)) {
     goto error;
   }
 

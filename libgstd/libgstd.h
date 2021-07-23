@@ -124,7 +124,7 @@ gstd_manager_ipc_stop (GstDManager * manager);
  * usage.
  */
 void
-gstd_manager_free (GstDManager ** manager);
+gstd_manager_free (GstDManager * manager);
 
 /**
  * gstd_manager_debug:

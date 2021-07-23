@@ -91,6 +91,13 @@ gstd_manager_new (Supported_IPCs supported_ipcs[], guint num_ipcs,
 }
 
 void
+gstd_manager_free (GstDManager * manager)
+{
+  // gstc_assert_and_ret (NULL != manager);
+  free (manager);
+}
+
+void
 myPrint (void)
 {
   g_print ("%ld\n", gstd_supported_ipc_to_ipc (GSTD_IPC_TYPE_TCP));
