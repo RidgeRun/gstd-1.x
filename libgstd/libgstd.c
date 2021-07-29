@@ -37,13 +37,16 @@
 #include "gstd_tcp.h"
 #include "gstd_unix.h"
 #include "gstd_http.h"
+#include "gstd_log.h"
+#include "libgstd_assert.h"
+
+static GType gstd_supported_ipc_to_ipc (Supported_IPCs code);
 
 struct _GstDManager
 {
   GstdSession *session;
   GstdIpc **ipc_array;
   guint num_ipcs;
-  int timeout;
 };
 
 static GType
@@ -84,6 +87,7 @@ gstd_manager_new (Supported_IPCs supported_ipcs[], guint num_ipcs,
   manager->session = session;
   manager->ipc_array = ipc_array;
   manager->num_ipcs = num_ipcs;
+  // manager->gstreamer_group = gst_init_get_option_group ();
 
   *out = manager;
 
@@ -91,9 +95,81 @@ gstd_manager_new (Supported_IPCs supported_ipcs[], guint num_ipcs,
 }
 
 void
+gstd_manager_init (void **gst_group)
+{
+  GOptionGroup *gstreamer_group;
+
+  gst_init (NULL, NULL);
+  gstd_debug_init ();
+
+  gstreamer_group = gst_init_get_option_group ();
+
+  if (gst_group != NULL && *gst_group != NULL) {
+    *(GOptionGroup **) gst_group = gstreamer_group;
+  }
+
+}
+
+int
+gstd_manager_ipc_start (GstDManager * manager)
+{
+  gboolean ipc_selected = FALSE;
+  gboolean ret = TRUE;
+  GstdReturnCode code;
+  gint i;
+
+  g_return_val_if_fail (manager->ipc_array, FALSE);
+  g_return_val_if_fail (manager->session, FALSE);
+
+  /* Verify if at leas one IPC mechanism was selected */
+  for (i = 0; i < manager->num_ipcs; i++) {
+    g_object_get (G_OBJECT (manager->ipc_array[i]), "enabled", &ipc_selected,
+        NULL);
+
+    if (ipc_selected) {
+      break;
+    }
+  }
+
+  /* If no IPC was selected, default to TCP */
+  if (!ipc_selected) {
+    g_object_set (G_OBJECT (manager->ipc_array[0]), "enabled", TRUE, NULL);
+  }
+
+  /* Run start for each IPC (each start method checks for the enabled flag) */
+  for (i = 0; i < manager->num_ipcs; i++) {
+    code = gstd_ipc_start (manager->ipc_array[i], manager->session);
+    if (code) {
+      g_printerr ("Couldn't start IPC : (%s)\n",
+          G_OBJECT_TYPE_NAME (manager->ipc_array[i]));
+      ret = FALSE;
+    }
+  }
+
+  return ret;
+}
+
+void
+gstd_manager_ipc_stop (GstDManager * manager)
+{
+  gint i;
+
+  g_return_if_fail (manager);
+
+  /* Run stop for each IPC */
+  for (i = 0; i < manager->num_ipcs; i++) {
+    if (TRUE == manager->ipc_array[i]->enabled) {
+      gstd_ipc_stop (manager->ipc_array[i]);
+      g_object_unref (manager->ipc_array[i]);
+    }
+  }
+}
+
+void
 gstd_manager_free (GstDManager * manager)
 {
-  // gstc_assert_and_ret (NULL != manager);
+  gst_deinit ();
+  gstd_assert_and_ret (NULL != manager);
   free (manager);
 }
 

@@ -91,6 +91,9 @@ typedef enum
 GstdStatus 
 gstd_manager_new (Supported_IPCs supported_ipcs[], uint num_ipcs, GstDManager ** out);
 
+void
+gstd_manager_init (void ** gst_group);
+
 /**
  * gstd_manager_ipc_start:
  * @manager: The manager returned by gstd_manager_new()
@@ -99,7 +102,7 @@ gstd_manager_new (Supported_IPCs supported_ipcs[], uint num_ipcs, GstDManager **
  *
  * Returns: GstdStatus indicating success or fail
  */
-GstdStatus
+int
 gstd_manager_ipc_start (GstDManager * manager);
 
 /**
@@ -110,7 +113,7 @@ gstd_manager_ipc_start (GstDManager * manager);
  *
  * Returns: GstdStatus indicating success or fail
  */
-GstdStatus
+void
 gstd_manager_ipc_stop (GstDManager * manager);
 
 

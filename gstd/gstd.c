@@ -158,7 +158,7 @@ main (gint argc, gchar * argv[])
   gint ret = EXIT_SUCCESS;
   gchar *current_filename = NULL;
 
-  // GstDManager *manager;
+  GstDManager *manager;
 
   /* Array to specify gstd how many IPCs are supported, 
    * IPCs should be added this array.
@@ -169,11 +169,11 @@ main (gint argc, gchar * argv[])
     GSTD_TYPE_HTTP,
   };
 
-  // Supported_IPCs test_supported_ipcs[] = {
-  //   TYPE_TCP,
-  //   TYPE_UNIX,
-  //   TYPE_HTTP,
-  // };
+  Supported_IPCs test_supported_ipcs[] = {
+    GSTD_IPC_TYPE_TCP,
+    GSTD_IPC_TYPE_UNIX,
+    GSTD_IPC_TYPE_HTTP,
+  };
 
   guint num_ipcs = (sizeof (supported_ipcs) / sizeof (GType));
   GstdIpc **ipc_array = g_malloc (num_ipcs * sizeof (GstdIpc *));
@@ -205,14 +205,15 @@ main (gint argc, gchar * argv[])
     {NULL}
   };
 
-  // gstd_manager_new (test_supported_ipcs, num_ipcs, &manager);
+  gstd_manager_new (test_supported_ipcs, num_ipcs, &manager);
 
   /* Initialize default */
   context = g_option_context_new (" - gst-launch under steroids");
   g_option_context_add_main_entries (context, entries, NULL);
 
   /* Initialize GStreamer */
-  gstreamer_group = gst_init_get_option_group ();
+  // gstreamer_group = gst_init_get_option_group ();
+  gstd_manager_init (&gstreamer_group);
   g_option_context_add_group (context, gstreamer_group);
 
   /* Read option group for each IPC */
@@ -249,7 +250,7 @@ main (gint argc, gchar * argv[])
 
   gstd_debug_init ();
   myPrint ();
-  g_print ("IT WORKS!\n");
+  g_print ("\nTEST: 8\n");
 
   if (kill) {
     if (gstd_daemon_stop ()) {
@@ -282,7 +283,11 @@ main (gint argc, gchar * argv[])
   session = gstd_session_new ("Session0");
 
   /* Start IPC subsystem */
-  if (!ipc_start (ipc_array, num_ipcs, session)) {
+  // if (!ipc_start (ipc_array, num_ipcs, session)) {
+  //   goto error;
+  // }
+  g_print ("\nSTARTING\n");
+  if (!gstd_manager_ipc_start (manager)) {
     goto error;
   }
 
@@ -304,7 +309,8 @@ main (gint argc, gchar * argv[])
   main_loop = NULL;
 
   /* Stop any IPC array */
-  ipc_stop (ipc_array, num_ipcs);
+  // ipc_stop (ipc_array, num_ipcs);
+  gstd_manager_ipc_stop (manager);
 
   /* Free Gstd session */
   g_object_unref (session);
@@ -328,6 +334,8 @@ error:
   }
 out:
   {
+    g_print ("\nFINISHING\n");
+    gstd_manager_free (manager);
     return ret;
   }
 }

@@ -3,6 +3,9 @@
         "gstd_session.h": "c",
         "gstd_tcp.h": "c",
         "gstd_ipc.h": "c",
-        "libgstd.h": "c"
+        "libgstd.h": "c",
+        "libgstc_assert.h": "c",
+        "libgstd_assert.h": "c",
+        "libgstc_json.h": "c"
     }
 }

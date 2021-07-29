@@ -117,43 +117,9 @@ libgstd_header_files = [
 ]
 
 gstd_src = [
+  '../libgstd/libgstd_assert.c',
   '../libgstd/libgstd.c'
 ]
-
-gstd_headers = [
-  '../libgstd/libgstd.h',
-]
-
-################
-# GSTD LIBRARY #
-################
-
-# Build and install library and pkgconfig file
-# Build library
-gstd_lib_manager = library('gstd-@0@'.format(apiversion),
-  [libgstd_src_files, gstd_src],
-  c_args : gst_d_args,
-  version : gstd_version,
-  include_directories : [configinc, gstd_inc_dir],
-  install : true,
-  install_dir : lib_install_dir,
-  dependencies : [libgstd_deps],
-)
-
-install_headers(gstd_headers)
-
-# Generate pkgconfig file
-pkgconfig.generate(gstd_lib_manager, description : 'GStreamer Manager library to control Gstd')
-
-# Define the library as an internal dependency to the current build
-lib_gstd_manager_dep = declare_dependency(link_with: gstd_lib_manager,
-  dependencies : [libgstd_deps])
-
-lib_gstd_manager_dir = meson.current_source_dir()
-
-################
-# GSTD LIBRARY #
-################
 
 # Create a static library used to create gstd daemon and also is used for tests
 gstd_lib = both_libraries('gstd-core',
