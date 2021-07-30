@@ -77,6 +77,8 @@ gstd_manager_new (Supported_IPCs supported_ipcs[], guint num_ipcs,
   GstdStatus ret = GSTD_LIB_OK;
   GstdIpc **ipc_array = g_malloc (num_ipcs * sizeof (GstdIpc *));
 
+  gstd_assert_and_ret_val (NULL != out, GSTD_NULL_ARGUMENT);
+
   manager = (GstDManager *) malloc (sizeof (GstDManager));
   session = gstd_session_new ("Session0");
 
@@ -108,7 +110,7 @@ void
 gstd_manager_init_options (void **gst_group)
 {
   g_print ("OPTIONS INIT\n");
-  g_return_if_fail (gst_group);
+  gstd_assert_and_ret (NULL != gst_group);
   gst_init (NULL, NULL);
   gstd_debug_init ();
 
@@ -124,6 +126,10 @@ gstd_manager_ipc_options (GstDManager * manager, void **ipc_group)
   GOptionGroup **ipc_group_gen;
   gint i;
 
+  gstd_assert_and_ret (NULL != manager);
+  gstd_assert_and_ret (NULL != manager->ipc_array);
+  gstd_assert_and_ret (NULL != ipc_group);
+
   ipc_group_gen = g_malloc (sizeof (ipc_group));
   g_return_if_fail (ipc_group);
 
@@ -134,7 +140,7 @@ gstd_manager_ipc_options (GstDManager * manager, void **ipc_group)
   *(GOptionGroup **) ipc_group = *ipc_group_gen;
 }
 
-int
+gboolean
 gstd_manager_ipc_start (GstDManager * manager)
 {
   gboolean ipc_selected = FALSE;
@@ -142,8 +148,9 @@ gstd_manager_ipc_start (GstDManager * manager)
   GstdReturnCode code;
   gint i;
 
-  g_return_val_if_fail (manager->ipc_array, FALSE);
-  g_return_val_if_fail (manager->session, FALSE);
+  gstd_assert_and_ret_val (NULL != manager, GSTD_NULL_ARGUMENT);
+  gstd_assert_and_ret_val (NULL != manager->ipc_array, GSTD_LIB_NOT_FOUND);
+  gstd_assert_and_ret_val (NULL != manager->session, GSTD_LIB_NOT_FOUND);
 
   /* Verify if at leas one IPC mechanism was selected */
   for (i = 0; i < manager->num_ipcs; i++) {
@@ -170,6 +177,7 @@ gstd_manager_ipc_start (GstDManager * manager)
     }
   }
 
+  g_print ("STATUS %d\n", ret);
   return ret;
 }
 
@@ -178,7 +186,9 @@ gstd_manager_ipc_stop (GstDManager * manager)
 {
   gint i;
 
-  g_return_if_fail (manager);
+  gstd_assert_and_ret (NULL != manager);
+  gstd_assert_and_ret (NULL != manager->ipc_array);
+  gstd_assert_and_ret (NULL != manager->session);
 
   /* Run stop for each IPC */
   for (i = 0; i < manager->num_ipcs; i++) {
@@ -195,6 +205,38 @@ gstd_manager_free (GstDManager * manager)
   gst_deinit ();
   gstd_assert_and_ret (NULL != manager);
   g_free (manager);
+}
+
+GstdStatus
+gstd_pipeline_create (GstDManager * manager,
+    const char *pipeline_name, const char *pipeline_desc)
+{
+  GstdStatus ret = GSTD_LIB_OK;
+  gchar *message = NULL;
+  gchar *output = NULL;
+
+  gstd_assert_and_ret_val (NULL != manager, GSTD_NULL_ARGUMENT);
+  gstd_assert_and_ret_val (NULL != manager->session, GSTD_NULL_ARGUMENT);
+  gstd_assert_and_ret_val (NULL != pipeline_name, GSTD_NULL_ARGUMENT);
+  gstd_assert_and_ret_val (NULL != pipeline_desc, GSTD_NULL_ARGUMENT);
+
+  message =
+      g_strdup_printf ("pipeline_create %s %s", pipeline_name, pipeline_desc);
+
+  ret = gstd_parser_parse_cmd (manager->session, message, &output);
+  g_free (message);
+  g_free (output);
+  message = NULL;
+  output = NULL;
+
+  return ret;
+}
+
+GstdStatus
+gstd_pipeline_list (GstDManager * manager, char **pipelines[], int *list_lenght)
+{
+  gstd_assert_and_ret_val (NULL != manager, GSTD_NULL_ARGUMENT);
+  gstd_assert_and_ret_val (NULL != manager->session, GSTD_NULL_ARGUMENT);
 }
 
 void

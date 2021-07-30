@@ -69,7 +69,6 @@ gint
 main (gint argc, gchar * argv[])
 {
   GMainLoop *main_loop;
-  GstdSession *session;
   gboolean version = FALSE;
   gboolean kill = FALSE;
   gboolean daemon = FALSE;
@@ -85,6 +84,7 @@ main (gint argc, gchar * argv[])
   gchar *current_filename = NULL;
 
   GstDManager *manager;
+  /* Necessary for type safety use in context groups */
   void *gstreamer_group_generic;
   void *ipc_group_generic;
 
@@ -173,7 +173,6 @@ main (gint argc, gchar * argv[])
   }
 
   gstd_debug_init ();
-  g_print ("\nTEST: 8\n");
 
   if (kill) {
     if (gstd_daemon_stop ()) {
@@ -202,8 +201,6 @@ main (gint argc, gchar * argv[])
     }
   }
 
-  /*Create session */
-  session = gstd_session_new ("Session0");
 
   /* Start IPC subsystem */
   if (!gstd_manager_ipc_start (manager)) {
@@ -231,9 +228,6 @@ main (gint argc, gchar * argv[])
   // ipc_stop (ipc_array, num_ipcs);
   gstd_manager_ipc_stop (manager);
 
-  /* Free Gstd session */
-  g_object_unref (session);
-
   gst_deinit ();
   gstd_log_deinit ();
 
@@ -253,7 +247,6 @@ error:
   }
 out:
   {
-    g_print ("\nFINISHING\n");
     gstd_manager_free (manager);
     return ret;
   }

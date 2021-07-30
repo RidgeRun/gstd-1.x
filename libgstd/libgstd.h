@@ -204,8 +204,9 @@ gstd_pipeline_create (GstDManager * manager, const char *pipeline_name,
  *
  * Returns: GstdStatus indicating success or some failure
  */
-GstdStatus gstd_pipeline_list(GstDManager * manager, char **pipelines[],
-  int *list_lenght);
+GstdStatus 
+gstd_pipeline_list(GstDManager * manager, 
+    char **pipelines[], int *list_lenght);
 
 /**
  * gstd_pipeline_delete:
