@@ -6,6 +6,7 @@
         "libgstd.h": "c",
         "libgstc_assert.h": "c",
         "libgstd_assert.h": "c",
-        "libgstc_json.h": "c"
+        "libgstc_json.h": "c",
+        "gstd_log.h": "c"
     }
 }

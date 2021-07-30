@@ -213,7 +213,7 @@ main (gint argc, gchar * argv[])
 
   /* Initialize GStreamer */
   // gstreamer_group = gst_init_get_option_group ();
-  gstd_manager_init (&gstreamer_group);
+  gstd_manager_init_options (&gstreamer_group);
   g_option_context_add_group (context, gstreamer_group);
 
   /* Read option group for each IPC */

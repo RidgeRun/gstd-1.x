@@ -40,6 +40,8 @@
 #include "gstd_log.h"
 #include "libgstd_assert.h"
 
+#include <stdio.h>
+
 static GType gstd_supported_ipc_to_ipc (Supported_IPCs code);
 
 struct _GstDManager
@@ -87,7 +89,6 @@ gstd_manager_new (Supported_IPCs supported_ipcs[], guint num_ipcs,
   manager->session = session;
   manager->ipc_array = ipc_array;
   manager->num_ipcs = num_ipcs;
-  // manager->gstreamer_group = gst_init_get_option_group ();
 
   *out = manager;
 
@@ -95,17 +96,23 @@ gstd_manager_new (Supported_IPCs supported_ipcs[], guint num_ipcs,
 }
 
 void
-gstd_manager_init (void **gst_group)
+gstd_manager_init (void)
 {
-  GOptionGroup *gstreamer_group;
+  g_print ("SIMPLE INIT\n");
+  gst_init (NULL, NULL);
+  gstd_debug_init ();
+}
 
+
+void
+gstd_manager_init_options (void **gst_group)
+{
+  g_print ("OPTIONS INIT\n");
   gst_init (NULL, NULL);
   gstd_debug_init ();
 
-  gstreamer_group = gst_init_get_option_group ();
-
   if (gst_group != NULL && *gst_group != NULL) {
-    *(GOptionGroup **) gst_group = gstreamer_group;
+    *(GOptionGroup **) gst_group = gst_init_get_option_group ();
   }
 
 }

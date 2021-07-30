@@ -91,8 +91,28 @@ typedef enum
 GstdStatus 
 gstd_manager_new (Supported_IPCs supported_ipcs[], uint num_ipcs, GstDManager ** out);
 
+/**
+ * gstd_manager_init:
+ * 
+ * 
+ * Initializes GStreamer wihtout returning its argument specification. 
+ *
+ */
 void
-gstd_manager_init (void ** gst_group);
+gstd_manager_init (void);
+
+/**
+ * gstd_manager_init_options:
+ * 
+ * @gstreamer_group: placeholder for GStreamer's argument specifications
+ * 
+ * Initializes GStreamer and return its argument specification. 
+ * This function is useful if you want to integrate GStreamer with other 
+ * libraries that use GOption.
+ *
+ */
+void
+gstd_manager_init_options (void **gstreamer_group);
 
 /**
  * gstd_manager_ipc_start:
