@@ -117,6 +117,17 @@ gstd_manager_init_options (void **gstreamer_group);
 /**
  * gstd_manager_ipc_start:
  * @manager: The manager returned by gstd_manager_new()
+ * @ipc_group: placeholder for IPCs specifications
+ * 
+ * Get IPCs information into a group 
+ *
+ */
+void
+gstd_manager_ipc_options (GstDManager * manager, void **ipc_group);
+
+/**
+ * gstd_manager_ipc_start:
+ * @manager: The manager returned by gstd_manager_new()
  * 
  * Starts the ipc in GstdIpc array
  *

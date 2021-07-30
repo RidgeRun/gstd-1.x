@@ -36,8 +36,6 @@
 #include "libgstd.h"
 
 static gboolean int_term_handler (gpointer user_data);
-static void ipc_add_option_groups (GType factory[],
-    guint num_ipcs, GOptionContext * context, GOptionGroup * groups[]);
 static void print_header ();
 
 #define HEADER \
@@ -67,22 +65,6 @@ int_term_handler (gpointer user_data)
   return TRUE;
 }
 
-static void
-ipc_add_option_groups (GType factory[], guint num_ipcs,
-    GOptionContext * context, GOptionGroup * groups[])
-{
-  gint i;
-
-  g_return_if_fail (context);
-  g_return_if_fail (groups);
-
-  for (i = 0; i < num_ipcs; i++) {
-    gstd_ipc_get_option_group (GSTD_IPC (g_object_new (factory[i], NULL)),
-        &groups[i]);
-    g_option_context_add_group (context, groups[i]);
-  }
-}
-
 gint
 main (gint argc, gchar * argv[])
 {
@@ -98,11 +80,13 @@ main (gint argc, gchar * argv[])
   GError *error = NULL;
   GOptionContext *context;
   GOptionGroup *gstreamer_group;
+  GOptionGroup **ipc_group;
   gint ret = EXIT_SUCCESS;
   gchar *current_filename = NULL;
 
   GstDManager *manager;
   void *gstreamer_group_generic;
+  void *ipc_group_generic;
 
   /* Array to specify gstd how many IPCs are supported, 
    * Supported_IPCs should be added this array.
@@ -111,15 +95,6 @@ main (gint argc, gchar * argv[])
     GSTD_IPC_TYPE_TCP,
     GSTD_IPC_TYPE_UNIX,
     GSTD_IPC_TYPE_HTTP,
-  };
-
-  /* Array to specify gstd which IPCs should be
-     included in context.
-   */
-  GType gstd_supported_ipcs[] = {
-    GSTD_TYPE_TCP,
-    GSTD_TYPE_UNIX,
-    GSTD_TYPE_HTTP,
   };
 
   guint num_ipcs = (sizeof (supported_ipcs) / sizeof (GType));
@@ -158,14 +133,16 @@ main (gint argc, gchar * argv[])
   g_option_context_add_main_entries (context, entries, NULL);
 
   /* Initialize GStreamer */
-  gstreamer_group = g_malloc (num_ipcs * sizeof (GOptionGroup *));
+  gstreamer_group = g_malloc (sizeof (GOptionGroup *));
   gstreamer_group_generic = gstreamer_group;
   gstd_manager_init_options (&gstreamer_group_generic);
   g_option_context_add_group (context, gstreamer_group_generic);
 
   /* Read option group for each IPC */
-  ipc_add_option_groups (gstd_supported_ipcs, num_ipcs, context,
-      optiongroup_array);
+  ipc_group = g_malloc (num_ipcs * sizeof (GOptionGroup *));
+  ipc_group_generic = ipc_group;
+  gstd_manager_ipc_options (manager, &ipc_group_generic);
+  g_option_context_add_group (context, ipc_group_generic);
 
   /* Parse the options before starting */
   if (!g_option_context_parse (context, &argc, &argv, &error)) {
@@ -261,6 +238,7 @@ main (gint argc, gchar * argv[])
   gstd_log_deinit ();
 
   g_free (optiongroup_array);
+  g_free (ipc_group);
 
   goto out;
 

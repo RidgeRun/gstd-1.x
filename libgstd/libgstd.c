@@ -108,6 +108,7 @@ void
 gstd_manager_init_options (void **gst_group)
 {
   g_print ("OPTIONS INIT\n");
+  g_return_if_fail (gst_group);
   gst_init (NULL, NULL);
   gstd_debug_init ();
 
@@ -115,6 +116,22 @@ gstd_manager_init_options (void **gst_group)
     *(GOptionGroup **) gst_group = gst_init_get_option_group ();
   }
 
+}
+
+void
+gstd_manager_ipc_options (GstDManager * manager, void **ipc_group)
+{
+  GOptionGroup **ipc_group_gen;
+  gint i;
+
+  ipc_group_gen = g_malloc (sizeof (ipc_group));
+  g_return_if_fail (ipc_group);
+
+  for (i = 0; i < manager->num_ipcs; i++) {
+    gstd_ipc_get_option_group (manager->ipc_array[i], &ipc_group_gen[i]);
+  }
+
+  *(GOptionGroup **) ipc_group = *ipc_group_gen;
 }
 
 int
@@ -177,7 +194,7 @@ gstd_manager_free (GstDManager * manager)
 {
   gst_deinit ();
   gstd_assert_and_ret (NULL != manager);
-  free (manager);
+  g_free (manager);
 }
 
 void
