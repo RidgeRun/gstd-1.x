@@ -102,6 +102,7 @@ main (gint argc, gchar * argv[])
   gchar *current_filename = NULL;
 
   GstDManager *manager;
+  void *gstreamer_group_generic;
 
   /* Array to specify gstd how many IPCs are supported, 
    * Supported_IPCs should be added this array.
@@ -157,8 +158,10 @@ main (gint argc, gchar * argv[])
   g_option_context_add_main_entries (context, entries, NULL);
 
   /* Initialize GStreamer */
-  gstd_manager_init_options (&gstreamer_group);
-  g_option_context_add_group (context, gstreamer_group);
+  gstreamer_group = g_malloc (num_ipcs * sizeof (GOptionGroup *));
+  gstreamer_group_generic = gstreamer_group;
+  gstd_manager_init_options (&gstreamer_group_generic);
+  g_option_context_add_group (context, gstreamer_group_generic);
 
   /* Read option group for each IPC */
   ipc_add_option_groups (gstd_supported_ipcs, num_ipcs, context,
