@@ -118,21 +118,23 @@ gstd_manager_new (SupportedIpcs supported_ipcs[], guint num_ipcs,
   GstDManager *manager;
   GstdSession *session;
   GstdStatus ret = GSTD_LIB_OK;
-  GstdIpc **ipc_array = g_malloc (num_ipcs * sizeof (GstdIpc *));
+  GstdIpc **ipc_array;
 
   gstd_assert_and_ret_val (NULL != out, GSTD_NULL_ARGUMENT);
-
   manager = (GstDManager *) malloc (sizeof (GstDManager));
   session = gstd_session_new ("Session0");
 
-  for (int i = 0; i < num_ipcs; i++) {
-    ipc_array[i] =
-        GSTD_IPC (g_object_new (gstd_supported_ipc_to_ipc (supported_ipcs[i]),
-            NULL));
+  if (NULL != supported_ipcs) {
+    ipc_array = g_malloc (num_ipcs * sizeof (GstdIpc *));
+    for (int i = 0; i < num_ipcs; i++) {
+      ipc_array[i] =
+          GSTD_IPC (g_object_new (gstd_supported_ipc_to_ipc (supported_ipcs[i]),
+              NULL));
+    }
+    manager->ipc_array = ipc_array;
   }
 
   manager->session = session;
-  manager->ipc_array = ipc_array;
   manager->num_ipcs = num_ipcs;
 
   *out = manager;
@@ -374,6 +376,34 @@ gstd_pipeline_stop (GstDManager * manager, const char *pipeline_name)
   gstd_assert_and_ret_val (NULL != pipeline_name, GSTD_NULL_ARGUMENT);
 
   ret = gstd_crud (manager, "stop", pipeline_name);
+
+  return ret;
+}
+
+GstdStatus
+gstd_pipeline_get_graph (GstDManager * manager, const char *pipeline_name,
+    char **response)
+{
+  GstdStatus ret;
+
+  gchar *message = NULL;
+  gchar *output = NULL;
+
+  gstd_assert_and_ret_val (NULL != manager, GSTD_NULL_ARGUMENT);
+  gstd_assert_and_ret_val (NULL != manager->session, GSTD_NULL_ARGUMENT);
+  gstd_assert_and_ret_val (NULL != pipeline_name, GSTD_NULL_ARGUMENT);
+  gstd_assert_and_ret_val (NULL != response, GSTD_NULL_ARGUMENT);
+
+  message = g_strdup_printf ("pipeline_get_graph %s", pipeline_name);
+
+  ret = gstd_parser_parse_cmd (manager->session, message, &output);
+
+  *response = g_strdup_printf ("%s", output);
+
+  g_free (message);
+  g_free (output);
+  message = NULL;
+  output = NULL;
 
   return ret;
 }

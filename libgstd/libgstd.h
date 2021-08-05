@@ -243,6 +243,7 @@ gstd_pipeline_stop(GstDManager * manager, const char *pipeline_name);
  * @manager: The manager returned by gstd_manager_new()
  * @pipeline_name: Name associated with the pipeline
  * @response: Pipeline graph description
+ * 
  * Attempts to get the graph of the pipeline.
  *
  * Returns: GstdStatus indicating success or some failure
