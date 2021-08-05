@@ -55,6 +55,7 @@ libgstd_src_files = [
 ]
 
 gstd_src = [
+  'libgstd_json.c',
   'libgstd_assert.c',
   'libgstd.c'
 ]

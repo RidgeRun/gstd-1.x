@@ -39,6 +39,7 @@
 #include "gstd_http.h"
 #include "gstd_log.h"
 #include "libgstd_assert.h"
+#include "libgstd_json.h"
 
 #include <stdio.h>
 
@@ -104,7 +105,6 @@ gstd_manager_init (void)
   gst_init (NULL, NULL);
   gstd_debug_init ();
 }
-
 
 void
 gstd_manager_init_options (void **gst_group)
@@ -235,8 +235,26 @@ gstd_pipeline_create (GstDManager * manager,
 GstdStatus
 gstd_pipeline_list (GstDManager * manager, char **pipelines[], int *list_lenght)
 {
+  GstdStatus ret = GSTD_LIB_OK;
+  gchar *message = NULL;
+  gchar *output = NULL;
+
   gstd_assert_and_ret_val (NULL != manager, GSTD_NULL_ARGUMENT);
   gstd_assert_and_ret_val (NULL != manager->session, GSTD_NULL_ARGUMENT);
+
+  message = g_strdup_printf ("list_pipelines");
+
+  gstd_parser_parse_cmd (manager->session, message, &output);
+
+  ret = gstd_json_get_child_char_array (output, "nodes",
+      "name", pipelines, list_lenght);
+
+  g_free (message);
+  g_free (output);
+  message = NULL;
+  output = NULL;
+
+  return ret;
 }
 
 void
