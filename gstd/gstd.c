@@ -89,9 +89,9 @@ main (gint argc, gchar * argv[])
   void *ipc_group_generic;
 
   /* Array to specify gstd how many IPCs are supported, 
-   * Supported_IPCs should be added this array.
+   * SupportedIpcs should be added this array.
    */
-  Supported_IPCs supported_ipcs[] = {
+  SupportedIpcs supported_ipcs[] = {
     GSTD_IPC_TYPE_TCP,
     GSTD_IPC_TYPE_UNIX,
     GSTD_IPC_TYPE_HTTP,
@@ -126,8 +126,6 @@ main (gint argc, gchar * argv[])
     {NULL}
   };
 
-  gstd_manager_new (supported_ipcs, num_ipcs, &manager);
-
   /* Initialize default */
   context = g_option_context_new (" - gst-launch under steroids");
   g_option_context_add_main_entries (context, entries, NULL);
@@ -135,7 +133,8 @@ main (gint argc, gchar * argv[])
   /* Initialize GStreamer */
   gstreamer_group = g_malloc (sizeof (GOptionGroup *));
   gstreamer_group_generic = gstreamer_group;
-  gstd_manager_init_options (&gstreamer_group_generic);
+  gstd_manager_new (supported_ipcs, num_ipcs, &manager,
+      &gstreamer_group_generic, 0, NULL);
   g_option_context_add_group (context, gstreamer_group_generic);
 
   /* Read option group for each IPC */

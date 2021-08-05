@@ -43,7 +43,7 @@
 
 #include <stdio.h>
 
-static GType gstd_supported_ipc_to_ipc (Supported_IPCs code);
+static GType gstd_supported_ipc_to_ipc (SupportedIpcs code);
 
 struct _GstDManager
 {
@@ -53,7 +53,7 @@ struct _GstDManager
 };
 
 static GType
-gstd_supported_ipc_to_ipc (Supported_IPCs code)
+gstd_supported_ipc_to_ipc (SupportedIpcs code)
 {
   GType code_description[] = {
     [GSTD_IPC_TYPE_TCP] = GSTD_TYPE_TCP,
@@ -69,9 +69,24 @@ gstd_supported_ipc_to_ipc (Supported_IPCs code)
   return code_description[code];
 }
 
+static void
+gstd_manager_init (void **gst_group, int argc, char *argv[])
+{
+  gst_init (&argc, &argv);
+  gstd_debug_init ();
+
+  if (gst_group != NULL && *gst_group != NULL) {
+    g_print ("OPTIONS INIT\n");
+    *(GOptionGroup **) gst_group = gst_init_get_option_group ();
+  } else {
+    g_print ("SIMPLE INIT\n");
+  }
+
+}
+
 GstdStatus
-gstd_manager_new (Supported_IPCs supported_ipcs[], guint num_ipcs,
-    GstDManager ** out)
+gstd_manager_new (SupportedIpcs supported_ipcs[], guint num_ipcs,
+    GstDManager ** out, void **gst_group, int argc, char *argv[])
 {
   GstDManager *manager;
   GstdSession *session;
@@ -95,29 +110,10 @@ gstd_manager_new (Supported_IPCs supported_ipcs[], guint num_ipcs,
 
   *out = manager;
 
+  /* Initialize GStreamer */
+  gstd_manager_init (gst_group, argc, argv);
+
   return ret;
-}
-
-void
-gstd_manager_init (void)
-{
-  g_print ("SIMPLE INIT\n");
-  gst_init (NULL, NULL);
-  gstd_debug_init ();
-}
-
-void
-gstd_manager_init_options (void **gst_group)
-{
-  g_print ("OPTIONS INIT\n");
-  gstd_assert_and_ret (NULL != gst_group);
-  gst_init (NULL, NULL);
-  gstd_debug_init ();
-
-  if (gst_group != NULL && *gst_group != NULL) {
-    *(GOptionGroup **) gst_group = gst_init_get_option_group ();
-  }
-
 }
 
 void
@@ -248,6 +244,28 @@ gstd_pipeline_list (GstDManager * manager, char **pipelines[], int *list_lenght)
 
   ret = gstd_json_get_child_char_array (output, "nodes",
       "name", pipelines, list_lenght);
+
+  g_free (message);
+  g_free (output);
+  message = NULL;
+  output = NULL;
+
+  return ret;
+}
+
+GstdStatus
+gstd_pipeline_delete (GstDManager * manager, const char *pipeline_name)
+{
+  GstdStatus ret = GSTD_LIB_OK;
+  gchar *message = NULL;
+  gchar *output = NULL;
+
+  gstd_assert_and_ret_val (NULL != manager, GSTD_NULL_ARGUMENT);
+  gstd_assert_and_ret_val (NULL != pipeline_name, GSTD_NULL_ARGUMENT);
+
+  message = g_strdup_printf ("pipeline_delete %s", pipeline_name);
+
+  ret = gstd_parser_parse_cmd (manager->session, message, &output);
 
   g_free (message);
   g_free (output);

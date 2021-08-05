@@ -38,9 +38,9 @@ typedef struct _GstDManager GstDManager;
  * Supported_IPCs:
  * IPC options for libGstD
  */
-typedef enum _Supported_IPCs Supported_IPCs;
+typedef enum _SupportedIpcs SupportedIpcs;
 
-enum _Supported_IPCs
+enum _SupportedIpcs
 {
     GSTD_IPC_TYPE_TCP,
     GSTD_IPC_TYPE_UNIX,
@@ -81,6 +81,9 @@ typedef enum
  * @supported_ipcs: ipcs the user will use 
  * @num_ipcs: lenght of supported_ipcs
  * @out: placeholder for newly allocated gstd manager.
+ * @gst_group: placeholder for GStreamer's argument specifications
+ * @argc: arguments for gst_init
+ * @argv: arguments for gst_init
  * 
  * Initializes gstd. If ipc array is not NULL
  * it will initialize the GstdIpc in GstDManager.
@@ -89,33 +92,12 @@ typedef enum
  * Returns: GstdStatus indicating success or fail
  */
 GstdStatus 
-gstd_manager_new (Supported_IPCs supported_ipcs[], uint num_ipcs, GstDManager ** out);
+gstd_manager_new (SupportedIpcs supported_ipcs[], uint num_ipcs, 
+    GstDManager ** out, void **gst_group, int argc, char *argv[]);
+
 
 /**
- * gstd_manager_init:
- * 
- * 
- * Initializes GStreamer wihtout returning its argument specification. 
- *
- */
-void
-gstd_manager_init (void);
-
-/**
- * gstd_manager_init_options:
- * 
- * @gstreamer_group: placeholder for GStreamer's argument specifications
- * 
- * Initializes GStreamer and return its argument specification. 
- * This function is useful if you want to integrate GStreamer with other 
- * libraries that use GOption.
- *
- */
-void
-gstd_manager_init_options (void **gstreamer_group);
-
-/**
- * gstd_manager_ipc_start:
+ * gstd_manager_ipc_options:
  * @manager: The manager returned by gstd_manager_new()
  * @ipc_group: placeholder for IPCs specifications
  * 
