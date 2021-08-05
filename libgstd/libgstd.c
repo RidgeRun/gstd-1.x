@@ -44,6 +44,9 @@
 #include <stdio.h>
 
 static GType gstd_supported_ipc_to_ipc (SupportedIpcs code);
+static void gstd_manager_init (void **gst_group, int argc, char *argv[]);
+static GstdStatus gstd_crud (GstDManager * manager, const char *operation,
+    const char *pipeline_name);
 
 struct _GstDManager
 {
@@ -82,6 +85,30 @@ gstd_manager_init (void **gst_group, int argc, char *argv[])
     g_print ("SIMPLE INIT\n");
   }
 
+}
+
+static GstdStatus
+gstd_crud (GstDManager * manager, const char *operation,
+    const char *pipeline_name)
+{
+  GstdStatus ret = GSTD_LIB_OK;
+  gchar *message = NULL;
+  gchar *output = NULL;
+
+  gstd_assert_and_ret_val (NULL != manager, GSTD_NULL_ARGUMENT);
+  gstd_assert_and_ret_val (NULL != pipeline_name, GSTD_NULL_ARGUMENT);
+  gstd_assert_and_ret_val (NULL != operation, GSTD_NULL_ARGUMENT);
+
+  message = g_strdup_printf ("pipeline_%s %s", operation, pipeline_name);
+
+  ret = gstd_parser_parse_cmd (manager->session, message, &output);
+
+  g_free (message);
+  g_free (output);
+  message = NULL;
+  output = NULL;
+
+  return ret;
 }
 
 GstdStatus
@@ -204,26 +231,72 @@ gstd_manager_free (GstDManager * manager)
 }
 
 GstdStatus
+gstd_manager_debug (GstDManager * manager, const char *threshold,
+    const int colors, const int reset)
+{
+  GstdStatus ret = GSTD_LIB_OK;
+  const char *colored;
+  const char *reset_bool;
+  gchar *message = NULL;
+  gchar *output = NULL;
+
+  gstd_assert_and_ret_val (NULL != manager, GSTD_NULL_ARGUMENT);
+  gstd_assert_and_ret_val (NULL != threshold, GSTD_NULL_ARGUMENT);
+
+  message = g_strdup_printf ("debug_enable true");
+  ret = gstd_parser_parse_cmd (manager->session, message, &output);
+  if (ret != GSTD_LIB_OK) {
+    return ret;
+  }
+  output = NULL;
+
+  message = g_strdup_printf ("debug_threshold %s", threshold);
+  ret = gstd_parser_parse_cmd (manager->session, message, &output);
+  if (ret != GSTD_LIB_OK) {
+    return ret;
+  }
+  output = NULL;
+
+  colored = colors == 0 ? "false" : "true";
+  message = g_strdup_printf ("debug_color %s", colored);
+  ret = gstd_parser_parse_cmd (manager->session, message, &output);
+  if (ret != GSTD_LIB_OK) {
+    return ret;
+  }
+  output = NULL;
+
+  reset_bool = reset == 0 ? "false" : "true";
+  message = g_strdup_printf ("debug_reset %s", reset_bool);
+  ret = gstd_parser_parse_cmd (manager->session, message, &output);
+  if (ret != GSTD_LIB_OK) {
+    return ret;
+  }
+
+  g_free (message);
+  g_free (output);
+  message = NULL;
+  output = NULL;
+
+  return ret;
+}
+
+GstdStatus
 gstd_pipeline_create (GstDManager * manager,
     const char *pipeline_name, const char *pipeline_desc)
 {
   GstdStatus ret = GSTD_LIB_OK;
   gchar *message = NULL;
-  gchar *output = NULL;
 
   gstd_assert_and_ret_val (NULL != manager, GSTD_NULL_ARGUMENT);
   gstd_assert_and_ret_val (NULL != manager->session, GSTD_NULL_ARGUMENT);
   gstd_assert_and_ret_val (NULL != pipeline_name, GSTD_NULL_ARGUMENT);
   gstd_assert_and_ret_val (NULL != pipeline_desc, GSTD_NULL_ARGUMENT);
 
-  message =
-      g_strdup_printf ("pipeline_create %s %s", pipeline_name, pipeline_desc);
+  message = g_strdup_printf ("%s %s", pipeline_name, pipeline_desc);
 
-  ret = gstd_parser_parse_cmd (manager->session, message, &output);
+  ret = gstd_crud (manager, "create", message);
   g_free (message);
-  g_free (output);
   message = NULL;
-  output = NULL;
 
   return ret;
 }
@@ -233,22 +306,22 @@ gstd_pipeline_list (GstDManager * manager, char **pipelines[], int *list_lenght)
 {
   GstdStatus ret = GSTD_LIB_OK;
   gchar *message = NULL;
-  gchar *output = NULL;
+  gchar *response = NULL;
 
   gstd_assert_and_ret_val (NULL != manager, GSTD_NULL_ARGUMENT);
   gstd_assert_and_ret_val (NULL != manager->session, GSTD_NULL_ARGUMENT);
 
   message = g_strdup_printf ("list_pipelines");
 
-  gstd_parser_parse_cmd (manager->session, message, &output);
+  gstd_parser_parse_cmd (manager->session, message, &response);
 
-  ret = gstd_json_get_child_char_array (output, "nodes",
+  ret = gstd_json_get_child_char_array (response, "nodes",
       "name", pipelines, list_lenght);
 
   g_free (message);
-  g_free (output);
+  g_free (response);
   message = NULL;
-  output = NULL;
+  response = NULL;
 
   return ret;
 }
@@ -257,20 +330,50 @@ GstdStatus
 gstd_pipeline_delete (GstDManager * manager, const char *pipeline_name)
 {
   GstdStatus ret = GSTD_LIB_OK;
-  gchar *message = NULL;
-  gchar *output = NULL;
 
   gstd_assert_and_ret_val (NULL != manager, GSTD_NULL_ARGUMENT);
   gstd_assert_and_ret_val (NULL != pipeline_name, GSTD_NULL_ARGUMENT);
 
-  message = g_strdup_printf ("pipeline_delete %s", pipeline_name);
+  ret = gstd_crud (manager, "delete", pipeline_name);
 
-  ret = gstd_parser_parse_cmd (manager->session, message, &output);
+  return ret;
+}
 
-  g_free (message);
-  g_free (output);
-  message = NULL;
-  output = NULL;
+GstdStatus
+gstd_pipeline_play (GstDManager * manager, const char *pipeline_name)
+{
+  GstdStatus ret = GSTD_LIB_OK;
+
+  gstd_assert_and_ret_val (NULL != manager, GSTD_NULL_ARGUMENT);
+  gstd_assert_and_ret_val (NULL != pipeline_name, GSTD_NULL_ARGUMENT);
+
+  ret = gstd_crud (manager, "play", pipeline_name);
+
+  return ret;
+}
+
+GstdStatus
+gstd_pipeline_pause (GstDManager * manager, const char *pipeline_name)
+{
+  GstdStatus ret = GSTD_LIB_OK;
+
+  gstd_assert_and_ret_val (NULL != manager, GSTD_NULL_ARGUMENT);
+  gstd_assert_and_ret_val (NULL != pipeline_name, GSTD_NULL_ARGUMENT);
+
+  ret = gstd_crud (manager, "pause", pipeline_name);
+
+  return ret;
+}
+
+GstdStatus
+gstd_pipeline_stop (GstDManager * manager, const char *pipeline_name)
+{
+  GstdStatus ret = GSTD_LIB_OK;
+
+  gstd_assert_and_ret_val (NULL != manager, GSTD_NULL_ARGUMENT);
+  gstd_assert_and_ret_val (NULL != pipeline_name, GSTD_NULL_ARGUMENT);
+
+  ret = gstd_crud (manager, "stop", pipeline_name);
 
   return ret;
 }

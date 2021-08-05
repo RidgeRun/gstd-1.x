@@ -154,7 +154,7 @@ gstd_manager_free (GstDManager * manager);
  *
  * Returns: GstdStatus indicating success, daemon unreachable, daemon timeout
  */
-GstdStatus gstd_manager_debug (const char* threshold,
+GstdStatus gstd_manager_debug (GstDManager * manager, const char* threshold,
     const int colors, const int reset);
 
 /**
