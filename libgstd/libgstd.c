@@ -31,6 +31,7 @@
  */
 
 #include <glib-unix.h>
+#include <stdio.h>
 
 #include "libgstd.h"
 #include "gstd_ipc.h"
@@ -40,8 +41,6 @@
 #include "gstd_log.h"
 #include "libgstd_assert.h"
 #include "libgstd_json.h"
-
-#include <stdio.h>
 
 static GType gstd_supported_ipc_to_ipc (SupportedIpcs code);
 static void gstd_manager_init (void **gst_group, int argc, char *argv[]);
