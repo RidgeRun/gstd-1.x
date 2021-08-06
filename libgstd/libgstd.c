@@ -248,14 +248,14 @@ gstd_manager_debug (GstDManager * manager, const char *threshold,
   message = g_strdup_printf ("debug_enable true");
   ret = gstd_parser_parse_cmd (manager->session, message, &output);
   if (ret != GSTD_LIB_OK) {
-    return ret;
+    goto out;
   }
   output = NULL;
 
   message = g_strdup_printf ("debug_threshold %s", threshold);
   ret = gstd_parser_parse_cmd (manager->session, message, &output);
   if (ret != GSTD_LIB_OK) {
-    return ret;
+    goto out;
   }
   output = NULL;
 
@@ -263,7 +263,7 @@ gstd_manager_debug (GstDManager * manager, const char *threshold,
   message = g_strdup_printf ("debug_color %s", colored);
   ret = gstd_parser_parse_cmd (manager->session, message, &output);
   if (ret != GSTD_LIB_OK) {
-    return ret;
+    goto out;
   }
   output = NULL;
 
@@ -271,9 +271,10 @@ gstd_manager_debug (GstDManager * manager, const char *threshold,
   message = g_strdup_printf ("debug_reset %s", reset_bool);
   ret = gstd_parser_parse_cmd (manager->session, message, &output);
   if (ret != GSTD_LIB_OK) {
-    return ret;
+    goto out;
   }
 
+out:
   g_free (message);
   g_free (output);
   message = NULL;
@@ -404,6 +405,53 @@ gstd_pipeline_get_graph (GstDManager * manager, const char *pipeline_name,
   g_free (output);
   message = NULL;
   output = NULL;
+
+  return ret;
+}
+
+GstdStatus
+gstd_pipeline_verbose (GstDManager * manager, const char *pipeline_name,
+    int value)
+{
+  GstdStatus ret = GSTD_LIB_OK;
+  const char *verbosed;
+  gchar *message = NULL;
+  gchar *output = NULL;
+
+  gstd_assert_and_ret_val (NULL != manager, GSTD_NULL_ARGUMENT);
+  gstd_assert_and_ret_val (NULL != manager->session, GSTD_NULL_ARGUMENT);
+
+  verbosed = value == 0 ? "false" : "true";
+  message = g_strdup_printf ("pipeline_verbose %s %s", pipeline_name, verbosed);
+  ret = gstd_parser_parse_cmd (manager->session, message, &output);
+
+  g_free (message);
+  g_free (output);
+  message = NULL;
+  output = NULL;
+
+  return ret;
+}
+
+GstdStatus
+gstd_element_get (GstDManager * manager, const char *pname,
+    const char *element, const char *property, const char *format, ...)
+{
+  GstdStatus ret;
+  gchar *message = NULL;
+  gchar *output = NULL;
+
+  gstd_assert_and_ret_val (manager != NULL, GSTD_NULL_ARGUMENT);
+  gstd_assert_and_ret_val (NULL != manager->session, GSTD_NULL_ARGUMENT);
+  gstd_assert_and_ret_val (pname != NULL, GSTD_NULL_ARGUMENT);
+  gstd_assert_and_ret_val (element != NULL, GSTD_NULL_ARGUMENT);
+  gstd_assert_and_ret_val (property != NULL, GSTD_NULL_ARGUMENT);
+  gstd_assert_and_ret_val (format != NULL, GSTD_NULL_ARGUMENT);
+
+  message = g_strdup_printf ("element_get %s %s %s", pname, element, property);
+  ret = gstd_parser_parse_cmd (manager->session, message, &output);
+
+  g_print ("%s\n", output);
 
   return ret;
 }
