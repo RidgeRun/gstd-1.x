@@ -288,17 +288,22 @@ gstd_pipeline_create (GstDManager * manager,
 {
   GstdStatus ret = GSTD_LIB_OK;
   gchar *message = NULL;
+  gchar *output = NULL;
 
   gstd_assert_and_ret_val (NULL != manager, GSTD_NULL_ARGUMENT);
   gstd_assert_and_ret_val (NULL != manager->session, GSTD_NULL_ARGUMENT);
   gstd_assert_and_ret_val (NULL != pipeline_name, GSTD_NULL_ARGUMENT);
   gstd_assert_and_ret_val (NULL != pipeline_desc, GSTD_NULL_ARGUMENT);
 
-  message = g_strdup_printf ("%s %s", pipeline_name, pipeline_desc);
+  message =
+      g_strdup_printf ("pipeline_create %s %s", pipeline_name, pipeline_desc);
 
   ret = gstd_crud (manager, "create", message);
+  ret = gstd_parser_parse_signal_callback (manager->session, message, &output);
   g_free (message);
+  g_free (output);
   message = NULL;
+  output = NULL;
 
   return ret;
 }
