@@ -78,10 +78,7 @@ gstd_manager_init (void **gst_group, int argc, char *argv[])
   gstd_debug_init ();
 
   if (gst_group != NULL && *gst_group != NULL) {
-    g_print ("OPTIONS INIT\n");
     *(GOptionGroup **) gst_group = gst_init_get_option_group ();
-  } else {
-    g_print ("SIMPLE INIT\n");
   }
 
 }
@@ -201,7 +198,6 @@ gstd_manager_ipc_start (GstDManager * manager)
     }
   }
 
-  g_print ("STATUS %d\n", ret);
   return ret;
 }
 
@@ -450,8 +446,10 @@ gstd_element_get (GstDManager * manager, const char *pname,
   message = g_strdup_printf ("element_get %s %s %s", pname, element, property);
   ret = gstd_parser_parse_cmd (manager->session, message, &output);
 
-  g_print ("%s\n", output);
 
+  /*
+     TODO
+   */
   return ret;
 }
 
