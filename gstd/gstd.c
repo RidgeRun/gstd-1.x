@@ -33,7 +33,7 @@
 #include "gstd_daemon.h"
 #include "gstd_log.h"
 
-#include "libgstd.h"
+#include "../libgstd/libgstd.h"
 
 static gboolean int_term_handler (gpointer user_data);
 static void print_header ();
