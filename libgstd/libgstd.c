@@ -29,8 +29,9 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
+#define _GNU_SOURCE
 #include <glib-unix.h>
+#include <stdarg.h>
 #include <stdio.h>
 
 #include "libgstd.h"
@@ -41,6 +42,8 @@
 #include "gstd_log.h"
 #include "libgstd_assert.h"
 #include "libgstd_json.h"
+
+#define PRINTF_ERROR -1
 
 static GType gstd_supported_ipc_to_ipc (SupportedIpcs code);
 static void gstd_manager_init (void **gst_group, int argc, char *argv[]);
@@ -450,12 +453,12 @@ gstd_element_get (GstDManager * manager, const char *pname,
   gchar *response = NULL;
   char *out;
 
-  gstd_assert_and_ret_val (manager != NULL, GSTD_NULL_ARGUMENT);
+  gstd_assert_and_ret_val (NULL != manager, GSTD_NULL_ARGUMENT);
   gstd_assert_and_ret_val (NULL != manager->session, GSTD_NULL_ARGUMENT);
-  gstd_assert_and_ret_val (pname != NULL, GSTD_NULL_ARGUMENT);
-  gstd_assert_and_ret_val (element != NULL, GSTD_NULL_ARGUMENT);
-  gstd_assert_and_ret_val (property != NULL, GSTD_NULL_ARGUMENT);
-  gstd_assert_and_ret_val (format != NULL, GSTD_NULL_ARGUMENT);
+  gstd_assert_and_ret_val (NULL != pname, GSTD_NULL_ARGUMENT);
+  gstd_assert_and_ret_val (NULL != element, GSTD_NULL_ARGUMENT);
+  gstd_assert_and_ret_val (NULL != property, GSTD_NULL_ARGUMENT);
+  gstd_assert_and_ret_val (NULL != format, GSTD_NULL_ARGUMENT);
 
   va_start (ap, format);
 
@@ -479,6 +482,48 @@ unref_response:
 
 unref:
   va_end (ap);
+  return ret;
+}
+
+GstdStatus
+gstd_element_set (GstDManager * manager, const char *pname,
+    const char *element, const char *parameter, const char *format, ...)
+{
+  GstdStatus ret;
+  int asprintf_ret;
+  va_list ap;
+
+  gchar *message = NULL;
+  gchar *values = NULL;
+  gchar *response = NULL;
+
+  gstd_assert_and_ret_val (NULL != manager, GSTD_NULL_ARGUMENT);
+  gstd_assert_and_ret_val (NULL != manager->session, GSTD_NULL_ARGUMENT);
+  gstd_assert_and_ret_val (NULL != pname, GSTD_NULL_ARGUMENT);
+  gstd_assert_and_ret_val (NULL != element, GSTD_NULL_ARGUMENT);
+  gstd_assert_and_ret_val (NULL != parameter, GSTD_NULL_ARGUMENT);
+  gstd_assert_and_ret_val (NULL != format, GSTD_NULL_ARGUMENT);
+
+  va_start (ap, format);
+  asprintf_ret = vasprintf (&values, format, ap);
+  if (PRINTF_ERROR == asprintf_ret) {
+    return GSTD_LIB_OOM;
+  }
+
+  message =
+      g_strdup_printf ("element_set %s %s %s %s", pname, element, parameter,
+      values);
+  ret = gstd_parser_parse_cmd (manager->session, message, &response);
+  if (ret != GSTD_LIB_OK) {
+    goto unref;
+  }
+
+unref:
+  g_free (message);
+  g_free (response);
+  message = NULL;
+  response = NULL;
+
   return ret;
 }
 
