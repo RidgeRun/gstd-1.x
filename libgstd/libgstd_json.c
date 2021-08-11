@@ -197,26 +197,21 @@ clear_mem:
 }
 
 GstdStatus
-gstd_json_child_string (const char *json, const char *parent_name,
-    const char *data_name, char **out)
+gstd_json_child_string (const char *json, const char *data_name, char **out)
 {
   GstdStatus ret;
   json_t *root;
-  json_t *parent;
   json_t *data;
+  json_error_t error;
   const char *tmp_string;
 
   gstd_assert_and_ret_val (json != NULL, GSTD_LIB_NULL_ARGUMENT);
-  gstd_assert_and_ret_val (parent_name != NULL, GSTD_LIB_NULL_ARGUMENT);
   gstd_assert_and_ret_val (data_name != NULL, GSTD_LIB_NULL_ARGUMENT);
   gstd_assert_and_ret_val (out != NULL, GSTD_LIB_NULL_ARGUMENT);
 
-  ret = gstd_json_get_value (json, parent_name, &root, &parent);
-  if (GSTD_LIB_OK != ret) {
-    goto out;
-  }
+  root = json_loads (json, 0, &error);
 
-  data = json_object_get (parent, data_name);
+  data = json_object_get (root, data_name);
   if (data == NULL) {
     ret = GSTD_LIB_NOT_FOUND;
     goto unref;
@@ -237,6 +232,5 @@ gstd_json_child_string (const char *json, const char *parent_name,
 
 unref:
   json_decref (root);
-out:
   return ret;
 }

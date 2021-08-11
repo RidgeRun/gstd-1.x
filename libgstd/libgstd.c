@@ -65,8 +65,8 @@ gstd_supported_ipc_to_ipc (SupportedIpcs code)
 
   const gint size = sizeof (code_description) / sizeof (gchar *);
 
-  g_return_val_if_fail (0 <= code, GSTD_TYPE_IPC);      // TODO: Proponer un GSTD_TYPE_DEFAULT
-  g_return_val_if_fail (size > code, GSTD_TYPE_IPC);
+  gstd_assert_and_ret_val (0 <= code, GSTD_TYPE_IPC);   // TODO: Proponer un GSTD_TYPE_DEFAULT
+  gstd_assert_and_ret_val (size > code, GSTD_TYPE_IPC);
 
   return code_description[code];
 }
@@ -295,11 +295,13 @@ gstd_pipeline_create (GstDManager * manager,
   gstd_assert_and_ret_val (NULL != pipeline_name, GSTD_NULL_ARGUMENT);
   gstd_assert_and_ret_val (NULL != pipeline_desc, GSTD_NULL_ARGUMENT);
 
-  message =
-      g_strdup_printf ("pipeline_create %s %s", pipeline_name, pipeline_desc);
+  // message =
+  //     g_strdup_printf ("pipeline_create %s %s", pipeline_name, pipeline_desc);
+
+  message = g_strdup_printf ("%s %s", pipeline_name, pipeline_desc);
 
   ret = gstd_crud (manager, "create", message);
-  ret = gstd_parser_parse_signal_callback (manager->session, message, &output);
+  // ret = gstd_parser_parse_signal_callback (manager->session, message, &output);
   g_free (message);
   g_free (output);
   message = NULL;
@@ -322,8 +324,9 @@ gstd_pipeline_list (GstDManager * manager, char **pipelines[], int *list_lenght)
 
   gstd_parser_parse_cmd (manager->session, message, &response);
 
-  ret = gstd_json_get_child_char_array (response, "nodes",
-      "name", pipelines, list_lenght);
+  ret =
+      gstd_json_get_child_char_array (response, "nodes", "name", pipelines,
+      list_lenght);
 
   g_free (message);
   g_free (response);
@@ -442,8 +445,10 @@ gstd_element_get (GstDManager * manager, const char *pname,
     const char *element, const char *property, const char *format, ...)
 {
   GstdStatus ret;
+  va_list ap;
   gchar *message = NULL;
-  gchar *output = NULL;
+  gchar *response = NULL;
+  char *out;
 
   gstd_assert_and_ret_val (manager != NULL, GSTD_NULL_ARGUMENT);
   gstd_assert_and_ret_val (NULL != manager->session, GSTD_NULL_ARGUMENT);
@@ -452,11 +457,28 @@ gstd_element_get (GstDManager * manager, const char *pname,
   gstd_assert_and_ret_val (property != NULL, GSTD_NULL_ARGUMENT);
   gstd_assert_and_ret_val (format != NULL, GSTD_NULL_ARGUMENT);
 
+  va_start (ap, format);
+
   message = g_strdup_printf ("element_get %s %s %s", pname, element, property);
-  ret = gstd_parser_parse_cmd (manager->session, message, &output);
+  ret = gstd_parser_parse_cmd (manager->session, message, &response);
+  if (ret != GSTD_LIB_OK) {
+    goto unref;
+  }
 
-  g_print ("%s\n", output);
+  ret = gstd_json_child_string (response, "value", &out);
+  if (ret != GSTD_LIB_OK) {
+    goto unref_response;
+  }
 
+  vsscanf (out, format, ap);
+
+  free (out);
+
+unref_response:
+  g_free (response);
+
+unref:
+  va_end (ap);
   return ret;
 }
 

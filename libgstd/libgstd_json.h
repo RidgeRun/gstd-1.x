@@ -61,7 +61,6 @@ gstd_json_get_child_char_array(const char *json,
   /**
    * gstd_json_child_string:
    * @json: Json as a cstring with the data to be searched for
-   * @parent_name: element name that is parent to the string
    * @data_name: name of the string
    * @out: pointer to output string memory, this memory should be freed by the user
    *
@@ -71,5 +70,4 @@ gstd_json_get_child_char_array(const char *json,
    * malformed string, unfound element
    */
   GstdStatus
-  gstd_json_child_string (const char * json, const char * parent_name,
-    const char * data_name, char ** out); 
+  gstd_json_child_string (const char * json, const char * data_name, char ** out); 
