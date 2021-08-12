@@ -56,7 +56,7 @@ gstd_deps = [gst_base_dep, gio_unix_dep, json_glib_dep, libd_dep, jansson_dep, l
 # Define gst client library dependencies
 libgstc_deps = [gst_base_dep, json_glib_dep, jansson_dep, thread_dep]
 # Define gst core library dependencies
-libgstd_deps = [gst_base_dep, json_glib_dep, jansson_dep, thread_dep, libsoup_dep, gio_unix_dep]
+libgstd_deps = [gst_base_dep, gio_unix_dep, json_glib_dep, libd_dep, jansson_dep, thread_dep, libsoup_dep]
 # Define gst client application dependencies
 gst_client_deps = [readline_dep, json_glib_dep, gio_unix_dep]
 # Define test dependencies

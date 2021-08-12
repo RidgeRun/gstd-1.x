@@ -38,10 +38,6 @@
 static gboolean int_term_handler (gpointer user_data);
 static void print_header ();
 
-#define HEADER \
-      "\nGstd version " PACKAGE_VERSION "\n" \
-      "Copyright (C) 2015-2020 RidgeRun (https://www.ridgerun.com)\n\n"
-
 static void
 print_header (void)
 {
@@ -79,14 +75,11 @@ main (gint argc, gchar * argv[])
   GError *error = NULL;
   GOptionContext *context;
   GOptionGroup *gstreamer_group;
-  GOptionGroup **ipc_group;
+  GOptionGroup *ipc_group;
   gint ret = EXIT_SUCCESS;
   gchar *current_filename = NULL;
 
   GstDManager *manager;
-  /* Necessary for type safety use in context groups */
-  void *gstreamer_group_generic;
-  void *ipc_group_generic;
 
   /* Array to specify gstd how many IPCs are supported, 
    * SupportedIpcs should be added this array.
@@ -132,16 +125,14 @@ main (gint argc, gchar * argv[])
 
   /* Initialize GStreamer */
   gstreamer_group = g_malloc (sizeof (GOptionGroup *));
-  gstreamer_group_generic = gstreamer_group;
   gstd_manager_new (supported_ipcs, num_ipcs, &manager,
-      &gstreamer_group_generic, 0, NULL);
-  g_option_context_add_group (context, gstreamer_group_generic);
+      &gstreamer_group, 0, NULL);
+  g_option_context_add_group (context, gstreamer_group);
 
   /* Read option group for each IPC */
   ipc_group = g_malloc (num_ipcs * sizeof (GOptionGroup *));
-  ipc_group_generic = ipc_group;
-  gstd_manager_ipc_options (manager, &ipc_group_generic);
-  g_option_context_add_group (context, ipc_group_generic);
+  gstd_manager_ipc_options (manager, &ipc_group);       // If you don't want this option, you can avoid calling this function
+  g_option_context_add_group (context, ipc_group);
 
   /* Parse the options before starting */
   if (!g_option_context_parse (context, &argc, &argv, &error)) {
@@ -200,7 +191,6 @@ main (gint argc, gchar * argv[])
     }
   }
 
-
   /* Start IPC subsystem */
   if (!gstd_manager_ipc_start (manager)) {
     goto error;
@@ -227,7 +217,6 @@ main (gint argc, gchar * argv[])
   // ipc_stop (ipc_array, num_ipcs);
   gstd_manager_ipc_stop (manager);
 
-  gst_deinit ();
   gstd_log_deinit ();
 
   g_free (optiongroup_array);

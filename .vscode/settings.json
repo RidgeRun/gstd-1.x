@@ -8,6 +8,7 @@
         "libgstd_assert.h": "c",
         "libgstc_json.h": "c",
         "gstd_log.h": "c",
-        "stdarg.h": "c"
+        "stdarg.h": "c",
+        "stdlib.h": "c"
     }
 }

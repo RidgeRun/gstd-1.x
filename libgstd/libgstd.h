@@ -25,6 +25,13 @@ extern "C"
 {
 #endif
 
+#include <gst/gst.h>
+#include <glib-unix.h>
+
+#define HEADER \
+      "\nGstd version " PACKAGE_VERSION "\n" \
+      "Copyright (C) 2015-2020 RidgeRun (https://www.ridgerun.com)\n\n"
+
 /*
  * GstDManager:
  * Opaque representation of GstD state.
@@ -36,9 +43,9 @@ typedef struct _GstDManager GstDManager;
  * Supported_IPCs:
  * IPC options for libGstD
  */
-typedef enum _SupportedIpcs SupportedIpcs;
+typedef enum _SupportedIpcs SupportedIpcs; // Used to avoid importing gstd_ipc.h in this file
 
-enum _SupportedIpcs
+enum _SupportedIpcs 
 {
     GSTD_IPC_TYPE_TCP,
     GSTD_IPC_TYPE_UNIX,
@@ -91,8 +98,7 @@ typedef enum
  */
 GstdStatus 
 gstd_manager_new (SupportedIpcs supported_ipcs[], uint num_ipcs, 
-    GstDManager ** out, void **gst_group, int argc, char *argv[]);
-
+    GstDManager ** out, GOptionGroup **gst_group, int argc, char *argv[]);
 
 /**
  * gstd_manager_ipc_options:
@@ -103,7 +109,7 @@ gstd_manager_new (SupportedIpcs supported_ipcs[], uint num_ipcs,
  *
  */
 void
-gstd_manager_ipc_options (GstDManager * manager, void **ipc_group);
+gstd_manager_ipc_options (GstDManager * manager, GOptionGroup **ipc_group);
 
 /**
  * gstd_manager_ipc_start:
