@@ -31,9 +31,6 @@
 /**
  * Prototypes for the functions
  */
-static GstdReturnCode
-gstd_parser_find (GstdSession * session, GstdObject * obj, gchar * args,
-    gchar ** response);
 static GstdReturnCode gstd_parser_create (GstdSession * session,
     GstdObject * obj, gchar * args, gchar ** response);
 static GstdReturnCode gstd_parser_read (GstdSession * session,
@@ -86,9 +83,6 @@ static GstdReturnCode gstd_parser_event_flush_stop (GstdSession *, gchar *,
     gchar *, gchar **);
 static GstdReturnCode gstd_parser_signal_connect (GstdSession *, gchar *,
     gchar *, gchar **);
-static GstdReturnCode
-gstd_parser_signal_callback (GstdSession * session, gchar * action,
-    gchar * args, gchar ** response);
 static GstdReturnCode gstd_parser_signal_timeout (GstdSession *, gchar *,
     gchar *, gchar **);
 static GstdReturnCode gstd_parser_signal_disconnect (GstdSession *, gchar *,
@@ -235,81 +229,7 @@ gstd_parser_parse_cmd (GstdSession * session, const gchar * cmd,
   return ret;
 }
 
-GstdReturnCode
-gstd_parser_parse_signal_callback (GstdSession * session, const gchar * cmd,
-    gchar ** response)
-{
-  gchar **tokens;
-  gchar *action, *args;
-  GstdReturnCode ret = GSTD_BAD_COMMAND;
 
-  g_return_val_if_fail (GSTD_IS_SESSION (session), GSTD_NULL_ARGUMENT);
-  g_return_val_if_fail (cmd, GSTD_NULL_ARGUMENT);
-  g_warn_if_fail (!*response);
-
-  tokens = g_strsplit (cmd, " ", 2);
-  action = tokens[0];
-  args = tokens[1];
-
-  ret = gstd_parser_signal_callback (session, action, args, response);
-
-  if (ret == GSTD_BAD_COMMAND)
-    GST_ERROR_OBJECT (session, "Unknown command \"%s\"", action);
-  g_strfreev (tokens);
-
-  return ret;
-}
-
-static GstdReturnCode
-gstd_parser_find (GstdSession * session, GstdObject * obj, gchar * args,
-    gchar ** response)
-{
-  gchar **tokens = NULL;
-  gchar *name;
-  gchar *description;
-  GstdObject *new;
-  GstdReturnCode ret;
-
-  g_return_val_if_fail (GSTD_IS_SESSION (session), GSTD_NULL_ARGUMENT);
-  g_return_val_if_fail (G_IS_OBJECT (obj), GSTD_NULL_ARGUMENT);
-
-  // This may mean a potential leak
-  g_warn_if_fail (!*response);
-
-  // Tokens has the form {<name>, <description>}
-  if (NULL == args) {
-    name = NULL;
-    description = NULL;
-  } else {
-    tokens = g_strsplit (args, " ", 2);
-    name = tokens[0];
-    description = tokens[1];
-  }
-
-  if (NULL == name) {
-    /* No name provided, hence no desciption either, but it may contain garbage */
-    description = NULL;
-  }
-
-  ret = gstd_object_create (obj, name, description);
-  if (ret)
-    goto out;
-
-  gstd_object_read (obj, name, &new);
-
-  if (NULL != new) {
-    gstd_object_to_string (new, response);
-    g_print ("\nHERE: %s\n", *response);
-    g_object_unref (new);
-  }
-
-out:
-  {
-    if (tokens)
-      g_strfreev (tokens);
-    return ret;
-  }
-}
 
 static GstdReturnCode
 gstd_parser_create (GstdSession * session, GstdObject * obj, gchar * args,
@@ -961,51 +881,6 @@ gstd_parser_signal_connect (GstdSession * session, gchar * action,
   return ret;
 }
 
-static GstdReturnCode
-gstd_parser_signal_callback (GstdSession * session, gchar * action,
-    gchar * args, gchar ** response)
-{
-  GstdReturnCode ret;
-  gchar *full_uri;
-  gchar *uri;
-  gchar *rest;
-  GstdObject *node;
-  gchar **tokens;
-
-  g_return_val_if_fail (GSTD_IS_SESSION (session), GSTD_NULL_ARGUMENT);
-
-  full_uri = g_strdup_printf ("/pipelines %s", args ? args : "");
-
-  tokens = g_strsplit (full_uri, " ", 2);
-  uri = tokens[0];
-  rest = tokens[1];
-
-  // Alias the empty string to the base
-  if (!uri)
-    uri = (gchar *) "/";
-
-  ret = gstd_get_by_uri (session, uri, &node);
-  if (ret || NULL == node) {
-    goto out;
-  }
-
-  ret = gstd_parser_find (session, node, rest, response);
-
-  g_object_unref (node);
-
-out:
-  {
-    g_strfreev (tokens);
-    return ret;
-  }
-
-  g_free (uri);
-  g_free (full_uri);
-  g_free (rest);
-  g_free (tokens);
-
-  return ret;
-}
 
 static GstdReturnCode
 gstd_parser_signal_disconnect (GstdSession * session, gchar * action,

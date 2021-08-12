@@ -41,7 +41,4 @@
 GstdReturnCode gstd_parser_parse_cmd (GstdSession * session, const gchar * cmd,
     gchar ** response);
 
-GstdReturnCode gstd_parser_parse_signal_callback (GstdSession * session, const gchar * cmd,
-    gchar ** response);
-
 #endif // __GSTD_PARSER_H__

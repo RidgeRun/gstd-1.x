@@ -117,7 +117,6 @@ libgstd_header_files = [
 ]
 
 gstd_src = [
-  '../libgstd/libgstd_json.c',
   '../libgstd/libgstd_assert.c',
   '../libgstd/libgstd.c'
 ]

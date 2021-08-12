@@ -40,7 +40,6 @@
 #include "gstd_http.h"
 #include "gstd_log.h"
 #include "libgstd_assert.h"
-#include "libgstd_json.h"
 
 static GType gstd_supported_ipc_to_ipc (SupportedIpcs code);
 static void gstd_manager_init (GOptionGroup ** gst_group, int argc,
