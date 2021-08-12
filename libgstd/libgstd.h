@@ -25,8 +25,6 @@ extern "C"
 {
 #endif
 
-void myPrint(void);
-
 /*
  * GstDManager:
  * Opaque representation of GstD state.
@@ -320,7 +318,7 @@ GstdStatus gstd_element_set(GstDManager * manager, const char *pname,
  *
  * Returns: GstdStatus indicating success or some failure
  */
-GstdStatus gstd_element_properties_list(GstDManager * manager, const char *pipeline_name, 
+GstdStatus gstd_element_properties_list (GstDManager * manager, const char *pipeline_name, 
     char *element, char **properties[], int *list_lenght);
 
 /**
@@ -398,7 +396,7 @@ GstdStatus gstd_pipeline_inject_eos (GstDManager * manager, const char *pipeline
  *
  * Returns: GstdStatus indicating success or some failure.
  */
-GstdStatus gstd_pipeline_seek(GstDManager * manager, const char *pname,
+GstdStatus gstd_pipeline_seek (GstDManager * manager, const char *pname,
     double rate, int format, int flags, int start_type, long long start,
     int stop_type, long long stop);
 
