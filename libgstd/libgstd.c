@@ -95,7 +95,7 @@ gstd_manager_new (SupportedIpcs supported_ipcs[], guint num_ipcs,
   manager = (GstDManager *) malloc (sizeof (GstDManager));
   session = gstd_session_new ("Session0");
 
-  // If there is ipcs, then initialize them
+  /* If there is ipcs, then initialize them */
   if (NULL != supported_ipcs) {
     ipc_array = g_malloc (num_ipcs * sizeof (GstdIpc *));
     for (int i = 0; i < num_ipcs; i++) {
