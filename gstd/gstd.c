@@ -219,7 +219,6 @@ main (gint argc, gchar * argv[])
   gstd_log_deinit ();
 
   g_free (optiongroup_array);
-  g_free (ipc_group);
 
   goto out;
 
