@@ -214,7 +214,6 @@ main (gint argc, gchar * argv[])
   main_loop = NULL;
 
   /* Stop any IPC array */
-  // ipc_stop (ipc_array, num_ipcs);
   gstd_manager_ipc_stop (manager);
 
   gstd_log_deinit ();

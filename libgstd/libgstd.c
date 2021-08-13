@@ -1,6 +1,6 @@
 /*
  * GStreamer Daemon - gst-launch on steroids
- * C client library abstracting gstd interprocess communication
+ * C library abstracting gstd
  *
  * Copyright (c) 2015-2021 RidgeRun, LLC (http://www.ridgerun.com)
  *
@@ -143,7 +143,7 @@ gstd_manager_ipc_start (GstDManager * manager)
   gstd_assert_and_ret_val (NULL != manager->ipc_array, GSTD_LIB_NOT_FOUND);
   gstd_assert_and_ret_val (NULL != manager->session, GSTD_LIB_NOT_FOUND);
 
-  /* Verify if at leas one IPC mechanism was selected */
+  /* Verify if at least one IPC mechanism was selected */
   for (i = 0; i < manager->num_ipcs; i++) {
     g_object_get (G_OBJECT (manager->ipc_array[i]), "enabled", &ipc_selected,
         NULL);
