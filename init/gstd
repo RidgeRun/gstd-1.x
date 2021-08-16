@@ -1,0 +1,49 @@
+#!/bin/sh
+
+### BEGIN INIT INFO
+# Provides: GstD
+# Short-Description: start and stop GstD
+# Description: Gstreamer Daemon is a framework for
+#              controlling audio and video streaming
+### END INIT INFO
+
+manage_dir()
+{
+    dir="$1";
+    mode="$2";
+    user="$3";
+
+    #Create directory if not created yet
+    mkdir -m "$mode" -p "$dir";
+    if [ $? -ne 0 ]; then
+        echo "GstD init: Error, cannot create directory $dir" 1>&2;
+        exit 1
+    fi
+
+    #Set the owner
+    chown -R "$user" "$dir";
+    if [ $? -ne 0 ]; then
+        echo "GstD init: Error, cannot change $dir owner to $user" 1>&2;
+        exit 1
+    fi
+}
+
+prefix=/usr/local
+gstdrunstatedir=${prefix}/var/run/gstd/
+gstdlogstatedir=${prefix}/var/log/gstd/
+
+case "$1" in
+    start)
+        #Manage pid and log directories
+        manage_dir "$gstdrunstatedir" 777 root
+        manage_dir "$gstdlogstatedir" 777 root
+
+        #Start gstd
+        /usr/local/bin/gstd -e;
+        ;;
+    stop)
+        /usr/local/bin/gstd -k;
+        ;;
+    *)
+        echo "$0 {start|stop}"
+esac
