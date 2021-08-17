@@ -39,6 +39,11 @@
 #include "gstd_unix.h"
 #include "gstd_http.h"
 #include "gstd_log.h"
+#include "libgstd_assert.h"
+
+static GType gstd_supported_ipc_to_ipc (SupportedIpcs code);
+static void gstd_manager_init (GOptionGroup ** gst_group, int argc,
+    char *argv[]);
 
 struct _GstDManager
 {
@@ -46,3 +51,148 @@ struct _GstDManager
   GstdIpc **ipc_array;
   guint num_ipcs;
 };
+
+static GType
+gstd_supported_ipc_to_ipc (SupportedIpcs code)
+{
+  GType code_description[] = {
+    [GSTD_IPC_TYPE_TCP] = GSTD_TYPE_TCP,
+    [GSTD_IPC_TYPE_UNIX] = GSTD_TYPE_UNIX,
+    [GSTD_IPC_TYPE_HTTP] = GSTD_TYPE_HTTP
+  };
+
+  const gint size = sizeof (code_description) / sizeof (gchar *);
+
+  gstd_assert_and_ret_val (0 <= code, GSTD_TYPE_IPC);   // TODO: Proponer un GSTD_TYPE_DEFAULT
+  gstd_assert_and_ret_val (size > code, GSTD_TYPE_IPC);
+
+  return code_description[code];
+}
+
+static void
+gstd_manager_init (GOptionGroup ** gst_group, int argc, char *argv[])
+{
+  gst_init (&argc, &argv);
+  gstd_debug_init ();
+
+  if (gst_group != NULL && *gst_group != NULL) {
+    *gst_group = gst_init_get_option_group ();
+  }
+
+}
+
+GstdStatus
+gstd_manager_new (SupportedIpcs supported_ipcs[], guint num_ipcs,
+    GstDManager ** out, GOptionGroup ** gst_group, int argc, char *argv[])
+{
+  GstDManager *manager;
+  GstdSession *session;
+  GstdStatus ret = GSTD_LIB_OK;
+  GstdIpc **ipc_array;
+
+  gstd_assert_and_ret_val (NULL != out, GSTD_NULL_ARGUMENT);
+
+  manager = (GstDManager *) malloc (sizeof (GstDManager));
+  session = gstd_session_new ("Session0");
+
+  /* If there is ipcs, then initialize them */
+  if (NULL != supported_ipcs) {
+    ipc_array = g_malloc (num_ipcs * sizeof (GstdIpc *));
+    for (int i = 0; i < num_ipcs; i++) {
+      ipc_array[i] =
+          GSTD_IPC (g_object_new (gstd_supported_ipc_to_ipc (supported_ipcs[i]),
+              NULL));
+    }
+    manager->ipc_array = ipc_array;
+  }
+
+  manager->session = session;
+  manager->num_ipcs = num_ipcs;
+
+  *out = manager;
+
+  /* Initialize GStreamer */
+  gstd_manager_init (gst_group, argc, argv);
+
+  return ret;
+}
+
+void
+gstd_manager_ipc_options (GstDManager * manager, GOptionGroup ** ipc_group)
+{
+  gint i;
+
+  gstd_assert_and_ret (NULL != manager);
+  gstd_assert_and_ret (NULL != manager->ipc_array);
+  gstd_assert_and_ret (NULL != ipc_group);
+
+  for (i = 0; i < manager->num_ipcs; i++) {
+    gstd_ipc_get_option_group (manager->ipc_array[i], &ipc_group[i]);
+  }
+}
+
+gboolean
+gstd_manager_ipc_start (GstDManager * manager)
+{
+  gboolean ipc_selected = FALSE;
+  gboolean ret = TRUE;
+  GstdReturnCode code;
+  gint i;
+
+  gstd_assert_and_ret_val (NULL != manager, GSTD_NULL_ARGUMENT);
+  gstd_assert_and_ret_val (NULL != manager->ipc_array, GSTD_LIB_NOT_FOUND);
+  gstd_assert_and_ret_val (NULL != manager->session, GSTD_LIB_NOT_FOUND);
+
+  /* Verify if at least one IPC mechanism was selected */
+  for (i = 0; i < manager->num_ipcs; i++) {
+    g_object_get (G_OBJECT (manager->ipc_array[i]), "enabled", &ipc_selected,
+        NULL);
+
+    if (ipc_selected) {
+      break;
+    }
+  }
+
+  /* If no IPC was selected, default to TCP */
+  if (!ipc_selected) {
+    g_object_set (G_OBJECT (manager->ipc_array[0]), "enabled", TRUE, NULL);
+  }
+
+  /* Run start for each IPC (each start method checks for the enabled flag) */
+  for (i = 0; i < manager->num_ipcs; i++) {
+    code = gstd_ipc_start (manager->ipc_array[i], manager->session);
+    if (code) {
+      g_printerr ("Couldn't start IPC : (%s)\n",
+          G_OBJECT_TYPE_NAME (manager->ipc_array[i]));
+      ret = FALSE;
+    }
+  }
+
+  return ret;
+}
+
+void
+gstd_manager_ipc_stop (GstDManager * manager)
+{
+  gint i;
+
+  gstd_assert_and_ret (NULL != manager);
+  gstd_assert_and_ret (NULL != manager->ipc_array);
+  gstd_assert_and_ret (NULL != manager->session);
+
+  /* Run stop for each IPC */
+  for (i = 0; i < manager->num_ipcs; i++) {
+    if (TRUE == manager->ipc_array[i]->enabled) {
+      gstd_ipc_stop (manager->ipc_array[i]);
+      g_object_unref (manager->ipc_array[i]);
+    }
+  }
+}
+
+void
+gstd_manager_free (GstDManager * manager)
+{
+  gstd_assert_and_ret (NULL != manager);
+  g_free (manager);
+  gst_deinit ();
+}

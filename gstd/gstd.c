@@ -36,16 +36,7 @@
 #include "libgstd.h"
 
 static gboolean int_term_handler (gpointer user_data);
-static void ipc_add_option_groups (GstdIpc * ipc[], GType factory[],
-    guint num_ipcs, GOptionContext * context, GOptionGroup * groups[]);
-static gboolean ipc_start (GstdIpc * ipc[], guint num_ipcs,
-    GstdSession * session);
-static void ipc_stop (GstdIpc * ipc[], guint numipc);
 static void print_header ();
-
-#define HEADER \
-      "\nGstd version " PACKAGE_VERSION "\n" \
-      "Copyright (C) 2015-2020 RidgeRun (https://www.ridgerun.com)\n\n"
 
 static void
 print_header (void)
@@ -70,81 +61,10 @@ int_term_handler (gpointer user_data)
   return TRUE;
 }
 
-static void
-ipc_add_option_groups (GstdIpc * ipc[], GType factory[], guint num_ipcs,
-    GOptionContext * context, GOptionGroup * groups[])
-{
-  gint i;
-
-  g_return_if_fail (ipc);
-  g_return_if_fail (context);
-  g_return_if_fail (groups);
-
-  for (i = 0; i < num_ipcs; i++) {
-    ipc[i] = GSTD_IPC (g_object_new (factory[i], NULL));
-    gstd_ipc_get_option_group (ipc[i], &groups[i]);
-    g_option_context_add_group (context, groups[i]);
-  }
-}
-
-static gboolean
-ipc_start (GstdIpc * ipc[], guint num_ipcs, GstdSession * session)
-{
-  gboolean ipc_selected = FALSE;
-  gboolean ret = TRUE;
-  GstdReturnCode code;
-  gint i;
-
-  g_return_val_if_fail (ipc, FALSE);
-  g_return_val_if_fail (session, FALSE);
-
-  /* Verify if at leas one IPC mechanism was selected */
-  for (i = 0; i < num_ipcs; i++) {
-    g_object_get (G_OBJECT (ipc[i]), "enabled", &ipc_selected, NULL);
-
-    if (ipc_selected) {
-      break;
-    }
-  }
-
-  /* If no IPC was selected, default to TCP */
-  if (!ipc_selected) {
-    g_object_set (G_OBJECT (ipc[0]), "enabled", TRUE, NULL);
-  }
-
-  /* Run start for each IPC (each start method checks for the enabled flag) */
-  for (i = 0; i < num_ipcs; i++) {
-    code = gstd_ipc_start (ipc[i], session);
-    if (code) {
-      g_printerr ("Couldn't start IPC : (%s)\n", G_OBJECT_TYPE_NAME (ipc[i]));
-      ret = FALSE;
-    }
-  }
-
-  return ret;
-}
-
-static void
-ipc_stop (GstdIpc * ipc[], guint num_ipcs)
-{
-  gint i;
-
-  g_return_if_fail (ipc);
-
-  /* Run stop for each IPC */
-  for (i = 0; i < num_ipcs; i++) {
-    if (TRUE == ipc[i]->enabled) {
-      gstd_ipc_stop (ipc[i]);
-      g_object_unref (ipc[i]);
-    }
-  }
-}
-
 gint
 main (gint argc, gchar * argv[])
 {
   GMainLoop *main_loop;
-  GstdSession *session;
   gboolean version = FALSE;
   gboolean kill = FALSE;
   gboolean daemon = FALSE;
@@ -155,20 +75,22 @@ main (gint argc, gchar * argv[])
   GError *error = NULL;
   GOptionContext *context;
   GOptionGroup *gstreamer_group;
+  GOptionGroup *ipc_group;
   gint ret = EXIT_SUCCESS;
   gchar *current_filename = NULL;
 
+  GstDManager *manager;
+
   /* Array to specify gstd how many IPCs are supported, 
-   * IPCs should be added this array.
+   * SupportedIpcs should be added this array.
    */
-  GType supported_ipcs[] = {
-    GSTD_TYPE_TCP,
-    GSTD_TYPE_UNIX,
-    GSTD_TYPE_HTTP,
+  SupportedIpcs supported_ipcs[] = {
+    GSTD_IPC_TYPE_TCP,
+    GSTD_IPC_TYPE_UNIX,
+    GSTD_IPC_TYPE_HTTP,
   };
 
   guint num_ipcs = (sizeof (supported_ipcs) / sizeof (GType));
-  GstdIpc **ipc_array = g_malloc (num_ipcs * sizeof (GstdIpc *));
   GOptionGroup **optiongroup_array =
       g_malloc (num_ipcs * sizeof (GOptionGroup *));
 
@@ -202,12 +124,15 @@ main (gint argc, gchar * argv[])
   g_option_context_add_main_entries (context, entries, NULL);
 
   /* Initialize GStreamer */
-  gstreamer_group = gst_init_get_option_group ();
+  gstreamer_group = g_malloc (sizeof (GOptionGroup *));
+  gstd_manager_new (supported_ipcs, num_ipcs, &manager,
+      &gstreamer_group, 0, NULL);
   g_option_context_add_group (context, gstreamer_group);
 
   /* Read option group for each IPC */
-  ipc_add_option_groups (ipc_array, supported_ipcs, num_ipcs, context,
-      optiongroup_array);
+  ipc_group = g_malloc (num_ipcs * sizeof (GOptionGroup *));
+  gstd_manager_ipc_options (manager, &ipc_group);       // If you don't want this option, you can avoid calling this function
+  g_option_context_add_group (context, ipc_group);
 
   /* Parse the options before starting */
   if (!g_option_context_parse (context, &argc, &argv, &error)) {
@@ -266,11 +191,8 @@ main (gint argc, gchar * argv[])
     }
   }
 
-  /*Create session */
-  session = gstd_session_new ("Session0");
-
   /* Start IPC subsystem */
-  if (!ipc_start (ipc_array, num_ipcs, session)) {
+  if (!gstd_manager_ipc_start (manager)) {
     goto error;
   }
 
@@ -292,15 +214,10 @@ main (gint argc, gchar * argv[])
   main_loop = NULL;
 
   /* Stop any IPC array */
-  ipc_stop (ipc_array, num_ipcs);
+  gstd_manager_ipc_stop (manager);
 
-  /* Free Gstd session */
-  g_object_unref (session);
-
-  gst_deinit ();
   gstd_log_deinit ();
 
-  g_free (ipc_array);
   g_free (optiongroup_array);
 
   goto out;
@@ -316,6 +233,7 @@ error:
   }
 out:
   {
+    gstd_manager_free (manager);
     return ret;
   }
 }
