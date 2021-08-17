@@ -117,6 +117,7 @@ libgstd_header_files = [
 ]
 
 gstd_src = [
+  '../libgstd/libgstd.c'
 ]
 
 # Create a static library used to create gstd daemon and also is used for tests

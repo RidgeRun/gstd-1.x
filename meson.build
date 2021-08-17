@@ -1,5 +1,5 @@
 project('gstd', 'c',
-  version : '0.13.0',
+  version : '0.12.0',
   meson_version : '>= 0.50',)
 
 gstd_version = meson.project_version()
@@ -55,6 +55,8 @@ endif
 gstd_deps = [gst_base_dep, gio_unix_dep, json_glib_dep, libd_dep, jansson_dep, libsoup_dep]
 # Define gst client library dependencies
 libgstc_deps = [gst_base_dep, json_glib_dep, jansson_dep, thread_dep]
+# Define gst core library dependencies
+libgstd_deps = [gst_base_dep, gio_unix_dep, json_glib_dep, libd_dep, jansson_dep, thread_dep, libsoup_dep]
 # Define gst client application dependencies
 gst_client_deps = [readline_dep, json_glib_dep, gio_unix_dep]
 # Define test dependencies
@@ -90,6 +92,7 @@ if logstatedir == '${prefix}/var/log/gstd/'
 endif
 gstd_log_state_dir = '-DGSTD_LOG_STATE_DIR="@0@"'.format(logstatedir)
 gst_c_args = ['-DHAVE_CONFIG_H',gstd_log_state_dir,gstd_run_state_dir]
+gst_d_args = ['-DHAVE_CONFIG_H',gstd_log_state_dir,gstd_run_state_dir]
 
 # Get an object returns describing a compiler
 cc = meson.get_compiler('c')
