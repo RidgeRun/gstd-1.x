@@ -64,6 +64,7 @@ test_gstd_deps=[gst_base_dep, gio_unix_dep, json_glib_dep, libd_dep, jansson_dep
 # Define header directories
 lib_gstc_inc_dir = include_directories('libgstc/c')
 gstd_inc_dir = include_directories('gstd')
+libgstd_inc_dir = include_directories('libgstd')
 configinc = include_directories('.')
 
 # Define gstreamer API version
@@ -242,6 +243,7 @@ configure_file(output : 'config.h', configuration : cdata)
 # Enter to each subdirectory and execute the meson.build
 subdir('gstd')
 subdir('libgstc')
+subdir('libgstd')
 subdir('gst_client')
 subdir('tests')
 subdir('examples')

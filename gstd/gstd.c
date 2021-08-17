@@ -33,6 +33,8 @@
 #include "gstd_daemon.h"
 #include "gstd_log.h"
 
+#include "libgstd.h"
+
 static gboolean int_term_handler (gpointer user_data);
 static void ipc_add_option_groups (GstdIpc * ipc[], GType factory[],
     guint num_ipcs, GOptionContext * context, GOptionGroup * groups[]);
