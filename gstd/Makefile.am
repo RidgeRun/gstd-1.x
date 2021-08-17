@@ -53,7 +53,10 @@ libgstd_core_la_SOURCES = gstd_session.c		\
 			  gstd_signal_reader.c		\
 			  gstd_socket.c			\
 			  gstd_unix.c			\
-			  gstd_signal_list.c
+			  gstd_signal_list.c	\
+			  ../libgstd/libgstd_assert.c	\
+			  ../libgstd/libgstd.c
+
 
 libgstd_core_la_CFLAGS = $(GST_CFLAGS)					\
 			 $(GIO_CFLAGS)					\
@@ -71,6 +74,7 @@ bin_PROGRAMS = gstd
 gstd_SOURCES =  gstd.c gstd_daemon.c
 
 gstd_CFLAGS = $(GST_CFLAGS)					\
+		   -I$(top_srcdir)/libgstd/			\
 	      $(GIO_CFLAGS)					\
 	      $(LIBSOUP_CFLAGS)					\
 	      $(GIO_UNIX_CFLAGS)				\
@@ -87,7 +91,7 @@ gstd_LDFLAGS = $(GST_LIBS)					\
 	       $(LIBSOUP_LIBS)					\
 	       -Wl,-rpath -Wl,$(libdir)
 
-gstd_LDADD = libgstd-core.la
+gstd_LDADD = libgstd-core.la $(top_srcdir)/libgstd/libgstd.h
 
 gstdincludedir = $(includedir)/gstd
 gstdinclude_HEADERS = \

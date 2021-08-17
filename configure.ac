@@ -297,6 +297,7 @@ libgstc/Makefile
 libgstc/c/Makefile
 libgstc/javascript/Makefile
 libgstc/python/Makefile
+libgstd/Makefile
 examples/Makefile
 examples/libgstc/Makefile
 tests/Makefile
