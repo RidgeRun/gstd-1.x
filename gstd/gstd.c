@@ -1,6 +1,6 @@
 /*
  * GStreamer Daemon - Gst Launch under steroids
- * Copyright (c) 2015-2017 Ridgerun, LLC (http://www.ridgerun.com)
+ * Copyright (c) 2015-2021 Ridgerun, LLC (http://www.ridgerun.com)
  * 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -73,13 +73,13 @@ main (gint argc, gchar * argv[])
   const gchar *gstlogfile = NULL;
   gchar *pidfile = NULL;
   GError *error = NULL;
-  GOptionContext *context;
-  GOptionGroup *gstreamer_group;
-  GOptionGroup *ipc_group;
+  GOptionContext *context = NULL;
+  GOptionGroup *gstreamer_group = NULL;
+  GOptionGroup *ipc_group = NULL;
   gint ret = EXIT_SUCCESS;
   gchar *current_filename = NULL;
 
-  GstDManager *manager;
+  GstDManager *manager = NULL;
 
   /* Array to specify gstd how many IPCs are supported, 
    * SupportedIpcs should be added this array.
@@ -124,14 +124,14 @@ main (gint argc, gchar * argv[])
   g_option_context_add_main_entries (context, entries, NULL);
 
   /* Initialize GStreamer */
-  gstreamer_group = g_malloc (sizeof (GOptionGroup *));
+  gstreamer_group = (GOptionGroup *) g_malloc0 (sizeof (gstreamer_group));      /* OptionGroup is assigned inside gstd_manager_new */
   gstd_manager_new (supported_ipcs, num_ipcs, &manager,
       &gstreamer_group, 0, NULL);
   g_option_context_add_group (context, gstreamer_group);
 
   /* Read option group for each IPC */
-  ipc_group = g_malloc (num_ipcs * sizeof (GOptionGroup *));
-  gstd_manager_ipc_options (manager, &ipc_group);       // If you don't want this option, you can avoid calling this function
+  ipc_group = (GOptionGroup *) g_malloc0 (num_ipcs * sizeof (ipc_group));
+  gstd_manager_ipc_options (manager, &ipc_group);       /* If you don't want this option, you can avoid calling this function */
   g_option_context_add_group (context, ipc_group);
 
   /* Parse the options before starting */

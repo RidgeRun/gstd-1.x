@@ -1,6 +1,6 @@
 /*
  * GStreamer Daemon - Gst Launch under steroids
- * Copyright (c) 2015-2017 Ridgerun, LLC (http://www.ridgerun.com)
+ * Copyright (c) 2015-2021 Ridgerun, LLC (http://www.ridgerun.com)
  * 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -30,7 +30,7 @@ extern "C"
 
 #define HEADER \
       "\nGstd version " PACKAGE_VERSION "\n" \
-      "Copyright (C) 2015-2020 RidgeRun (https://www.ridgerun.com)\n\n"
+      "Copyright (C) 2015-2021 RidgeRun (https://www.ridgerun.com)\n\n"
 
 /*
  * GstDManager:
@@ -41,6 +41,9 @@ typedef struct _GstDManager GstDManager;
 
 /**
  * Supported_IPCs:
+ * @GSTD_IPC_TYPE_TCP: To enable TCP communication
+ * @GSTD_IPC_TYPE_UNIX: To enable TCP communication
+ * @GSTD_IPC_TYPE_HTTP: To enable TCP communication
  * IPC options for libGstD
  */
 typedef enum _SupportedIpcs SupportedIpcs; /* Used to avoid importing gstd_ipc.h in this file */
@@ -54,14 +57,14 @@ enum _SupportedIpcs
 
 /**
  * GstdStatus:
- * @gstd_OK: Everything went okay
- * @gstd_NULL_ARGUMENT: A mandatory argument was passed in as NULL
- * @gstd_OOM: The system has run out of memory
- * @gstd_TYPE_ERROR: An error occurred parsing a type from a string
- * @gstd_NOT_FOUND: The response is missing the field requested
- * @gstd_THREAD_ERROR: Unable to create a new thread
- * @gstd_BUS_TIMEOUT: A timeout was received while waiting on the bus
- * @gstd_LONG_RESPONSE: The response exceeds our maximum, typically
+ * @GSTD_LIB_OK: Everything went okay
+ * @GSTD_LIB_NULL_ARGUMENT: A mandatory argument was passed in as NULL
+ * @GSTD_LIB_OOM: The system has run out of memory
+ * @GSTD_LIB_TYPE_ERROR: An error occurred parsing a type from a string
+ * @GSTD_LIB_NOT_FOUND: The response is missing the field requested
+ * @GSTD_LIB_THREAD_ERROR: Unable to create a new thread
+ * @GSTD_LIB_BUS_TIMEOUT: A timeout was received while waiting on the bus
+ * @GSTD_LIB_LONG_RESPONSE: The response exceeds our maximum, typically
  * meaning a missing null terminator
  *
  * Return codes for the different libgstd operations
@@ -75,7 +78,6 @@ typedef enum
   GSTD_LIB_NOT_FOUND = -7,
   GSTD_LIB_THREAD_ERROR = -11,
   GSTD_LIB_BUS_TIMEOUT = -12,
-  GSTD_LIB_SOCKET_TIMEOUT = -13,
   GSTD_LIB_LONG_RESPONSE = -14
 } GstdStatus;
 

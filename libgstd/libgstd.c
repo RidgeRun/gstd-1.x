@@ -33,12 +33,12 @@
 #include <stdarg.h>
 #include <stdio.h>
 
-#include "libgstd.h"
+#include "gstd_http.h"
 #include "gstd_ipc.h"
+#include "gstd_log.h"
 #include "gstd_tcp.h"
 #include "gstd_unix.h"
-#include "gstd_http.h"
-#include "gstd_log.h"
+#include "libgstd.h"
 #include "libgstd_assert.h"
 
 static GType gstd_supported_ipc_to_ipc (SupportedIpcs code);
@@ -63,7 +63,7 @@ gstd_supported_ipc_to_ipc (SupportedIpcs code)
 
   const gint size = sizeof (code_description) / sizeof (gchar *);
 
-  gstd_assert_and_ret_val (0 <= code, GSTD_TYPE_IPC);   // TODO: Proponer un GSTD_TYPE_DEFAULT
+  gstd_assert_and_ret_val (0 <= code, GSTD_TYPE_IPC);
   gstd_assert_and_ret_val (size > code, GSTD_TYPE_IPC);
 
   return code_description[code];
@@ -85,20 +85,20 @@ GstdStatus
 gstd_manager_new (SupportedIpcs supported_ipcs[], guint num_ipcs,
     GstDManager ** out, GOptionGroup ** gst_group, int argc, char *argv[])
 {
-  GstDManager *manager;
-  GstdSession *session;
   GstdStatus ret = GSTD_LIB_OK;
-  GstdIpc **ipc_array;
+  GstDManager *manager = NULL;
+  GstdSession *session = NULL;
+  GstdIpc **ipc_array = NULL;
 
   gstd_assert_and_ret_val (NULL != out, GSTD_NULL_ARGUMENT);
 
-  manager = (GstDManager *) malloc (sizeof (GstDManager));
+  manager = (GstDManager *) g_malloc0 (sizeof (*manager));
   session = gstd_session_new ("Session0");
 
   /* If there is ipcs, then initialize them */
-  if (NULL != supported_ipcs) {
-    ipc_array = g_malloc (num_ipcs * sizeof (GstdIpc *));
-    for (int i = 0; i < num_ipcs; i++) {
+  if (NULL != supported_ipcs && num_ipcs > 0) {
+    ipc_array = g_malloc0 (num_ipcs * sizeof (*ipc_array));
+    for (guint i = 0; i < num_ipcs; i++) {
       ipc_array[i] =
           GSTD_IPC (g_object_new (gstd_supported_ipc_to_ipc (supported_ipcs[i]),
               NULL));
@@ -120,7 +120,7 @@ gstd_manager_new (SupportedIpcs supported_ipcs[], guint num_ipcs,
 void
 gstd_manager_ipc_options (GstDManager * manager, GOptionGroup ** ipc_group)
 {
-  gint i;
+  gint i = 0;
 
   gstd_assert_and_ret (NULL != manager);
   gstd_assert_and_ret (NULL != manager->ipc_array);
@@ -136,8 +136,8 @@ gstd_manager_ipc_start (GstDManager * manager)
 {
   gboolean ipc_selected = FALSE;
   gboolean ret = TRUE;
-  GstdReturnCode code;
-  gint i;
+  GstdReturnCode code = GSTD_EOK;
+  gint i = 0;
 
   gstd_assert_and_ret_val (NULL != manager, GSTD_NULL_ARGUMENT);
   gstd_assert_and_ret_val (NULL != manager->ipc_array, GSTD_LIB_NOT_FOUND);
@@ -174,7 +174,7 @@ gstd_manager_ipc_start (GstDManager * manager)
 void
 gstd_manager_ipc_stop (GstDManager * manager)
 {
-  gint i;
+  gint i = 0;
 
   gstd_assert_and_ret (NULL != manager);
   gstd_assert_and_ret (NULL != manager->ipc_array);
