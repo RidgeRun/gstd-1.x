@@ -5,6 +5,7 @@ gstd_src_files = [
   'gstd.c'
 ]
 
+# Library source files
 libgstd_header_files = [
   'gstd_bus_msg_element.h',
   'gstd_bus_msg.h',
@@ -58,11 +59,6 @@ libgstd_header_files = [
   'gstd_tcp.h',
   'gstd_socket.h',
   'gstd_unix.h'
-]
-
-gstd_src = [
-  '../libgstd/libgstd_assert.c',
-  '../libgstd/libgstd.c'
 ]
 
 # Create a static library used to create gstd daemon and also is used for tests

@@ -30,10 +30,10 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "libgstd_assert.h"
+
 #include <stdio.h>
 #include <stdlib.h>
-
-#include "libgstd_assert.h"
 
 void
 _gstd_assert (int cond, const char *scond, const char *file,

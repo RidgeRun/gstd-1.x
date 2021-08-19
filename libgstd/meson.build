@@ -1,8 +1,3 @@
-gstd_src = [
-  'libgstd_assert.c',
-  'libgstd.c'
-]
-
 gstd_headers = [
   'libgstd.h',
 ]

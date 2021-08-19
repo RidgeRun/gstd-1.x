@@ -30,6 +30,9 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 #define _GNU_SOURCE
+
+#include "libgstd.h"
+
 #include <stdarg.h>
 #include <stdio.h>
 
@@ -38,10 +41,9 @@
 #include "gstd_log.h"
 #include "gstd_tcp.h"
 #include "gstd_unix.h"
-#include "libgstd.h"
 #include "libgstd_assert.h"
 
-static GType gstd_supported_ipc_to_ipc (SupportedIpcs code);
+static GType gstd_supported_ipc_to_ipc (const SupportedIpcs code);
 static void gstd_manager_init (GOptionGroup ** gst_group, int argc,
     char *argv[]);
 
@@ -53,7 +55,7 @@ struct _GstDManager
 };
 
 static GType
-gstd_supported_ipc_to_ipc (SupportedIpcs code)
+gstd_supported_ipc_to_ipc (const SupportedIpcs code)
 {
   GType code_description[] = {
     [GSTD_IPC_TYPE_TCP] = GSTD_TYPE_TCP,
@@ -75,14 +77,15 @@ gstd_manager_init (GOptionGroup ** gst_group, int argc, char *argv[])
   gst_init (&argc, &argv);
   gstd_debug_init ();
 
-  if (gst_group != NULL && *gst_group != NULL) {
+  if (gst_group != NULL) {
+    g_free (*gst_group);
     *gst_group = gst_init_get_option_group ();
   }
 
 }
 
 GstdStatus
-gstd_manager_new (SupportedIpcs supported_ipcs[], guint num_ipcs,
+gstd_manager_new (const SupportedIpcs supported_ipcs[], const guint num_ipcs,
     GstDManager ** out, GOptionGroup ** gst_group, int argc, char *argv[])
 {
   GstdStatus ret = GSTD_LIB_OK;
@@ -118,7 +121,7 @@ gstd_manager_new (SupportedIpcs supported_ipcs[], guint num_ipcs,
 }
 
 void
-gstd_manager_ipc_options (GstDManager * manager, GOptionGroup ** ipc_group)
+gstd_manager_ipc_options (GstDManager * manager, GOptionGroup * ipc_group[])
 {
   gint i = 0;
 
@@ -182,9 +185,9 @@ gstd_manager_ipc_stop (GstDManager * manager)
 
   /* Run stop for each IPC */
   for (i = 0; i < manager->num_ipcs; i++) {
-    if (TRUE == manager->ipc_array[i]->enabled) {
+    if (NULL != manager->ipc_array[i] && TRUE == manager->ipc_array[i]->enabled) {
       gstd_ipc_stop (manager->ipc_array[i]);
-      g_object_unref (manager->ipc_array[i]);
+      g_clear_object (&manager->ipc_array[i]);
     }
   }
 }
@@ -193,6 +196,9 @@ void
 gstd_manager_free (GstDManager * manager)
 {
   gstd_assert_and_ret (NULL != manager);
+  gstd_manager_ipc_stop (manager);
+  g_free (manager->ipc_array);
+  g_object_unref (manager->session);
   g_free (manager);
   gst_deinit ();
 }

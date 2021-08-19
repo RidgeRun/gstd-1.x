@@ -56,6 +56,7 @@ int_term_handler (gpointer user_data)
   /* User has pressed CTRL-C, stop the main loop
      so the application closes itself */
   GST_INFO ("Interrupt received, shutting down...");
+  g_print ("\n");
   g_main_loop_quit (main_loop);
 
   return TRUE;
@@ -75,7 +76,7 @@ main (gint argc, gchar * argv[])
   GError *error = NULL;
   GOptionContext *context = NULL;
   GOptionGroup *gstreamer_group = NULL;
-  GOptionGroup *ipc_group = NULL;
+  GOptionGroup **ipc_group_array = NULL;
   gint ret = EXIT_SUCCESS;
   gchar *current_filename = NULL;
 
@@ -84,15 +85,13 @@ main (gint argc, gchar * argv[])
   /* Array to specify gstd how many IPCs are supported, 
    * SupportedIpcs should be added this array.
    */
-  SupportedIpcs supported_ipcs[] = {
+  const SupportedIpcs supported_ipcs[] = {
     GSTD_IPC_TYPE_TCP,
     GSTD_IPC_TYPE_UNIX,
     GSTD_IPC_TYPE_HTTP,
   };
 
-  guint num_ipcs = (sizeof (supported_ipcs) / sizeof (GType));
-  GOptionGroup **optiongroup_array =
-      g_malloc (num_ipcs * sizeof (GOptionGroup *));
+  const guint num_ipcs = (sizeof (supported_ipcs) / sizeof (SupportedIpcs));
 
   GOptionEntry entries[] = {
     {"version", 'v', 0, G_OPTION_ARG_NONE, &version,
@@ -124,15 +123,16 @@ main (gint argc, gchar * argv[])
   g_option_context_add_main_entries (context, entries, NULL);
 
   /* Initialize GStreamer */
-  gstreamer_group = (GOptionGroup *) g_malloc0 (sizeof (gstreamer_group));      /* OptionGroup is assigned inside gstd_manager_new */
   gstd_manager_new (supported_ipcs, num_ipcs, &manager,
       &gstreamer_group, 0, NULL);
   g_option_context_add_group (context, gstreamer_group);
 
   /* Read option group for each IPC */
-  ipc_group = (GOptionGroup *) g_malloc0 (num_ipcs * sizeof (ipc_group));
-  gstd_manager_ipc_options (manager, &ipc_group);       /* If you don't want this option, you can avoid calling this function */
-  g_option_context_add_group (context, ipc_group);
+  ipc_group_array = g_malloc0 (num_ipcs * sizeof (*ipc_group_array));
+  gstd_manager_ipc_options (manager, ipc_group_array);  /* If you don't want this option, you can avoid calling this function */
+  for (int i = 0; i < num_ipcs; i++) {
+    g_option_context_add_group (context, ipc_group_array[i]);
+  }
 
   /* Parse the options before starting */
   if (!g_option_context_parse (context, &argc, &argv, &error)) {
@@ -218,8 +218,6 @@ main (gint argc, gchar * argv[])
 
   gstd_log_deinit ();
 
-  g_free (optiongroup_array);
-
   goto out;
 
 error:
@@ -233,6 +231,7 @@ error:
   }
 out:
   {
+    g_free (ipc_group_array);
     gstd_manager_free (manager);
     return ret;
   }

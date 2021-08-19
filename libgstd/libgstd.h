@@ -29,7 +29,7 @@ extern "C"
 #include <glib-unix.h>
 
 #define HEADER \
-      "\nGstd version " PACKAGE_VERSION "\n" \
+      "\nGstD version " PACKAGE_VERSION "\n" \
       "Copyright (C) 2015-2021 RidgeRun (https://www.ridgerun.com)\n\n"
 
 /*
@@ -86,7 +86,7 @@ typedef enum
  * gstd_manager_new:
  * 
  * @supported_ipcs: ipcs the user will use 
- * @num_ipcs: lenght of supported_ipcs
+ * @num_ipcs: length of supported_ipcs
  * @out: placeholder for newly allocated gstd manager.
  * @gst_group: placeholder for GStreamer's argument specifications
  * @argc: arguments for gst_init
@@ -99,7 +99,7 @@ typedef enum
  * Returns: GstdStatus indicating success or fail
  */
 GstdStatus 
-gstd_manager_new (SupportedIpcs supported_ipcs[], uint num_ipcs, 
+gstd_manager_new (const SupportedIpcs supported_ipcs[], const uint num_ipcs, 
     GstDManager ** out, GOptionGroup **gst_group, int argc, char *argv[]);
 
 /**
@@ -111,7 +111,7 @@ gstd_manager_new (SupportedIpcs supported_ipcs[], uint num_ipcs,
  *
  */
 void
-gstd_manager_ipc_options (GstDManager * manager, GOptionGroup **ipc_group);
+gstd_manager_ipc_options (GstDManager * manager, GOptionGroup * ipc_group[]);
 
 /**
  * gstd_manager_ipc_start:

@@ -300,6 +300,11 @@ libgstd_src_files = [
   '../gstd/gstd_unix.c'
 ]
 
+gstd_src = [
+  '../libgstd/libgstd_assert.c',
+  '../libgstd/libgstd.c'
+]
+
 # Enter to each subdirectory and execute the meson.build
 subdir('gstd')
 subdir('libgstc')
