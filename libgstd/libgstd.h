@@ -83,6 +83,14 @@ typedef enum
 
 
 /**
+ * gstd_init_get_option_group:
+ * 
+ * Returns: A GOptionGroup with GStreamer's argument specification.
+ * 
+ */
+GOptionGroup* gstd_init_get_option_group (void);
+
+/**
  * gstd_manager_new:
  * 
  * @supported_ipcs: ipcs the user will use 
@@ -100,7 +108,7 @@ typedef enum
  */
 GstdStatus 
 gstd_manager_new (const SupportedIpcs supported_ipcs[], const uint num_ipcs, 
-    GstDManager ** out, GOptionGroup **gst_group, int argc, char *argv[]);
+    GstDManager ** out, int argc, char *argv[]);
 
 /**
  * gstd_manager_ipc_options:

@@ -44,8 +44,7 @@
 #include "libgstd_assert.h"
 
 static GType gstd_supported_ipc_to_ipc (const SupportedIpcs code);
-static void gstd_manager_init (GOptionGroup ** gst_group, int argc,
-    char *argv[]);
+static void gstd_manager_init (int argc, char *argv[]);
 
 struct _GstDManager
 {
@@ -72,21 +71,21 @@ gstd_supported_ipc_to_ipc (const SupportedIpcs code)
 }
 
 static void
-gstd_manager_init (GOptionGroup ** gst_group, int argc, char *argv[])
+gstd_manager_init (int argc, char *argv[])
 {
   gst_init (&argc, &argv);
   gstd_debug_init ();
+}
 
-  if (gst_group != NULL) {
-    g_free (*gst_group);
-    *gst_group = gst_init_get_option_group ();
-  }
-
+GOptionGroup *
+gstd_init_get_option_group (void)
+{
+  return gst_init_get_option_group ();
 }
 
 GstdStatus
 gstd_manager_new (const SupportedIpcs supported_ipcs[], const guint num_ipcs,
-    GstDManager ** out, GOptionGroup ** gst_group, int argc, char *argv[])
+    GstDManager ** out, int argc, char *argv[])
 {
   GstdStatus ret = GSTD_LIB_OK;
   GstDManager *manager = NULL;
@@ -115,7 +114,7 @@ gstd_manager_new (const SupportedIpcs supported_ipcs[], const guint num_ipcs,
   *out = manager;
 
   /* Initialize GStreamer */
-  gstd_manager_init (gst_group, argc, argv);
+  gstd_manager_init (argc, argv);
 
   return ret;
 }

@@ -123,8 +123,8 @@ main (gint argc, gchar * argv[])
   g_option_context_add_main_entries (context, entries, NULL);
 
   /* Initialize GStreamer */
-  gstd_manager_new (supported_ipcs, num_ipcs, &manager,
-      &gstreamer_group, 0, NULL);
+  gstreamer_group = gstd_init_get_option_group ();
+  gstd_manager_new (supported_ipcs, num_ipcs, &manager, 0, NULL);
   g_option_context_add_group (context, gstreamer_group);
 
   /* Read option group for each IPC */
