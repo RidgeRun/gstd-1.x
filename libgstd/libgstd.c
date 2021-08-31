@@ -84,32 +84,20 @@ gstd_init_get_option_group (void)
 }
 
 GstdStatus
-gstd_manager_new (const SupportedIpcs supported_ipcs[], const guint num_ipcs,
-    GstDManager ** out, int argc, char *argv[])
+gstd_manager_new (GstDManager ** out, int argc, char *argv[])
 {
   GstdStatus ret = GSTD_LIB_OK;
   GstDManager *manager = NULL;
   GstdSession *session = NULL;
-  GstdIpc **ipc_array = NULL;
 
   gstd_assert_and_ret_val (NULL != out, GSTD_NULL_ARGUMENT);
 
   manager = (GstDManager *) g_malloc0 (sizeof (*manager));
   session = gstd_session_new ("Session0");
 
-  /* If there is ipcs, then initialize them */
-  if (NULL != supported_ipcs && num_ipcs > 0) {
-    ipc_array = g_malloc0 (num_ipcs * sizeof (*ipc_array));
-    for (guint i = 0; i < num_ipcs; i++) {
-      ipc_array[i] =
-          GSTD_IPC (g_object_new (gstd_supported_ipc_to_ipc (supported_ipcs[i]),
-              NULL));
-    }
-    manager->ipc_array = ipc_array;
-  }
-
   manager->session = session;
-  manager->num_ipcs = num_ipcs;
+  manager->num_ipcs = 0;
+  manager->ipc_array = NULL;
 
   *out = manager;
 
@@ -120,16 +108,40 @@ gstd_manager_new (const SupportedIpcs supported_ipcs[], const guint num_ipcs,
 }
 
 void
+gstd_manager_set_ipc (GstDManager * manager,
+    const SupportedIpcs supported_ipcs[], const guint num_ipcs)
+{
+
+  GstdIpc **ipc_array = NULL;
+
+  gstd_assert_and_ret (NULL != manager);
+  gstd_assert_and_ret (NULL != supported_ipcs);
+
+  /* If there is ipcs, then initialize them */
+  if (NULL != supported_ipcs && num_ipcs > 0) {
+    ipc_array = g_malloc0 (num_ipcs * sizeof (*ipc_array));
+    for (gint ipc_idx = 0; ipc_idx < num_ipcs; ipc_idx++) {
+      ipc_array[ipc_idx] =
+          GSTD_IPC (g_object_new (gstd_supported_ipc_to_ipc (supported_ipcs
+                  [ipc_idx]), NULL));
+    }
+    manager->ipc_array = ipc_array;
+  }
+
+  manager->num_ipcs = num_ipcs;
+  manager->ipc_array = ipc_array;
+}
+
+void
 gstd_manager_ipc_options (GstDManager * manager, GOptionGroup * ipc_group[])
 {
-  gint i = 0;
-
   gstd_assert_and_ret (NULL != manager);
   gstd_assert_and_ret (NULL != manager->ipc_array);
   gstd_assert_and_ret (NULL != ipc_group);
 
-  for (i = 0; i < manager->num_ipcs; i++) {
-    gstd_ipc_get_option_group (manager->ipc_array[i], &ipc_group[i]);
+  for (gint ipc_idx = 0; ipc_idx < manager->num_ipcs; ipc_idx++) {
+    gstd_ipc_get_option_group (manager->ipc_array[ipc_idx],
+        &ipc_group[ipc_idx]);
   }
 }
 
@@ -139,16 +151,16 @@ gstd_manager_ipc_start (GstDManager * manager)
   gboolean ipc_selected = FALSE;
   gboolean ret = TRUE;
   GstdReturnCode code = GSTD_EOK;
-  gint i = 0;
+  gint ipc_idx;
 
   gstd_assert_and_ret_val (NULL != manager, GSTD_NULL_ARGUMENT);
   gstd_assert_and_ret_val (NULL != manager->ipc_array, GSTD_LIB_NOT_FOUND);
   gstd_assert_and_ret_val (NULL != manager->session, GSTD_LIB_NOT_FOUND);
 
   /* Verify if at least one IPC mechanism was selected */
-  for (i = 0; i < manager->num_ipcs; i++) {
-    g_object_get (G_OBJECT (manager->ipc_array[i]), "enabled", &ipc_selected,
-        NULL);
+  for (ipc_idx = 0; ipc_idx < manager->num_ipcs; ipc_idx++) {
+    g_object_get (G_OBJECT (manager->ipc_array[ipc_idx]), "enabled",
+        &ipc_selected, NULL);
 
     if (ipc_selected) {
       break;
@@ -161,11 +173,11 @@ gstd_manager_ipc_start (GstDManager * manager)
   }
 
   /* Run start for each IPC (each start method checks for the enabled flag) */
-  for (i = 0; i < manager->num_ipcs; i++) {
-    code = gstd_ipc_start (manager->ipc_array[i], manager->session);
+  for (ipc_idx = 0; ipc_idx < manager->num_ipcs; ipc_idx++) {
+    code = gstd_ipc_start (manager->ipc_array[ipc_idx], manager->session);
     if (code) {
       g_printerr ("Couldn't start IPC : (%s)\n",
-          G_OBJECT_TYPE_NAME (manager->ipc_array[i]));
+          G_OBJECT_TYPE_NAME (manager->ipc_array[ipc_idx]));
       ret = FALSE;
     }
   }
@@ -176,17 +188,16 @@ gstd_manager_ipc_start (GstDManager * manager)
 void
 gstd_manager_ipc_stop (GstDManager * manager)
 {
-  gint i = 0;
-
   gstd_assert_and_ret (NULL != manager);
   gstd_assert_and_ret (NULL != manager->ipc_array);
   gstd_assert_and_ret (NULL != manager->session);
 
   /* Run stop for each IPC */
-  for (i = 0; i < manager->num_ipcs; i++) {
-    if (NULL != manager->ipc_array[i] && TRUE == manager->ipc_array[i]->enabled) {
-      gstd_ipc_stop (manager->ipc_array[i]);
-      g_clear_object (&manager->ipc_array[i]);
+  for (gint ipc_idx = 0; ipc_idx < manager->num_ipcs; ipc_idx++) {
+    if (NULL != manager->ipc_array[ipc_idx]
+        && TRUE == manager->ipc_array[ipc_idx]->enabled) {
+      gstd_ipc_stop (manager->ipc_array[ipc_idx]);
+      g_clear_object (&manager->ipc_array[ipc_idx]);
     }
   }
 }

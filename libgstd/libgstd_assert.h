@@ -65,10 +65,10 @@ void
 _gstd_assert (int cond, const char *scond, const char *file,
     const char *function, int line);
 
-#endif // LIBGSTD_CHECKS_DISABLE
+#endif /* LIBGSTD_CHECKS_DISABLE */
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // __LIBGSTD_ASSERT_H__
+#endif /* __LIBGSTD_ASSERT_H__ */

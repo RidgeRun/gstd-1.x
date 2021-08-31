@@ -61,25 +61,10 @@ libgstd_header_files = [
   'gstd_unix.h'
 ]
 
-# Create a static library used to create gstd daemon and also is used for tests
-gstd_lib = both_libraries('gstd-core',
-  libgstd_src_files,
-  c_args : gst_c_args,
-  version : gstd_version,
-  include_directories : configinc,
-  dependencies : [gstd_deps],
-  install : true,
-  install_dir : lib_install_dir,
-)
-
-# Define the library as an internal dependency to the current build
-lib_gstd_dep = declare_dependency(link_with: gstd_lib,
-  dependencies : [gstd_deps])
-
 # Create gstd application
 exe_name = '@0@-@1@'.format(gstd_name, apiversion)
 executable(exe_name,
-  [gstd_src_files, gstd_src],
+  [gstd_src_files],
   install: true,
   include_directories : [configinc, libgstd_inc_dir],
   dependencies : [gstd_deps, lib_gstd_dep],

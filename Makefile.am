@@ -1,9 +1,10 @@
 ACLOCAL_AMFLAGS=-I m4 -I .
 
-SUBDIRS=gstd		\
+SUBDIRS=		\
+       libgstd         \
 	gst_client 	\
 	libgstc		\
-	libgstd		\
+	gstd		\
 	tests		\
 	examples	\
 	docs      	\

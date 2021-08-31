@@ -39,7 +39,7 @@ foreach t : gstd_tests
         cpp_args : gst_c_args + test_defines,
         include_directories : [configinc, gstd_inc_dir],
         link_with : link_with_libs,
-        dependencies : [test_gstd_deps,lib_gstd_dep],
+        dependencies : [test_gstd_deps, lib_gstd_dep],
     )
 
     # Define enviroment variable

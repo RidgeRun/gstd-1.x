@@ -93,22 +93,29 @@ GOptionGroup* gstd_init_get_option_group (void);
 /**
  * gstd_manager_new:
  * 
- * @supported_ipcs: ipcs the user will use 
- * @num_ipcs: length of supported_ipcs
  * @out: placeholder for newly allocated gstd manager.
- * @gst_group: placeholder for GStreamer's argument specifications
  * @argc: arguments for gst_init
  * @argv: arguments for gst_init
  * 
- * Initializes gstd. If ipc array is not NULL
- * it will initialize the GstdIpc in GstDManager.
- * If it is NULL it will just initialize the session.
+ * Initializes gstd.
  *
  * Returns: GstdStatus indicating success or fail
  */
 GstdStatus 
-gstd_manager_new (const SupportedIpcs supported_ipcs[], const uint num_ipcs, 
-    GstDManager ** out, int argc, char *argv[]);
+gstd_manager_new (GstDManager ** out, int argc, char *argv[]);
+
+
+/**
+ * gstd_manager_set_ipc:
+ * 
+ * @manager: The manager returned by gstd_manager_new()
+ * @supported_ipcs: ipcs the user will use 
+ * @num_ipcs: length of supported_ipcs
+ * 
+ * It will initialize the GstdIpc in GstDManager.
+ *
+ */
+void gstd_manager_set_ipc (GstDManager * manager, const SupportedIpcs supported_ipcs[], const guint num_ipcs);
 
 /**
  * gstd_manager_ipc_options:
@@ -161,4 +168,4 @@ gstd_manager_free (GstDManager * manager);
 }
 #endif
 
-#endif // __LIBGSTD_H__
+#endif /* __LIBGSTD_H__ */

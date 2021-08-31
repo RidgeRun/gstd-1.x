@@ -124,8 +124,9 @@ main (gint argc, gchar * argv[])
 
   /* Initialize GStreamer */
   gstreamer_group = gstd_init_get_option_group ();
-  gstd_manager_new (supported_ipcs, num_ipcs, &manager, 0, NULL);
+  gstd_manager_new (&manager, 0, NULL);
   g_option_context_add_group (context, gstreamer_group);
+  gstd_manager_set_ipc (manager, supported_ipcs, num_ipcs);
 
   /* Read option group for each IPC */
   ipc_group_array = g_malloc0 (num_ipcs * sizeof (*ipc_group_array));
