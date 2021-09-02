@@ -35,7 +35,7 @@ gstd_bus_msg_stream_status_to_string (GstdBusMsg * msg,
     GstdIFormatter * formatter, GstMessage * target);
 
 static const gchar
-    *gstd_bus_msg_stream_status_code_to_string (GstStreamStatusType type);
+    * gstd_bus_msg_stream_status_code_to_string (GstStreamStatusType type);
 
 struct _GstdBusMsgStreamStatus
 {

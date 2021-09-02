@@ -30,6 +30,10 @@
 
 #include "libgstd.h"
 
+#define HEADER \
+      "\nGstD version " PACKAGE_VERSION "\n" \
+      "Copyright (C) 2015-2021 RidgeRun (https://www.ridgerun.com)\n\n"
+
 static gboolean int_term_handler (gpointer user_data);
 static void print_header ();
 
@@ -108,7 +112,7 @@ main (gint argc, gchar * argv[])
 
   /* Initialize GStreamer */
   gstd_manager_new (&manager, 0, NULL);
-  gstd_get_option_context (manager, &context);
+  gstd_context_add_group (manager, context);
 
   /* Parse the options before starting */
   if (!g_option_context_parse (context, &argc, &argv, &error)) {
@@ -185,6 +189,9 @@ main (gint argc, gchar * argv[])
   /* Application shut down */
   g_main_loop_unref (main_loop);
   main_loop = NULL;
+
+  /* Stop any IPC array */
+  gstd_manager_stop (manager);
 
   gstd_log_deinit ();
 

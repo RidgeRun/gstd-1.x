@@ -1,7 +1,7 @@
 ACLOCAL_AMFLAGS=-I m4 -I .
 
 SUBDIRS=		\
-       libgstd         \
+       libgstd        \
 	gst_client 	\
 	libgstc		\
 	gstd		\

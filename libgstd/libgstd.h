@@ -28,32 +28,12 @@ extern "C"
 #include <gst/gst.h>
 #include <glib-unix.h>
 
-#define HEADER \
-      "\nGstD version " PACKAGE_VERSION "\n" \
-      "Copyright (C) 2015-2021 RidgeRun (https://www.ridgerun.com)\n\n"
-
 /*
  * GstDManager:
  * Opaque representation of GstD state.
  * This struct will have: Session, GstdIpc and num_ipcs (for now)
  */
 typedef struct _GstDManager GstDManager;
-
-/**
- * Supported_IPCs:
- * @GSTD_IPC_TYPE_TCP: To enable TCP communication
- * @GSTD_IPC_TYPE_UNIX: To enable TCP communication
- * @GSTD_IPC_TYPE_HTTP: To enable TCP communication
- * IPC options for libGstD
- */
-typedef enum _SupportedIpcs SupportedIpcs; /* Used to avoid importing gstd_ipc.h in this file */
-
-enum _SupportedIpcs 
-{
-    GSTD_IPC_TYPE_TCP,
-    GSTD_IPC_TYPE_UNIX,
-    GSTD_IPC_TYPE_HTTP,
-};
 
 /**
  * GstdStatus:
@@ -83,13 +63,13 @@ typedef enum
 
 
 /**
- * gstd_get_option_context:
+ * gstd_context_add_group:
  * 
  * Returns: A GOptionGroup with GStreamer's argument specification.
  * 
  */
 void
-gstd_get_option_context (GstDManager *manager, GOptionContext **context);
+gstd_context_add_group (GstDManager *manager, GOptionContext *context);
 
 /**
  * gstd_manager_new:
@@ -116,6 +96,17 @@ gstd_manager_new (GstDManager ** out, int argc, char *argv[]);
  */
 int
 gstd_manager_start (GstDManager * manager);
+
+/**
+ * gstd_manager_stop:
+ * @manager: The manager returned by gstd_manager_new()
+ * 
+ * Stops the ipc in GstdIpc array
+ *
+ * Returns: GstdStatus indicating success or fail
+ */
+void
+gstd_manager_stop (GstDManager * manager);
 
 /**
  * gstd_manager_free:

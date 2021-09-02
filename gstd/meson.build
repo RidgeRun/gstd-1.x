@@ -1,70 +1,19 @@
 gstd_name = 'gstd'
+
 # Application source files
 gstd_src_files = [
   'gstd_daemon.c',
   'gstd.c'
 ]
 
-# Library source files
-libgstd_header_files = [
-  'gstd_bus_msg_element.h',
-  'gstd_bus_msg.h',
-  'gstd_bus_msg_simple.h',
-  'gstd_bus_msg_notify.h',
-  'gstd_bus_msg_qos.h',
-  'gstd_bus_msg_state_changed.h',
-  'gstd_bus_msg_stream_status.h',
-  'gstd_callback.h',
-  'gstd_daemon.h',
-  'gstd_debug.h',
-  'gstd_element.h',
-  'gstd_event_creator.h',
-  'gstd_event_factory.h',
-  'gstd_event_handler.h',
-  'gstd_icreator.h',
-  'gstd_ideleter.h',
-  'gstd_iformatter.h',
-  'gstd_ipc.h',
-  'gstd_ireader.h',
-  'gstd_iupdater.h',
-  'gstd_json_builder.h',
-  'gstd_list.h',
-  'gstd_list_reader.h',
-  'gstd_log.h',
-  'gstd_msg_reader.h',
-  'gstd_msg_type.h',
-  'gstd_no_creator.h',
-  'gstd_no_deleter.h',
-  'gstd_no_reader.h',
-  'gstd_no_updater.h',
-  'gstd_object.h',
-  'gstd_parser.h',
-  'gstd_pipeline_bus.h',
-  'gstd_pipeline_creator.h',
-  'gstd_pipeline_deleter.h',
-  'gstd_pipeline.h',
-  'gstd_property_array.h',
-  'gstd_property_boolean.h',
-  'gstd_property_enum.h',
-  'gstd_property_flags.h',
-  'gstd_property.h',
-  'gstd_property_int.h',
-  'gstd_property_reader.h',
-  'gstd_property_string.h',
-  'gstd_return_codes.h',
-  'gstd_session.h',
-  'gstd_signal.h',
-  'gstd_signal_reader.h',
-  'gstd_state.h',
-  'gstd_tcp.h',
-  'gstd_socket.h',
-  'gstd_unix.h'
+libgstd_src_files = [
+  '../libgstd/libgstd.c'
 ]
 
 # Create gstd application
 exe_name = '@0@-@1@'.format(gstd_name, apiversion)
 executable(exe_name,
-  [gstd_src_files],
+  [gstd_src_files, libgstd_src_files],
   install: true,
   include_directories : [configinc, libgstd_inc_dir],
   dependencies : [gstd_deps, lib_gstd_dep],
