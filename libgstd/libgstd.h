@@ -83,12 +83,13 @@ typedef enum
 
 
 /**
- * gstd_init_get_option_group:
+ * gstd_get_option_context:
  * 
  * Returns: A GOptionGroup with GStreamer's argument specification.
  * 
  */
-GOptionGroup* gstd_init_get_option_group (void);
+void
+gstd_get_option_context (GstDManager *manager, GOptionContext **context);
 
 /**
  * gstd_manager_new:
@@ -106,30 +107,7 @@ gstd_manager_new (GstDManager ** out, int argc, char *argv[]);
 
 
 /**
- * gstd_manager_set_ipc:
- * 
- * @manager: The manager returned by gstd_manager_new()
- * @supported_ipcs: ipcs the user will use 
- * @num_ipcs: length of supported_ipcs
- * 
- * It will initialize the GstdIpc in GstDManager.
- *
- */
-void gstd_manager_set_ipc (GstDManager * manager, const SupportedIpcs supported_ipcs[], const guint num_ipcs);
-
-/**
- * gstd_manager_ipc_options:
- * @manager: The manager returned by gstd_manager_new()
- * @ipc_group: placeholder for IPCs specifications
- * 
- * Get IPCs information into a group 
- *
- */
-void
-gstd_manager_ipc_options (GstDManager * manager, GOptionGroup * ipc_group[]);
-
-/**
- * gstd_manager_ipc_start:
+ * gstd_manager_start:
  * @manager: The manager returned by gstd_manager_new()
  * 
  * Starts the ipc in GstdIpc array
@@ -137,19 +115,7 @@ gstd_manager_ipc_options (GstDManager * manager, GOptionGroup * ipc_group[]);
  * Returns: GstdStatus indicating success or fail
  */
 int
-gstd_manager_ipc_start (GstDManager * manager);
-
-/**
- * gstd_manager_ipc_start:
- * @manager: The manager returned by gstd_manager_new()
- * 
- * Stops the ipc in GstdIpc array
- *
- * Returns: GstdStatus indicating success or fail
- */
-void
-gstd_manager_ipc_stop (GstDManager * manager);
-
+gstd_manager_start (GstDManager * manager);
 
 /**
  * gstd_manager_free:
