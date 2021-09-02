@@ -60,7 +60,7 @@ libgstd_@GSTD_API_VERSION@_la_SOURCES =             \
              ../gstd/gstd_unix.c                    \
              ../gstd/gstd_signal_list.c
 
-libgstd_@GSTD_API_VERSION@_la_CFLAGS =                         \
+libgstd_@GSTD_API_VERSION@_la_CFLAGS =                                   \
 			 $(GST_CFLAGS)                                     \
 			 -I$(top_srcdir)/gstd/                             \
 			 $(GIO_CFLAGS)                                     \

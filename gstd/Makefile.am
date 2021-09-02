@@ -3,8 +3,8 @@ bin_PROGRAMS = gstd
 
 gstd_SOURCES =  gstd.c gstd_daemon.c
 
-gstd_CFLAGS =                                               \
-             $(GST_CFLAGS)                                     \
+gstd_CFLAGS =                                                 \
+             $(GST_CFLAGS)                                    \
 	      -I$(top_srcdir)/libgstd/                          \
 	      $(GIO_CFLAGS)                                     \
 	      $(LIBSOUP_CFLAGS)                                 \
@@ -14,7 +14,7 @@ gstd_CFLAGS =                                               \
 	      -DGSTD_LOG_STATE_DIR=\"$(GSTD_LOG_STATE_DIR)\"    \
 	      -DGSTD_RUN_STATE_DIR=\"$(GSTD_RUN_STATE_DIR)\"
 
-gstd_LDFLAGS = $(GST_LIBS)                  \
+gstd_LDFLAGS = $(GST_LIBS)                    \
 	       $(GIO_LIBS)                      \
 	       $(GIO_UNIX_LIBS)                 \
 	       $(GJSON_LIBS)                    \
@@ -25,7 +25,7 @@ gstd_LDFLAGS = $(GST_LIBS)                  \
 gstd_LDADD = $(top_srcdir)/libgstd/libgstd-1.0.la
 
 gstdincludedir = $(includedir)/gstd
-gstdinclude_HEADERS =                   \
+gstdinclude_HEADERS =                         \
 		  gstd_session.h                \
 		  gstd_object.h                 \
 		  gstd_return_codes.h           \

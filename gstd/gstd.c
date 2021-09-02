@@ -25,11 +25,6 @@
 #include <gst/gst.h>
 #include <glib-unix.h>
 
-#include "gstd_session.h"
-#include "gstd_ipc.h"
-#include "gstd_tcp.h"
-#include "gstd_unix.h"
-#include "gstd_http.h"
 #include "gstd_daemon.h"
 #include "gstd_log.h"
 
@@ -75,23 +70,12 @@ main (gint argc, gchar * argv[])
   gchar *pidfile = NULL;
   GError *error = NULL;
   GOptionContext *context = NULL;
-  GOptionGroup *gstreamer_group = NULL;
-  GOptionGroup **ipc_group_array = NULL;
   gint ret = EXIT_SUCCESS;
   gchar *current_filename = NULL;
+  gchar *filename = NULL;
+  gboolean parent = FALSE;
 
   GstDManager *manager = NULL;
-
-  /* Array to specify gstd how many IPCs are supported, 
-   * SupportedIpcs should be added this array.
-   */
-  const SupportedIpcs supported_ipcs[] = {
-    GSTD_IPC_TYPE_TCP,
-    GSTD_IPC_TYPE_UNIX,
-    GSTD_IPC_TYPE_HTTP,
-  };
-
-  const guint num_ipcs = (sizeof (supported_ipcs) / sizeof (SupportedIpcs));
 
   GOptionEntry entries[] = {
     {"version", 'v', 0, G_OPTION_ARG_NONE, &version,
@@ -123,17 +107,8 @@ main (gint argc, gchar * argv[])
   g_option_context_add_main_entries (context, entries, NULL);
 
   /* Initialize GStreamer */
-  gstreamer_group = gstd_init_get_option_group ();
   gstd_manager_new (&manager, 0, NULL);
-  g_option_context_add_group (context, gstreamer_group);
-  gstd_manager_set_ipc (manager, supported_ipcs, num_ipcs);
-
-  /* Read option group for each IPC */
-  ipc_group_array = g_malloc0 (num_ipcs * sizeof (*ipc_group_array));
-  gstd_manager_ipc_options (manager, ipc_group_array);  /* If you don't want this option, you can avoid calling this function */
-  for (int i = 0; i < num_ipcs; i++) {
-    g_option_context_add_group (context, ipc_group_array[i]);
-  }
+  gstd_get_option_context (manager, &context);
 
   /* Parse the options before starting */
   if (!g_option_context_parse (context, &argc, &argv, &error)) {
@@ -173,8 +148,6 @@ main (gint argc, gchar * argv[])
   }
 
   if (daemon) {
-    gboolean parent;
-
     if (!gstd_daemon_start (&parent)) {
       goto error;
     }
@@ -182,7 +155,6 @@ main (gint argc, gchar * argv[])
     /* Parent fork ends here */
     if (parent) {
       if (!quiet) {
-        gchar *filename;
         filename = gstd_log_get_current_gstd ();
         g_print ("Log traces will be saved to %s.\n", filename);
         g_print ("Detaching from parent process.\n");
@@ -193,7 +165,7 @@ main (gint argc, gchar * argv[])
   }
 
   /* Start IPC subsystem */
-  if (!gstd_manager_ipc_start (manager)) {
+  if (!gstd_manager_start (manager)) {
     goto error;
   }
 
@@ -214,9 +186,6 @@ main (gint argc, gchar * argv[])
   g_main_loop_unref (main_loop);
   main_loop = NULL;
 
-  /* Stop any IPC array */
-  gstd_manager_ipc_stop (manager);
-
   gstd_log_deinit ();
 
   goto out;
@@ -232,7 +201,6 @@ error:
   }
 out:
   {
-    g_free (ipc_group_array);
     gstd_manager_free (manager);
     return ret;
   }
