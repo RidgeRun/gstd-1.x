@@ -22,8 +22,6 @@
 #endif
 
 #include <stdlib.h>
-#include <gst/gst.h>
-#include <glib-unix.h>
 
 #include "gstd_daemon.h"
 #include "gstd_log.h"
@@ -208,6 +206,7 @@ error:
   }
 out:
   {
+    gst_deinit ();
     gstd_manager_free (manager);
     return ret;
   }

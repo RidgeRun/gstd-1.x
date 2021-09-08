@@ -242,5 +242,4 @@ gstd_manager_free (GstDManager * manager)
   g_free (manager->ipc_array);
   g_object_unref (manager->session);
   g_free (manager);
-  gst_deinit ();
 }
