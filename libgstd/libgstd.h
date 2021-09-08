@@ -72,7 +72,7 @@ void
 gstd_context_add_group (GstDManager *manager, GOptionContext *context);
 
 /**
- * gstd_manager_new:
+ * gstd_new:
  * 
  * @out: placeholder for newly allocated gstd manager.
  * @argc: arguments for gst_init
@@ -83,33 +83,33 @@ gstd_context_add_group (GstDManager *manager, GOptionContext *context);
  * Returns: GstdStatus indicating success or fail
  */
 GstdStatus 
-gstd_manager_new (GstDManager ** out, int argc, char *argv[]);
+gstd_new (GstDManager ** out, int argc, char *argv[]);
 
 
 /**
- * gstd_manager_start:
- * @manager: The manager returned by gstd_manager_new()
+ * gstd_start:
+ * @manager: The manager returned by gstd_new()
  * 
  * Starts the ipc in GstdIpc array
  *
  * Returns: GstdStatus indicating success or fail
  */
 int
-gstd_manager_start (GstDManager * manager);
+gstd_start (GstDManager * manager);
 
 /**
- * gstd_manager_stop:
- * @manager: The manager returned by gstd_manager_new()
+ * gstd_stop:
+ * @manager: The manager returned by gstd_new()
  * 
  * Stops the ipc in GstdIpc array
  *
  * Returns: GstdStatus indicating success or fail
  */
 void
-gstd_manager_stop (GstDManager * manager);
+gstd_stop (GstDManager * manager);
 
 /**
- * gstd_manager_free:
+ * gstd_free:
  * @manager: A valid manager allocated with gstd_new()
  *
  * Frees a previously allocated GstDManager.
@@ -118,7 +118,7 @@ gstd_manager_stop (GstDManager * manager);
  * usage.
  */
 void
-gstd_manager_free (GstDManager * manager);
+gstd_free (GstDManager * manager);
 
 
 #ifdef __cplusplus

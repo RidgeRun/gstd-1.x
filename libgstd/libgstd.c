@@ -59,8 +59,8 @@ enum _SupportedIpcs
 };
 
 static GType gstd_supported_ipc_to_ipc (const SupportedIpcs code);
-static void gstd_manager_init (int argc, char *argv[]);
-static void gstd_manager_set_ipc (GstDManager * manager);
+static void gstd_init (int argc, char *argv[]);
+static void gstd_set_ipc (GstDManager * manager);
 
 struct _GstDManager
 {
@@ -87,14 +87,14 @@ gstd_supported_ipc_to_ipc (const SupportedIpcs code)
 }
 
 static void
-gstd_manager_init (int argc, char *argv[])
+gstd_init (int argc, char *argv[])
 {
   gst_init (&argc, &argv);
   gstd_debug_init ();
 }
 
 static void
-gstd_manager_set_ipc (GstDManager * manager)
+gstd_set_ipc (GstDManager * manager)
 {
   /* Array to specify gstd how many IPCs are supported, 
    * SupportedIpcs should be added to this array.
@@ -152,7 +152,7 @@ gstd_context_add_group (GstDManager * manager, GOptionContext * context)
 }
 
 GstdStatus
-gstd_manager_new (GstDManager ** out, int argc, char *argv[])
+gstd_new (GstDManager ** out, int argc, char *argv[])
 {
   GstdStatus ret = GSTD_LIB_OK;
   GstDManager *manager = NULL;
@@ -167,18 +167,18 @@ gstd_manager_new (GstDManager ** out, int argc, char *argv[])
   manager->num_ipcs = 0;
   manager->ipc_array = NULL;
 
-  gstd_manager_set_ipc (manager);
+  gstd_set_ipc (manager);
 
   *out = manager;
 
   /* Initialize GStreamer */
-  gstd_manager_init (argc, argv);
+  gstd_init (argc, argv);
 
   return ret;
 }
 
 gboolean
-gstd_manager_start (GstDManager * manager)
+gstd_start (GstDManager * manager)
 {
   gboolean ipc_selected = FALSE;
   gboolean ret = TRUE;
@@ -218,7 +218,7 @@ gstd_manager_start (GstDManager * manager)
 }
 
 void
-gstd_manager_stop (GstDManager * manager)
+gstd_stop (GstDManager * manager)
 {
   g_return_if_fail (NULL != manager);
   g_return_if_fail (NULL != manager->ipc_array);
@@ -235,10 +235,10 @@ gstd_manager_stop (GstDManager * manager)
 }
 
 void
-gstd_manager_free (GstDManager * manager)
+gstd_free (GstDManager * manager)
 {
   g_return_if_fail (NULL != manager);
-  gstd_manager_stop (manager);
+  gstd_stop (manager);
   g_free (manager->ipc_array);
   g_object_unref (manager->session);
   g_free (manager);

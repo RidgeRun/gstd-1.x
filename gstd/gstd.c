@@ -109,7 +109,7 @@ main (gint argc, gchar * argv[])
   g_option_context_add_main_entries (context, entries, NULL);
 
   /* Initialize GStreamer */
-  gstd_manager_new (&manager, 0, NULL);
+  gstd_new (&manager, 0, NULL);
   gstd_context_add_group (manager, context);
 
   /* Parse the options before starting */
@@ -167,7 +167,7 @@ main (gint argc, gchar * argv[])
   }
 
   /* Start IPC subsystem */
-  if (!gstd_manager_start (manager)) {
+  if (!gstd_start (manager)) {
     goto error;
   }
 
@@ -189,7 +189,7 @@ main (gint argc, gchar * argv[])
   main_loop = NULL;
 
   /* Stop any IPC array */
-  gstd_manager_stop (manager);
+  gstd_stop (manager);
 
   gstd_log_deinit ();
 
@@ -207,7 +207,7 @@ error:
 out:
   {
     gst_deinit ();
-    gstd_manager_free (manager);
+    gstd_free (manager);
     return ret;
   }
 }
