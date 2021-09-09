@@ -29,11 +29,11 @@ extern "C"
 #include <glib-unix.h>
 
 /*
- * GstDManager:
+ * GstD:
  * Opaque representation of GstD state.
  * This struct will have: Session, GstdIpc and num_ipcs (for now)
  */
-typedef struct _GstDManager GstDManager;
+typedef struct _GstD GstD;
 
 /**
  * GstdStatus:
@@ -65,16 +65,17 @@ typedef enum
 /**
  * gstd_context_add_group:
  * 
- * Returns: A GOptionGroup with GStreamer's argument specification.
+ * @gstd: The gstd returned by gstd_new()
+ * @out: GOptionContext which will contain the GstDOptions
  * 
  */
 void
-gstd_context_add_group (GstDManager *manager, GOptionContext *context);
+gstd_context_add_group (GstD *gstd, GOptionContext *context);
 
 /**
  * gstd_new:
  * 
- * @out: placeholder for newly allocated gstd manager.
+ * @out: placeholder for newly allocated gstd instance.
  * @argc: arguments for gst_init
  * @argv: arguments for gst_init
  * 
@@ -83,42 +84,42 @@ gstd_context_add_group (GstDManager *manager, GOptionContext *context);
  * Returns: GstdStatus indicating success or fail
  */
 GstdStatus 
-gstd_new (GstDManager ** out, int argc, char *argv[]);
+gstd_new (GstD ** out, int argc, char *argv[]);
 
 
 /**
  * gstd_start:
- * @manager: The manager returned by gstd_new()
+ * @gstd: The gstd returned by gstd_new()
  * 
  * Starts the ipc in GstdIpc array
  *
  * Returns: GstdStatus indicating success or fail
  */
 int
-gstd_start (GstDManager * manager);
+gstd_start (GstD * gstd);
 
 /**
  * gstd_stop:
- * @manager: The manager returned by gstd_new()
+ * @gstd: The gstd instance returned by gstd_new()
  * 
  * Stops the ipc in GstdIpc array
  *
  * Returns: GstdStatus indicating success or fail
  */
 void
-gstd_stop (GstDManager * manager);
+gstd_stop (GstD * gstd);
 
 /**
  * gstd_free:
- * @manager: A valid manager allocated with gstd_new()
+ * @gstd: A valid gstd instance allocated with gstd_new()
  *
- * Frees a previously allocated GstDManager.
+ * Frees a previously allocated GstD.
  *
- * Returns: A newly allocated GstDManager. Use gstd_free() after
+ * Returns: A newly allocated GstD. Use gstd_free() after
  * usage.
  */
 void
-gstd_free (GstDManager * manager);
+gstd_free (GstD * gstd);
 
 
 #ifdef __cplusplus

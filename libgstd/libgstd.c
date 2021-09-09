@@ -60,9 +60,9 @@ enum _SupportedIpcs
 
 static GType gstd_supported_ipc_to_ipc (const SupportedIpcs code);
 static void gstd_init (int argc, char *argv[]);
-static void gstd_set_ipc (GstDManager * manager);
+static void gstd_set_ipc (GstD * gstd);
 
-struct _GstDManager
+struct _GstD
 {
   GstdSession *session;
   GstdIpc **ipc_array;
@@ -94,7 +94,7 @@ gstd_init (int argc, char *argv[])
 }
 
 static void
-gstd_set_ipc (GstDManager * manager)
+gstd_set_ipc (GstD * gstd)
 {
   /* Array to specify gstd how many IPCs are supported, 
    * SupportedIpcs should be added to this array.
@@ -109,7 +109,7 @@ gstd_set_ipc (GstDManager * manager)
 
   GstdIpc **ipc_array = NULL;
 
-  g_return_if_fail (NULL != manager);
+  g_return_if_fail (NULL != gstd);
   g_return_if_fail (NULL != supported_ipcs);
 
   /* If there is ipcs, then initialize them */
@@ -120,30 +120,30 @@ gstd_set_ipc (GstDManager * manager)
           GSTD_IPC (g_object_new (gstd_supported_ipc_to_ipc (supported_ipcs
                   [ipc_idx]), NULL));
     }
-    manager->ipc_array = ipc_array;
+    gstd->ipc_array = ipc_array;
   }
 
-  manager->num_ipcs = num_ipcs;
-  manager->ipc_array = ipc_array;
+  gstd->num_ipcs = num_ipcs;
+  gstd->ipc_array = ipc_array;
 }
 
 void
-gstd_context_add_group (GstDManager * manager, GOptionContext * context)
+gstd_context_add_group (GstD * gstd, GOptionContext * context)
 {
   GOptionGroup *gst_options = NULL;
   GOptionGroup **ipc_group_array = NULL;
 
-  g_return_if_fail (NULL != manager);
-  g_return_if_fail (NULL != manager->ipc_array);
+  g_return_if_fail (NULL != gstd);
+  g_return_if_fail (NULL != gstd->ipc_array);
   g_return_if_fail (NULL != context);
 
   gst_options = gst_init_get_option_group ();
   g_option_context_add_group (context, gst_options);
 
-  ipc_group_array = g_malloc0 (manager->num_ipcs * sizeof (*ipc_group_array));
+  ipc_group_array = g_malloc0 (gstd->num_ipcs * sizeof (*ipc_group_array));
 
-  for (gint ipc_idx = 0; ipc_idx < manager->num_ipcs; ipc_idx++) {
-    gstd_ipc_get_option_group (manager->ipc_array[ipc_idx],
+  for (gint ipc_idx = 0; ipc_idx < gstd->num_ipcs; ipc_idx++) {
+    gstd_ipc_get_option_group (gstd->ipc_array[ipc_idx],
         &ipc_group_array[ipc_idx]);
     g_option_context_add_group (context, ipc_group_array[ipc_idx]);
   }
@@ -152,24 +152,24 @@ gstd_context_add_group (GstDManager * manager, GOptionContext * context)
 }
 
 GstdStatus
-gstd_new (GstDManager ** out, int argc, char *argv[])
+gstd_new (GstD ** out, int argc, char *argv[])
 {
   GstdStatus ret = GSTD_LIB_OK;
-  GstDManager *manager = NULL;
+  GstD *gstd = NULL;
   GstdSession *session = NULL;
 
   g_return_val_if_fail (NULL != out, GSTD_NULL_ARGUMENT);
 
-  manager = (GstDManager *) g_malloc0 (sizeof (*manager));
+  gstd = (GstD *) g_malloc0 (sizeof (*gstd));
   session = gstd_session_new ("Session0");
 
-  manager->session = session;
-  manager->num_ipcs = 0;
-  manager->ipc_array = NULL;
+  gstd->session = session;
+  gstd->num_ipcs = 0;
+  gstd->ipc_array = NULL;
 
-  gstd_set_ipc (manager);
+  gstd_set_ipc (gstd);
 
-  *out = manager;
+  *out = gstd;
 
   /* Initialize GStreamer */
   gstd_init (argc, argv);
@@ -178,20 +178,20 @@ gstd_new (GstDManager ** out, int argc, char *argv[])
 }
 
 gboolean
-gstd_start (GstDManager * manager)
+gstd_start (GstD * gstd)
 {
   gboolean ipc_selected = FALSE;
   gboolean ret = TRUE;
   GstdReturnCode code = GSTD_EOK;
   gint ipc_idx;
 
-  g_return_val_if_fail (NULL != manager, GSTD_NULL_ARGUMENT);
-  g_return_val_if_fail (NULL != manager->ipc_array, GSTD_LIB_NOT_FOUND);
-  g_return_val_if_fail (NULL != manager->session, GSTD_LIB_NOT_FOUND);
+  g_return_val_if_fail (NULL != gstd, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (NULL != gstd->ipc_array, GSTD_LIB_NOT_FOUND);
+  g_return_val_if_fail (NULL != gstd->session, GSTD_LIB_NOT_FOUND);
 
   /* Verify if at least one IPC mechanism was selected */
-  for (ipc_idx = 0; ipc_idx < manager->num_ipcs; ipc_idx++) {
-    g_object_get (G_OBJECT (manager->ipc_array[ipc_idx]), "enabled",
+  for (ipc_idx = 0; ipc_idx < gstd->num_ipcs; ipc_idx++) {
+    g_object_get (G_OBJECT (gstd->ipc_array[ipc_idx]), "enabled",
         &ipc_selected, NULL);
 
     if (ipc_selected) {
@@ -201,15 +201,15 @@ gstd_start (GstDManager * manager)
 
   /* If no IPC was selected, default to TCP */
   if (!ipc_selected) {
-    g_object_set (G_OBJECT (manager->ipc_array[0]), "enabled", TRUE, NULL);
+    g_object_set (G_OBJECT (gstd->ipc_array[0]), "enabled", TRUE, NULL);
   }
 
   /* Run start for each IPC (each start method checks for the enabled flag) */
-  for (ipc_idx = 0; ipc_idx < manager->num_ipcs; ipc_idx++) {
-    code = gstd_ipc_start (manager->ipc_array[ipc_idx], manager->session);
+  for (ipc_idx = 0; ipc_idx < gstd->num_ipcs; ipc_idx++) {
+    code = gstd_ipc_start (gstd->ipc_array[ipc_idx], gstd->session);
     if (code) {
       g_printerr ("Couldn't start IPC : (%s)\n",
-          G_OBJECT_TYPE_NAME (manager->ipc_array[ipc_idx]));
+          G_OBJECT_TYPE_NAME (gstd->ipc_array[ipc_idx]));
       ret = FALSE;
     }
   }
@@ -218,28 +218,28 @@ gstd_start (GstDManager * manager)
 }
 
 void
-gstd_stop (GstDManager * manager)
+gstd_stop (GstD * gstd)
 {
-  g_return_if_fail (NULL != manager);
-  g_return_if_fail (NULL != manager->ipc_array);
-  g_return_if_fail (NULL != manager->session);
+  g_return_if_fail (NULL != gstd);
+  g_return_if_fail (NULL != gstd->ipc_array);
+  g_return_if_fail (NULL != gstd->session);
 
   /* Run stop for each IPC */
-  for (gint ipc_idx = 0; ipc_idx < manager->num_ipcs; ipc_idx++) {
-    if (NULL != manager->ipc_array[ipc_idx]
-        && TRUE == manager->ipc_array[ipc_idx]->enabled) {
-      gstd_ipc_stop (manager->ipc_array[ipc_idx]);
-      g_clear_object (&manager->ipc_array[ipc_idx]);
+  for (gint ipc_idx = 0; ipc_idx < gstd->num_ipcs; ipc_idx++) {
+    if (NULL != gstd->ipc_array[ipc_idx]
+        && TRUE == gstd->ipc_array[ipc_idx]->enabled) {
+      gstd_ipc_stop (gstd->ipc_array[ipc_idx]);
+      g_clear_object (&gstd->ipc_array[ipc_idx]);
     }
   }
 }
 
 void
-gstd_free (GstDManager * manager)
+gstd_free (GstD * gstd)
 {
-  g_return_if_fail (NULL != manager);
-  gstd_stop (manager);
-  g_free (manager->ipc_array);
-  g_object_unref (manager->session);
-  g_free (manager);
+  g_return_if_fail (NULL != gstd);
+  gstd_stop (gstd);
+  g_free (gstd->ipc_array);
+  g_object_unref (gstd->session);
+  g_free (gstd);
 }

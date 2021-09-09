@@ -77,7 +77,7 @@ main (gint argc, gchar * argv[])
   gchar *filename = NULL;
   gboolean parent = FALSE;
 
-  GstDManager *manager = NULL;
+  GstD *gstd = NULL;
 
   GOptionEntry entries[] = {
     {"version", 'v', 0, G_OPTION_ARG_NONE, &version,
@@ -109,8 +109,8 @@ main (gint argc, gchar * argv[])
   g_option_context_add_main_entries (context, entries, NULL);
 
   /* Initialize GStreamer */
-  gstd_new (&manager, 0, NULL);
-  gstd_context_add_group (manager, context);
+  gstd_new (&gstd, 0, NULL);
+  gstd_context_add_group (gstd, context);
 
   /* Parse the options before starting */
   if (!g_option_context_parse (context, &argc, &argv, &error)) {
@@ -167,7 +167,7 @@ main (gint argc, gchar * argv[])
   }
 
   /* Start IPC subsystem */
-  if (!gstd_start (manager)) {
+  if (!gstd_start (gstd)) {
     goto error;
   }
 
@@ -189,7 +189,7 @@ main (gint argc, gchar * argv[])
   main_loop = NULL;
 
   /* Stop any IPC array */
-  gstd_stop (manager);
+  gstd_stop (gstd);
 
   gstd_log_deinit ();
 
@@ -207,7 +207,7 @@ error:
 out:
   {
     gst_deinit ();
-    gstd_free (manager);
+    gstd_free (gstd);
     return ret;
   }
 }
