@@ -5,6 +5,8 @@ gstdinclude_HEADERS = libgstd.h
 
 libgstd_@GSTD_API_VERSION@_la_SOURCES =             \
              libgstd.c                              \
+             libgstd_json.c                         \
+             libgstd_parser.c                       \
              gstd_session.c                         \
              gstd_object.c                          \
              gstd_pipeline.c                        \
@@ -71,3 +73,7 @@ libgstd_@GSTD_API_VERSION@_la_CFLAGS =                                   \
 			 $(JANSSON_CFLAGS) -pthread
 
 libgstd_@GSTD_API_VERSION@_la_LDFLAGS = $(GST_LIBS) $(GIO_LIBS) $(GJSON_LIBS) $(LIBSOUP_LIBS) $(JANSSON_LIBS) -pthread
+
+noinst_HEADERS = \
+    libgstd_json.h         \
+    libgstd_parser.h

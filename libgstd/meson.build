@@ -60,7 +60,9 @@ gstd_src = [
 ]
 
 libgstd_src = [
-  'libgstd.c'
+  'libgstd.c', 
+  'libgstd_json.c',
+  'libgstd_parser.c'
 ]
 
 gstd_lib_manager = library('gstd-@0@'.format(apiversion),
