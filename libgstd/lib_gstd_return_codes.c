@@ -25,7 +25,7 @@
  * Gstreamer Daemon return codes textual description
  */
 
-#include "gstd_return_codes.h"
+#include "lib_gstd_return_codes.h"
 
 const gchar *
 gstd_return_code_to_string (GstdReturnCode code)

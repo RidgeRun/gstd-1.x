@@ -21,7 +21,7 @@
 #include "config.h"
 #endif
 
-#include "gstd_return_codes.h"
+#include "lib_gstd_return_codes.h"
 #include "gstd_property_boolean.h"
 
 /* Gstd Property debugging category */

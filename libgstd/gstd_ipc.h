@@ -53,7 +53,7 @@
 
 #include <glib.h>
 
-#include "gstd_return_codes.h"
+#include "lib_gstd_return_codes.h"
 #include "gstd_object.h"
 #include "gstd_pipeline.h"
 #include "gstd_session.h"

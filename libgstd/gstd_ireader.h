@@ -21,7 +21,7 @@
 #define __GSTD_IREADER_H__
 
 #include <gst/gst.h>
-#include "gstd_return_codes.h"
+#include "lib_gstd_return_codes.h"
 
 G_BEGIN_DECLS
 #define GSTD_TYPE_IREADER                (gstd_ireader_get_type ())
