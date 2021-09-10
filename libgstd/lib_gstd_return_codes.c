@@ -51,7 +51,9 @@ gstd_return_code_to_string (GstdReturnCode code)
     [-GSTD_IPC_ERROR] = "IPC error",
     [-GSTD_EVENT_ERROR] = "Event error",
     [-GSTD_MISSING_ARGUMENT] = "One or more arguments are missing",
-    [-GSTD_MISSING_NAME] = "Name is missing"
+    [-GSTD_MISSING_NAME] = "Name is missing",
+    [-GSTD_OOM] = "The system has run out of memory",
+    [-GSTD_UNKNOWN_ERROR] = "Unknown error"
   };
 
   const gint size = sizeof (code_description) / sizeof (gchar *);
