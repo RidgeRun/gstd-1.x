@@ -30,6 +30,8 @@
 const gchar *
 gstd_return_code_to_string (GstdReturnCode code)
 {
+
+  GstdReturnCode ucode = -code;
   static const gchar *code_description[] = {
     [-GSTD_EOK] = "Success",
     [-GSTD_NULL_ARGUMENT] = "Required argument is NULL",
@@ -54,8 +56,8 @@ gstd_return_code_to_string (GstdReturnCode code)
 
   const gint size = sizeof (code_description) / sizeof (gchar *);
 
-  g_return_val_if_fail (0 <= code, "(invalid code)");
-  g_return_val_if_fail (size > code, "(invalid code)");
+  g_return_val_if_fail (0 <= ucode, "(invalid code)");
+  g_return_val_if_fail (size > ucode, "(invalid code)");
 
-  return code_description[code];
+  return code_description[ucode];
 }
