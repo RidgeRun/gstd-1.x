@@ -35,7 +35,7 @@ extern "C"
  * @cmd: GstD command to run
  * @response:  gchar which will contain the response of the command
  * 
- * Initializes gstd.
+ * Run a console command a return the answer.
  *
  * Returns: GstdReturnCode indicating success or fail
  */
