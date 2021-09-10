@@ -65,7 +65,7 @@ enum _SupportedIpcs
 static GType gstd_supported_ipc_to_ipc (const SupportedIpcs code);
 static void gstd_init (int argc, char *argv[]);
 static void gstd_set_ipc (GstD * gstd);
-static GstdStatus gstd_crud (GstD * gstd, const char *operation,
+static GstdStatus gstd_pipeline_action (GstD * gstd, const char *operation,
     const char *pipeline_name);
 
 struct _GstD
@@ -134,7 +134,8 @@ gstd_set_ipc (GstD * gstd)
 }
 
 static GstdStatus
-gstd_crud (GstD * gstd, const char *operation, const char *pipeline_name)
+gstd_pipeline_action (GstD * gstd, const char *operation,
+    const char *pipeline_name)
 {
   GstdStatus ret = GSTD_LIB_OK;
   gchar *message = NULL;
@@ -283,7 +284,7 @@ gstd_pipeline_create (GstD * gstd,
   g_return_val_if_fail (NULL != pipeline_desc, GSTD_LIB_NULL_ARGUMENT);
 
   message = g_strdup_printf ("%s %s", pipeline_name, pipeline_desc);
-  ret = gstd_crud (gstd, "create", message);
+  ret = gstd_pipeline_action (gstd, "create", message);
 
   g_free (message);
   message = NULL;
@@ -333,7 +334,7 @@ gstd_pipeline_delete (GstD * gstd, const char *pipeline_name)
   g_return_val_if_fail (NULL != gstd, GSTD_LIB_NULL_ARGUMENT);
   g_return_val_if_fail (NULL != pipeline_name, GSTD_LIB_NULL_ARGUMENT);
 
-  ret = gstd_crud (gstd, "delete", pipeline_name);
+  ret = gstd_pipeline_action (gstd, "delete", pipeline_name);
 
   return ret;
 }
@@ -346,7 +347,7 @@ gstd_pipeline_play (GstD * gstd, const char *pipeline_name)
   g_return_val_if_fail (NULL != gstd, GSTD_LIB_NULL_ARGUMENT);
   g_return_val_if_fail (NULL != pipeline_name, GSTD_LIB_NULL_ARGUMENT);
 
-  ret = gstd_crud (gstd, "play", pipeline_name);
+  ret = gstd_pipeline_action (gstd, "play", pipeline_name);
 
   return ret;
 }
@@ -359,7 +360,7 @@ gstd_pipeline_pause (GstD * gstd, const char *pipeline_name)
   g_return_val_if_fail (NULL != gstd, GSTD_LIB_NULL_ARGUMENT);
   g_return_val_if_fail (NULL != pipeline_name, GSTD_LIB_NULL_ARGUMENT);
 
-  ret = gstd_crud (gstd, "pause", pipeline_name);
+  ret = gstd_pipeline_action (gstd, "pause", pipeline_name);
 
   return ret;
 }
@@ -372,7 +373,7 @@ gstd_pipeline_stop (GstD * gstd, const char *pipeline_name)
   g_return_val_if_fail (NULL != gstd, GSTD_LIB_NULL_ARGUMENT);
   g_return_val_if_fail (NULL != pipeline_name, GSTD_LIB_NULL_ARGUMENT);
 
-  ret = gstd_crud (gstd, "stop", pipeline_name);
+  ret = gstd_pipeline_action (gstd, "stop", pipeline_name);
 
   return ret;
 }
