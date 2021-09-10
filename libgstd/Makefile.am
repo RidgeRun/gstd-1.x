@@ -7,6 +7,7 @@ libgstd_@GSTD_API_VERSION@_la_SOURCES =             \
              libgstd.c                              \
              libgstd_json.c                         \
              libgstd_parser.c                       \
+             lib_gstd_return_codes.c                \
              gstd_session.c                         \
              gstd_object.c                          \
              gstd_pipeline.c                        \
@@ -48,7 +49,6 @@ libgstd_@GSTD_API_VERSION@_la_SOURCES =             \
              gstd_msg_reader.c                      \
              gstd_msg_type.c                        \
              gstd_bus_msg_qos.c                     \
-             gstd_return_codes.c                    \
              gstd_state.c                           \
              gstd_parser.c                          \
              gstd_bus_msg_stream_status.c           \

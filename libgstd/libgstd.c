@@ -65,8 +65,6 @@ enum _SupportedIpcs
 static GType gstd_supported_ipc_to_ipc (const SupportedIpcs code);
 static void gstd_init (int argc, char *argv[]);
 static void gstd_set_ipc (GstD * gstd);
-static GstdStatus gstd_pipeline_action (GstD * gstd, const char *operation,
-    const char *pipeline_name);
 
 struct _GstD
 {
@@ -133,24 +131,24 @@ gstd_set_ipc (GstD * gstd)
   gstd->ipc_array = ipc_array;
 }
 
-static GstdStatus
+static GstdReturnCode
 gstd_pipeline_action (GstD * gstd, const char *operation,
     const char *pipeline_name)
 {
-  GstdStatus ret = GSTD_LIB_OK;
+  GstdReturnCode ret = GSTD_EOK;
   gchar *message = NULL;
 
-  g_return_val_if_fail (NULL != gstd, GSTD_LIB_NULL_ARGUMENT);
-  g_return_val_if_fail (NULL != gstd->session, GSTD_LIB_NULL_ARGUMENT);
-  g_return_val_if_fail (NULL != pipeline_name, GSTD_LIB_NULL_ARGUMENT);
-  g_return_val_if_fail (NULL != operation, GSTD_LIB_NULL_ARGUMENT);
+  g_return_val_if_fail (NULL != gstd, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (NULL != gstd->session, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (NULL != pipeline_name, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (NULL != operation, GSTD_NULL_ARGUMENT);
 
   message = g_strdup_printf ("pipeline_%s %s", operation, pipeline_name);
 
   ret = gstd_parser (gstd->session, message, NULL);
 
   g_free (message);
-  message = NULL;
+
 
   return ret;
 }
@@ -179,10 +177,10 @@ gstd_context_add_group (GstD * gstd, GOptionContext * context)
   g_free (ipc_group_array);
 }
 
-GstdStatus
+GstdReturnCode
 gstd_new (GstD ** out, int argc, char *argv[])
 {
-  GstdStatus ret = GSTD_LIB_OK;
+  GstdReturnCode ret = GSTD_EOK;
   GstD *gstd = NULL;
   GstdSession *session = NULL;
 
@@ -214,8 +212,8 @@ gstd_start (GstD * gstd)
   gint ipc_idx;
 
   g_return_val_if_fail (NULL != gstd, GSTD_NULL_ARGUMENT);
-  g_return_val_if_fail (NULL != gstd->ipc_array, GSTD_LIB_NOT_FOUND);
-  g_return_val_if_fail (NULL != gstd->session, GSTD_LIB_NOT_FOUND);
+  g_return_val_if_fail (NULL != gstd->ipc_array, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (NULL != gstd->session, GSTD_NULL_ARGUMENT);
 
   /* Verify if at least one IPC mechanism was selected */
   for (ipc_idx = 0; ipc_idx < gstd->num_ipcs; ipc_idx++) {
@@ -272,159 +270,162 @@ gstd_free (GstD * gstd)
   g_free (gstd);
 }
 
-GstdStatus
+GstdReturnCode
 gstd_pipeline_create (GstD * gstd,
     const char *pipeline_name, const char *pipeline_desc)
 {
-  GstdStatus ret = GSTD_LIB_OK;
+  GstdReturnCode ret = GSTD_EOK;
   gchar *message = NULL;
 
-  g_return_val_if_fail (NULL != gstd, GSTD_LIB_NULL_ARGUMENT);
-  g_return_val_if_fail (NULL != gstd->session, GSTD_LIB_NULL_ARGUMENT);
-  g_return_val_if_fail (NULL != pipeline_name, GSTD_LIB_NULL_ARGUMENT);
-  g_return_val_if_fail (NULL != pipeline_desc, GSTD_LIB_NULL_ARGUMENT);
+  g_return_val_if_fail (NULL != gstd, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (NULL != gstd->session, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (NULL != pipeline_name, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (NULL != pipeline_desc, GSTD_NULL_ARGUMENT);
 
   message = g_strdup_printf ("%s %s", pipeline_name, pipeline_desc);
   ret = gstd_pipeline_action (gstd, "create", message);
 
   g_free (message);
-  message = NULL;
+
 
   return ret;
 }
 
-GstdStatus
+GstdReturnCode
 gstd_pipeline_list (GstD * gstd, char **pipelines[], int *list_lenght)
 {
-  GstdStatus ret = GSTD_LIB_OK;
+  GstdReturnCode ret = GSTD_EOK;
   gchar *message = NULL;
   gchar *response = NULL;
 
-  g_return_val_if_fail (NULL != gstd, GSTD_LIB_NULL_ARGUMENT);
-  g_return_val_if_fail (NULL != gstd->session, GSTD_LIB_NULL_ARGUMENT);
-  g_return_val_if_fail (NULL != pipelines, GSTD_LIB_NULL_ARGUMENT);
-  g_return_val_if_fail (NULL != list_lenght, GSTD_LIB_NULL_ARGUMENT);
+  g_return_val_if_fail (NULL != gstd, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (NULL != gstd->session, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (NULL != pipelines, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (NULL != list_lenght, GSTD_NULL_ARGUMENT);
 
   message = g_strdup_printf ("list_pipelines");
   ret = gstd_parser (gstd->session, message, &response);
-  if (ret != GSTD_LIB_OK) {
-    goto out;
+  if (ret != GSTD_EOK) {
+    goto out_no_free_response;
   }
 
   ret =
       gstd_json_get_child_char_array (response, "nodes", "name", pipelines,
       list_lenght);
-  if (ret != GSTD_LIB_OK) {
+  if (ret != GSTD_EOK) {
     goto out;
   }
 
 out:
   g_free (message);
   g_free (response);
-  message = NULL;
-  response = NULL;
+
+  return ret;
+
+out_no_free_response:
+  g_free (message);
 
   return ret;
 }
 
-GstdStatus
+GstdReturnCode
 gstd_pipeline_delete (GstD * gstd, const char *pipeline_name)
 {
-  GstdStatus ret = GSTD_LIB_OK;
+  GstdReturnCode ret = GSTD_EOK;
 
-  g_return_val_if_fail (NULL != gstd, GSTD_LIB_NULL_ARGUMENT);
-  g_return_val_if_fail (NULL != gstd->session, GSTD_LIB_NULL_ARGUMENT);
-  g_return_val_if_fail (NULL != pipeline_name, GSTD_LIB_NULL_ARGUMENT);
+  g_return_val_if_fail (NULL != gstd, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (NULL != gstd->session, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (NULL != pipeline_name, GSTD_NULL_ARGUMENT);
 
   ret = gstd_pipeline_action (gstd, "delete", pipeline_name);
 
   return ret;
 }
 
-GstdStatus
+GstdReturnCode
 gstd_pipeline_play (GstD * gstd, const char *pipeline_name)
 {
-  GstdStatus ret = GSTD_LIB_OK;
+  GstdReturnCode ret = GSTD_EOK;
 
-  g_return_val_if_fail (NULL != gstd, GSTD_LIB_NULL_ARGUMENT);
-  g_return_val_if_fail (NULL != gstd->session, GSTD_LIB_NULL_ARGUMENT);
-  g_return_val_if_fail (NULL != pipeline_name, GSTD_LIB_NULL_ARGUMENT);
+  g_return_val_if_fail (NULL != gstd, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (NULL != gstd->session, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (NULL != pipeline_name, GSTD_NULL_ARGUMENT);
 
   ret = gstd_pipeline_action (gstd, "play", pipeline_name);
 
   return ret;
 }
 
-GstdStatus
+GstdReturnCode
 gstd_pipeline_pause (GstD * gstd, const char *pipeline_name)
 {
-  GstdStatus ret = GSTD_LIB_OK;
+  GstdReturnCode ret = GSTD_EOK;
 
-  g_return_val_if_fail (NULL != gstd, GSTD_LIB_NULL_ARGUMENT);
-  g_return_val_if_fail (NULL != gstd->session, GSTD_LIB_NULL_ARGUMENT);
-  g_return_val_if_fail (NULL != pipeline_name, GSTD_LIB_NULL_ARGUMENT);
+  g_return_val_if_fail (NULL != gstd, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (NULL != gstd->session, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (NULL != pipeline_name, GSTD_NULL_ARGUMENT);
 
   ret = gstd_pipeline_action (gstd, "pause", pipeline_name);
 
   return ret;
 }
 
-GstdStatus
+GstdReturnCode
 gstd_pipeline_stop (GstD * gstd, const char *pipeline_name)
 {
-  GstdStatus ret = GSTD_LIB_OK;
+  GstdReturnCode ret = GSTD_EOK;
 
-  g_return_val_if_fail (NULL != gstd, GSTD_LIB_NULL_ARGUMENT);
-  g_return_val_if_fail (NULL != gstd->session, GSTD_LIB_NULL_ARGUMENT);
-  g_return_val_if_fail (NULL != pipeline_name, GSTD_LIB_NULL_ARGUMENT);
+  g_return_val_if_fail (NULL != gstd, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (NULL != gstd->session, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (NULL != pipeline_name, GSTD_NULL_ARGUMENT);
 
   ret = gstd_pipeline_action (gstd, "stop", pipeline_name);
 
   return ret;
 }
 
-GstdStatus
+GstdReturnCode
 gstd_set_debug (GstD * gstd, const char *threshold,
     const int colors, const int reset)
 {
-  GstdStatus ret = GSTD_LIB_OK;
-  const char *colored = "";
-  const char *reset_bool = "";
+  GstdReturnCode ret = GSTD_EOK;
+  const char *colored = NULL;
+  const char *reset_bool = NULL;
   gchar *message = NULL;
 
-  g_return_val_if_fail (NULL != gstd, GSTD_LIB_NULL_ARGUMENT);
-  g_return_val_if_fail (NULL != gstd->session, GSTD_LIB_NULL_ARGUMENT);
-  g_return_val_if_fail (NULL != threshold, GSTD_LIB_NULL_ARGUMENT);
+  g_return_val_if_fail (NULL != gstd, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (NULL != gstd->session, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (NULL != threshold, GSTD_NULL_ARGUMENT);
 
   message = g_strdup_printf ("debug_enable true");
   ret = gstd_parser (gstd->session, message, NULL);
-  if (ret != GSTD_LIB_OK) {
+  if (ret != GSTD_EOK) {
     goto out;
   }
 
   message = g_strdup_printf ("debug_threshold %s", threshold);
   ret = gstd_parser (gstd->session, message, NULL);
-  if (ret != GSTD_LIB_OK) {
+  if (ret != GSTD_EOK) {
     goto out;
   }
 
   colored = colors == 0 ? "false" : "true";
   message = g_strdup_printf ("debug_color %s", colored);
   ret = gstd_parser (gstd->session, message, NULL);
-  if (ret != GSTD_LIB_OK) {
+  if (ret != GSTD_EOK) {
     goto out;
   }
 
   reset_bool = reset == 0 ? "false" : "true";
   message = g_strdup_printf ("debug_reset %s", reset_bool);
   ret = gstd_parser (gstd->session, message, NULL);
-  if (ret != GSTD_LIB_OK) {
+  if (ret != GSTD_EOK) {
     goto out;
   }
 
 out:
   g_free (message);
-  message = NULL;
+
 
   return ret;
 }

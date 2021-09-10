@@ -1,4 +1,5 @@
 gstd_headers = [
+  'lib_gstd_return_codes.h',
   'libgstd.h',
 ]
 
@@ -44,7 +45,6 @@ gstd_src = [
   'gstd_msg_reader.c',
   'gstd_msg_type.c',
   'gstd_bus_msg_qos.c',
-  'gstd_return_codes.c',
   'gstd_state.c',
   'gstd_parser.c',
   'gstd_bus_msg_stream_status.c',
@@ -62,7 +62,8 @@ gstd_src = [
 libgstd_src = [
   'libgstd.c', 
   'libgstd_json.c',
-  'libgstd_parser.c'
+  'libgstd_parser.c',
+  'lib_gstd_return_codes.c',
 ]
 
 gstd_lib_manager = library('gstd-@0@'.format(apiversion),

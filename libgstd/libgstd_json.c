@@ -36,30 +36,27 @@
 #include <stdlib.h>
 #include <string.h>
 
-static GstdStatus gstd_json_get_value (const char *json, const char *name,
-    json_t ** root, json_t ** out);
-
-static GstdStatus
+static GstdReturnCode
 gstd_json_get_value (const char *json, const char *name, json_t ** root,
     json_t ** out)
 {
-  GstdStatus ret = GSTD_LIB_OK;
-  json_error_t error;
+  GstdReturnCode ret = GSTD_EOK;
+  json_error_t error = { 0 };
 
-  g_return_val_if_fail (json != NULL, GSTD_LIB_NULL_ARGUMENT);
-  g_return_val_if_fail (name != NULL, GSTD_LIB_NULL_ARGUMENT);
-  g_return_val_if_fail (root != NULL, GSTD_LIB_NULL_ARGUMENT);
-  g_return_val_if_fail (out != NULL, GSTD_LIB_NULL_ARGUMENT);
+  g_return_val_if_fail (json != NULL, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (name != NULL, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (root != NULL, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (out != NULL, GSTD_NULL_ARGUMENT);
 
   *root = json_loads (json, 0, &error);
   if (!*root) {
-    ret = GSTD_LIB_OOM;
+    ret = GSTD_OOM;
     goto out;
   }
 
   *out = json_object_get (*root, name);
   if (!*out) {
-    ret = GSTD_LIB_NOT_FOUND;
+    ret = GSTD_NO_RESOURCE;
     json_decref (*root);
   }
 
@@ -67,19 +64,19 @@ out:
   return ret;
 }
 
-GstdStatus
+GstdReturnCode
 gstd_json_is_null (const char *json, const char *name, int *out)
 {
-  GstdStatus ret = GSTD_LIB_OK;
-  json_t *root;
-  json_t *data;
+  GstdReturnCode ret = GSTD_EOK;
+  json_t *root = NULL;
+  json_t *data = NULL;
 
-  g_return_val_if_fail (json != NULL, GSTD_LIB_NULL_ARGUMENT);
-  g_return_val_if_fail (name != NULL, GSTD_LIB_NULL_ARGUMENT);
-  g_return_val_if_fail (out != NULL, GSTD_LIB_NULL_ARGUMENT);
+  g_return_val_if_fail (json != NULL, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (name != NULL, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (out != NULL, GSTD_NULL_ARGUMENT);
 
   ret = gstd_json_get_value (json, name, &root, &data);
-  if (GSTD_LIB_OK != ret) {
+  if (GSTD_EOK != ret) {
     goto out;
   }
 
@@ -90,30 +87,34 @@ out:
   return ret;
 }
 
-GstdStatus
+GstdReturnCode
 gstd_json_get_child_char_array (const char *json,
     const char *array_name, const char *element_name, char **out[],
     int *array_lenght)
 {
-  GstdStatus ret = GSTD_LIB_OK;
-  json_t *root;
-  json_t *array_data;
-  json_t *data, *name;
-  json_error_t error;
+  GstdReturnCode ret = GSTD_EOK;
+  json_t *root = NULL;
+  json_t *array_data = NULL;
+  json_t *data, *name = NULL;
+  json_error_t error = { 0 };
   int i, j;
 
-  g_return_val_if_fail (json != NULL, GSTD_LIB_NULL_ARGUMENT);
-  g_return_val_if_fail (array_name != NULL, GSTD_LIB_NULL_ARGUMENT);
-  g_return_val_if_fail (element_name != NULL, GSTD_LIB_NULL_ARGUMENT);
-  g_return_val_if_fail (out != NULL, GSTD_LIB_NULL_ARGUMENT);
-  g_return_val_if_fail (array_lenght != NULL, GSTD_LIB_NULL_ARGUMENT);
+  g_return_val_if_fail (json != NULL, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (array_name != NULL, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (element_name != NULL, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (out != NULL, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (array_lenght != NULL, GSTD_NULL_ARGUMENT);
 
   root = json_loads (json, 0, &error);
+  if (NULL == root) {
+    ret = GSTD_BAD_VALUE;
+    goto unref;
+  }
 
   array_data = json_object_get (root, array_name);
 
   if (!json_is_array (array_data)) {
-    ret = GSTD_LIB_TYPE_ERROR;
+    ret = GSTD_BAD_VALUE;
     goto unref;
   }
 
@@ -121,19 +122,23 @@ gstd_json_get_child_char_array (const char *json,
 
   /* Allocate enough memory for all names */
   *out = malloc ((*array_lenght) * sizeof (char *));
+  if (NULL == out) {
+    ret = GSTD_OOM;
+    goto unref;
+  }
 
   for (i = 0; i < (*array_lenght); i++) {
     const char *string;
 
     data = json_array_get (array_data, i);
     if (!json_is_object (data)) {
-      ret = GSTD_LIB_TYPE_ERROR;
+      ret = GSTD_BAD_VALUE;
       goto clear_mem;
     }
 
     name = json_object_get (data, element_name);
     if (!json_is_string (name)) {
-      ret = GSTD_LIB_TYPE_ERROR;
+      ret = GSTD_BAD_VALUE;
       goto clear_mem;
     }
 
@@ -144,6 +149,10 @@ gstd_json_get_child_char_array (const char *json,
       * memory copies are necessary in order to preserve data
       */
     (*out)[i] = malloc (strlen (string) + 1);
+    if (NULL == out[i]) {
+      ret = GSTD_OOM;
+      goto unref;
+    }
     strncpy ((*out)[i], string, strlen (string));
     /* Ensure traling null byte is copied */
     (*out)[i][strlen (string)] = '\0';
@@ -164,39 +173,47 @@ clear_mem:
 
 }
 
-GstdStatus
+GstdReturnCode
 gstd_json_child_string (const char *json, const char *data_name, char **out)
 {
-  GstdStatus ret = GSTD_LIB_OK;
-  json_t *root;
-  json_t *data;
-  json_error_t error;
-  const char *tmp_string;
+  GstdReturnCode ret = GSTD_EOK;
+  json_t *root = NULL;
+  json_t *data = NULL;
+  json_error_t error = { 0 };
+  const char *tmp_string = NULL;
 
-  g_return_val_if_fail (json != NULL, GSTD_LIB_NULL_ARGUMENT);
-  g_return_val_if_fail (data_name != NULL, GSTD_LIB_NULL_ARGUMENT);
-  g_return_val_if_fail (out != NULL, GSTD_LIB_NULL_ARGUMENT);
+  g_return_val_if_fail (json != NULL, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (data_name != NULL, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (out != NULL, GSTD_NULL_ARGUMENT);
 
   root = json_loads (json, 0, &error);
+  if (NULL == root) {
+    ret = GSTD_BAD_VALUE;
+    goto unref;
+  }
 
   data = json_object_get (root, data_name);
-  if (data == NULL) {
-    ret = GSTD_LIB_NOT_FOUND;
+  if (NULL == data) {
+    ret = GSTD_NO_RESOURCE;
     goto unref;
   }
 
   if (!json_is_string (data)) {
-    ret = GSTD_LIB_TYPE_ERROR;
+    ret = GSTD_BAD_VALUE;
     goto unref;
   }
 
   tmp_string = json_string_value (data);
   /* Allocate memory for output */
   *out = malloc ((strlen (tmp_string) + 1) * sizeof (char));
+  if (NULL == out) {
+    ret = GSTD_OOM;
+    goto unref;
+  }
   strncpy (*out, tmp_string, strlen (tmp_string));
   /* Ensure traling null byte is copied */
   (*out)[strlen (tmp_string)] = '\0';
-  ret = GSTD_LIB_OK;
+  ret = GSTD_EOK;
 
 unref:
   json_decref (root);

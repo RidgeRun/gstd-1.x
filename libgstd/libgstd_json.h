@@ -32,7 +32,7 @@
 
 #include "libgstd.h"
 
-GstdStatus
+GstdReturnCode
 gstd_json_is_null (const char * json, const char * name, int * out);
 
 /**
@@ -48,10 +48,10 @@ gstd_json_is_null (const char * json, const char * name, int * out);
  * Returns all the elements that have element_name that belongs to array_name,
  * which in turn is the child of parent_name
  *
- * Returns: GstdStatus indicating success, null argument, type error,
+ * Returns: GstdReturnCode indicating success, null argument, type error,
  * malformed string, unfound element
  */
-GstdStatus
+GstdReturnCode
 gstd_json_get_child_char_array(const char *json,
   const char* array_name, const char *element_name, char **out[], int *array_lenght);
 
@@ -63,8 +63,8 @@ gstd_json_get_child_char_array(const char *json,
  *
  * Returns string that has data_name and its parent is parent_name
  *
- * Returns: GstdStatus indicating success, null argument, type error,
+ * Returns: GstdReturnCode indicating success, null argument, type error,
  * malformed string, unfound element
  */
-GstdStatus
+GstdReturnCode
 gstd_json_child_string (const char * json, const char * data_name, char ** out); 

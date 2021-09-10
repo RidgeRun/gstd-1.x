@@ -28,44 +28,14 @@ extern "C"
 #include <gst/gst.h>
 #include <glib-unix.h>
 
+#include "lib_gstd_return_codes.h"
+
 /*
  * GstD:
  * Opaque representation of GstD state.
  * This struct will have: Session, GstdIpc and num_ipcs (for now)
  */
 typedef struct _GstD GstD;
-
-/**
- * GstdStatus:
- * @GSTD_LIB_OK: Everything went okay
- * @GSTD_LIB_NULL_ARGUMENT: A mandatory argument was passed in as NULL
- * @GSTD_LIB_OOM: The system has run out of memory
- * @GSTD_LIB_TYPE_ERROR: An error occurred parsing a type from a string
- * @GSTD_LIB_NOT_FOUND: The response is missing the field requested
- * @GSTD_LIB_THREAD_ERROR: Unable to create a new thread
- * @GSTD_LIB_BUS_TIMEOUT: A timeout was received while waiting on the bus
- * @GSTD_LIB_LONG_RESPONSE: The response exceeds our maximum, typically
- * meaning a missing null terminator
- *
- * Return codes for the different libgstd operations
- */
-
-typedef enum
-{
-  GSTD_LIB_OK = 0,
-  GSTD_LIB_NULL_ARGUMENT = -1,
-  GSTD_LIB_BAD_PARAMETER = -2,
-  GSTD_LIB_EXISTING_RESOURCE = -3,
-  GSTD_LIB_OOM = -4,
-  GSTD_LIB_TYPE_ERROR = -5,
-  GSTD_LIB_BAD_ACTION = -6,
-  GSTD_LIB_NOT_FOUND = -7,
-  GSTD_LIB_NO_CONNECTION = -8,
-  GSTD_LIB_THREAD_ERROR = -9,
-  GSTD_LIB_BUS_TIMEOUT = -10,
-  GSTD_LIB_LONG_RESPONSE = -11,
-  GSTD_LIB_UNKNOWN_ERROR = -12
-} GstdStatus;
 
 /**
  * gstd_context_add_group:
@@ -86,9 +56,9 @@ gstd_context_add_group (GstD *gstd, GOptionContext *context);
  * 
  * Initializes gstd.
  *
- * Returns: GstdStatus indicating success or fail
+ * Returns: GstdReturnCode indicating success or fail
  */
-GstdStatus 
+GstdReturnCode 
 gstd_new (GstD ** out, int argc, char *argv[]);
 
 
@@ -98,7 +68,7 @@ gstd_new (GstD ** out, int argc, char *argv[]);
  * 
  * Starts the ipc in GstdIpc array
  *
- * Returns: GstdStatus indicating success or fail
+ * Returns: GstdReturnCode indicating success or fail
  */
 int
 gstd_start (GstD * gstd);
@@ -109,7 +79,7 @@ gstd_start (GstD * gstd);
  * 
  * Stops the ipc in GstdIpc array
  *
- * Returns: GstdStatus indicating success or fail
+ * Returns: GstdReturnCode indicating success or fail
  */
 void
 gstd_stop (GstD * gstd);
@@ -135,9 +105,9 @@ gstd_free (GstD * gstd);
  * Creates a new GStreamer pipeline that can be referred to using
  * @pipeline_name.
  *
- * Returns: GstdStatus indicating success or some failure
+ * Returns: GstdReturnCode indicating success or some failure
  */
-GstdStatus
+GstdReturnCode
 gstd_pipeline_create (GstD * gstd, const char *pipeline_name,
     const char *pipeline_desc);
   
@@ -153,9 +123,9 @@ gstd_pipeline_create (GstD * gstd, const char *pipeline_name,
  * free(*pipelines[idx]) to release the resources used to hold the list and
  * its elements
  *
- * Returns: GstdStatus indicating success or some failure
+ * Returns: GstdReturnCode indicating success or some failure
  */
-GstdStatus 
+GstdReturnCode 
 gstd_pipeline_list(GstD * gstd, 
     char **pipelines[], int *list_lenght);
 
@@ -166,9 +136,9 @@ gstd_pipeline_list(GstD * gstd,
  *
  * Deletes a previously created GStreamer pipeline named @pipeline_name.
  *
- * Returns: GstdStatus indicating success or some failure
+ * Returns: GstdReturnCode indicating success or some failure
  */
-GstdStatus
+GstdReturnCode
 gstd_pipeline_delete(GstD * gstd, const char *pipeline_name);
 
 /**
@@ -178,9 +148,9 @@ gstd_pipeline_delete(GstD * gstd, const char *pipeline_name);
  *
  * Attempts to change the named pipeline to the play state.
  *
- * Returns: GstdStatus indicating success or some failure
+ * Returns: GstdReturnCode indicating success or some failure
  */
-GstdStatus
+GstdReturnCode
 gstd_pipeline_play(GstD * gstd, const char *pipeline_name);
 
 /**
@@ -190,9 +160,9 @@ gstd_pipeline_play(GstD * gstd, const char *pipeline_name);
  *
  * Attempts to change the named pipeline to the paused state.
  *
- * Returns: GstdStatus indicating success or some failure
+ * Returns: GstdReturnCode indicating success or some failure
  */
-GstdStatus
+GstdReturnCode
 gstd_pipeline_pause(GstD * gstd, const char *pipeline_name);
 
 /**
@@ -202,9 +172,9 @@ gstd_pipeline_pause(GstD * gstd, const char *pipeline_name);
  *
  * Attempts to change the named pipeline to the null state.
  *
- * Returns: GstdStatus indicating success or some failure
+ * Returns: GstdReturnCode indicating success or some failure
  */
-GstdStatus
+GstdReturnCode
 gstd_pipeline_stop(GstD * gstd, const char *pipeline_name);
 
 /**
@@ -217,9 +187,9 @@ gstd_pipeline_stop(GstD * gstd, const char *pipeline_name);
  *
  * Controls amount of GStreamer Daemon debug logging.  Typically the GStreamer Daemon debug log output is directed to the system log file.
  *
- * Returns: GstdStatus indicating success, daemon unreachable, daemon timeout
+ * Returns: GstdReturnCode indicating success, daemon unreachable, daemon timeout
  */
-GstdStatus gstd_set_debug (GstD * gstd, const char* threshold,
+GstdReturnCode gstd_set_debug (GstD * gstd, const char* threshold,
     const int colors, const int reset);
 
 #ifdef __cplusplus

@@ -28,7 +28,18 @@ extern "C"
 #include "gstd_session.h"
 #include "libgstd.h"
 
-GstdStatus
+/**
+ * gstd_parser:
+ * 
+ * @session: Session allocated in gstd instance
+ * @cmd: GstD command to run
+ * @response:  gchar which will contain the response of the command
+ * 
+ * Initializes gstd.
+ *
+ * Returns: GstdReturnCode indicating success or fail
+ */
+GstdReturnCode
 gstd_parser (GstdSession * session, const gchar * cmd, gchar ** response);
 
 #ifdef __cplusplus
