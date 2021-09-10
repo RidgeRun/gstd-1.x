@@ -141,6 +141,7 @@ gstd_pipeline_action (GstD * gstd, const char *operation,
   gchar *message = NULL;
 
   g_return_val_if_fail (NULL != gstd, GSTD_LIB_NULL_ARGUMENT);
+  g_return_val_if_fail (NULL != gstd->session, GSTD_LIB_NULL_ARGUMENT);
   g_return_val_if_fail (NULL != pipeline_name, GSTD_LIB_NULL_ARGUMENT);
   g_return_val_if_fail (NULL != operation, GSTD_LIB_NULL_ARGUMENT);
 
@@ -332,6 +333,7 @@ gstd_pipeline_delete (GstD * gstd, const char *pipeline_name)
   GstdStatus ret = GSTD_LIB_OK;
 
   g_return_val_if_fail (NULL != gstd, GSTD_LIB_NULL_ARGUMENT);
+  g_return_val_if_fail (NULL != gstd->session, GSTD_LIB_NULL_ARGUMENT);
   g_return_val_if_fail (NULL != pipeline_name, GSTD_LIB_NULL_ARGUMENT);
 
   ret = gstd_pipeline_action (gstd, "delete", pipeline_name);
@@ -345,6 +347,7 @@ gstd_pipeline_play (GstD * gstd, const char *pipeline_name)
   GstdStatus ret = GSTD_LIB_OK;
 
   g_return_val_if_fail (NULL != gstd, GSTD_LIB_NULL_ARGUMENT);
+  g_return_val_if_fail (NULL != gstd->session, GSTD_LIB_NULL_ARGUMENT);
   g_return_val_if_fail (NULL != pipeline_name, GSTD_LIB_NULL_ARGUMENT);
 
   ret = gstd_pipeline_action (gstd, "play", pipeline_name);
@@ -358,6 +361,7 @@ gstd_pipeline_pause (GstD * gstd, const char *pipeline_name)
   GstdStatus ret = GSTD_LIB_OK;
 
   g_return_val_if_fail (NULL != gstd, GSTD_LIB_NULL_ARGUMENT);
+  g_return_val_if_fail (NULL != gstd->session, GSTD_LIB_NULL_ARGUMENT);
   g_return_val_if_fail (NULL != pipeline_name, GSTD_LIB_NULL_ARGUMENT);
 
   ret = gstd_pipeline_action (gstd, "pause", pipeline_name);
@@ -371,6 +375,7 @@ gstd_pipeline_stop (GstD * gstd, const char *pipeline_name)
   GstdStatus ret = GSTD_LIB_OK;
 
   g_return_val_if_fail (NULL != gstd, GSTD_LIB_NULL_ARGUMENT);
+  g_return_val_if_fail (NULL != gstd->session, GSTD_LIB_NULL_ARGUMENT);
   g_return_val_if_fail (NULL != pipeline_name, GSTD_LIB_NULL_ARGUMENT);
 
   ret = gstd_pipeline_action (gstd, "stop", pipeline_name);
@@ -388,6 +393,7 @@ gstd_set_debug (GstD * gstd, const char *threshold,
   gchar *message = NULL;
 
   g_return_val_if_fail (NULL != gstd, GSTD_LIB_NULL_ARGUMENT);
+  g_return_val_if_fail (NULL != gstd->session, GSTD_LIB_NULL_ARGUMENT);
   g_return_val_if_fail (NULL != threshold, GSTD_LIB_NULL_ARGUMENT);
 
   message = g_strdup_printf ("debug_enable true");

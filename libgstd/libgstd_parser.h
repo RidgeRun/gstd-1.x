@@ -35,4 +35,4 @@ gstd_parser (GstdSession * session, const gchar * cmd, gchar ** response);
 }
 #endif
 
-#endif // __LIBGSTD_PARSER_H__
+#endif /* __LIBGSTD_PARSER_H__ */

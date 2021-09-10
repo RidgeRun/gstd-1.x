@@ -34,6 +34,9 @@
 
 #include "gstd_parser.h"
 
+/* Necessary because the output of gstd_parser_parse_cmd is
+*  of type GstdReturnCode but LibGstD return GstdStatus to user.
+*/
 static GstdStatus gstd_return_code_to_gstd_status (const GstdReturnCode code);
 
 static GstdStatus
