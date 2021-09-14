@@ -149,7 +149,6 @@ gstd_pipeline_action (GstD * gstd, const char *operation,
 
   g_free (message);
 
-
   return ret;
 }
 
@@ -287,7 +286,6 @@ gstd_pipeline_create (GstD * gstd,
 
   g_free (message);
 
-
   return ret;
 }
 
@@ -403,6 +401,7 @@ gstd_set_debug (GstD * gstd, const char *threshold,
     goto out;
   }
 
+  g_free (message);
   message = g_strdup_printf ("debug_threshold %s", threshold);
   ret = gstd_parser (gstd->session, message, NULL);
   if (ret != GSTD_EOK) {
@@ -410,6 +409,7 @@ gstd_set_debug (GstD * gstd, const char *threshold,
   }
 
   colored = colors == 0 ? "false" : "true";
+  g_free (message);
   message = g_strdup_printf ("debug_color %s", colored);
   ret = gstd_parser (gstd->session, message, NULL);
   if (ret != GSTD_EOK) {
@@ -417,6 +417,7 @@ gstd_set_debug (GstD * gstd, const char *threshold,
   }
 
   reset_bool = reset == 0 ? "false" : "true";
+  g_free (message);
   message = g_strdup_printf ("debug_reset %s", reset_bool);
   ret = gstd_parser (gstd->session, message, NULL);
   if (ret != GSTD_EOK) {

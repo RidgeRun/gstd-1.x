@@ -97,7 +97,7 @@ gstd_json_get_child_char_array (const char *json,
   json_t *array_data = NULL;
   json_t *data, *name = NULL;
   json_error_t error = { 0 };
-  int i, j;
+  int out_idx, out_to_clean_idx;
 
   g_return_val_if_fail (json != NULL, GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (array_name != NULL, GSTD_NULL_ARGUMENT);
@@ -127,10 +127,10 @@ gstd_json_get_child_char_array (const char *json,
     goto unref;
   }
 
-  for (i = 0; i < (*array_lenght); i++) {
+  for (out_idx = 0; out_idx < (*array_lenght); out_idx++) {
     const char *string;
 
-    data = json_array_get (array_data, i);
+    data = json_array_get (array_data, out_idx);
     if (!json_is_object (data)) {
       ret = GSTD_BAD_VALUE;
       goto clear_mem;
@@ -148,14 +148,14 @@ gstd_json_get_child_char_array (const char *json,
       * Jansson library frees memory after parent object is dereferenced,
       * memory copies are necessary in order to preserve data
       */
-    (*out)[i] = malloc (strlen (string) + 1);
-    if (NULL == out[i]) {
+    (*out)[out_idx] = malloc (strlen (string) + 1);
+    if (NULL == out[out_idx]) {
       ret = GSTD_OOM;
       goto unref;
     }
-    strncpy ((*out)[i], string, strlen (string));
+    strncpy ((*out)[out_idx], string, strlen (string));
     /* Ensure traling null byte is copied */
-    (*out)[i][strlen (string)] = '\0';
+    (*out)[out_idx][strlen (string)] = '\0';
   }
 
 unref:
@@ -165,8 +165,8 @@ unref:
 
 clear_mem:
   /* In case of failure all allocated memory is freed */
-  for (j = 0; j < i; j++) {
-    free ((*out)[j]);
+  for (out_to_clean_idx = 0; out_to_clean_idx < out_idx; out_to_clean_idx++) {
+    free ((*out)[out_to_clean_idx]);
   }
   free (*out);
   return ret;
