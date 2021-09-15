@@ -15,7 +15,6 @@ jobs:
       fail-fast: false
       matrix:
         os:
-          - ubuntu-18.04
           - ubuntu-20.04
         include:
           - os: ubuntu-22.04

@@ -38,16 +38,16 @@ from pygstc.logger import *
 
 class TestGstcPipelineStopMethods(GstdTestRunner):
 
-    def test_libgstc_python_pipeline_stop(self):
+    async def test_libgstc_python_pipeline_stop(self):
         pipeline = 'videotestsrc name=v0 ! fakesink'
         self.gstd_logger = CustomLogger('test_libgstc', loglevel='DEBUG')
         self.gstd_client = GstdClient(port=self.port, logger=self.gstd_logger)
-        self.gstd_client.pipeline_create('p0', pipeline)
-        self.gstd_client.pipeline_play('p0')
-        self.gstd_client.pipeline_stop('p0')
-        self.assertIn(self.gstd_client.read(
-            'pipelines/p0/state')['value'], ['NULL', 'null'])
-        self.gstd_client.pipeline_delete('p0')
+        await self.gstd_client.pipeline_create('p0', pipeline)
+        await self.gstd_client.pipeline_play('p0')
+        await self.gstd_client.pipeline_stop('p0')
+        ret = await self.gstd_client.read('pipelines/p0/state')
+        self.assertIn(ret['value'], ['NULL', 'null'])
+        await self.gstd_client.pipeline_delete('p0')
 
 
 if __name__ == '__main__':

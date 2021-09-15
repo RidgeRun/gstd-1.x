@@ -38,18 +38,18 @@ from pygstc.logger import *
 
 class TestGstcBusFilterMethods(GstdTestRunner):
 
-    def test_bus_filter_eos(self):
+    async def test_bus_filter_eos(self):
         pipeline = 'videotestsrc name=v0 ! fakesink'
         self.gstd_logger = CustomLogger('test_libgstc', loglevel='DEBUG')
         self.gstd_client = GstdClient(port=self.port, logger=self.gstd_logger)
-        self.gstd_client.pipeline_create('p0', pipeline)
-        self.gstd_client.pipeline_play('p0')
-        self.gstd_client.event_eos('p0')
-        self.gstd_client.bus_filter('p0', 'eos')
-        ret = self.gstd_client.bus_read('p0')
+        await self.gstd_client.pipeline_create('p0', pipeline)
+        await self.gstd_client.pipeline_play('p0')
+        await self.gstd_client.event_eos('p0')
+        await self.gstd_client.bus_filter('p0', 'eos')
+        ret = await self.gstd_client.bus_read('p0')
         self.assertEqual(ret['type'], 'eos')
-        self.gstd_client.pipeline_stop('p0')
-        self.gstd_client.pipeline_delete('p0')
+        await self.gstd_client.pipeline_stop('p0')
+        await self.gstd_client.pipeline_delete('p0')
 
 
 if __name__ == '__main__':

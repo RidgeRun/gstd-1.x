@@ -38,7 +38,7 @@ from pygstc.logger import *
 
 class TestGstcListPropertiesMethods(GstdTestRunner):
 
-    def test_list_properties(self):
+    async def test_list_properties(self):
         pipeline = \
             'videotestsrc name=v0 ! identity name=i0 ! fakesink name=x0'
         self.gstd_logger = CustomLogger('test_libgstc', loglevel='DEBUG')
@@ -63,10 +63,10 @@ class TestGstcListPropertiesMethods(GstdTestRunner):
             {'name': 'signal-handoffs'},
             {'name': 'drop-allocation'},
         ]
-        self.gstd_client.pipeline_create('p0', pipeline)
-        self.assertEqual(self.gstd_client.list_properties('p0', 'i0')[0],
-                         identity_properties[0])
-        self.gstd_client.pipeline_delete('p0')
+        await self.gstd_client.pipeline_create('p0', pipeline)
+        ret = await self.gstd_client.list_properties('p0', 'i0')
+        self.assertEqual(ret[0], identity_properties[0])
+        await self.gstd_client.pipeline_delete('p0')
 
 
 if __name__ == '__main__':

@@ -29,16 +29,17 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
 # OF THE POSSIBILITY OF SUCH DAMAGE.
 
+import asyncio
 import unittest
-import subprocess
 
 from gstd_runner import GstdTestRunner
 
 
 class TestGstcStopGstdMethods(GstdTestRunner):
 
-    def test_libgstc_python_stop_gstd(self):
-        subprocess.Popen([self.gstd_path, '-k'])
+    async def test_libgstc_python_stop_gstd(self):
+        gstd_k = await asyncio.create_subprocess_exec(self.gstd_path, '-k')
+        await gstd_k.wait()
 
 
 if __name__ == '__main__':
