@@ -1,6 +1,6 @@
 /*
  * GStreamer Daemon - Gst Launch under steroids
- * Copyright (c) 2015-2017 Ridgerun, LLC (http://www.ridgerun.com)
+ * Copyright (c) 2015-2021 Ridgerun, LLC (http://www.ridgerun.com)
  * 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -21,8 +21,8 @@
 #include "config.h"
 #endif
 
-#include "lib_gstd_return_codes.h"
 #include "gstd_property_boolean.h"
+#include "lib_gstd_return_codes.h"
 
 /* Gstd Property debugging category */
 GST_DEBUG_CATEGORY_STATIC (gstd_property_boolean_debug);

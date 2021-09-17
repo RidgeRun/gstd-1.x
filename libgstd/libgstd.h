@@ -185,7 +185,8 @@ gstd_pipeline_stop(GstD * gstd, const char *pipeline_name);
  * @reset: if non-zero the debug threshold will be cleared each time, otherwise threshold 
  * is appended to previous threshold.
  *
- * Controls amount of GStreamer Daemon debug logging.  Typically the GStreamer Daemon debug log output is directed to the system log file.
+ * Controls amount of GStreamer Daemon debug logging.  
+ * Typically the GStreamer Daemon debug log output is directed to the system log file.
  *
  * Returns: GstdReturnCode indicating success, daemon unreachable, daemon timeout
  */

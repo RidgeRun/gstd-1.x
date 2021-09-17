@@ -97,7 +97,7 @@ gstd_json_get_child_char_array (const char *json,
   json_t *array_data = NULL;
   json_t *data, *name = NULL;
   json_error_t error = { 0 };
-  int out_idx, out_to_clean_idx;
+  int out_idx = 0, out_to_clean_idx = 0;
 
   g_return_val_if_fail (json != NULL, GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (array_name != NULL, GSTD_NULL_ARGUMENT);

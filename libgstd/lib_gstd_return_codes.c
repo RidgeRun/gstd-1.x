@@ -20,7 +20,7 @@
  */
 
 /**
- * \file return_codes.C
+ * \file lib_gstd_return_codes.c
  *
  * Gstreamer Daemon return codes textual description
  */
