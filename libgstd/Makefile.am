@@ -59,7 +59,7 @@ libgstd_@GSTD_API_VERSION@_la_SOURCES =             \
              gstd_signal_list.c                     \
              gstd_log.c
 
-libgstd_@GSTD_API_VERSION@_la_CFLAGS =                                   \
+libgstd_@GSTD_API_VERSION@_la_CFLAGS =                                     \
 			 $(GST_CFLAGS)                                     \
 			 -I$(top_srcdir)/gstd/                             \
 			 $(GIO_CFLAGS)                                     \
@@ -72,7 +72,7 @@ libgstd_@GSTD_API_VERSION@_la_CFLAGS =                                   \
 
 libgstd_@GSTD_API_VERSION@_la_LDFLAGS = $(GST_LIBS) $(GIO_LIBS) $(GJSON_LIBS) $(LIBSOUP_LIBS) $(JANSSON_LIBS) -pthread
 
-noinst_HEADERS =                                    \
+noinst_HEADERS =                                                \
 			 gstd_session.c                         \
 			 gstd_pipeline.c                        \
 			 gstd_element.c                         \
