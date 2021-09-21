@@ -37,107 +37,107 @@ enum _GstdReturnCode
   /**
    * Everything went OK 
    */
-  GSTD_EOK = 0,
+  GSTD_EOK,
 
   /**
    * A mandatory argument was passed NULL
    */
-  GSTD_NULL_ARGUMENT = -1,
+  GSTD_NULL_ARGUMENT,
 
   /**
    * A bad pipeline description was provided
    */
-  GSTD_BAD_DESCRIPTION = -2,
+  GSTD_BAD_DESCRIPTION,
 
   /**
    * The name trying to be used already exists
    */
-  GSTD_EXISTING_NAME = -3,
+  GSTD_EXISTING_NAME,
 
   /**
    * Missing initialization
    */
-  GSTD_MISSING_INITIALIZATION = -4,
+  GSTD_MISSING_INITIALIZATION,
 
   /**
    * The requested pipeline was not found
    */
-  GSTD_NO_PIPELINE = -5,
+  GSTD_NO_PIPELINE,
 
   /**
    * The requested resource was not found
    */
-  GSTD_NO_RESOURCE = -6,
+  GSTD_NO_RESOURCE,
 
   /**
    * Cannot create a resource in the given property
    */
-  GSTD_NO_CREATE = -7,
+  GSTD_NO_CREATE,
 
   /**
    * The resource to create already exists
    */
-  GSTD_EXISTING_RESOURCE = -8,
+  GSTD_EXISTING_RESOURCE,
 
   /**
    * Cannot update the given property
    */
-  GSTD_NO_UPDATE = -9,
+  GSTD_NO_UPDATE,
 
   /**
    * Unknown command
    */
-  GSTD_BAD_COMMAND = -10,
+  GSTD_BAD_COMMAND,
 
   /**
    * Cannot read the given resource
    */
-  GSTD_NO_READ = -11,
+  GSTD_NO_READ,
 
   /**
    * Cannot connect
    */
-  GSTD_NO_CONNECTION = -12,
+  GSTD_NO_CONNECTION,
 
   /**
    * The given value is incorrect
    */
-  GSTD_BAD_VALUE = -13,
+  GSTD_BAD_VALUE,
 
   /**
    * Failed to change state of a pipeline
    */
-  GSTD_STATE_ERROR = -14,
+  GSTD_STATE_ERROR,
 
   /**
    * Failed to start IPC
    */
-  GSTD_IPC_ERROR = -15,
+  GSTD_IPC_ERROR,
 
   /**
    * Unknown event
    */
-  GSTD_EVENT_ERROR = -16,
+  GSTD_EVENT_ERROR,
 
   /**
    * Incomplete arguments in user input
    */
-  GSTD_MISSING_ARGUMENT = -17,
+  GSTD_MISSING_ARGUMENT,
 
   /**
    * Missing name of the pipeline
    */
-  GSTD_MISSING_NAME = -18,
+  GSTD_MISSING_NAME,
 
   /**
    * The system has run out of memory
    */
-  GSTD_OOM = -19,
+  GSTD_OOM,
 
   /**
    * Unknown error
    */
-  GSTD_UNKNOWN_ERROR = -20,
+  GSTD_UNKNOWN_ERROR,
 
 };
 

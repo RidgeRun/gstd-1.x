@@ -1,6 +1,6 @@
 /*
  * GStreamer Daemon - Gst Launch under steroids
- * Copyright (c) 2015-2017 Ridgerun, LLC (http://www.ridgerun.com)
+ * Copyright (c) 2015-2021 Ridgerun, LLC (http://www.ridgerun.com)
  * 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -170,11 +170,12 @@
 #define __GSTD_SESSION___
 
 #include <glib.h>
-#include "lib_gstd_return_codes.h"
+#include "gstd_debug.h"
+#include "gstd_list.h"
 #include "gstd_object.h"
 #include "gstd_pipeline.h"
-#include "gstd_list.h"
-#include "gstd_debug.h"
+#include "gstd_return_codes.h"
+
 
 G_BEGIN_DECLS
 #define GSTD_TYPE_SESSION \

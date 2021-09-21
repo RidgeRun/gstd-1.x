@@ -43,9 +43,6 @@
 #include "gstd_tcp.h"
 #include "gstd_unix.h"
 
-#include "libgstd_json.h"
-#include "libgstd_parser.h"
-
 /**
  * Supported_IPCs:
  * @GSTD_IPC_TYPE_TCP: To enable TCP communication
@@ -129,27 +126,6 @@ gstd_set_ipc (GstD * gstd)
 
   gstd->num_ipcs = num_ipcs;
   gstd->ipc_array = ipc_array;
-}
-
-static GstdReturnCode
-gstd_pipeline_action (GstD * gstd, const char *operation,
-    const char *pipeline_name)
-{
-  GstdReturnCode ret = GSTD_EOK;
-  gchar *message = NULL;
-
-  g_return_val_if_fail (NULL != gstd, GSTD_NULL_ARGUMENT);
-  g_return_val_if_fail (NULL != gstd->session, GSTD_NULL_ARGUMENT);
-  g_return_val_if_fail (NULL != pipeline_name, GSTD_NULL_ARGUMENT);
-  g_return_val_if_fail (NULL != operation, GSTD_NULL_ARGUMENT);
-
-  message = g_strdup_printf ("pipeline_%s %s", operation, pipeline_name);
-
-  ret = gstd_parser (gstd->session, message, NULL);
-
-  g_free (message);
-
-  return ret;
 }
 
 void
@@ -270,163 +246,96 @@ gstd_free (GstD * gstd)
 }
 
 GstdReturnCode
-gstd_pipeline_create (GstD * gstd,
-    const char *pipeline_name, const char *pipeline_desc)
+gstd_create (GstD * gstd, const gchar * uri, const gchar * name,
+    const gchar * description)
 {
   GstdReturnCode ret = GSTD_EOK;
-  gchar *message = NULL;
+  GstdObject *node;
 
   g_return_val_if_fail (NULL != gstd, GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (NULL != gstd->session, GSTD_NULL_ARGUMENT);
-  g_return_val_if_fail (NULL != pipeline_name, GSTD_NULL_ARGUMENT);
-  g_return_val_if_fail (NULL != pipeline_desc, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (NULL != uri, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (NULL != name, GSTD_NULL_ARGUMENT);
 
-  message = g_strdup_printf ("%s %s", pipeline_name, pipeline_desc);
-  ret = gstd_pipeline_action (gstd, "create", message);
-
-  g_free (message);
-
-  return ret;
-}
-
-GstdReturnCode
-gstd_pipeline_list (GstD * gstd, char **pipelines[], int *list_lenght)
-{
-  GstdReturnCode ret = GSTD_EOK;
-  gchar *message = NULL;
-  gchar *response = NULL;
-
-  g_return_val_if_fail (NULL != gstd, GSTD_NULL_ARGUMENT);
-  g_return_val_if_fail (NULL != gstd->session, GSTD_NULL_ARGUMENT);
-  g_return_val_if_fail (NULL != pipelines, GSTD_NULL_ARGUMENT);
-  g_return_val_if_fail (NULL != list_lenght, GSTD_NULL_ARGUMENT);
-
-  message = g_strdup_printf ("list_pipelines");
-  ret = gstd_parser (gstd->session, message, &response);
-  if (ret != GSTD_EOK) {
-    goto out_no_free_response;
-  }
-
-  ret =
-      gstd_json_get_child_char_array (response, "nodes", "name", pipelines,
-      list_lenght);
-  if (ret != GSTD_EOK) {
+  ret = gstd_get_by_uri (gstd->session, uri, &node);
+  if (GSTD_EOK != ret || NULL == node) {
     goto out;
   }
+
+  ret = gstd_object_create (node, name, description);
+
+  g_object_unref (node);
 
 out:
-  g_free (message);
-  g_free (response);
-
-  return ret;
-
-out_no_free_response:
-  g_free (message);
-
   return ret;
 }
 
 GstdReturnCode
-gstd_pipeline_delete (GstD * gstd, const char *pipeline_name)
+gstd_read (GstD * gstd, const gchar * uri, GstdObject ** resource)
 {
   GstdReturnCode ret = GSTD_EOK;
+  GstdObject *node;
 
   g_return_val_if_fail (NULL != gstd, GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (NULL != gstd->session, GSTD_NULL_ARGUMENT);
-  g_return_val_if_fail (NULL != pipeline_name, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (NULL != uri, GSTD_NULL_ARGUMENT);
 
-  ret = gstd_pipeline_action (gstd, "delete", pipeline_name);
-
-  return ret;
-}
-
-GstdReturnCode
-gstd_pipeline_play (GstD * gstd, const char *pipeline_name)
-{
-  GstdReturnCode ret = GSTD_EOK;
-
-  g_return_val_if_fail (NULL != gstd, GSTD_NULL_ARGUMENT);
-  g_return_val_if_fail (NULL != gstd->session, GSTD_NULL_ARGUMENT);
-  g_return_val_if_fail (NULL != pipeline_name, GSTD_NULL_ARGUMENT);
-
-  ret = gstd_pipeline_action (gstd, "play", pipeline_name);
-
-  return ret;
-}
-
-GstdReturnCode
-gstd_pipeline_pause (GstD * gstd, const char *pipeline_name)
-{
-  GstdReturnCode ret = GSTD_EOK;
-
-  g_return_val_if_fail (NULL != gstd, GSTD_NULL_ARGUMENT);
-  g_return_val_if_fail (NULL != gstd->session, GSTD_NULL_ARGUMENT);
-  g_return_val_if_fail (NULL != pipeline_name, GSTD_NULL_ARGUMENT);
-
-  ret = gstd_pipeline_action (gstd, "pause", pipeline_name);
-
-  return ret;
-}
-
-GstdReturnCode
-gstd_pipeline_stop (GstD * gstd, const char *pipeline_name)
-{
-  GstdReturnCode ret = GSTD_EOK;
-
-  g_return_val_if_fail (NULL != gstd, GSTD_NULL_ARGUMENT);
-  g_return_val_if_fail (NULL != gstd->session, GSTD_NULL_ARGUMENT);
-  g_return_val_if_fail (NULL != pipeline_name, GSTD_NULL_ARGUMENT);
-
-  ret = gstd_pipeline_action (gstd, "stop", pipeline_name);
-
-  return ret;
-}
-
-GstdReturnCode
-gstd_set_debug (GstD * gstd, const char *threshold,
-    const int colors, const int reset)
-{
-  GstdReturnCode ret = GSTD_EOK;
-  const char *colored = NULL;
-  const char *reset_bool = NULL;
-  gchar *message = NULL;
-
-  g_return_val_if_fail (NULL != gstd, GSTD_NULL_ARGUMENT);
-  g_return_val_if_fail (NULL != gstd->session, GSTD_NULL_ARGUMENT);
-  g_return_val_if_fail (NULL != threshold, GSTD_NULL_ARGUMENT);
-
-  message = g_strdup_printf ("debug_enable true");
-  ret = gstd_parser (gstd->session, message, NULL);
-  if (ret != GSTD_EOK) {
+  ret = gstd_get_by_uri (gstd->session, uri, &node);
+  if (GSTD_EOK != ret || NULL == node) {
     goto out;
   }
 
-  g_free (message);
-  message = g_strdup_printf ("debug_threshold %s", threshold);
-  ret = gstd_parser (gstd->session, message, NULL);
-  if (ret != GSTD_EOK) {
-    goto out;
-  }
-
-  colored = colors == 0 ? "false" : "true";
-  g_free (message);
-  message = g_strdup_printf ("debug_color %s", colored);
-  ret = gstd_parser (gstd->session, message, NULL);
-  if (ret != GSTD_EOK) {
-    goto out;
-  }
-
-  reset_bool = reset == 0 ? "false" : "true";
-  g_free (message);
-  message = g_strdup_printf ("debug_reset %s", reset_bool);
-  ret = gstd_parser (gstd->session, message, NULL);
-  if (ret != GSTD_EOK) {
-    goto out;
-  }
+  *resource = node;
+  g_object_unref (node);
 
 out:
-  g_free (message);
+  return ret;
+}
 
+GstdReturnCode
+gstd_update (GstD * gstd, const gchar * uri, const gchar * value)
+{
+  GstdReturnCode ret = GSTD_EOK;
+  GstdObject *node;
 
+  g_return_val_if_fail (NULL != gstd, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (NULL != gstd->session, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (NULL != uri, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (NULL != value, GSTD_NULL_ARGUMENT);
+
+  ret = gstd_get_by_uri (gstd->session, uri, &node);
+  if (GSTD_EOK != ret || NULL == node) {
+    goto out;
+  }
+
+  ret = gstd_object_update (node, value);
+
+  g_object_unref (node);
+
+out:
+  return ret;
+}
+
+GstdReturnCode
+gstd_delete (GstD * gstd, const gchar * uri, const gchar * name)
+{
+  GstdReturnCode ret = GSTD_EOK;
+  GstdObject *node;
+
+  g_return_val_if_fail (NULL != gstd, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (NULL != gstd->session, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (NULL != uri, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (NULL != name, GSTD_NULL_ARGUMENT);
+
+  ret = gstd_get_by_uri (gstd->session, uri, &node);
+  if (GSTD_EOK != ret || NULL == node) {
+    goto out;
+  }
+
+  ret = gstd_object_delete (node, name);
+
+  g_object_unref (node);
+
+out:
   return ret;
 }

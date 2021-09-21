@@ -21,7 +21,7 @@
 #define __GSTD_IDELETER_H__
 
 #include <gst/gst.h>
-#include <lib_gstd_return_codes.h>
+#include <gstd_return_codes.h>
 
 G_BEGIN_DECLS
 #define GSTD_TYPE_IDELETER                (gstd_ideleter_get_type ())

@@ -53,10 +53,10 @@
 
 #include <glib.h>
 
-#include "lib_gstd_return_codes.h"
 #include "gstd_object.h"
 #include "gstd_parser.h"
 #include "gstd_pipeline.h"
+#include "gstd_return_codes.h"
 #include "gstd_session.h"
 
 G_BEGIN_DECLS

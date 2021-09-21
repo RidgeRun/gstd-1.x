@@ -22,7 +22,7 @@
 #endif
 
 #include "gstd_property_boolean.h"
-#include "lib_gstd_return_codes.h"
+#include "gstd_return_codes.h"
 
 /* Gstd Property debugging category */
 GST_DEBUG_CATEGORY_STATIC (gstd_property_boolean_debug);

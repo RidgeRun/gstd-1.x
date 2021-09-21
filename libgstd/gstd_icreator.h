@@ -21,7 +21,7 @@
 #define __GSTD_ICREATOR_H__
 
 #include <gst/gst.h>
-#include <lib_gstd_return_codes.h>
+#include <gstd_return_codes.h>
 
 G_BEGIN_DECLS
 #define GSTD_TYPE_ICREATOR                (gstd_icreator_get_type ())

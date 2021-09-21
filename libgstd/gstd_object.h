@@ -19,7 +19,7 @@
 #ifndef __GSTD_OBJECT_H__
 #define __GSTD_OBJECT_H__
 
-#include <lib_gstd_return_codes.h>
+#include <gstd_return_codes.h>
 
 #include "gstd_icreator.h"
 #include "gstd_ideleter.h"

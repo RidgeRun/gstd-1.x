@@ -28,7 +28,8 @@ extern "C"
 #include <gst/gst.h>
 #include <glib-unix.h>
 
-#include "lib_gstd_return_codes.h"
+#include "gstd_object.h"
+#include "gstd_return_codes.h"
 
 /*
  * GstD:
@@ -97,101 +98,62 @@ void
 gstd_free (GstD * gstd);
 
 /**
- * gstd_pipeline_create:
- * @gstd: The gstd instance returned by gstd_new()
- * @pipeline_name: Name to associate to the pipeline
- * @pipeline_desc: The gst-launch style pipeline description to create
+ * gstd_create:
+ * 
+ * @gstd: A valid gstd instance allocated with gstd_new()
+ * @uri: Path to the resource in which the action will be
+ * applied in low level CRUD syntax 
+ * @name: Name of the resource to create
+ * @description: Description of the resource to create
+ * 
+ * A new Create call of the argument with the description
  *
- * Creates a new GStreamer pipeline that can be referred to using
- * @pipeline_name.
- *
- * Returns: GstdReturnCode indicating success or some failure
+ * Returns: GstdReturnCode indicating success or fail
  */
-GstdReturnCode
-gstd_pipeline_create (GstD * gstd, const char *pipeline_name,
-    const char *pipeline_desc);
-  
-/**
- * gstd_pipeline_list:
- * @gstd: The gstd instance returned by gstd_new()
- * @pipelines: List of existing pipelines names returned by the gstd library
- * @list_lenght: Number of elements in the pipelines list
- *
- * Returns a list of the names of the existing pipelines.  Depending on the
- * deployment, another  application may have created some of the pipelines.
- * The gstd application needs to do a free(*pipelines) and a
- * free(*pipelines[idx]) to release the resources used to hold the list and
- * its elements
- *
- * Returns: GstdReturnCode indicating success or some failure
- */
-GstdReturnCode 
-gstd_pipeline_list(GstD * gstd, 
-    char **pipelines[], int *list_lenght);
+GstdReturnCode gstd_create (GstD *gstd, const gchar *uri, const gchar *name, const gchar *description);
 
 /**
- * gstd_pipeline_delete:
- * @gstd: The gstd instance returned by gstd_new()
- * @pipeline_name: Name associated with the pipeline
+ * gstd_read:
+ * 
+ * @gstd: A valid gstd instance allocated with gstd_new()
+ * @uri: Path to the resource in which the action will be
+ * applied in low level CRUD syntax 
+ * @resource: Placeholder for the resource required
+ * 
+ * A new Read call of the argument
  *
- * Deletes a previously created GStreamer pipeline named @pipeline_name.
- *
- * Returns: GstdReturnCode indicating success or some failure
+ * Returns: GstdReturnCode indicating success or fail
  */
-GstdReturnCode
-gstd_pipeline_delete(GstD * gstd, const char *pipeline_name);
+GstdReturnCode gstd_read (GstD *gstd, const gchar *uri, GstdObject **resource);
 
 /**
- * gstd_pipeline_play:
- * @gstd: The gstd instance returned by gstd_new()
- * @pipeline_name: Name associated with the pipeline
+ * gstd_update:
+ * 
+ * @gstd: A valid gstd instance allocated with gstd_new()
+ * @uri: Path to the resource in which the action will be
+ * applied in low level CRUD syntax 
+ * @value: New value to set the resource 
+ * 
+ * A new Update call of the argument with the description
  *
- * Attempts to change the named pipeline to the play state.
- *
- * Returns: GstdReturnCode indicating success or some failure
+ * Returns: GstdReturnCode indicating success or fail
  */
-GstdReturnCode
-gstd_pipeline_play(GstD * gstd, const char *pipeline_name);
+GstdReturnCode gstd_update (GstD *gstd, const gchar *uri, const gchar *value);
 
 /**
- * gstd_pipeline_pause:
- * @gstd: The gstd instance returned by gstd_new()
- * @pipeline_name: Name associated with the pipeline
+ * gstd_delete:
+ * 
+ * @gstd: A valid gstd instance allocated with gstd_new()
+ * @uri: Path to the resource in which the action will be
+ * applied in low level CRUD syntax 
+ * @name: Name of the resource to delete
+ * 
+ * A Delete call to a resource given by the URI
  *
- * Attempts to change the named pipeline to the paused state.
- *
- * Returns: GstdReturnCode indicating success or some failure
+ * Returns: GstdReturnCode indicating success or fail
  */
-GstdReturnCode
-gstd_pipeline_pause(GstD * gstd, const char *pipeline_name);
+GstdReturnCode gstd_delete (GstD *gstd, const gchar *uri, const gchar *name);
 
-/**
- * gstd_pipeline_stop:
- * @gstd: The gstd instance returned by gstd_new()
- * @pipeline_name: Name associated with the pipeline
- *
- * Attempts to change the named pipeline to the null state.
- *
- * Returns: GstdReturnCode indicating success or some failure
- */
-GstdReturnCode
-gstd_pipeline_stop(GstD * gstd, const char *pipeline_name);
-
-/**
- * gstd_debug:
- * @threshold: the debug level takes a keyword and the debug level in the argument
- * recieving 0 as a level is equivalent to disabling debug
- * @colors: if non-zero ANSI color control escape sequences will be included in the debug output
- * @reset: if non-zero the debug threshold will be cleared each time, otherwise threshold 
- * is appended to previous threshold.
- *
- * Controls amount of GStreamer Daemon debug logging.  
- * Typically the GStreamer Daemon debug log output is directed to the system log file.
- *
- * Returns: GstdReturnCode indicating success, daemon unreachable, daemon timeout
- */
-GstdReturnCode gstd_set_debug (GstD * gstd, const char* threshold,
-    const int colors, const int reset);
 
 #ifdef __cplusplus
 }

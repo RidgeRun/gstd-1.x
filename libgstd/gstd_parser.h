@@ -26,7 +26,7 @@
 
 #include <glib.h>
 
-#include "lib_gstd_return_codes.h"
+#include "gstd_return_codes.h"
 #include "gstd_session.h"
 
 /**
