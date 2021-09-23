@@ -56,7 +56,7 @@ gstd_src = [
   'gstd_session.c',
   'gstd_socket.c',
   'gstd_unix.c',
-  '../gstd/gstd_log.c',
+  'gstd_log.c',
 ]
 
 libgstd_src = [

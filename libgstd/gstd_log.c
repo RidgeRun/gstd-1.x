@@ -37,17 +37,18 @@ GST_DEBUG_CATEGORY (gstd_debug);
 static void
 gstd_log_proxy (GstDebugCategory * category, GstDebugLevel level,
     const gchar * file, const gchar * function, gint line, GObject * object,
-    GstDebugMessage * message, gpointer user_data) G_GNUC_NO_INSTRUMENT;
+    GstDebugMessage * message, gpointer user_data)
+    G_GNUC_NO_INSTRUMENT;
 
-static const gchar *gstd_log_get_gstd_default (void);
-static const gchar *gstd_log_get_gst_default (void);
-static gchar *gstd_log_get_filename (const gchar * filename,
+     static const gchar *gstd_log_get_gstd_default (void);
+     static const gchar *gstd_log_get_gst_default (void);
+     static gchar *gstd_log_get_filename (const gchar * filename,
     const gchar * default_filename);
 
-static FILE *_gstdlog = NULL;
-static FILE *_gstlog = NULL;
-static gchar *gstd_filename;
-static gchar *gst_filename;
+     static FILE *_gstdlog = NULL;
+     static FILE *_gstlog = NULL;
+     static gchar *gstd_filename;
+     static gchar *gst_filename;
 
 gboolean
 gstd_log_init (const gchar * gstdfilename, const gchar * gstfilename)
@@ -62,7 +63,8 @@ gstd_log_init (const gchar * gstdfilename, const gchar * gstfilename)
   _gstdlog = g_fopen (gstd_filename, "a+");
 
   if (!_gstdlog) {
-    g_printerr ("Unable to open Gstd log file %s: %s\n", gstd_filename, g_strerror (errno));
+    g_printerr ("Unable to open Gstd log file %s: %s\n", gstd_filename,
+        g_strerror (errno));
     return FALSE;
   }
 
@@ -71,7 +73,8 @@ gstd_log_init (const gchar * gstdfilename, const gchar * gstfilename)
   _gstlog = g_fopen (gst_filename, "a+");
 
   if (!_gstlog) {
-    g_printerr ("Unable to open Gst log file %s: %s\n", gst_filename, g_strerror (errno));
+    g_printerr ("Unable to open Gst log file %s: %s\n", gst_filename,
+        g_strerror (errno));
     return FALSE;
   }
 
