@@ -123,6 +123,4 @@ noinst_HEADERS =                                               \
 			 gstd_socket.h                         \
 			 gstd_unix.h                           \
 			 gstd_signal_list.h                    \
-			 gstd_log.c
-
-			 
+			 gstd_log.h
