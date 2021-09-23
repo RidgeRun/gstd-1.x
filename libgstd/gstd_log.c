@@ -34,16 +34,16 @@ GST_DEBUG_CATEGORY (gstd_debug);
 #define GSTD_DEBUG_PREFIX "gstd"
 #define GSTD_DEBUG_LEVEL "WARNING"
 
+static const gchar *gstd_log_get_gstd_default (void);
+static const gchar *gstd_log_get_gst_default (void);
+static gchar *gstd_log_get_filename (const gchar * filename,
+    const gchar * default_filename);
+
 static void
 gstd_log_proxy (GstDebugCategory * category, GstDebugLevel level,
     const gchar * file, const gchar * function, gint line, GObject * object,
     GstDebugMessage * message, gpointer user_data)
     G_GNUC_NO_INSTRUMENT;
-
-     static const gchar *gstd_log_get_gstd_default (void);
-     static const gchar *gstd_log_get_gst_default (void);
-     static gchar *gstd_log_get_filename (const gchar * filename,
-    const gchar * default_filename);
 
      static FILE *_gstdlog = NULL;
      static FILE *_gstlog = NULL;
