@@ -250,7 +250,7 @@ gstd_create (GstD * gstd, const gchar * uri, const gchar * name,
     const gchar * description)
 {
   GstdReturnCode ret = GSTD_EOK;
-  GstdObject *node;
+  GstdObject *node = NULL;
 
   g_return_val_if_fail (NULL != gstd, GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (NULL != gstd->session, GSTD_NULL_ARGUMENT);
@@ -258,7 +258,7 @@ gstd_create (GstD * gstd, const gchar * uri, const gchar * name,
   g_return_val_if_fail (NULL != name, GSTD_NULL_ARGUMENT);
 
   ret = gstd_get_by_uri (gstd->session, uri, &node);
-  if (GSTD_EOK != ret || NULL == node) {
+  if (GSTD_EOK != ret) {
     goto out;
   }
 
@@ -287,7 +287,7 @@ GstdReturnCode
 gstd_delete (GstD * gstd, const gchar * uri, const gchar * name)
 {
   GstdReturnCode ret = GSTD_EOK;
-  GstdObject *node;
+  GstdObject *node = NULL;
 
   g_return_val_if_fail (NULL != gstd, GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (NULL != gstd->session, GSTD_NULL_ARGUMENT);
@@ -295,7 +295,7 @@ gstd_delete (GstD * gstd, const gchar * uri, const gchar * name)
   g_return_val_if_fail (NULL != name, GSTD_NULL_ARGUMENT);
 
   ret = gstd_get_by_uri (gstd->session, uri, &node);
-  if (GSTD_EOK != ret || NULL == node) {
+  if (GSTD_EOK != ret) {
     goto out;
   }
 
