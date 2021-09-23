@@ -72,7 +72,7 @@ libgstd_@GSTD_API_VERSION@_la_CFLAGS =                                     \
 
 libgstd_@GSTD_API_VERSION@_la_LDFLAGS = $(GST_LIBS) $(GIO_LIBS) $(GJSON_LIBS) $(LIBSOUP_LIBS) $(JANSSON_LIBS) -pthread
 
-noinst_HEADERS =                                                \
+noinst_HEADERS =                                               \
 			 gstd_session.h                        \
 			 gstd_pipeline.h                       \
 			 gstd_element.h                        \
