@@ -131,20 +131,6 @@ GstdReturnCode gstd_create (GstD *gstd, const gchar *uri, const gchar *name, con
 GstdReturnCode gstd_read (GstD *gstd, const gchar *uri, GstdObject **resource);
 
 /**
- * gstd_update:
- * 
- * @gstd: A valid gstd instance allocated with gstd_new()
- * @uri: Path to the resource in which the action will be
- * applied in low level CRUD syntax 
- * @value: New value to set the resource 
- * 
- * A new Update call of the argument with the description
- *
- * Returns: GstdReturnCode indicating success or fail
- */
-GstdReturnCode gstd_update (GstD *gstd, const gchar *uri, const gchar *value);
-
-/**
  * gstd_delete:
  * 
  * @gstd: A valid gstd instance allocated with gstd_new()
