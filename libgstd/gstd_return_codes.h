@@ -1,7 +1,7 @@
 
 /*
  * GStreamer Daemon - Gst Launch under steroids
- * Copyright (c) 2015-2017 Ridgerun, LLC (http://www.ridgerun.com)
+ * Copyright (c) 2015-2021 Ridgerun, LLC (http://www.ridgerun.com)
  * 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -128,6 +128,16 @@ enum _GstdReturnCode
    * Missing name of the pipeline
    */
   GSTD_MISSING_NAME,
+
+  /**
+   * The system has run out of memory
+   */
+  GSTD_OOM,
+
+  /**
+   * Unknown error
+   */
+  GSTD_UNKNOWN_ERROR,
 
 };
 

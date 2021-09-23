@@ -28,39 +28,34 @@ extern "C"
 #include <gst/gst.h>
 #include <glib-unix.h>
 
+#include "gstd_return_codes.h"
+
 /*
  * GstD:
  * Opaque representation of GstD state.
- * This struct will have: Session, GstdIpc and num_ipcs (for now)
+ * This struct have: Session, GstdIpc and num_ipcs
  */
 typedef struct _GstD GstD;
 
-/**
- * GstdStatus:
- * @GSTD_LIB_OK: Everything went okay
- * @GSTD_LIB_NULL_ARGUMENT: A mandatory argument was passed in as NULL
- * @GSTD_LIB_OOM: The system has run out of memory
- * @GSTD_LIB_TYPE_ERROR: An error occurred parsing a type from a string
- * @GSTD_LIB_NOT_FOUND: The response is missing the field requested
- * @GSTD_LIB_THREAD_ERROR: Unable to create a new thread
- * @GSTD_LIB_BUS_TIMEOUT: A timeout was received while waiting on the bus
- * @GSTD_LIB_LONG_RESPONSE: The response exceeds our maximum, typically
- * meaning a missing null terminator
- *
- * Return codes for the different libgstd operations
+/*
+ * GstdObject:
+ * Opaque representation of GstD objects.
  */
-typedef enum
-{
-  GSTD_LIB_OK = 0,
-  GSTD_LIB_NULL_ARGUMENT = -1,
-  GSTD_LIB_OOM = -4,
-  GSTD_LIB_TYPE_ERROR = -5,
-  GSTD_LIB_NOT_FOUND = -7,
-  GSTD_LIB_THREAD_ERROR = -11,
-  GSTD_LIB_BUS_TIMEOUT = -12,
-  GSTD_LIB_LONG_RESPONSE = -14
-} GstdStatus;
+typedef struct _GstdObject GstdObject;
 
+/**
+ * gstd_new:
+ * 
+ * @out: placeholder for newly allocated gstd instance.
+ * @argc: arguments for gst_init
+ * @argv: arguments for gst_init
+ * 
+ * Initializes gstd.
+ *
+ * Returns: GstdReturnCode indicating success or fail
+ */
+GstdReturnCode 
+gstd_new (GstD ** out, int argc, char *argv[]);
 
 /**
  * gstd_context_add_group:
@@ -73,27 +68,12 @@ void
 gstd_context_add_group (GstD *gstd, GOptionContext *context);
 
 /**
- * gstd_new:
- * 
- * @out: placeholder for newly allocated gstd instance.
- * @argc: arguments for gst_init
- * @argv: arguments for gst_init
- * 
- * Initializes gstd.
- *
- * Returns: GstdStatus indicating success or fail
- */
-GstdStatus 
-gstd_new (GstD ** out, int argc, char *argv[]);
-
-
-/**
  * gstd_start:
  * @gstd: The gstd returned by gstd_new()
  * 
  * Starts the ipc in GstdIpc array
  *
- * Returns: GstdStatus indicating success or fail
+ * Returns: GstdReturnCode indicating success or fail
  */
 int
 gstd_start (GstD * gstd);
@@ -104,7 +84,7 @@ gstd_start (GstD * gstd);
  * 
  * Stops the ipc in GstdIpc array
  *
- * Returns: GstdStatus indicating success or fail
+ * Returns: GstdReturnCode indicating success or fail
  */
 void
 gstd_stop (GstD * gstd);
@@ -121,6 +101,62 @@ gstd_stop (GstD * gstd);
 void
 gstd_free (GstD * gstd);
 
+/**
+ * gstd_create:
+ * 
+ * @gstd: A valid gstd instance allocated with gstd_new()
+ * @uri: Path to the resource in which the action will be
+ * applied in low level CRUD syntax 
+ * @name: Name of the resource to create
+ * @description: Description of the resource to create
+ * 
+ * A new Create call of the argument with the description
+ *
+ * Returns: GstdReturnCode indicating success or fail
+ */
+GstdReturnCode gstd_create (GstD *gstd, const gchar *uri, const gchar *name, const gchar *description);
+
+/**
+ * gstd_read:
+ * 
+ * @gstd: A valid gstd instance allocated with gstd_new()
+ * @uri: Path to the resource in which the action will be
+ * applied in low level CRUD syntax 
+ * @resource: Placeholder for the resource required
+ * 
+ * A new Read call of the argument
+ *
+ * Returns: GstdReturnCode indicating success or fail
+ */
+GstdReturnCode gstd_read (GstD *gstd, const gchar *uri, GstdObject **resource);
+
+/**
+ * gstd_update:
+ * 
+ * @gstd: A valid gstd instance allocated with gstd_new()
+ * @uri: Path to the resource in which the action will be
+ * applied in low level CRUD syntax 
+ * @value: New value to set the resource 
+ * 
+ * A new Update call of the argument with the description
+ *
+ * Returns: GstdReturnCode indicating success or fail
+ */
+GstdReturnCode gstd_update (GstD *gstd, const gchar *uri, const gchar *value);
+
+/**
+ * gstd_delete:
+ * 
+ * @gstd: A valid gstd instance allocated with gstd_new()
+ * @uri: Path to the resource in which the action will be
+ * applied in low level CRUD syntax 
+ * @name: Name of the resource to delete
+ * 
+ * A Delete call to a resource given by the URI
+ *
+ * Returns: GstdReturnCode indicating success or fail
+ */
+GstdReturnCode gstd_delete (GstD *gstd, const gchar *uri, const gchar *name);
 
 #ifdef __cplusplus
 }
