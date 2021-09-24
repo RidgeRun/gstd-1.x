@@ -22,9 +22,11 @@ gio_unix_dep  = dependency('gio-unix-2.0',       version : '>=2.44.1')
 json_glib_dep = dependency('json-glib-1.0',      version : '>=0.16.2')
 libd_dep      = dependency('libdaemon',          version : '>=0.14')
 jansson_dep   = dependency('jansson',            version : '>=2.7')
-gst_check_dep = dependency('gstreamer-check-1.0',version : '>=1.0.5')
 thread_dep    = dependency('threads')
 libsoup_dep = dependency('libsoup-2.4',		       version : '>=2.4')
+
+gst_check_required = get_option('enable-tests').enabled()
+gst_check_dep = dependency('gstreamer-check-1.0', required : gst_check_required, version : '>=1.0.5')
 
 systemd_required = get_option('enable-systemd').enabled()
 systemd_dep = dependency('systemd', required : systemd_required, version : '>=232')
