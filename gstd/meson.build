@@ -43,6 +43,6 @@ meson.add_install_script('gstd_chmod.sh','777', logstatedir)
 
 ## Create symbolic link to gstd
 meson.add_install_script('gstd_symbolic_link.sh',
-  get_option('bindir') +'/'+ exe_name,
+  exe_name,
   get_option('bindir') +'/'+ gstd_name
 )
