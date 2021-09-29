@@ -278,6 +278,7 @@ gstd_read (GstD * gstd, const gchar * uri, GstdObject ** resource)
   g_return_val_if_fail (NULL != gstd, GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (NULL != gstd->session, GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (NULL != uri, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (NULL != resource, GSTD_NULL_ARGUMENT);
 
   ret = gstd_get_by_uri (gstd->session, uri, resource);
   return ret;
