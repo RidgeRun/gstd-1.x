@@ -114,7 +114,8 @@ gstd_free (GstD * gstd);
  *
  * Returns: GstdReturnCode indicating success or fail
  */
-GstdReturnCode gstd_create (GstD *gstd, const gchar *uri, const gchar *name, const gchar *description);
+GstdReturnCode
+gstd_create (GstD *gstd, const gchar *uri, const gchar *name, const gchar *description);
 
 /**
  * gstd_read:
@@ -128,7 +129,8 @@ GstdReturnCode gstd_create (GstD *gstd, const gchar *uri, const gchar *name, con
  *
  * Returns: GstdReturnCode indicating success or fail
  */
-GstdReturnCode gstd_read (GstD *gstd, const gchar *uri, GstdObject **resource);
+GstdReturnCode
+gstd_read (GstD *gstd, const gchar *uri, GstdObject **resource);
 
 /**
  * gstd_delete:
@@ -142,7 +144,8 @@ GstdReturnCode gstd_read (GstD *gstd, const gchar *uri, GstdObject **resource);
  *
  * Returns: GstdReturnCode indicating success or fail
  */
-GstdReturnCode gstd_delete (GstD *gstd, const gchar *uri, const gchar *name);
+GstdReturnCode
+gstd_delete (GstD *gstd, const gchar *uri, const gchar *name);
 
 #ifdef __cplusplus
 }
