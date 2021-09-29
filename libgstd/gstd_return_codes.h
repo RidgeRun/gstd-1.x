@@ -129,16 +129,6 @@ enum _GstdReturnCode
    */
   GSTD_MISSING_NAME,
 
-  /**
-   * The system has run out of memory
-   */
-  GSTD_OOM,
-
-  /**
-   * Unknown error
-   */
-  GSTD_UNKNOWN_ERROR,
-
 };
 
 
