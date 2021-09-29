@@ -1,7 +1,9 @@
 lib_LTLIBRARIES = libgstd-@GSTD_API_VERSION@.la
 
 gstdincludedir = $(includedir)/gstd
-gstdinclude_HEADERS = libgstd.h gstd_return_codes.h
+gstdinclude_HEADERS =                               \
+             libgstd.h                              \
+             gstd_return_codes.h
 
 libgstd_@GSTD_API_VERSION@_la_SOURCES =             \
              libgstd.c                              \
