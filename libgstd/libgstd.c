@@ -307,27 +307,3 @@ gstd_delete (GstD * gstd, const gchar * uri, const gchar * name)
 out:
   return ret;
 }
-
-GstdReturnCode
-gstd_update (GstD * gstd, const gchar * uri, const gchar * value)
-{
-  GstdReturnCode ret = GSTD_EOK;
-  GstdObject *node;
-
-  g_return_val_if_fail (NULL != gstd, GSTD_NULL_ARGUMENT);
-  g_return_val_if_fail (NULL != gstd->session, GSTD_NULL_ARGUMENT);
-  g_return_val_if_fail (NULL != uri, GSTD_NULL_ARGUMENT);
-  g_return_val_if_fail (NULL != value, GSTD_NULL_ARGUMENT);
-
-  ret = gstd_get_by_uri (gstd->session, uri, &node);
-  if (GSTD_EOK != ret || NULL == node) {
-    goto out;
-  }
-
-  ret = gstd_object_update (node, value);
-
-  g_object_unref (node);
-
-out:
-  return ret;
-}
