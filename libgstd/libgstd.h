@@ -33,7 +33,7 @@ extern "C"
 /*
  * GstD:
  * Opaque representation of GstD state.
- * This struct have: Session, GstdIpc and num_ipcs
+ * This struct has: Session, GstdIpc and num_ipcs
  */
 typedef struct _GstD GstD;
 
