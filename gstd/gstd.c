@@ -23,10 +23,9 @@
 
 #include <stdlib.h>
 
+#include "gstd.h"
 #include "gstd_daemon.h"
 #include "gstd_log.h"
-
-#include "gstd.h"
 
 #define HEADER \
       "\nGstD version " PACKAGE_VERSION "\n" \
