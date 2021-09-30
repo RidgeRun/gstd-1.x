@@ -29,6 +29,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 #define _GNU_SOURCE
 
 #include "libgstd.h"
@@ -151,10 +152,10 @@ gstd_context_add_group (GstD * gstd, GOptionContext * context)
   g_free (ipc_group_array);
 }
 
-GstdStatus
+GstdReturnCode
 gstd_new (GstD ** out, int argc, char *argv[])
 {
-  GstdStatus ret = GSTD_LIB_OK;
+  GstdReturnCode ret = GSTD_EOK;
   GstD *gstd = NULL;
   GstdSession *session = NULL;
 
@@ -186,8 +187,8 @@ gstd_start (GstD * gstd)
   gint ipc_idx;
 
   g_return_val_if_fail (NULL != gstd, GSTD_NULL_ARGUMENT);
-  g_return_val_if_fail (NULL != gstd->ipc_array, GSTD_LIB_NOT_FOUND);
-  g_return_val_if_fail (NULL != gstd->session, GSTD_LIB_NOT_FOUND);
+  g_return_val_if_fail (NULL != gstd->ipc_array, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (NULL != gstd->session, GSTD_NULL_ARGUMENT);
 
   /* Verify if at least one IPC mechanism was selected */
   for (ipc_idx = 0; ipc_idx < gstd->num_ipcs; ipc_idx++) {
@@ -242,4 +243,67 @@ gstd_free (GstD * gstd)
   g_free (gstd->ipc_array);
   g_object_unref (gstd->session);
   g_free (gstd);
+}
+
+GstdReturnCode
+gstd_create (GstD * gstd, const gchar * uri, const gchar * name,
+    const gchar * description)
+{
+  GstdReturnCode ret = GSTD_EOK;
+  GstdObject *node = NULL;
+
+  g_return_val_if_fail (NULL != gstd, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (NULL != gstd->session, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (NULL != uri, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (NULL != name, GSTD_NULL_ARGUMENT);
+
+  ret = gstd_get_by_uri (gstd->session, uri, &node);
+  if (GSTD_EOK != ret) {
+    goto out;
+  }
+
+  ret = gstd_object_create (node, name, description);
+
+  g_object_unref (node);
+
+out:
+  return ret;
+}
+
+GstdReturnCode
+gstd_read (GstD * gstd, const gchar * uri, GstdObject ** resource)
+{
+  GstdReturnCode ret = GSTD_EOK;
+
+  g_return_val_if_fail (NULL != gstd, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (NULL != gstd->session, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (NULL != uri, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (NULL != resource, GSTD_NULL_ARGUMENT);
+
+  ret = gstd_get_by_uri (gstd->session, uri, resource);
+  return ret;
+}
+
+GstdReturnCode
+gstd_delete (GstD * gstd, const gchar * uri, const gchar * name)
+{
+  GstdReturnCode ret = GSTD_EOK;
+  GstdObject *node = NULL;
+
+  g_return_val_if_fail (NULL != gstd, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (NULL != gstd->session, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (NULL != uri, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (NULL != name, GSTD_NULL_ARGUMENT);
+
+  ret = gstd_get_by_uri (gstd->session, uri, &node);
+  if (GSTD_EOK != ret) {
+    goto out;
+  }
+
+  ret = gstd_object_delete (node, name);
+
+  g_object_unref (node);
+
+out:
+  return ret;
 }

@@ -1,7 +1,7 @@
 
 /*
  * Gstreamer Daemon - Gst Launch under steroids
- * Copyright (C) 2015 RidgeRun Engineering <support@ridgerun.com>
+ * Copyright (C) 2015-2021 RidgeRun Engineering <support@ridgerun.com>
  *
  * This file is part of Gstd.
  *
@@ -20,7 +20,7 @@
  */
 
 /**
- * \file return_codes.C
+ * \file gstd_return_codes.c
  *
  * Gstreamer Daemon return codes textual description
  */
@@ -49,7 +49,7 @@ gstd_return_code_to_string (GstdReturnCode code)
     [GSTD_IPC_ERROR] = "IPC error",
     [GSTD_EVENT_ERROR] = "Event error",
     [GSTD_MISSING_ARGUMENT] = "One or more arguments are missing",
-    [GSTD_MISSING_NAME] = "Name is missing"
+    [GSTD_MISSING_NAME] = "Name is missing",
   };
 
   const gint size = sizeof (code_description) / sizeof (gchar *);

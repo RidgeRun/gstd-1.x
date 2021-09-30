@@ -1,6 +1,6 @@
 /*
  * GStreamer Daemon - Gst Launch under steroids
- * Copyright (c) 2015-2017 Ridgerun, LLC (http://www.ridgerun.com)
+ * Copyright (c) 2015-2021 Ridgerun, LLC (http://www.ridgerun.com)
  * 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -22,10 +22,12 @@
 #include <gstd_return_codes.h>
 
 #include "gstd_icreator.h"
-#include "gstd_ireader.h"
-#include "gstd_iupdater.h"
 #include "gstd_ideleter.h"
 #include "gstd_iformatter.h"
+#include "gstd_ireader.h"
+#include "gstd_iupdater.h"
+
+#include "libgstd.h"
 
 typedef struct _GstdIFormatter GstdIFormatter;
 
@@ -42,7 +44,7 @@ G_BEGIN_DECLS
   (G_TYPE_CHECK_CLASS_TYPE((klass),GSTD_TYPE_OBJECT))
 #define GSTD_OBJECT_GET_CLASS(obj) \
   (G_TYPE_INSTANCE_GET_CLASS ((obj), GSTD_TYPE_OBJECT, GstdObjectClass))
-typedef struct _GstdObject GstdObject;
+
 typedef struct _GstdObjectClass GstdObjectClass;
 
 struct _GstdObject
