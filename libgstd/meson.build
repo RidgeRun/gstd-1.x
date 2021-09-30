@@ -1,6 +1,6 @@
 gstd_headers = [
+  'gstd.h',
   'gstd_return_codes.h',
-  'libgstd.h',
 ]
 
 # Common files needed for GstD and libGstD

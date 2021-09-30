@@ -32,7 +32,7 @@
 
 #define _GNU_SOURCE
 
-#include "libgstd.h"
+#include "gstd.h"
 
 #include <stdarg.h>
 #include <stdio.h>

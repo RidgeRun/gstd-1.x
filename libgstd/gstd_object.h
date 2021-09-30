@@ -21,13 +21,12 @@
 
 #include <gstd_return_codes.h>
 
+#include "gstd.h"
 #include "gstd_icreator.h"
 #include "gstd_ideleter.h"
 #include "gstd_iformatter.h"
 #include "gstd_ireader.h"
 #include "gstd_iupdater.h"
-
-#include "libgstd.h"
 
 typedef struct _GstdIFormatter GstdIFormatter;
 
