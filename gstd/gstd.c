@@ -26,7 +26,7 @@
 #include "gstd_daemon.h"
 #include "gstd_log.h"
 
-#include "libgstd.h"
+#include "gstd.h"
 
 #define HEADER \
       "\nGstD version " PACKAGE_VERSION "\n" \

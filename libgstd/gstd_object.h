@@ -27,7 +27,7 @@
 #include "gstd_ireader.h"
 #include "gstd_iupdater.h"
 
-#include "libgstd.h"
+#include "gstd.h"
 
 typedef struct _GstdIFormatter GstdIFormatter;
 

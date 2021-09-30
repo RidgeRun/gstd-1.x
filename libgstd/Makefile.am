@@ -3,7 +3,7 @@ lib_LTLIBRARIES = libgstd-@GSTD_API_VERSION@.la
 gstdincludedir = $(includedir)/gstd
 gstdinclude_HEADERS =                               \
              gstd_return_codes.h                    \
-             libgstd.h
+             gstd.h
 
 libgstd_@GSTD_API_VERSION@_la_SOURCES =             \
              gstd_bus_msg.c                         \
