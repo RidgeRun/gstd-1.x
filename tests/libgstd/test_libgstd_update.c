@@ -21,7 +21,6 @@
 
 #include "gstd.h"
 
-
 static GstD *manager;
 static const gchar *uri = "/pipelines";
 static const gchar *pipe_name = "p1";
@@ -40,72 +39,61 @@ teardown (void)
   gstd_free (manager);
 }
 
-GST_START_TEST (test_pipeline_delete_successful)
+GST_START_TEST (test_pipeline_update_successful)
 {
   GstdReturnCode ret = GSTD_EOK;
-  GstdObject *resource = NULL;
+  gchar *uri_update = NULL;
 
-  ret = gstd_delete (manager, uri, pipe_name);
+  uri_update =
+      g_strdup_printf ("/pipelines/%s/elements/vts/properties/pattern",
+      pipe_name);
+  ret = gstd_update (manager, uri_update, "1");
+
   fail_if (GSTD_EOK != ret);
-
-  gstd_read (manager, "/pipelines/p1", &resource);
-  fail_if (NULL != resource);
 }
 
 GST_END_TEST;
 
-GST_START_TEST (test_pipeline_delete_bad_uri)
+GST_START_TEST (test_pipeline_update_bad_uri)
 {
   GstdReturnCode ret = GSTD_EOK;
-  GstdObject *resource = NULL;
 
-  ret = gstd_delete (manager, "uri", pipe_name);
+  ret = gstd_update (manager, "uri", "1");
+
   fail_if (GSTD_BAD_COMMAND != ret);
-
-  gstd_read (manager, "/pipelines/p1", &resource);
-  fail_if (NULL == resource);
 }
 
 GST_END_TEST;
 
-GST_START_TEST (test_pipeline_delete_non_existing_resource)
+GST_START_TEST (test_pipeline_update_bad_value)
 {
   GstdReturnCode ret = GSTD_EOK;
+  gchar *uri_update = NULL;
 
-  gstd_delete (manager, uri, pipe_name);
-  ret = gstd_delete (manager, uri, pipe_name);
+  uri_update =
+      g_strdup_printf ("/pipelines/%s/elements/vts/properties/pattern",
+      pipe_name);
+  ret = gstd_update (manager, uri_update, "value");
 
-  fail_if (GSTD_NO_RESOURCE != ret);
-}
-
-GST_END_TEST;
-
-GST_START_TEST (test_pipeline_create_bad_name)
-{
-  GstdReturnCode ret = GSTD_EOK;
-
-  ret = gstd_delete (manager, uri, "pipe_name");
-
-  fail_if (GSTD_NO_RESOURCE != ret);
+  fail_if (GSTD_BAD_VALUE != ret);
 }
 
 GST_END_TEST;
 
 static Suite *
-gstd_delete_suite (void)
+gstd_update_suite (void)
 {
-  Suite *suite = suite_create ("gstd_delete");
+  Suite *suite = suite_create ("gstd_update");
   TCase *tc = tcase_create ("general");
 
   suite_add_tcase (suite, tc);
 
   tcase_add_checked_fixture (tc, setup, teardown);
-  tcase_add_test (tc, test_pipeline_delete_successful);
-  tcase_add_test (tc, test_pipeline_delete_bad_uri);
-  tcase_add_test (tc, test_pipeline_delete_non_existing_resource);
-  tcase_add_test (tc, test_pipeline_create_bad_name);
+  tcase_add_test (tc, test_pipeline_update_successful);
+  tcase_add_test (tc, test_pipeline_update_bad_uri);
+  tcase_add_test (tc, test_pipeline_update_bad_value);
 
   return suite;
 }
 
-GST_CHECK_MAIN (gstd_delete);
+GST_CHECK_MAIN (gstd_update);
