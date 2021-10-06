@@ -1,3 +1,4 @@
 SUBDIRS = 	\
 	gstd	\
+	libgstd \
 	libgstc

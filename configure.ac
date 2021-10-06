@@ -305,6 +305,7 @@ tests/gstd/Makefile
 tests/libgstc/Makefile
 tests/libgstc/c/Makefile
 tests/libgstc/python/Makefile
+tests/libgstd/Makefile
 docs/Makefile
 docs/reference/Makefile
 docs/reference/gstd/Makefile
