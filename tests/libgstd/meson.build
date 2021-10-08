@@ -16,7 +16,7 @@ if gst_dep.type_name() == 'pkgconfig'
    plugins_dir =[gst_dep.get_pkgconfig_variable('pluginsdir')]
 endif
 
-# Create environment object to  stores information about the environment
+# Create environment object to store information about the environment
 # variables set during tests.
 # Define constant enviroment variable
 env = environment()
