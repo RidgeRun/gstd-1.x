@@ -62,9 +62,11 @@ GST_END_TEST;
 GST_START_TEST (test_pipeline_create_existing_resource)
 {
   GstdReturnCode ret = GSTD_EOK;
-  ret = gstd_create (manager, uri, "pipe_name", description);
-  ret = gstd_create (manager, uri, "pipe_name", description);
 
+  ret = gstd_create (manager, uri, "pipe_name", description);
+  fail_if (GSTD_EOK != ret);
+
+  ret = gstd_create (manager, uri, "pipe_name", description);
   fail_if (GSTD_EXISTING_RESOURCE != ret);
 }
 
