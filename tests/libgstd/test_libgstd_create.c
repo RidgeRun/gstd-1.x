@@ -25,7 +25,7 @@
 static GstD *manager;
 static const gchar *uri = "/pipelines";
 static const gchar *pipe_name = "p1";
-static const gchar *description = "videotestsrc ! autovideosink";
+static const gchar *description = "videotestsrc ! fakesink";
 
 static void
 setup (void)
