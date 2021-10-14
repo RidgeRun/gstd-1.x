@@ -18,5 +18,5 @@ AM_CFLAGS = $(GST_CFLAGS)                                     \
              $(JANSSON_CFLAGS) -pthread                       \
              -I$(top_srcdir)/libgstd
 
-AM_LDFLAGS = $(GST_LIBS) $(GIO_LIBS) $(GJSON_LIBS) $(LIBSOUP_LIBS) $(JANSSON_LIBS) -pthread
+AM_LDFLAGS = $(GST_LIBS) $(GIO_LIBS) $(GJSON_LIBS) $(LIBSOUP_LIBS) $(JANSSON_LIBS)
 LDADD = $(top_srcdir)/libgstd/libgstd-@GSTD_API_VERSION@.la
