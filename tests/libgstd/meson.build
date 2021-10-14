@@ -3,6 +3,7 @@ gstd_tests = [
   ['test_libgstd_init.c'],
   ['test_libgstd_create.c'],
   ['test_libgstd_read.c'],
+  ['test_libgstd_update.c'],
   ['test_libgstd_delete.c'],
 ]
 # Add C Definitions for tests

@@ -2,6 +2,7 @@ TESTS =                                     \
         test_libgstd_init                   \
         test_libgstd_create                 \
         test_libgstd_read                   \
+        test_libgstd_update                 \
         test_libgstd_delete 
 
 check_PROGRAMS = $(TESTS)
