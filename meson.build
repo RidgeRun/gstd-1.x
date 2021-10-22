@@ -30,8 +30,8 @@ systemd_required = get_option('enable-systemd').enabled()
 systemd_dep = dependency('systemd', required : systemd_required, version : '>=232')
 
 cc = meson.get_compiler('c')
-readline = cc.find_library('readline', required: true)
-if readline.found()
+readline_dep = dependency('readline')
+if readline_dep.found()
   add_project_arguments('-DHAVE_LIBREADLINE', language: 'c')
   add_project_arguments('-DHAVE_READLINE_HISTORY', language: 'c')
   # Add arguments to the compiler command line. 
@@ -46,8 +46,6 @@ if readline.found()
   else
     add_project_arguments('-DHAVE_HISTORY_H', language: 'c')
   endif
-  
-  readline_dep = readline
 endif
 
 ## Dependencies
