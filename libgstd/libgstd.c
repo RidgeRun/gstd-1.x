@@ -227,8 +227,7 @@ gstd_stop (GstD * gstd)
 
   /* Run stop for each IPC */
   for (gint ipc_idx = 0; ipc_idx < gstd->num_ipcs; ipc_idx++) {
-    if (NULL != gstd->ipc_array[ipc_idx]
-        && TRUE == gstd->ipc_array[ipc_idx]->enabled) {
+    if (NULL != gstd->ipc_array[ipc_idx]) {
       gstd_ipc_stop (gstd->ipc_array[ipc_idx]);
       g_clear_object (&gstd->ipc_array[ipc_idx]);
     }

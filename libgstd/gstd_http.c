@@ -122,19 +122,25 @@ static void
 gstd_http_finalize (GObject * object)
 {
   GstdHttp *self = GSTD_HTTP (object);
+  GstdIpc *ipc = GSTD_IPC (object);
 
   GST_INFO_OBJECT (object, "Deinitializing gstd HTTP");
 
-  gstd_http_stop (GSTD_IPC (object));
+  if (ipc->enabled) {
+    gstd_http_stop (ipc);
+  }
+
   g_mutex_clear (&self->mutex);
 
   if (self->address) {
     g_free (self->address);
+    self->address = NULL;
   }
-  self->address = NULL;
 
-  g_thread_pool_free (self->pool, FALSE, TRUE);
-  self->pool = NULL;
+  if (self->pool) {
+    g_thread_pool_free (self->pool, FALSE, TRUE);
+    self->pool = NULL;
+  }
 
   G_OBJECT_CLASS (gstd_http_parent_class)->finalize (object);
 }
