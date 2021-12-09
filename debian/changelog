@@ -1,3 +1,9 @@
+gstd (0.13.1-1) unstable; urgency=medium
+
+  * Fix deadlock when a socket dies or closes incorrectly on PyGstc
+
+ -- RidgeRun Engineering <support@ridgerun.com>  Wed, 08 Dec 08:30:00  -0600
+
 gstd (0.13.0-1) unstable; urgency=medium
 
   * Add libgstc support to get pipeline state

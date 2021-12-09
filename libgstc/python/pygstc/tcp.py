@@ -176,6 +176,11 @@ class Ipc:
             except socket.error as e:
                 raise TimeoutError from e
 
+            # When a connection dies, the socket does not close properly and it
+            # returns immediately with an empty string. So, check that first.
+            if len(newbuf) == 0:
+                break
+
             if self._terminator in newbuf:
                 buf += newbuf[:newbuf.find(self._terminator)]
                 break
