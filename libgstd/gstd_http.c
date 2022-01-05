@@ -450,7 +450,7 @@ noconnection:
 static gboolean
 gstd_http_init_get_option_group (GstdIpc * base, GOptionGroup ** group)
 {
-  GstdHttp *self = NULL;
+  GstdHttp *self = GSTD_HTTP (base);
   GOptionEntry http_args[] = {
     {"enable-http-protocol", 't', 0, G_OPTION_ARG_NONE, &base->enabled,
         "Enable attach the server through given HTTP ports ", NULL}
@@ -473,8 +473,6 @@ gstd_http_init_get_option_group (GstdIpc * base, GOptionGroup ** group)
 
   g_return_val_if_fail (base, FALSE);
   g_return_val_if_fail (group, FALSE);
-
-  self = GSTD_HTTP (base);
 
   GST_DEBUG_OBJECT (self, "HTTP init group callback ");
   *group = g_option_group_new ("gstd-http", ("HTTP Options"),
