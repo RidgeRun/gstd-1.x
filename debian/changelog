@@ -1,3 +1,9 @@
+gstd (0.13.2-1) unstable; urgency=medium
+
+  * Fix segfault when enabling HTTP IPC
+
+ -- RidgeRun Engineering <support@ridgerun.com>  Wed, 05 Jan 10:00:00  -0600
+
 gstd (0.13.1-1) unstable; urgency=medium
 
   * Fix deadlock when a socket dies or closes incorrectly on PyGstc
