@@ -29,9 +29,6 @@
 
 #include <glib.h>
 
-typedef enum _GstdReturnCode GstdReturnCode;
-const gchar *gstd_return_code_to_string (GstdReturnCode code);
-
 enum _GstdReturnCode
 {
   /**
@@ -131,5 +128,7 @@ enum _GstdReturnCode
 
 };
 
+typedef enum _GstdReturnCode GstdReturnCode;
+const gchar *gstd_return_code_to_string (GstdReturnCode code);
 
 #endif //__GSTD_RETURN_CODES_H__
