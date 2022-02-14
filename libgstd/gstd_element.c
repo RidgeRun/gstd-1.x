@@ -462,13 +462,13 @@ gstd_element_signals_to_string (GstdElement * self, GstdIFormatter * formatter)
 void
 gstd_element_actions_to_string (GstdElement * self, GstdIFormatter * formatter)
 {
-  GList *signal_list;
+  GList *action_list;
 
   g_return_if_fail (GSTD_IS_OBJECT (self));
 
   gstd_iformatter_set_member_name (formatter, "element_actions");
-  signal_list = self->element_actions->list;
-  gstd_element_signals_to_string_internal (self, signal_list, formatter);
+  action_list = self->element_actions->list;
+  gstd_element_signals_to_string_internal (self, action_list, formatter);
 }
 
 void
