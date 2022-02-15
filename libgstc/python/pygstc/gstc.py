@@ -1,7 +1,7 @@
 # GStreamer Daemon - gst-launch on steroids
 # Python client library abstracting gstd interprocess communication
 
-# Copyright (c) 2020-2021 RidgeRun, LLC (http://www.ridgerun.com)
+# Copyright (c) 2020-2022 RidgeRun, LLC (http://www.ridgerun.com)
 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -150,6 +150,8 @@ class GstdClient:
         logger : CustomLogger
             Custom logger where all log messages from this class are going
             to be reported
+        timeout : float
+            Timeout in seconds to wait for a response. 0: non-blocking, None: blocking
         """
 
         if logger:
@@ -844,7 +846,7 @@ class GstdClient:
             Pipeline description (same as gst-launch-1.0)
         """
 
-        self._logger.info('Creating pipeline %s with description "%s"'
+        self._logger.info('Creating pipeline by reference %s with description "%s"'
                           % (pipe_name, pipe_desc))
         parameters = self._check_parameters([pipe_name, pipe_desc], [str, str])
         self._send_cmd_line(['pipeline_create_ref'] + parameters)
@@ -890,7 +892,7 @@ class GstdClient:
             Error is triggered when the Gstd python client fails internally
         """
 
-        self._logger.info('Deleting pipeline %s' % pipe_name)
+        self._logger.info('Deleting pipeline by reference %s' % pipe_name)
         parameters = self._check_parameters([pipe_name], [str])
         self._send_cmd_line(['pipeline_delete_ref'] + parameters)
 
@@ -956,7 +958,7 @@ class GstdClient:
             Error is triggered when the Gstd python client fails internally
         """
 
-        self._logger.info('Playing pipeline %s' % pipe_name)
+        self._logger.info('Playing pipeline by reference %s' % pipe_name)
         parameters = self._check_parameters([pipe_name], [str])
         self._send_cmd_line(['pipeline_play_ref'] + parameters)
 
@@ -1001,7 +1003,7 @@ class GstdClient:
             Error is triggered when the Gstd python client fails internally
         """
 
-        self._logger.info('Stoping pipeline %s' % pipe_name)
+        self._logger.info('Stoping pipeline by reference %s' % pipe_name)
         parameters = self._check_parameters([pipe_name], [str])
         self._send_cmd_line(['pipeline_stop_ref'] + parameters)
 

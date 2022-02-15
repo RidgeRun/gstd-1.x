@@ -42,10 +42,11 @@
 #include "gstd_list.h"
 #include "gstd_list_reader.h"
 #include "gstd_object.h"
-#include "gstd_pipeline.h"
 #include "gstd_pipeline_bus.h"
 #include "gstd_property_reader.h"
 #include "gstd_state.h"
+
+#include "gstd_pipeline.h"
 
 enum
 {

@@ -39,11 +39,11 @@
 #include <gst/gst.h>
 
 #include "gstd_ipc.h"
-#include "gstd_tcp.h"
 #include "gstd_element.h"
 #include "gstd_pipeline_bus.h"
 #include "gstd_event_handler.h"
 
+#include "gstd_tcp.h"
 
 /* Gstd TCP debugging category */
 GST_DEBUG_CATEGORY_STATIC (gstd_tcp_debug);
