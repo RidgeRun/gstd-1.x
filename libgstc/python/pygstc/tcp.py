@@ -104,7 +104,7 @@ class Ipc:
             Decoded JSON string with the response
         """
         data = None
-        self._logger.debug('GSTD socket sending line: %s' % line)
+        self._logger.debug('GSTD socket sending line: {}'.format(line))
         try:
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 

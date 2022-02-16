@@ -160,8 +160,9 @@ class GstdClient:
             self._logger = DummyLogger()
         self._ip = ip
         self._port = port
-        self._logger.info('Starting GstClient with ip=%s port=%d'
-                          % (self._ip, self._port))
+        self._logger.info(
+            'Starting GstClient with ip={} port={}'.format(
+                self._ip, self._port))
         self._ipc = Ipc(self._logger, self._ip, self._port)
         self._timeout = timeout
         self.ping_gstd()
@@ -188,9 +189,12 @@ class GstdClient:
         for i, parameter in enumerate(parameter_list):
             if not isinstance(parameter, type_list[i]):
                 raise GstcError(
-                    "%s TypeError: parameter %i: expected %s, '%s found" %
-                    (inspect.stack()[1].function, i, type_list[i],
-                     type(parameter)), GstcErrorCode.GSTC_MALFORMED)
+                    "{} TypeError: parameter {}: expected {}, '{} found".format(
+                        inspect.stack()[1].function,
+                        i,
+                        type_list[i],
+                        type(parameter)),
+                    GstcErrorCode.GSTC_MALFORMED)
             if type_list[i] == str:
                 parameter_string_list += [parameter]
             elif type_list[i] == bool:
@@ -228,8 +232,9 @@ class GstdClient:
             jresult = self._ipc.send(cmd_line, timeout=self._timeout)
             result = json.loads(jresult)
             if result['code'] != GstcErrorCode.GSTC_OK.value:
-                self._logger.error('%s error: %s' % (cmd,
-                                                     result['description']))
+                self._logger.error(
+                    '{} error: {}'.format(
+                        cmd, result['description']))
                 raise GstdError(result['description'],
                                 result['code'])
             return result
@@ -308,8 +313,9 @@ class GstdClient:
             Error is triggered when the Gstd python client fails internally
         """
 
-        self._logger.info('Setting bus read filter of pipeline %s to %s'
-                          % (pipe_name, filter))
+        self._logger.info(
+            'Setting bus read filter of pipeline {} to {}'.format(
+                pipe_name, filter))
         parameters = self._check_parameters([pipe_name, filter], [str, str])
         self._send_cmd_line(['bus_filter'] + parameters)
 
@@ -335,7 +341,7 @@ class GstdClient:
             Command response
         """
 
-        self._logger.info('Reading bus of pipeline %s' % pipe_name)
+        self._logger.info('Reading bus of pipeline {}'.format(pipe_name))
         parameters = self._check_parameters([pipe_name], [str])
         result = self._send_cmd_line(['bus_read'] + parameters)
         return result['response']
@@ -359,8 +365,9 @@ class GstdClient:
             Error is triggered when the Gstd python client fails internally
         """
 
-        self._logger.info('Setting bus read timeout of pipeline %s to %s'
-                          % (pipe_name, timeout))
+        self._logger.info(
+            'Setting bus read timeout of pipeline {} to {}'.format(
+                pipe_name, timeout))
         parameters = self._check_parameters([pipe_name, timeout], [str, int])
         self._send_cmd_line(['bus_timeout'] + parameters)
 
@@ -390,8 +397,9 @@ class GstdClient:
             Error is triggered when the Gstd python client fails internally
         """
 
-        self._logger.info('Creating property %s in uri %s with value "%s"'
-                          % (property, uri, value))
+        self._logger.info(
+            'Creating property {} in uri {} with value "{}"'.format(
+                property, uri, value))
         parameters = self._check_parameters(
             [uri, property, value], [str, str, str])
         self._send_cmd_line(['create'] + parameters)
@@ -485,8 +493,8 @@ class GstdClient:
             Error is triggered when the Gstd python client fails internally
         """
 
-        self._logger.info('Setting GStreamer debug threshold to %s'
-                          % threshold)
+        self._logger.info(
+            'Setting GStreamer debug threshold to {}'.format(threshold))
         parameters = self._check_parameters([threshold], [str])
         self._send_cmd_line(['debug_threshold'] + parameters)
 
@@ -509,7 +517,7 @@ class GstdClient:
             Error is triggered when the Gstd python client fails internally
         """
 
-        self._logger.info('Deleting name %s at uri "%s"' % (name, uri))
+        self._logger.info('Deleting name {} at uri "{}"'.format(name, uri))
         parameters = self._check_parameters([uri, name], [str, str])
         self._send_cmd_line(['delete'] + parameters)
 
@@ -545,8 +553,8 @@ class GstdClient:
         """
 
         self._logger.info(
-            'Getting value of element %s %s property in pipeline %s' %
-            (element, prop, pipe_name))
+            'Getting value of element {} {} property in pipeline {}'.format(
+                element, prop, pipe_name))
         parameters = self._check_parameters(
             [pipe_name, element, prop], [str, str, str])
         result = self._send_cmd_line(['element_get'] + parameters)
@@ -581,8 +589,9 @@ class GstdClient:
             Error is triggered when the Gstd python client fails internally
         """
 
-        self._logger.info('Setting element %s %s property in pipeline %s to:%s'
-                          % (element, prop, pipe_name, value))
+        self._logger.info(
+            'Setting element {} {} property in pipeline {} to:{}'.format(
+                element, prop, pipe_name, value))
         parameters = self._check_parameters(
             [pipe_name, element, prop, value], [str, str, str, str])
         self._send_cmd_line(['element_set'] + parameters)
@@ -604,8 +613,8 @@ class GstdClient:
             Error is triggered when the Gstd python client fails internally
         """
 
-        self._logger.info('Sending end-of-stream event to pipeline %s'
-                          % pipe_name)
+        self._logger.info(
+            'Sending end-of-stream event to pipeline {}'.format(pipe_name))
         parameters = self._check_parameters([pipe_name], [str])
         self._send_cmd_line(['event_eos'] + parameters)
 
@@ -626,8 +635,8 @@ class GstdClient:
             Error is triggered when the Gstd python client fails internally
         """
 
-        self._logger.info('Putting pipeline %s in flushing mode'
-                          % pipe_name)
+        self._logger.info(
+            'Putting pipeline {} in flushing mode'.format(pipe_name))
         parameters = self._check_parameters([pipe_name], [str])
         self._send_cmd_line(['event_flush_start'] + parameters)
 
@@ -650,8 +659,8 @@ class GstdClient:
             Error is triggered when the Gstd python client fails internally
         """
 
-        self._logger.info('Taking pipeline %s out of flushing mode'
-                          % pipe_name)
+        self._logger.info(
+            'Taking pipeline {} out of flushing mode'.format(pipe_name))
         parameters = self._check_parameters([pipe_name, reset], [str, bool])
         self._send_cmd_line(['event_flush_stop'] + parameters)
 
@@ -696,8 +705,8 @@ class GstdClient:
             Error is triggered when the Gstd python client fails internally
         """
 
-        self._logger.info('Performing event seek in pipeline %s'
-                          % pipe_name)
+        self._logger.info(
+            'Performing event seek in pipeline {}'.format(pipe_name))
         parameters = self._check_parameters(
             [
                 pipe_name, rate, format, flags, start_type, start, end_type,
@@ -728,7 +737,7 @@ class GstdClient:
             List of elements
         """
 
-        self._logger.info('Listing elements of pipeline %s' % pipe_name)
+        self._logger.info('Listing elements of pipeline {}'.format(pipe_name))
         parameters = self._check_parameters([pipe_name], [str])
         result = self._send_cmd_line(['list_elements'] + parameters)
         return result['response']['nodes']
@@ -778,8 +787,9 @@ class GstdClient:
             List of properties
         """
 
-        self._logger.info('Listing properties of  element %s from pipeline %s'
-                          % (element, pipe_name))
+        self._logger.info(
+            'Listing properties of  element {} from pipeline {}'.format(
+                element, pipe_name))
         parameters = self._check_parameters([pipe_name, element], [str, str])
         result = self._send_cmd_line(['list_properties'] + parameters)
         return result['response']['nodes']
@@ -808,8 +818,9 @@ class GstdClient:
             List of signals
         """
 
-        self._logger.info('Listing signals of  element %s from pipeline %s'
-                          % (element, pipe_name))
+        self._logger.info(
+            'Listing signals of  element {} from pipeline {}'.format(
+                element, pipe_name))
         parameters = self._check_parameters([pipe_name, element], [str, str])
         result = self._send_cmd_line(['list_signals'] + parameters)
         return result['response']['nodes']
@@ -826,8 +837,9 @@ class GstdClient:
             Pipeline description (same as gst-launch-1.0)
         """
 
-        self._logger.info('Creating pipeline %s with description "%s"'
-                          % (pipe_name, pipe_desc))
+        self._logger.info(
+            'Creating pipeline {} with description "{}"'.format(
+                pipe_name, pipe_desc))
         parameters = self._check_parameters([pipe_name, pipe_desc], [str, str])
         self._send_cmd_line(['pipeline_create'] + parameters)
 
@@ -846,8 +858,9 @@ class GstdClient:
             Pipeline description (same as gst-launch-1.0)
         """
 
-        self._logger.info('Creating pipeline by reference %s with description "%s"'
-                          % (pipe_name, pipe_desc))
+        self._logger.info(
+            'Creating pipeline by reference {} with description "{}"'.format(
+                pipe_name, pipe_desc))
         parameters = self._check_parameters([pipe_name, pipe_desc], [str, str])
         self._send_cmd_line(['pipeline_create_ref'] + parameters)
 
@@ -868,7 +881,7 @@ class GstdClient:
             Error is triggered when the Gstd python client fails internally
         """
 
-        self._logger.info('Deleting pipeline %s' % pipe_name)
+        self._logger.info('Deleting pipeline {}'.format(pipe_name))
         parameters = self._check_parameters([pipe_name], [str])
         self._send_cmd_line(['pipeline_delete'] + parameters)
 
@@ -892,7 +905,8 @@ class GstdClient:
             Error is triggered when the Gstd python client fails internally
         """
 
-        self._logger.info('Deleting pipeline by reference %s' % pipe_name)
+        self._logger.info(
+            'Deleting pipeline by reference {}'.format(pipe_name))
         parameters = self._check_parameters([pipe_name], [str])
         self._send_cmd_line(['pipeline_delete_ref'] + parameters)
 
@@ -913,7 +927,7 @@ class GstdClient:
             Error is triggered when the Gstd python client fails internally
         """
 
-        self._logger.info('Pausing pipeline %s' % pipe_name)
+        self._logger.info('Pausing pipeline {}'.format(pipe_name))
         parameters = self._check_parameters([pipe_name], [str])
         self._send_cmd_line(['pipeline_pause'] + parameters)
 
@@ -934,7 +948,7 @@ class GstdClient:
             Error is triggered when the Gstd python client fails internally
         """
 
-        self._logger.info('Playing pipeline %s' % pipe_name)
+        self._logger.info('Playing pipeline {}'.format(pipe_name))
         parameters = self._check_parameters([pipe_name], [str])
         self._send_cmd_line(['pipeline_play'] + parameters)
 
@@ -958,7 +972,7 @@ class GstdClient:
             Error is triggered when the Gstd python client fails internally
         """
 
-        self._logger.info('Playing pipeline by reference %s' % pipe_name)
+        self._logger.info('Playing pipeline by reference {}'.format(pipe_name))
         parameters = self._check_parameters([pipe_name], [str])
         self._send_cmd_line(['pipeline_play_ref'] + parameters)
 
@@ -979,7 +993,7 @@ class GstdClient:
             Error is triggered when the Gstd python client fails internally
         """
 
-        self._logger.info('Stoping pipeline %s' % pipe_name)
+        self._logger.info('Stoping pipeline {}'.format(pipe_name))
         parameters = self._check_parameters([pipe_name], [str])
         self._send_cmd_line(['pipeline_stop'] + parameters)
 
@@ -1003,7 +1017,7 @@ class GstdClient:
             Error is triggered when the Gstd python client fails internally
         """
 
-        self._logger.info('Stoping pipeline by reference %s' % pipe_name)
+        self._logger.info('Stoping pipeline by reference {}'.format(pipe_name))
         parameters = self._check_parameters([pipe_name], [str])
         self._send_cmd_line(['pipeline_stop_ref'] + parameters)
 
@@ -1029,7 +1043,7 @@ class GstdClient:
             Pipeline graph in GraphViz dot format
         """
 
-        self._logger.info('Getting the pipeline %s graph' % pipe_name)
+        self._logger.info('Getting the pipeline {} graph'.format(pipe_name))
         parameters = self._check_parameters([pipe_name], [str])
         result = self._send_cmd_line(['pipeline_get_graph'] + parameters)
         return result
@@ -1054,8 +1068,9 @@ class GstdClient:
             Error is triggered when Gstd IPC fails
         """
 
-        self._logger.info('Setting the pipeline %s verbose mode to %s'
-                          % (pipe_name, value))
+        self._logger.info(
+            'Setting the pipeline {} verbose mode to {}'.format(
+                pipe_name, value))
         parameters = self._check_parameters([pipe_name, value], [str, bool])
         self._send_cmd_line(['pipeline_verbose'] + parameters)
 
@@ -1081,7 +1096,7 @@ class GstdClient:
             Command response
         """
 
-        self._logger.info('Reading uri %s' % uri)
+        self._logger.info('Reading uri {}'.format(uri))
         parameters = self._check_parameters([uri], [str])
         result = self._send_cmd_line(['read'] + parameters)
         return result['response']
@@ -1118,8 +1133,8 @@ class GstdClient:
         """
 
         self._logger.info(
-            'Connecting to signal %s of element %s from pipeline %s' %
-            (signal, element, pipe_name))
+            'Connecting to signal {} of element {} from pipeline {}'.format(
+                signal, element, pipe_name))
         parameters = self._check_parameters(
             [pipe_name, element, signal], [str, str, str])
         result = self._send_cmd_line(['signal_connect'] + parameters)
@@ -1152,8 +1167,8 @@ class GstdClient:
         """
 
         self._logger.info(
-            'Disconnecting from signal %s of element %s from pipeline %s' %
-            (signal, element, pipe_name))
+            'Disconnecting from signal {} of element {} from pipeline {}'.format(
+                signal, element, pipe_name))
         parameters = self._check_parameters(
             [pipe_name, element, signal], [str, str, str])
         self._send_cmd_line(['signal_disconnect'] + parameters)
@@ -1189,8 +1204,8 @@ class GstdClient:
         """
 
         self._logger.info(
-            'Connecting to signal %s of element %s from pipeline %s with \
-                timeout %s' % (signal, element, pipe_name, timeout))
+            'Connecting to signal {} of element {} from pipeline {} with \
+                timeout {}'.format(signal, element, pipe_name, timeout))
         parameters = self._check_parameters(
             [pipe_name, element, signal, timeout], [str, str, str, int])
         self._send_cmd_line(['signal_timeout'] + parameters)
@@ -1242,7 +1257,6 @@ class GstdClient:
             Error is triggered when the Gstd python client fails internally
         """
 
-        self._logger.info('Updating uri %s with value "%s"' % (uri,
-                                                               value))
+        self._logger.info('Updating uri {} with value "{}"'.format(uri, value))
         parameters = self._check_parameters([uri, value], [str, str])
         self._send_cmd_line(['update'] + parameters)
