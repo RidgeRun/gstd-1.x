@@ -1123,8 +1123,8 @@ class GstdClient:
         """
 
         self._logger.info(
-            'Triggering action %s of element %s from pipeline %s'
-            % (action, element, pipe_name))
+            'Triggering action {} of element {} from pipeline {}'.format(
+                action, element, pipe_name))
         parameters = self._check_parameters(
             [pipe_name, element, action], [str, str, str])
         self._send_cmd_line(['action_emit'] + parameters)
