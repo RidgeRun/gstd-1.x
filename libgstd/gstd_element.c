@@ -21,26 +21,25 @@
 #include "config.h"
 #endif
 
-#include <string.h>
-#include <gst/gst.h>
 #include <gobject/gvaluecollector.h>
+#include <gst/gst.h>
 #include <json-glib/json-glib.h>
+#include <string.h>
 
-#include "gstd_list.h"
+#include "gstd_action.h"
 #include "gstd_element.h"
-#include "gstd_object.h"
 #include "gstd_event_handler.h"
-
 #include "gstd_iformatter.h"
 #include "gstd_json_builder.h"
-#include "gstd_property_reader.h"
-#include "gstd_property_boolean.h"
-#include "gstd_property_string.h"
-#include "gstd_property_int.h"
-#include "gstd_property_enum.h"
-#include "gstd_property_array.h"
+#include "gstd_list.h"
 #include "gstd_list_reader.h"
-#include "gstd_action.h"
+#include "gstd_object.h"
+#include "gstd_property_array.h"
+#include "gstd_property_boolean.h"
+#include "gstd_property_enum.h"
+#include "gstd_property_int.h"
+#include "gstd_property_reader.h"
+#include "gstd_property_string.h"
 #include "gstd_signal.h"
 #include "gstd_signal_list.h"
 
