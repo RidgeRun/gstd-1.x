@@ -200,6 +200,9 @@ static GstdClientCmd cmds[] = {
   {"signal_disconnect", gstd_client_cmd_socket, "Disconnect from signal",
       "signal_disconnect <pipe> <element> <signal>"},
 
+  {"action_emit", gstd_client_cmd_socket, "Emit action",
+      "action_emit <pipe> <element> <action>"},
+
   {"debug_enable", gstd_client_cmd_socket,
         "Enable/Disable GStreamer debug",
       "debug_enable <enable>"},

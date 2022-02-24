@@ -986,6 +986,28 @@ gstc_pipeline_list (GstClient * client, char **pipelines[], int *list_lenght)
 
 out:
   return ret;
+
+}
+
+GstcStatus
+gstc_pipeline_emit_action (GstClient * client, const char *pipeline_name,
+    const char *element, const char *action)
+{
+  GstcStatus ret;
+  int asprintf_ret;
+  char *where;
+  const char *where_fmt = "/pipelines/%s/elements/%s/actions/%s";
+
+  asprintf_ret = asprintf (&where, where_fmt, pipeline_name, element, action);
+  if (asprintf_ret == PRINTF_ERROR) {
+    return GSTC_OOM;
+  }
+
+  ret = gstc_cmd_create (client, where, action);
+
+  free (where);
+
+  return ret;
 }
 
 GstcStatus

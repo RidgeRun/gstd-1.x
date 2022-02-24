@@ -1101,6 +1101,34 @@ class GstdClient:
             [pipe_name, element, signal, timeout], [str, str, str, int])
         self._send_cmd_line(['signal_timeout'] + parameters)
 
+    def action_emit(self, pipe_name, element, action):
+        """
+        Emits an action with no-parameters
+
+        Parameters
+        ----------
+        pipe_name: string
+            The name of the pipeline
+        element: string
+            The name of the element
+        action: string
+            The name of the action
+
+        Raises
+        ------
+        GstdError
+            Error is triggered when Gstd IPC fails
+        GstcError
+            Error is triggered when the Gstd python client fails internally
+        """
+
+        self._logger.info(
+            'Triggering action {} of element {} from pipeline {}'.format(
+                action, element, pipe_name))
+        parameters = self._check_parameters(
+            [pipe_name, element, action], [str, str, str])
+        self._send_cmd_line(['action_emit'] + parameters)
+
     def update(self, uri, value):
         """
         Update the resource at the given URI.

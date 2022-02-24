@@ -87,6 +87,8 @@ static GstdReturnCode gstd_parser_signal_timeout (GstdSession *, gchar *,
     gchar *, gchar **);
 static GstdReturnCode gstd_parser_signal_disconnect (GstdSession *, gchar *,
     gchar *, gchar **);
+static GstdReturnCode gstd_parser_action_emit (GstdSession *, gchar *,
+    gchar *, gchar **);
 static GstdReturnCode gstd_parser_debug_enable (GstdSession *, gchar *, gchar *,
     gchar **);
 static GstdReturnCode gstd_parser_debug_threshold (GstdSession *, gchar *,
@@ -137,6 +139,8 @@ static GstdCmd cmds[] = {
   {"signal_connect", gstd_parser_signal_connect},
   {"signal_timeout", gstd_parser_signal_timeout},
   {"signal_disconnect", gstd_parser_signal_disconnect},
+
+  {"action_emit", gstd_parser_action_emit},
 
   {"debug_enable", gstd_parser_debug_enable},
   {"debug_threshold", gstd_parser_debug_threshold},
@@ -909,7 +913,32 @@ gstd_parser_signal_disconnect (GstdSession * session, gchar * action,
   return ret;
 }
 
+static GstdReturnCode
+gstd_parser_action_emit (GstdSession * session, gchar * action,
+    gchar * args, gchar ** response)
+{
+  GstdReturnCode ret;
+  gchar *uri;
+  gchar **tokens;
 
+  g_return_val_if_fail (GSTD_IS_SESSION (session), GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (args, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (response, GSTD_NULL_ARGUMENT);
+
+  tokens = g_strsplit (args, " ", 3);
+  check_argument (tokens[0], GSTD_BAD_COMMAND);
+  check_argument (tokens[1], GSTD_BAD_COMMAND);
+  check_argument (tokens[2], GSTD_BAD_COMMAND);
+
+  uri = g_strdup_printf ("/pipelines/%s/elements/%s/actions/%s %s",
+      tokens[0], tokens[1], tokens[2], tokens[2]);
+  ret = gstd_parser_parse_raw_cmd (session, (gchar *) "create", uri, response);
+
+  g_free (uri);
+  g_strfreev (tokens);
+
+  return ret;
+}
 
 static GstdReturnCode
 gstd_parser_signal_timeout (GstdSession * session, gchar * action, gchar * args,
