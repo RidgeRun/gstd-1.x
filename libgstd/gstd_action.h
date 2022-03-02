@@ -44,7 +44,7 @@ G_BEGIN_DECLS
 
 typedef struct _GstdAction GstdAction;
 typedef struct _GstdActionClass GstdActionClass;
-GType gstd_action_get_type ();
+GType gstd_action_get_type (void);
 
 struct _GstdAction
 {
