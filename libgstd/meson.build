@@ -5,6 +5,7 @@ gstd_headers = [
 
 # Common files needed for GstD and libGstD
 gstd_src = [
+  'gstd_action.c',
   'gstd_object.c',
   'gstd_pipeline.c',
   'gstd_element.c',

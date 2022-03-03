@@ -402,7 +402,7 @@ gstd_element_properties_to_string (GstdElement * self,
 
 }
 
-void
+static void
 gstd_element_signals_to_string_internal (GstdElement * self,
     GList * signal_list, GstdIFormatter * formatter)
 {
