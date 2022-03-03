@@ -21,25 +21,25 @@
 #include "config.h"
 #endif
 
-#include <string.h>
-#include <gst/gst.h>
 #include <gobject/gvaluecollector.h>
+#include <gst/gst.h>
 #include <json-glib/json-glib.h>
+#include <string.h>
 
-#include "gstd_list.h"
+#include "gstd_action.h"
 #include "gstd_element.h"
-#include "gstd_object.h"
 #include "gstd_event_handler.h"
-
 #include "gstd_iformatter.h"
 #include "gstd_json_builder.h"
-#include "gstd_property_reader.h"
-#include "gstd_property_boolean.h"
-#include "gstd_property_string.h"
-#include "gstd_property_int.h"
-#include "gstd_property_enum.h"
-#include "gstd_property_array.h"
+#include "gstd_list.h"
 #include "gstd_list_reader.h"
+#include "gstd_object.h"
+#include "gstd_property_array.h"
+#include "gstd_property_boolean.h"
+#include "gstd_property_enum.h"
+#include "gstd_property_int.h"
+#include "gstd_property_reader.h"
+#include "gstd_property_string.h"
 #include "gstd_signal.h"
 #include "gstd_signal_list.h"
 
@@ -49,6 +49,7 @@ enum
   PROP_EVENT,
   PROP_PROPERTIES,
   PROP_SIGNALS,
+  PROP_ACTIONS,
   N_PROPERTIES                  // NOT A PROPERTY
 };
 
@@ -87,6 +88,11 @@ struct _GstdElement
    * The signals held by the element
    */
   GstdList *element_signals;
+
+  /*
+   * The actions held by the element
+   */
+  GstdList *element_actions;
 };
 
 struct _GstdElementClass
@@ -109,8 +115,11 @@ void gstd_element_properties_to_string (GstdElement * self,
     GstdIFormatter * formatter);
 void gstd_element_signals_to_string (GstdElement * self,
     GstdIFormatter * formatter);
+void gstd_element_actions_to_string (GstdElement * self,
+    GstdIFormatter * formatter);
 static GstdReturnCode gstd_element_fill_properties (GstdElement * self);
-static GstdReturnCode gstd_element_fill_signals (GstdElement * self);
+static GstdReturnCode gstd_element_fill_signals_and_actions (GstdElement *
+    self);
 static GType gstd_element_property_get_type (GType g_type);
 static void
 gstd_element_class_init (GstdElementClass * klass)
@@ -151,6 +160,13 @@ gstd_element_class_init (GstdElementClass * klass)
       GSTD_TYPE_LIST,
       G_PARAM_READABLE | G_PARAM_STATIC_STRINGS | GSTD_PARAM_READ);
 
+  properties[PROP_ACTIONS] =
+      g_param_spec_object ("actions",
+      "Actions",
+      "The actions of the element",
+      GSTD_TYPE_LIST,
+      G_PARAM_READABLE | G_PARAM_STATIC_STRINGS | GSTD_PARAM_READ);
+
   g_object_class_install_properties (object_class, N_PROPERTIES, properties);
 
   gstd_object_class->to_string = gstd_element_to_string;
@@ -180,10 +196,17 @@ gstd_element_init (GstdElement * self)
       GSTD_LIST (g_object_new (GSTD_TYPE_SIGNAL_LIST, "name", "element_signals",
           "node-type", GSTD_TYPE_SIGNAL, "flags", GSTD_PARAM_READ, NULL));
 
+  self->element_actions =
+      GSTD_LIST (g_object_new (GSTD_TYPE_LIST, "name", "element_actions",
+          "node-type", GSTD_TYPE_ACTION, "flags", GSTD_PARAM_READ, NULL));
+
   gstd_object_set_reader (GSTD_OBJECT (self->element_properties),
       g_object_new (GSTD_TYPE_LIST_READER, NULL));
 
   gstd_object_set_reader (GSTD_OBJECT (self->element_signals),
+      g_object_new (GSTD_TYPE_LIST_READER, NULL));
+
+  gstd_object_set_reader (GSTD_OBJECT (self->element_actions),
       g_object_new (GSTD_TYPE_LIST_READER, NULL));
 
 }
@@ -207,6 +230,7 @@ gstd_element_dispose (GObject * object)
 
   g_object_unref (self->element_properties);
   g_object_unref (self->element_signals);
+  g_object_unref (self->element_actions);
 
   G_OBJECT_CLASS (gstd_element_parent_class)->dispose (object);
 }
@@ -237,6 +261,10 @@ gstd_element_get_property (GObject * object,
       GST_DEBUG_OBJECT (self, "Returning signals %p", self->element_signals);
       g_value_set_object (value, self->element_signals);
       break;
+    case PROP_ACTIONS:
+      GST_DEBUG_OBJECT (self, "Returning actions %p", self->element_actions);
+      g_value_set_object (value, self->element_actions);
+      break;
     default:
       /* We don't have any other property... */
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -263,7 +291,7 @@ gstd_element_set_property (GObject * object,
           GST_OBJECT_NAME (self->element));
 
       gstd_element_fill_properties (self);
-      gstd_element_fill_signals (self);
+      gstd_element_fill_signals_and_actions (self);
       break;
     default:
       /* We don't have any other property... */
@@ -374,50 +402,72 @@ gstd_element_properties_to_string (GstdElement * self,
 
 }
 
-void
-gstd_element_signals_to_string (GstdElement * self, GstdIFormatter * formatter)
+static void
+gstd_element_signals_to_string_internal (GstdElement * self,
+    GList * signal_list, GstdIFormatter * formatter)
 {
-  GSignalQuery *query = NULL;
-  GList *signal_list;
+  GSignalQuery query;
   guint j;
   const gchar *typename;
 
-  g_return_if_fail (GSTD_IS_OBJECT (self));
-
-  gstd_iformatter_set_member_name (formatter, "element_signals");
   gstd_iformatter_begin_array (formatter);
 
-  signal_list = self->element_signals->list;
   while (signal_list) {
     guint signal_id;
 
     signal_id = g_signal_lookup (GSTD_OBJECT_NAME (signal_list->data),
         G_OBJECT_TYPE (self->element));
-    query = g_new0 (GSignalQuery, 1);
-    g_signal_query (signal_id, query);
+    g_signal_query (signal_id, &query);
 
     /* Describe each signal using a structure */
     gstd_iformatter_begin_object (formatter);
 
     gstd_iformatter_set_member_name (formatter, "name");
-    gstd_iformatter_set_string_value (formatter, query->signal_name);
+    gstd_iformatter_set_string_value (formatter, query.signal_name);
 
     gstd_iformatter_set_member_name (formatter, "arguments");
     gstd_iformatter_begin_array (formatter);
-    for (j = 0; j < query->n_params; j++) {
-      typename = g_type_name (query->param_types[j]);
+    for (j = 0; j < query.n_params; j++) {
+      typename = g_type_name (query.param_types[j]);
       gstd_iformatter_set_string_value (formatter, typename);
     }
     gstd_iformatter_end_array (formatter);
 
+    gstd_iformatter_set_member_name (formatter, "return");
+    typename = g_type_name (query.return_type);
+    gstd_iformatter_set_string_value (formatter, typename);
+
     /* Close signal structure */
     gstd_iformatter_end_object (formatter);
 
-    g_free (query);
     signal_list = signal_list->next;
   }
 
   gstd_iformatter_end_array (formatter);
+}
+
+void
+gstd_element_signals_to_string (GstdElement * self, GstdIFormatter * formatter)
+{
+  GList *signal_list;
+
+  g_return_if_fail (GSTD_IS_OBJECT (self));
+
+  gstd_iformatter_set_member_name (formatter, "element_signals");
+  signal_list = self->element_signals->list;
+  gstd_element_signals_to_string_internal (self, signal_list, formatter);
+}
+
+void
+gstd_element_actions_to_string (GstdElement * self, GstdIFormatter * formatter)
+{
+  GList *action_list;
+
+  g_return_if_fail (GSTD_IS_OBJECT (self));
+
+  gstd_iformatter_set_member_name (formatter, "element_actions");
+  action_list = self->element_actions->list;
+  gstd_element_signals_to_string_internal (self, action_list, formatter);
 }
 
 void
@@ -431,6 +481,7 @@ gstd_element_internal_to_string (GstdElement * self, gchar ** outstring)
 
   gstd_element_properties_to_string (self, formatter);
   gstd_element_signals_to_string (self, formatter);
+  gstd_element_actions_to_string (self, formatter);
 
   gstd_iformatter_end_object (formatter);
 
@@ -540,38 +591,41 @@ gstd_element_fill_properties (GstdElement * self)
 
 
 static GstdReturnCode
-gstd_element_fill_signals (GstdElement * self)
+gstd_element_fill_signals_and_actions (GstdElement * self)
 {
   guint *signals;
   guint n_signals;
-  GSignalQuery *query = NULL;
-  GstdObject *element_signal;
+  GSignalQuery query;
+  GstdObject *gstd_object;
+  GType type;
   guint i;
 
   g_return_val_if_fail (GSTD_IS_ELEMENT (self), GSTD_NULL_ARGUMENT);
 
-  GST_DEBUG_OBJECT (self, "Gathering \"%s\" signals", GST_OBJECT_NAME (self));
+  GST_DEBUG_OBJECT (self, "Gathering \"%s\" signals & actions",
+      GST_OBJECT_NAME (self->element));
 
-  signals = g_signal_list_ids (G_OBJECT_TYPE (self->element), &n_signals);
+  for (type = G_OBJECT_TYPE (self->element); type; type = g_type_parent (type)) {
 
-  for (i = 0; i < n_signals; ++i) {
-    query = g_new0 (GSignalQuery, 1);
-    g_signal_query (signals[i], query);
+    signals = g_signal_list_ids (type, &n_signals);
 
-    if (query->signal_flags & G_SIGNAL_ACTION) {
-      g_free (query);
-      continue;
+    for (i = 0; i < n_signals; ++i) {
+      g_signal_query (signals[i], &query);
+
+      GST_DEBUG_OBJECT (self, "signal/action query %d: name %s", i,
+          query.signal_name);
+      if (query.signal_flags & G_SIGNAL_ACTION) {
+        gstd_object = g_object_new (GSTD_TYPE_ACTION, "name",
+            query.signal_name, "target", self->element, NULL);
+        gstd_list_append_child (self->element_actions, gstd_object);
+      } else {
+        gstd_object = g_object_new (GSTD_TYPE_SIGNAL, "name",
+            query.signal_name, "target", self->element, NULL);
+        gstd_list_append_child (self->element_signals, gstd_object);
+      }
     }
-
-    element_signal = g_object_new (GSTD_TYPE_SIGNAL, "name",
-        query->signal_name, "target", self->element, NULL);
-
-    gstd_list_append_child (self->element_signals, element_signal);
-
-    g_free (query);
+    g_free (signals);
   }
-
-  g_free (signals);
 
   return GSTD_EOK;
 }

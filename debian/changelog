@@ -1,3 +1,18 @@
+gstd (0.14.0-1) unstable; urgency=medium
+
+  * Add actions
+  * Memory leak Fixes
+  * CPP compilation fixes
+  * Updates PyGstc to 0.2.2
+
+ -- RidgeRun Engineering <support@ridgerun.com>  Thu, 03 Mar 12:00:00  -0600
+
+gstd (0.13.2-1) unstable; urgency=medium
+
+  * Fix segfault when enabling HTTP IPC
+
+ -- RidgeRun Engineering <support@ridgerun.com>  Wed, 05 Jan 10:00:00  -0600
+
 gstd (0.13.1-1) unstable; urgency=medium
 
   * Fix deadlock when a socket dies or closes incorrectly on PyGstc

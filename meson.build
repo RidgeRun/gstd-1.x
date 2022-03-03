@@ -1,5 +1,5 @@
 project('gstd', 'c',
-  version : '0.13.2',
+  version : '0.14.0',
   meson_version : '>= 0.50',)
 
 gstd_version = meson.project_version()
@@ -22,9 +22,11 @@ gio_unix_dep  = dependency('gio-unix-2.0',       version : '>=2.44.1')
 json_glib_dep = dependency('json-glib-1.0',      version : '>=0.16.2')
 libd_dep      = dependency('libdaemon',          version : '>=0.14')
 jansson_dep   = dependency('jansson',            version : '>=2.7')
-gst_check_dep = dependency('gstreamer-check-1.0',version : '>=1.0.5')
 thread_dep    = dependency('threads')
 libsoup_dep = dependency('libsoup-2.4',		       version : '>=2.4')
+
+gst_check_required = get_option('enable-tests').enabled()
+gst_check_dep = dependency('gstreamer-check-1.0', required : gst_check_required, version : '>=1.0.5')
 
 systemd_required = get_option('enable-systemd').enabled()
 systemd_dep = dependency('systemd', required : systemd_required, version : '>=232')
@@ -52,18 +54,68 @@ endif
 
 ## Dependencies
 # Define gst Daemon dependencies
-gstd_deps = [gst_base_dep, gio_unix_dep, json_glib_dep, libd_dep, jansson_dep, libsoup_dep]
+gstd_deps = [
+  libd_dep
+  ]
+
 # Define gst client library dependencies
-libgstc_deps = [gst_base_dep, json_glib_dep, jansson_dep, thread_dep]
+libgstc_deps = [
+  gst_base_dep, 
+  json_glib_dep, 
+  jansson_dep, 
+  thread_dep
+  ]
+
+# Define gst core library dependencies
+libgstd_deps = [
+  gst_base_dep, 
+  gio_unix_dep, 
+  json_glib_dep, 
+  jansson_dep, 
+  thread_dep, 
+  libsoup_dep
+  ]
+
 # Define gst client application dependencies
-gst_client_deps = [readline_dep, json_glib_dep, gio_unix_dep]
+gst_client_deps = [
+  readline_dep, 
+  json_glib_dep, 
+  gio_unix_dep
+  ]
+
 # Define test dependencies
-test_libgstc_deps=[gst_base_dep, json_glib_dep, jansson_dep, thread_dep, gst_check_dep]
-test_gstd_deps=[gst_base_dep, gio_unix_dep, json_glib_dep, libd_dep, jansson_dep, gst_check_dep]
+test_libgstc_deps=[
+  gst_base_dep, 
+  json_glib_dep, 
+  jansson_dep, 
+  thread_dep, 
+  gst_check_dep
+  ]
+
+test_gstd_deps=[
+  gst_base_dep, 
+  gio_unix_dep, 
+  json_glib_dep, 
+  libd_dep, 
+  jansson_dep, 
+  gst_check_dep
+  ]
+
+test_libgstd_deps=[
+  gst_base_dep, 
+  gio_unix_dep, 
+  json_glib_dep, 
+  libd_dep, 
+  jansson_dep, 
+  thread_dep, 
+  libsoup_dep, 
+  gst_check_dep
+  ]
 
 # Define header directories
 lib_gstc_inc_dir = include_directories('libgstc/c')
 gstd_inc_dir = include_directories('gstd')
+libgstd_inc_dir = include_directories('libgstd')
 configinc = include_directories('.')
 
 # Define gstreamer API version
@@ -89,6 +141,7 @@ if logstatedir == '${prefix}/var/log/gstd/'
 endif
 gstd_log_state_dir = '-DGSTD_LOG_STATE_DIR="@0@"'.format(logstatedir)
 gst_c_args = ['-DHAVE_CONFIG_H',gstd_log_state_dir,gstd_run_state_dir]
+gst_d_args = ['-DHAVE_CONFIG_H',gstd_log_state_dir,gstd_run_state_dir]
 
 # Get an object returns describing a compiler
 cc = meson.get_compiler('c')
@@ -240,10 +293,10 @@ endif
 configure_file(output : 'config.h', configuration : cdata)
 
 # Enter to each subdirectory and execute the meson.build
-subdir('gstd')
 subdir('libgstc')
+subdir('libgstd')
+subdir('gstd')
 subdir('gst_client')
 subdir('tests')
 subdir('examples')
 subdir('docs')
-subdir('init')

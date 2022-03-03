@@ -16,11 +16,11 @@ executable(exe_name,
 
 ## Create symbolic link to gst-client
 meson.add_install_script('gst_client_symbolic_link.sh',
-  get_option('bindir') +'/'+ exe_name,
+  exe_name,
   get_option('bindir') +'/'+ gst_client_name
 )
 
 meson.add_install_script('gst_client_symbolic_link.sh',
-  get_option('bindir') +'/'+ exe_name,
+  exe_name,
   get_option('bindir') +'/'+ 'gstd-client'
 )

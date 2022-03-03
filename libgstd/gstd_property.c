@@ -296,6 +296,8 @@ gstd_property_update_default (GstdObject * object, const gchar * svalue)
     ret = GSTD_EOK;
   }
 
+  g_value_unset (&value);
+
   GST_OBJECT_UNLOCK (prop);
 
   return ret;

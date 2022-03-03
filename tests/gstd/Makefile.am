@@ -4,6 +4,6 @@ TESTS = test_gstd_pipeline_create 	\
 
 check_PROGRAMS = $(TESTS)
 
-AM_CFLAGS = $(GST_CFLAGS) -I$(top_srcdir)/gstd/
+AM_CFLAGS = $(GST_CFLAGS) -I$(top_srcdir)/libgstd/
 AM_LDFLAGS = $(GST_LIBS)
-LDADD = $(top_srcdir)/gstd/libgstd-core.la
+LDADD = $(top_srcdir)/libgstd/libgstd-1.0.la

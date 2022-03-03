@@ -1,11 +1,11 @@
 # Tests and condition when to skip the test
 gstd_tests = [
-  ['test_gstd_no_create.c'],
-  ['test_gstd_pipeline_create.c'],
-  ['test_gstd_session.c'],
-  ['test_gstd_state.c'],
+  ['test_libgstd_init.c'],
+  ['test_libgstd_create.c'],
+  ['test_libgstd_read.c'],
+  ['test_libgstd_update.c'],
+  ['test_libgstd_delete.c'],
 ]
-
 # Add C Definitions for tests
 test_defines = [
   '-DTESTFILE="' + meson.current_source_dir() + '/meson.build"',
@@ -17,7 +17,7 @@ if gst_dep.type_name() == 'pkgconfig'
    plugins_dir =[gst_dep.get_pkgconfig_variable('pluginsdir')]
 endif
 
-# Create environment object to  stores information about the environment
+# Create environment object to store information about the environment
 # variables set during tests.
 # Define constant enviroment variable
 env = environment()
@@ -39,7 +39,7 @@ foreach t : gstd_tests
         cpp_args : gst_c_args + test_defines,
         include_directories : [configinc, libgstd_inc_dir],
         link_with : link_with_libs,
-        dependencies : [test_gstd_deps, lib_gstd_dep],
+        dependencies : [test_libgstd_deps, lib_gstd_dep],
     )
 
     # Define enviroment variable

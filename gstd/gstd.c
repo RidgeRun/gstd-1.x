@@ -1,6 +1,6 @@
 /*
  * GStreamer Daemon - Gst Launch under steroids
- * Copyright (c) 2015-2017 Ridgerun, LLC (http://www.ridgerun.com)
+ * Copyright (c) 2015-2021 Ridgerun, LLC (http://www.ridgerun.com)
  * 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -22,28 +22,17 @@
 #endif
 
 #include <stdlib.h>
-#include <gst/gst.h>
-#include <glib-unix.h>
 
-#include "gstd_session.h"
-#include "gstd_ipc.h"
-#include "gstd_tcp.h"
-#include "gstd_unix.h"
-#include "gstd_http.h"
+#include "gstd.h"
 #include "gstd_daemon.h"
 #include "gstd_log.h"
 
-static gboolean int_term_handler (gpointer user_data);
-static void ipc_add_option_groups (GstdIpc * ipc[], GType factory[],
-    guint num_ipcs, GOptionContext * context, GOptionGroup * groups[]);
-static gboolean ipc_start (GstdIpc * ipc[], guint num_ipcs,
-    GstdSession * session);
-static void ipc_stop (GstdIpc * ipc[], guint numipc);
-static void print_header ();
-
 #define HEADER \
-      "\nGstd version " PACKAGE_VERSION "\n" \
-      "Copyright (C) 2015-2020 RidgeRun (https://www.ridgerun.com)\n\n"
+      "\nGstD version " PACKAGE_VERSION "\n" \
+      "Copyright (C) 2015-2021 RidgeRun (https://www.ridgerun.com)\n\n"
+
+static gboolean int_term_handler (gpointer user_data);
+static void print_header ();
 
 static void
 print_header (void)
@@ -63,86 +52,16 @@ int_term_handler (gpointer user_data)
   /* User has pressed CTRL-C, stop the main loop
      so the application closes itself */
   GST_INFO ("Interrupt received, shutting down...");
+  g_print ("\n");
   g_main_loop_quit (main_loop);
 
   return TRUE;
-}
-
-static void
-ipc_add_option_groups (GstdIpc * ipc[], GType factory[], guint num_ipcs,
-    GOptionContext * context, GOptionGroup * groups[])
-{
-  gint i;
-
-  g_return_if_fail (ipc);
-  g_return_if_fail (context);
-  g_return_if_fail (groups);
-
-  for (i = 0; i < num_ipcs; i++) {
-    ipc[i] = GSTD_IPC (g_object_new (factory[i], NULL));
-    gstd_ipc_get_option_group (ipc[i], &groups[i]);
-    g_option_context_add_group (context, groups[i]);
-  }
-}
-
-static gboolean
-ipc_start (GstdIpc * ipc[], guint num_ipcs, GstdSession * session)
-{
-  gboolean ipc_selected = FALSE;
-  gboolean ret = TRUE;
-  GstdReturnCode code;
-  gint i;
-
-  g_return_val_if_fail (ipc, FALSE);
-  g_return_val_if_fail (session, FALSE);
-
-  /* Verify if at leas one IPC mechanism was selected */
-  for (i = 0; i < num_ipcs; i++) {
-    g_object_get (G_OBJECT (ipc[i]), "enabled", &ipc_selected, NULL);
-
-    if (ipc_selected) {
-      break;
-    }
-  }
-
-  /* If no IPC was selected, default to TCP */
-  if (!ipc_selected) {
-    g_object_set (G_OBJECT (ipc[0]), "enabled", TRUE, NULL);
-  }
-
-  /* Run start for each IPC (each start method checks for the enabled flag) */
-  for (i = 0; i < num_ipcs; i++) {
-    code = gstd_ipc_start (ipc[i], session);
-    if (code) {
-      g_printerr ("Couldn't start IPC : (%s)\n", G_OBJECT_TYPE_NAME (ipc[i]));
-      ret = FALSE;
-    }
-  }
-
-  return ret;
-}
-
-static void
-ipc_stop (GstdIpc * ipc[], guint num_ipcs)
-{
-  gint i;
-
-  g_return_if_fail (ipc);
-
-  /* Run stop for each IPC */
-  for (i = 0; i < num_ipcs; i++) {
-    if (TRUE == ipc[i]->enabled) {
-      gstd_ipc_stop (ipc[i]);
-      g_object_unref (ipc[i]);
-    }
-  }
 }
 
 gint
 main (gint argc, gchar * argv[])
 {
   GMainLoop *main_loop;
-  GstdSession *session;
   gboolean version = FALSE;
   gboolean kill = FALSE;
   gboolean daemon = FALSE;
@@ -151,24 +70,13 @@ main (gint argc, gchar * argv[])
   const gchar *gstlogfile = NULL;
   gchar *pidfile = NULL;
   GError *error = NULL;
-  GOptionContext *context;
-  GOptionGroup *gstreamer_group;
+  GOptionContext *context = NULL;
   gint ret = EXIT_SUCCESS;
   gchar *current_filename = NULL;
+  gchar *filename = NULL;
+  gboolean parent = FALSE;
 
-  /* Array to specify gstd how many IPCs are supported, 
-   * IPCs should be added this array.
-   */
-  GType supported_ipcs[] = {
-    GSTD_TYPE_TCP,
-    GSTD_TYPE_UNIX,
-    GSTD_TYPE_HTTP,
-  };
-
-  guint num_ipcs = (sizeof (supported_ipcs) / sizeof (GType));
-  GstdIpc **ipc_array = g_malloc (num_ipcs * sizeof (GstdIpc *));
-  GOptionGroup **optiongroup_array =
-      g_malloc (num_ipcs * sizeof (GOptionGroup *));
+  GstD *gstd = NULL;
 
   GOptionEntry entries[] = {
     {"version", 'v', 0, G_OPTION_ARG_NONE, &version,
@@ -200,12 +108,8 @@ main (gint argc, gchar * argv[])
   g_option_context_add_main_entries (context, entries, NULL);
 
   /* Initialize GStreamer */
-  gstreamer_group = gst_init_get_option_group ();
-  g_option_context_add_group (context, gstreamer_group);
-
-  /* Read option group for each IPC */
-  ipc_add_option_groups (ipc_array, supported_ipcs, num_ipcs, context,
-      optiongroup_array);
+  gstd_new (&gstd, 0, NULL);
+  gstd_context_add_group (gstd, context);
 
   /* Parse the options before starting */
   if (!g_option_context_parse (context, &argc, &argv, &error)) {
@@ -245,8 +149,6 @@ main (gint argc, gchar * argv[])
   }
 
   if (daemon) {
-    gboolean parent;
-
     if (!gstd_daemon_start (&parent)) {
       goto error;
     }
@@ -254,7 +156,6 @@ main (gint argc, gchar * argv[])
     /* Parent fork ends here */
     if (parent) {
       if (!quiet) {
-        gchar *filename;
         filename = gstd_log_get_current_gstd ();
         g_print ("Log traces will be saved to %s.\n", filename);
         g_print ("Detaching from parent process.\n");
@@ -264,11 +165,8 @@ main (gint argc, gchar * argv[])
     }
   }
 
-  /*Create session */
-  session = gstd_session_new ("Session0");
-
   /* Start IPC subsystem */
-  if (!ipc_start (ipc_array, num_ipcs, session)) {
+  if (!gstd_start (gstd)) {
     goto error;
   }
 
@@ -290,16 +188,9 @@ main (gint argc, gchar * argv[])
   main_loop = NULL;
 
   /* Stop any IPC array */
-  ipc_stop (ipc_array, num_ipcs);
+  gstd_stop (gstd);
 
-  /* Free Gstd session */
-  g_object_unref (session);
-
-  gst_deinit ();
   gstd_log_deinit ();
-
-  g_free (ipc_array);
-  g_free (optiongroup_array);
 
   goto out;
 
@@ -314,6 +205,8 @@ error:
   }
 out:
   {
+    gst_deinit ();
+    gstd_free (gstd);
     return ret;
   }
 }
