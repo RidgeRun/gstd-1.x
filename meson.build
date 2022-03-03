@@ -1,5 +1,5 @@
 project('gstd', 'c',
-  version : '0.13.2',
+  version : '0.14.0',
   meson_version : '>= 0.50',)
 
 gstd_version = meson.project_version()
