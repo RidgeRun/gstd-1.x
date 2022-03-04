@@ -32,6 +32,7 @@
 import unittest
 import threading
 
+from gstd_runner import GstdTestRunner
 from pygstc.gstc import *
 from pygstc.logger import *
 import time
@@ -40,22 +41,22 @@ import os
 ret_val = ''
 
 
-def signal_connect_test():
+def signal_connect_test(port):
     global ret_val
     gstd_logger = CustomLogger('test_libgstc', loglevel='DEBUG')
-    gstd_client = GstdClient(logger=gstd_logger)
+    gstd_client = GstdClient(port=port, logger=gstd_logger)
     ret_val = gstd_client.signal_connect('p0', 'identity', 'handoff')
 
 
-class TestGstcSignalDisconnectMethods(unittest.TestCase):
+class TestGstcSignalDisconnectMethods(GstdTestRunner):
 
     def test_libgstc_python_signal_disconnect(self):
         global ret_val
         pipeline = 'videotestsrc ! identity name=identity ! fakesink'
         self.gstd_logger = CustomLogger('test_libgstc', loglevel='DEBUG')
-        self.gstd_client = GstdClient(logger=self.gstd_logger)
+        self.gstd_client = GstdClient(port=self.port, logger=self.gstd_logger)
         self.gstd_client.pipeline_create('p0', pipeline)
-        ret_thr = threading.Thread(target=signal_connect_test)
+        ret_thr = threading.Thread(target=signal_connect_test, args=(self.port,))
         ret_thr.start()
         time.sleep(0.1)
         self.gstd_client.signal_disconnect('p0', 'identity', 'handoff')

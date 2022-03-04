@@ -29,21 +29,32 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
 # OF THE POSSIBILITY OF SUCH DAMAGE.
 
+import time
 import unittest
 
+from gstd_runner import GstdTestRunner
 from pygstc.gstc import *
 from pygstc.logger import *
 
+DEFAULT_STATE_READ_RETRIES = 3
+DEFAULT_TIME_BETWEEN_RETRIES = 0.1 #seconds
+RUN_STATES = ['RUNNING', 'READY']
 
-class TestGstcPipelinePauseMethods(unittest.TestCase):
+class TestGstcPipelinePauseMethods(GstdTestRunner):
 
     def test_libgstc_python_pipeline_pause(self):
         pipeline = 'videotestsrc name=v0 ! fakesink'
         self.gstd_logger = CustomLogger('test_libgstc', loglevel='DEBUG')
-        self.gstd_client = GstdClient(logger=self.gstd_logger)
+        self.gstd_client = GstdClient(port=self.port, logger=self.gstd_logger)
         self.gstd_client.pipeline_create('p0', pipeline)
         self.gstd_client.pipeline_play('p0')
         self.gstd_client.pipeline_pause('p0')
+        state = self.gstd_client.read('pipelines/p0/state')['value']
+        retry = DEFAULT_STATE_READ_RETRIES
+        while (retry and state in RUN_STATES):
+            time.sleep(DEFAULT_TIME_BETWEEN_RETRIES)
+            state = self.gstd_client.read('pipelines/p0/state')['value']
+            retry -= 1
         self.assertEqual(self.gstd_client.read(
             'pipelines/p0/state')['value'], 'PAUSED')
         self.gstd_client.pipeline_delete('p0')

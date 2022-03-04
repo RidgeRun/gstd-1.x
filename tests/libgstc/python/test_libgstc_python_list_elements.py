@@ -31,16 +31,17 @@
 
 import unittest
 
+from gstd_runner import GstdTestRunner
 from pygstc.gstc import *
 from pygstc.logger import *
 
 
-class TestGstcListElementsMethods(unittest.TestCase):
+class TestGstcListElementsMethods(GstdTestRunner):
 
     def test_list_elements(self):
         pipeline = 'videotestsrc name=v0 ! fakesink name=x0'
         self.gstd_logger = CustomLogger('test_libgstc', loglevel='DEBUG')
-        self.gstd_client = GstdClient(logger=self.gstd_logger)
+        self.gstd_client = GstdClient(port=self.port, logger=self.gstd_logger)
         self.gstd_client.pipeline_create('p0', pipeline)
         self.assertEqual(self.gstd_client.list_elements('p0'),
                          [{'name': 'x0'}, {'name': 'v0'}])

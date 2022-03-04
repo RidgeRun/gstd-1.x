@@ -31,17 +31,18 @@
 
 import unittest
 
+from gstd_runner import GstdTestRunner
 from pygstc.gstc import *
 from pygstc.logger import *
 
 
-class TestGstcListPropertiesMethods(unittest.TestCase):
+class TestGstcListPropertiesMethods(GstdTestRunner):
 
     def test_list_properties(self):
         pipeline = \
             'videotestsrc name=v0 ! identity name=i0 ! fakesink name=x0'
         self.gstd_logger = CustomLogger('test_libgstc', loglevel='DEBUG')
-        self.gstd_client = GstdClient(logger=self.gstd_logger)
+        self.gstd_client = GstdClient(port=self.port, logger=self.gstd_logger)
         identity_properties = [
             {'name': 'name'},
             {'name': 'parent'},

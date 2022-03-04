@@ -32,11 +32,13 @@
 import unittest
 import subprocess
 
+from gstd_runner import GstdTestRunner
 
-class TestGstcStopGstdMethods(unittest.TestCase):
+
+class TestGstcStopGstdMethods(GstdTestRunner):
 
     def test_libgstc_python_stop_gstd(self):
-        subprocess.Popen(['gstd', '-k'])
+        subprocess.Popen([self.gstd_path, '-k'])
 
 
 if __name__ == '__main__':
