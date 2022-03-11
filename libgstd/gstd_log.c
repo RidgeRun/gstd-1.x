@@ -155,8 +155,9 @@ gstd_log_get_filename (const gchar * filename, const gchar * default_filename)
     return g_strdup (filename);
   } else {
     g_printerr
-        ("WARNING: The pid filename is not absolute since default filename\n");
-    return g_strdup (default_filename);;
+        ("WARNING: The pid filename is not absolute, falling back to: %s\n",
+        default_filename);
+    return g_strdup (default_filename);
   }
 }
 
