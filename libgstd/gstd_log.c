@@ -48,13 +48,18 @@ gstd_log_proxy (GstDebugCategory * category, GstDebugLevel level,
 
      static FILE *_gstdlog = NULL;
      static FILE *_gstlog = NULL;
-     static gchar *gstd_filename;
-     static gchar *gst_filename;
+     static gchar *gstd_filename = NULL;
+     static gchar *gst_filename = NULL;
 
 gboolean
-gstd_log_init (const gchar * gstdfilename, const gchar * gstfilename)
+gstd_log_init (const gchar * gstdfilename, const gchar * gstfilename,
+    gboolean enabled)
 {
   if (_gstdlog) {
+    return TRUE;
+  }
+
+  if (!enabled) {
     return TRUE;
   }
 

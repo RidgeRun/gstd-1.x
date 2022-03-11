@@ -23,7 +23,8 @@
 
 #include <gst/gst.h>
 
-gboolean gstd_log_init (const gchar * gstdfilename, const gchar * gstfilename);
+gboolean gstd_log_init (const gchar * gstdfilename, const gchar * gstfilename,
+    gboolean enabled);
 void gstd_log_deinit (void);
 void gstd_debug_init (void);
 
