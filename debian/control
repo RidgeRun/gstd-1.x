@@ -22,19 +22,8 @@ Homepage: https://developer.ridgerun.com/wiki/index.php?title=GStreamer_Daemon_-
 Package: gstd
 Architecture: any
 Multi-arch: same
-Depends: ${shlibs:Depends}, ${misc:Depends},
-          automake,
-          libtool,
-          pkg-config,
-          libgstreamer1.0-dev,
-          libgstreamer-plugins-base1.0-dev,
-          libglib2.0-dev,
-          libjson-glib-dev,
-          gtk-doc-tools,
-          libreadline-dev,
-          libncursesw5-dev,
-          libdaemon-dev,
-          libjansson-dev
+Depends: ${shlibs:Depends},
+         ${misc:Depends}
 Description: GStreamer Daemon 
   GStreamer Daemon, also called gstd, is a GStreamer 
   framework for controlling audio and video streaming 
