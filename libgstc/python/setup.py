@@ -2,7 +2,7 @@
 # GStreamer Daemon - gst-launch on steroids
 # Python client library abstracting gstd interprocess communication
 
-# Copyright (c) 2015-2020 RidgeRun, LLC (http://www.ridgerun.com)
+# Copyright (c) 2020-2022 RidgeRun, LLC (http://www.ridgerun.com)
 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -33,7 +33,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='pygstc',
-    version='0.2.2',
+    version='0.3.0',
     description='Python GStreamer Daemon Client',
     long_description='Python GStreamer Daemon Client',
     long_description_content_type='text/markdown',

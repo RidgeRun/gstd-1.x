@@ -1,0 +1,17 @@
+Source: pygstc
+Section: python
+Priority: optional
+Maintainer: RidgeRun <support@ridgerun.com>
+Build-Depends: debhelper (>= 11),
+               dh-python,
+               python3-setuptools,
+               python3
+Standards-Version: 4.1.3
+X-Python3-Version: >= 3.6
+
+Package: python3-pygstc
+Architecture: all
+Depends: ${misc:Depends},
+         ${python3:Depends}
+Description: Python GStreamer Daemon Client.
+ Standalone Python Client for RidgeRun's GStreamer Daemon
