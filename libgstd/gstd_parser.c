@@ -270,13 +270,10 @@ gstd_parser_create (GstdSession * session, GstdObject * obj, gchar * args,
   if (ret)
     goto out;
 
-  if (0 != strcmp (name, "eos")) {
-    gstd_object_read (obj, name, &new);
-
-    if (NULL != new) {
-      gstd_object_to_string (new, response);
-      g_object_unref (new);
-    }
+  gstd_object_read (obj, name, &new);
+  if (NULL != new) {
+    gstd_object_to_string (new, response);
+    g_object_unref (new);
   }
 
 out:
