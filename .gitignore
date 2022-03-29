@@ -34,11 +34,32 @@ gst_client/gst-client-1.0
 __pycache__
 autoregen.sh
 
+# debian files
+*.deb
+*.build
+*.buildinfo
+*.changes
+debian/
+
+# python build
+build/
+.pybuild/
+*egg-info/
+
+# Init
+init/gstd
+init/gstd.service
+
 # Tests
 tests/gstd/test_gstd_no_create
 tests/gstd/test_gstd_pipeline_create
 tests/gstd/test_gstd_state
 tests/libgstc/c/libgstc*
+tests/libgstd/test_libgstd_create
+tests/libgstd/test_libgstd_delete
+tests/libgstd/test_libgstd_init
+tests/libgstd/test_libgstd_read
+tests/libgstd/test_libgstd_update
 
 # Examples
 examples/libgstc/simple_pipeline
