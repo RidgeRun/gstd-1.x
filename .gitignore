@@ -39,7 +39,17 @@ autoregen.sh
 *.build
 *.buildinfo
 *.changes
-debian/
+debian/.debhelper/
+debian/autoreconf.after
+debian/autoreconf.before
+debian/debhelper-build-stamp
+debian/files
+debian/*.postinst.debhelper
+debian/*.postrm.debhelper
+debian/*.prerm.debhelper
+debian/*.substvars
+debian/gstd/
+debian/pygstc/
 
 # python build
 build/
