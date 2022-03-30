@@ -271,7 +271,6 @@ gstd_parser_create (GstdSession * session, GstdObject * obj, gchar * args,
     goto out;
 
   gstd_object_read (obj, name, &new);
-
   if (NULL != new) {
     gstd_object_to_string (new, response);
     g_object_unref (new);
