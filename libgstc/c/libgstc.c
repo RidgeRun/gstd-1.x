@@ -54,6 +54,12 @@
 #define UPDATE_FORMAT "update %s %s"
 #define DELETE_FORMAT "delete %s %s"
 
+/* Gst client high level command formats */
+#define PIPELINE_CREATE_REF_FORMAT "pipeline_crete_ref %s %s"
+#define PIPELINE_DELETE_REF_FORMAT "pipeline_delete_ref %s"
+#define PIPELINE_PLAY_REF_FORMAT "pipeline_play_ref %s"
+#define PIPELINE_STOP_REF_FORMAT "pipeline_stop_ref %s"
+
 #define PIPELINE_CREATE_FORMAT               "%s %s"
 #define PIPELINE_STATE_FORMAT                "/pipelines/%s/state"
 #define PIPELINE_GRAPH_FORMAT                "/pipelines/%s/graph"
@@ -332,6 +338,32 @@ gstc_pipeline_create (GstClient * client, const char *pipeline_name,
 }
 
 GstcStatus
+gstc_pipeline_create_ref (GstClient * client, const char *pipeline_name,
+    const char *pipeline_desc)
+{
+  GstcStatus ret;
+  int asprintf_ret;
+  char *request;
+
+  gstc_assert_and_ret_val (NULL != client, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != pipeline_name, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != pipeline_desc, GSTC_NULL_ARGUMENT);
+
+  asprintf_ret =
+      asprintf (&request, PIPELINE_CREATE_REF_FORMAT, pipeline_name,
+      pipeline_desc);
+  if (PRINTF_ERROR == asprintf_ret) {
+    return GSTC_OOM;
+  }
+
+  ret = gstc_cmd_send (client, request);
+
+  free (request);
+
+  return ret;
+}
+
+GstcStatus
 gstc_pipeline_delete (GstClient * client, const char *pipeline_name)
 {
   GstcStatus ret;
@@ -341,6 +373,28 @@ gstc_pipeline_delete (GstClient * client, const char *pipeline_name)
   gstc_assert_and_ret_val (NULL != pipeline_name, GSTC_NULL_ARGUMENT);
 
   ret = gstc_cmd_delete (client, resource, pipeline_name);
+
+  return ret;
+}
+
+GstcStatus
+gstc_pipeline_delete_ref (GstClient * client, const char *pipeline_name)
+{
+  GstcStatus ret;
+  int asprintf_ret;
+  char *request;
+
+  gstc_assert_and_ret_val (NULL != client, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != pipeline_name, GSTC_NULL_ARGUMENT);
+
+  asprintf_ret = asprintf (&request, PIPELINE_DELETE_REF_FORMAT, pipeline_name);
+  if (PRINTF_ERROR == asprintf_ret) {
+    return GSTC_OOM;
+  }
+
+  ret = gstc_cmd_send (client, request);
+
+  free (request);
 
   return ret;
 }
@@ -380,6 +434,28 @@ gstc_pipeline_play (GstClient * client, const char *pipeline_name)
 }
 
 GstcStatus
+gstc_pipeline_play_ref (GstClient * client, const char *pipeline_name)
+{
+  GstcStatus ret;
+  int asprintf_ret;
+  char *request;
+
+  gstc_assert_and_ret_val (NULL != client, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != pipeline_name, GSTC_NULL_ARGUMENT);
+
+  asprintf_ret = asprintf (&request, PIPELINE_PLAY_REF_FORMAT, pipeline_name);
+  if (PRINTF_ERROR == asprintf_ret) {
+    return GSTC_OOM;
+  }
+
+  ret = gstc_cmd_send (client, request);
+
+  free (request);
+
+  return ret;
+}
+
+GstcStatus
 gstc_pipeline_pause (GstClient * client, const char *pipeline_name)
 {
   const char *state = "paused";
@@ -399,6 +475,28 @@ gstc_pipeline_stop (GstClient * client, const char *pipeline_name)
   gstc_assert_and_ret_val (NULL != pipeline_name, GSTC_NULL_ARGUMENT);
 
   return gstc_cmd_change_state (client, pipeline_name, state);
+}
+
+GstcStatus
+gstc_pipeline_stop_ref (GstClient * client, const char *pipeline_name)
+{
+  GstcStatus ret;
+  int asprintf_ret;
+  char *request;
+
+  gstc_assert_and_ret_val (NULL != client, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != pipeline_name, GSTC_NULL_ARGUMENT);
+
+  asprintf_ret = asprintf (&request, PIPELINE_STOP_REF_FORMAT, pipeline_name);
+  if (PRINTF_ERROR == asprintf_ret) {
+    return GSTC_OOM;
+  }
+
+  ret = gstc_cmd_send (client, request);
+
+  free (request);
+
+  return ret;
 }
 
 GstcStatus
