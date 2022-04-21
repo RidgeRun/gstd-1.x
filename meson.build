@@ -269,8 +269,8 @@ pkgconfig = import('pkgconfig')
 
 # Install git hooks
 run_command('rm', '-f', '.git/hooks/pre-commit',
-'.git/hooks/pre-commit')
-r = run_command('ln', '-s', '../../common/hooks/pre-commit.hook', '.git/hooks/pre-commit')
+'.git/hooks/pre-commit', check: false)
+r = run_command('ln', '-s', '../../common/hooks/pre-commit.hook', '.git/hooks/pre-commit', check: false)
 if r.returncode() != 0
   warning('Failed to create commit hook')
 endif
