@@ -22,6 +22,9 @@ LIBD_REQUIRED=0.14
 dnl required version of jansson
 JANSSON_REQUIRED=2.7
 
+dnl required version of libedit
+LIBEDIT_REQUIRED=3.0
+
 dnl required version of systemd
 SYSTEMD_REQUIRED=232
 
@@ -139,21 +142,21 @@ GTK_DOC_CHECK([1.14],[--flavour no-tmpl --docdir docs])
 AM_CONDITIONAL([ENABLE_GTK_DOC], false)
 ])
 
-AX_LIB_READLINE
-if test "x$ax_cv_lib_readline" = "xno"; then
+PKG_CHECK_MODULES(LIBEDIT, [
+    libedit >= $LIBEDIT_REQUIRED
+  ], [
+    AC_SUBST(LIBEDIT_CFLAGS)
+    AC_SUBST(LIBEDIT_LIBS)
+  ], [
   AC_MSG_ERROR([
-       Please install readline development packages. In Debian based
-       systems you may run:
-         - readline : "sudo apt-get install libreadline-dev"
+    Can't find libedit development packages:
 
-       Additionally, install one of the following:
-        - ncurses  : "sudo apt-get install libncurses5-dev"
-        - ncurserw : "sudo apt-get install libncursesw5-dev"
+      libedit-dev >= $LIBEDIT_REQUIRED
+
+    Please make sure you have the necessary libdedit-dev
+    development files installed.
   ])
-else
-  AC_SUBST(READLINE_CFLAGS, )
-  AC_SUBST(READLINE_LIBS, $ax_cv_lib_readline)
-fi
+])
 
 PKG_CHECK_MODULES(LIBD, [
     libdaemon >= $LIBD_REQUIRED

@@ -23,7 +23,8 @@ json_glib_dep = dependency('json-glib-1.0',      version : '>=0.16.2')
 libd_dep      = dependency('libdaemon',          version : '>=0.14')
 jansson_dep   = dependency('jansson',            version : '>=2.7')
 thread_dep    = dependency('threads')
-libsoup_dep = dependency('libsoup-2.4',		       version : '>=2.4')
+libsoup_dep   = dependency('libsoup-2.4',        version : '>=2.4')
+libedit_dep   = dependency('libedit',            version : '>=3.0')
 
 gst_check_required = get_option('enable-tests').enabled()
 gst_check_dep = dependency('gstreamer-check-1.0', required : gst_check_required, version : '>=1.0.5')
@@ -32,25 +33,6 @@ systemd_required = get_option('enable-systemd').enabled()
 systemd_dep = dependency('systemd', required : systemd_required, version : '>=232')
 
 cc = meson.get_compiler('c')
-readline = cc.find_library('readline', required: true)
-if readline.found()
-  add_project_arguments('-DHAVE_LIBREADLINE', language: 'c')
-  add_project_arguments('-DHAVE_READLINE_HISTORY', language: 'c')
-  # Add arguments to the compiler command line. 
-  if cc.has_header('readline/readline.h')
-    add_project_arguments('-DHAVE_READLINE_READLINE_H', language: 'c')
-  else
-    add_project_arguments('-DHAVE_READLINE_H', language: 'c')
-  endif
-  
-  if cc.has_header('readline/history.h')
-    add_project_arguments('-DHAVE_READLINE_HISTORY_H', language: 'c')
-  else
-    add_project_arguments('-DHAVE_HISTORY_H', language: 'c')
-  endif
-  
-  readline_dep = readline
-endif
 
 ## Dependencies
 # Define gst Daemon dependencies
@@ -78,7 +60,7 @@ libgstd_deps = [
 
 # Define gst client application dependencies
 gst_client_deps = [
-  readline_dep, 
+  libedit_dep,
   json_glib_dep, 
   gio_unix_dep
   ]
