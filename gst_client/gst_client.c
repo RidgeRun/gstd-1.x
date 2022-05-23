@@ -21,6 +21,7 @@
 #endif
 
 #include <errno.h>
+#include <editline/readline.h>
 #include <gio/gio.h>
 #include <gio/gunixsocketaddress.h>
 #include <glib/gstdio.h>
@@ -30,33 +31,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-#ifdef HAVE_LIBREADLINE
-#  if defined(HAVE_READLINE_READLINE_H)
-#    include <readline/readline.h>
-#  elif defined(HAVE_READLINE_H)
-#    include <readline.h>
-#  else /* !defined(HAVE_READLINE_H) */
-extern gchar *readline ();
-#  endif /* !defined(HAVE_READLINE_H) */
-gchar *cmdline = NULL;
-#else /* !defined(HAVE_READLINE_READLINE_H) */
-
-#endif /* HAVE_LIBREADLINE */
-
-#ifdef HAVE_READLINE_HISTORY
-#  if defined(HAVE_READLINE_HISTORY_H)
-#    include <readline/history.h>
-#  elif defined(HAVE_HISTORY_H)
-#    include <history.h>
-#  else /* !defined(HAVE_HISTORY_H) */
-extern void add_history ();
-extern gint write_history ();
-extern gint read_history ();
-#  endif /* defined(HAVE_READLINE_HISTORY_H) */
-#else
-
-#endif /* HAVE_READLINE_HISTORY */
 
 /* cmdline defaults */
 #define GSTD_CLIENT_DEFAULT_TCP_INET_ADDRESS "localhost"
@@ -428,11 +402,6 @@ main (gint argc, gchar * argv[])
 
   if (!inter)
     return EXIT_SUCCESS;
-
-#ifndef HAVE_LIBREADLINE
-  // No readline, no interaction
-  quit = TRUE;
-#endif
 
   gstd_client_header (quiet);
 
