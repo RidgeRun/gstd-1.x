@@ -7,7 +7,8 @@ TESTS =                                     \
 
 check_PROGRAMS = $(TESTS)
 
-AM_CFLAGS = $(GST_CFLAGS)                                     \
+AM_CFLAGS =  $(GSTD_CFLAGS)                                   \
+             $(GST_CFLAGS)                                    \
              -I$(top_srcdir)/gstd/                            \
              $(GIO_CFLAGS)                                    \
              $(GIO_UNIX_CFLAGS)                               \
@@ -18,5 +19,11 @@ AM_CFLAGS = $(GST_CFLAGS)                                     \
              $(JANSSON_CFLAGS) -pthread                       \
              -I$(top_srcdir)/libgstd
 
-AM_LDFLAGS = $(GST_LIBS) $(GIO_LIBS) $(GJSON_LIBS) $(LIBSOUP_LIBS) $(JANSSON_LIBS)
+AM_LDFLAGS =             \
+    $(GSTD_LIBS)         \
+    $(GST_LIBS)          \
+    $(GIO_LIBS)          \
+    $(GJSON_LIBS)        \
+    $(LIBSOUP_LIBS)      \
+    $(JANSSON_LIBS)
 LDADD = $(top_srcdir)/libgstd/libgstd-@GSTD_API_VERSION@.la

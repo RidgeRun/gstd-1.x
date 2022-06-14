@@ -29,8 +29,8 @@ TESTS = 				\
 
 check_PROGRAMS = $(TESTS)
 
-AM_CFLAGS = $(GST_CFLAGS) $(JANSSON_CFLAGS) $(GIO_CFLAGS) -I$(top_srcdir)/libgstc/c
-AM_LDFLAGS = $(GST_LIBS) $(JANSSON_LIBS) $(GIO_LIBS)
+AM_CFLAGS = $(GSTD_CFLAGS) $(GST_CFLAGS) $(JANSSON_CFLAGS) $(GIO_CFLAGS) -I$(top_srcdir)/libgstc/c
+AM_LDFLAGS = $(GSTD_LIBS) $(GST_LIBS) $(JANSSON_LIBS) $(GIO_LIBS)
 
 COMMON_SOURCES = \
 	@top_srcdir@/libgstc/c/libgstc_assert.c \
@@ -126,9 +126,9 @@ libgstc_pipeline_list_SOURCES = 		\
 	$(COMMON_SOURCES)
 
 libgstc_pipeline_seek_SOURCES =	 	\
-  	test_libgstc_pipeline_seek.c		\
+	test_libgstc_pipeline_seek.c		\
 	@top_srcdir@/libgstc/c/libgstc.c	\
-  	$(COMMON_SOURCES)
+	$(COMMON_SOURCES)
 
 libgstc_debug_SOURCES = 			\
 	test_libgstc_debug.c			\
