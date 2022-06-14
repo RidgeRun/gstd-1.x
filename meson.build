@@ -1,6 +1,10 @@
 project('gstd', 'c',
   version : '0.14.0',
-  meson_version : '>= 0.50',)
+  meson_version : '>= 0.50',
+  default_options : [
+    'c_std=c11',
+  ]
+)
 
 gstd_version = meson.project_version()
 version_arr = gstd_version.split('.')
@@ -273,6 +277,8 @@ endif
 
 # Meson will generate a header file all the entries in the configuration data object
 configure_file(output : 'config.h', configuration : cdata)
+
+add_project_arguments(['-D_GNU_SOURCE'], language: 'c')
 
 # Enter to each subdirectory and execute the meson.build
 subdir('libgstc')
