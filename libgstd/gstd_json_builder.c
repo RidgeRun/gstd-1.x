@@ -208,6 +208,11 @@ gstd_json_set_value (GstdIFormatter * iface, const GValue * value)
       double_value = g_value_get_double (value);
       json_builder_add_double_value (self->json_builder, double_value);
       break;
+    case G_TYPE_STRING:
+      str_value = g_strdup (g_value_get_string (value));
+      json_builder_add_string_value (self->json_builder, str_value);
+      g_free (str_value);
+      break;
     default:
       /* if the gvalue is not a boolean, integer or float point value, then
        * gvalue is converted to string
