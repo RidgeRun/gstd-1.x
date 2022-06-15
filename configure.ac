@@ -288,6 +288,10 @@ AC_COMPILE_IFELSE([AC_LANG_PROGRAM([ ], [ ])], [
   AC_MSG_RESULT([no])
 ])
 
+dnl extra flags passed to all modules
+AC_SUBST([GSTD_CFLAGS], ["-std=c11 -D_GNU_SOURCE"])
+AC_SUBST([GSTD_LIBS], [])
+
 dnl =======================================================================
 dnl Finally, create Makefiles in all directories
 dnl =======================================================================
