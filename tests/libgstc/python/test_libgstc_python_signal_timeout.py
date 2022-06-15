@@ -32,16 +32,17 @@
 import unittest
 import threading
 
+from gstd_runner import GstdTestRunner
 from pygstc.gstc import *
 from pygstc.logger import *
 
 
-class TestGstcSignalTimeoutMethods(unittest.TestCase):
+class TestGstcSignalTimeoutMethods(GstdTestRunner):
 
     def test_libgstc_python_signal_timeout(self):
         pipeline = 'videotestsrc ! identity name=identity ! fakesink'
         self.gstd_logger = CustomLogger('test_libgstc', loglevel='DEBUG')
-        self.gstd_client = GstdClient(logger=self.gstd_logger)
+        self.gstd_client = GstdClient(port=self.port, logger=self.gstd_logger)
         self.gstd_client.pipeline_create('p0', pipeline)
         self.gstd_client.signal_timeout('p0', 'identity', 'handoff', 1)
         ret_con = self.gstd_client.signal_connect('p0', 'identity',

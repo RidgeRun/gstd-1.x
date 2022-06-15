@@ -2,7 +2,7 @@
 # GStreamer Daemon - gst-launch on steroids
 # Python client library abstracting gstd interprocess communication
 
-# Copyright (c) 2015-2020 RidgeRun, LLC (http://www.ridgerun.com)
+# Copyright (c) 2015-2022 RidgeRun, LLC (http://www.ridgerun.com)
 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -29,25 +29,43 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
 # OF THE POSSIBILITY OF SUCH DAMAGE.
 
+import pathlib
+import socket
+import subprocess
 import unittest
 
-from gstd_runner import GstdTestRunner
-from pygstc.gstc import *
-from pygstc.logger import *
 
+DEFAULT_TEAR_DOWN_TIMEOUT = 1
 
-class TestGstcReadMethods(GstdTestRunner):
+class GstdTestRunner(unittest.TestCase):
 
-    def test_libgstc_python_read(self):
-        pipeline = 'videotestsrc name=v0 pattern=ball ! fakesink'
-        self.gstd_logger = CustomLogger('test_libgstc', loglevel='DEBUG')
-        self.gstd_client = GstdClient(port=self.port, logger=self.gstd_logger)
-        self.gstd_client.pipeline_create('p0', pipeline)
-        ret = self.gstd_client.read(
-            'pipelines/p0/elements/v0/properties/pattern')
-        self.assertEqual(ret['value'], 'Moving ball')
-        self.gstd_client.pipeline_stop('p0')
-        self.gstd_client.pipeline_delete('p0')
+    def get_open_port(self):
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        s.bind(("",0))
+        s.listen(1)
+        port = s.getsockname()[1]
+        s.close()
+        return port
+
+    def setUp(self):
+        self.port = self.get_open_port()
+        self.gstd_path = (pathlib.Path(__file__).parent.parent.parent.parent
+            .joinpath('gstd').joinpath('gstd').resolve())
+        self.gstd = subprocess.Popen([self.gstd_path, '-p', str(self.port)])
+        connected = -1
+        while connected != 0:
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            connected = sock.connect_ex(("", self.port))
+            sock.close()
+
+    def tearDown(self):
+        self.gstd.terminate()
+        try:
+            self.gstd.wait(DEFAULT_TEAR_DOWN_TIMEOUT)
+        except subprocess.TimeoutExpired:
+            self.gstd.kill()
+            self.gstd.wait()
 
 
 if __name__ == '__main__':
