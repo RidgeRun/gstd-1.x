@@ -47,7 +47,7 @@ class TestGstcPipelinePlayMethods(GstdTestRunner):
         self.gstd_client.pipeline_play('p0')
         time.sleep(0.1)
         self.assertIn(self.gstd_client.read('pipelines/p0/state')
-                      ['value'], ['PLAYING'])
+                      ['value'], ['PLAYING', 'playing'])
         self.gstd_client.pipeline_stop('p0')
         self.gstd_client.pipeline_delete('p0')
 

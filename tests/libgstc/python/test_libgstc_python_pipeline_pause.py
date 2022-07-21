@@ -38,7 +38,7 @@ from pygstc.logger import *
 
 DEFAULT_STATE_READ_RETRIES = 3
 DEFAULT_TIME_BETWEEN_RETRIES = 0.1 #seconds
-RUN_STATES = ['RUNNING', 'READY']
+RUN_STATES = ['RUNNING', 'running,', 'READY', 'ready']
 
 class TestGstcPipelinePauseMethods(GstdTestRunner):
 
@@ -55,8 +55,8 @@ class TestGstcPipelinePauseMethods(GstdTestRunner):
             time.sleep(DEFAULT_TIME_BETWEEN_RETRIES)
             state = self.gstd_client.read('pipelines/p0/state')['value']
             retry -= 1
-        self.assertEqual(self.gstd_client.read(
-            'pipelines/p0/state')['value'], 'PAUSED')
+        self.assertIn(self.gstd_client.read(
+            'pipelines/p0/state')['value'], ['PAUSED', 'paused'])
         self.gstd_client.pipeline_delete('p0')
 
 

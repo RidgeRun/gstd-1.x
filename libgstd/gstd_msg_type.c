@@ -40,7 +40,7 @@
 GType
 gstd_msg_type_get_type (void)
 {
-  static volatile gsize gstd_msg_type_type = 0;
+  static gsize gstd_msg_type_type = 0;
   static const GFlagsValue gstd_msg_type[] = {
     {GST_MESSAGE_UNKNOWN, "GST_MESSAGE_UNKNOWN", "unknown"},
     {GST_MESSAGE_UNKNOWN, "GST_MESSAGE_UNKNOWN", "none"},

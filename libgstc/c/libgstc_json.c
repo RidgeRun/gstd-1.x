@@ -184,7 +184,7 @@ gstc_json_get_child_char_array (const char *json, const char *parent_name,
       * memory copies are necessary in order to preserve data
       */
     (*out)[i] = malloc (strlen (string) + 1);
-    strncpy ((*out)[i], string, strlen (string));
+    memcpy ((*out)[i], string, strlen (string));
     /* Ensure traling null byte is copied */
     (*out)[i][strlen (string)] = '\0';
   }
@@ -239,7 +239,7 @@ gstc_json_child_string (const char *json, const char *parent_name,
   tmp_string = json_string_value (data);
   /* Allocate memory for output */
   *out = malloc ((strlen (tmp_string) + 1) * sizeof (char));
-  strncpy (*out, tmp_string, strlen (tmp_string));
+  memcpy (*out, tmp_string, strlen (tmp_string));
   /* Ensure traling null byte is copied */
   (*out)[strlen (tmp_string)] = '\0';
   ret = GSTC_OK;

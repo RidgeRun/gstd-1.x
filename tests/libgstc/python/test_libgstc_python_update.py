@@ -47,7 +47,7 @@ class TestGstcUpdateMethods(GstdTestRunner):
             'pipelines/p0/elements/v0/properties/pattern', 'ball')
         ret = self.gstd_client.read(
             'pipelines/p0/elements/v0/properties/pattern')
-        self.assertEqual(ret['value'], 'Moving ball')
+        self.assertIn(ret['value'], ['Moving ball', 'ball'])
         self.gstd_client.pipeline_stop('p0')
         self.gstd_client.pipeline_delete('p0')
 
