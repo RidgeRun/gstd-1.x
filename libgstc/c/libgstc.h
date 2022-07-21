@@ -206,7 +206,22 @@ GstcStatus gstc_client_debug (GstClient *client, const char* threshold,
 GstcStatus
 gstc_pipeline_create (GstClient *client, const char *pipeline_name,
     const char *pipeline_desc);
-  
+
+/**
+ * gstc_pipeline_create_ref:
+ * @client: The client returned by gstc_client_new()
+ * @pipeline_name: Name to associate to the pipeline
+ * @pipeline_desc: The gst-launch style pipeline description to create
+ *
+ * Creates a new GStreamer pipeline using refcount.
+ *
+ * Returns: GstcStatus indicating success, daemon unreachable, daemon
+ * timeout, bad pipeline
+ */
+GstcStatus
+gstc_pipeline_create_ref (GstClient *client, const char *pipeline_name,
+    const char *pipeline_desc);
+
 /**
  * gstc_pipeline_list:
  * @client: The client returned by gstc_client_new()
@@ -239,6 +254,19 @@ GstcStatus
 gstc_pipeline_delete(GstClient *client, const char *pipeline_name);
 
 /**
+ * gstc_pipeline_delete_ref:
+ * @client: The client returned by gstc_client_new()
+ * @pipeline_name: Name associated with the pipeline
+ *
+ * Deletes a previously created GStreamer pipeline using refcount.
+ *
+ * Returns: GstcStatus indicating success, daemon unreachable, daemon
+ * timeout, bad pipeline name
+ */
+GstcStatus
+gstc_pipeline_delete_ref(GstClient *client, const char *pipeline_name);
+
+/**
  * gstc_pipeline_play:
  * @client: The client returned by gstc_client_new()
  * @pipeline_name: Name associated with the pipeline
@@ -250,6 +278,19 @@ gstc_pipeline_delete(GstClient *client, const char *pipeline_name);
  */
 GstcStatus
 gstc_pipeline_play(GstClient *client, const char *pipeline_name);
+
+/**
+ * gstc_pipeline_play_ref:
+ * @client: The client returned by gstc_client_new()
+ * @pipeline_name: Name associated with the pipeline
+ *
+ * Attempts to change the named pipeline to the play state using refcount.
+ *
+ * Returns: GstcStatus indicating success, daemon unreachable, daemon
+ * timeout, bad pipeline name, unable to change pipeline state
+ */
+GstcStatus
+gstc_pipeline_play_ref(GstClient *client, const char *pipeline_name);
 
 /**
  * gstc_pipeline_pause:
@@ -276,6 +317,19 @@ gstc_pipeline_pause(GstClient *client, const char *pipeline_name);
  */
 GstcStatus
 gstc_pipeline_stop(GstClient *client, const char *pipeline_name);
+
+/**
+ * gstc_pipeline_stop_ref:
+ * @client: The client returned by gstc_client_new()
+ * @pipeline_name: Name associated with the pipeline
+ *
+ * Attempts to change the named pipeline to the null state using refcount.
+ *
+ * Returns: GstcStatus indicating success, daemon unreachable, daemon
+ * timeout, bad pipeline name, unable to change pipeline state
+ */
+GstcStatus
+gstc_pipeline_stop_ref(GstClient *client, const char *pipeline_name);
 
 /**
  * gstc_pipeline_get_graph:
