@@ -43,12 +43,12 @@ class TestGstcElementGetMethods(GstdTestRunner):
         self.gstd_logger = CustomLogger('test_libgstc', loglevel='DEBUG')
         self.gstd_client = GstdClient(port=self.port, logger=self.gstd_logger)
         self.gstd_client.pipeline_create('p0', pipeline)
-        self.assertEqual(
+        self.assertIn(
             self.gstd_client.element_get(
                 'p0',
                 'v0',
                 'pattern'),
-            'Moving ball')
+            ['Moving ball', 'ball'])
         self.gstd_client.pipeline_delete('p0')
 
 

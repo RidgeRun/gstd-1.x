@@ -10,17 +10,29 @@ on:
       - develop
 
 jobs:
-  build:
-    runs-on: ubuntu-18.04
+  ubuntu:
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-18.04
+          - ubuntu-20.04
+        include:
+          - os: ubuntu-22.04
+            remove-unwind: fix-unwind
+
+    runs-on: ${{ matrix.os }}
 
     steps:
     - uses: actions/checkout@v2
+    - if: ${{ matrix.remove-unwind }}
+      run: sudo apt remove libunwind-14-dev
     - name: Dependecies
       run: |
         sudo apt update
         sudo apt install automake libtool pkg-config libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev
         sudo apt install libglib2.0-dev libjson-glib-dev gtk-doc-tools libedit-dev libncursesw5-dev
-        sudo apt install libdaemon-dev libjansson-dev python3-pip python3-setuptools libsoup2.4 
+        sudo apt install libdaemon-dev libjansson-dev python3-pip python3-setuptools libsoup2.4-dev
 
     - name: Generate
       run: ./autogen.sh
