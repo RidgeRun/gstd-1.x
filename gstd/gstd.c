@@ -103,7 +103,7 @@ main (gint argc, gchar * argv[])
         "Create gst.log file to path", NULL}
     ,
     {"no-log", 'L', 0, G_OPTION_ARG_NONE, &nolog,
-          "Disable gstd and gstd file logging while in daemon mode (Takes precedence over -l and -d)",
+          "Disable file logging when gstd is running in daemon mode. Takes precedence over -l and -d.",
         NULL}
     ,
     {NULL}
