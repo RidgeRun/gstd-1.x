@@ -173,7 +173,11 @@ main (gint argc, gchar * argv[])
     if (parent) {
       if (!quiet) {
         filename = gstd_log_get_current_gstd ();
-        g_print ("Log traces will be saved to %s.\n", filename);
+        if (nolog) {
+          g_print ("Log traces have been disabled.\n");
+        } else {
+          g_print ("Log traces will be saved to %s.\n", filename);
+        }
         g_print ("Detaching from parent process.\n");
         g_free (filename);
       }
