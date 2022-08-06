@@ -75,6 +75,7 @@ main (gint argc, gchar * argv[])
   gint ret = EXIT_SUCCESS;
   gchar *current_filename = NULL;
   gchar *filename = NULL;
+  gboolean nolog = FALSE;
   gboolean parent = FALSE;
 
   GstD *gstd = NULL;
@@ -100,6 +101,10 @@ main (gint argc, gchar * argv[])
     ,
     {"gst-log-filename", 'd', 0, G_OPTION_ARG_FILENAME, &gstlogfile,
         "Create gst.log file to path", NULL}
+    ,
+    {"no-log", 'L', 0, G_OPTION_ARG_NONE, &nolog,
+          "Disable file logging when gstd is running in daemon mode. Takes precedence over -l and -d.",
+        NULL}
     ,
     {NULL}
   };
@@ -128,10 +133,20 @@ main (gint argc, gchar * argv[])
     goto out;
   }
 
+  /* If we need to daemonize or interact with the daemon (like killing
+   * it, for example) we need to initialize the daemon subsystem.
+   */
   if (daemon || kill) {
-    if (!gstd_log_init (gstdlogfile, gstlogfile)) {
-      ret = EXIT_FAILURE;
-      goto out;
+
+    /* Initialize the file logging only if:
+     * - the user didn't explicitly request it by setting --no-log
+     * - the user didn't invoke gstd to kill the daemon
+     */
+    if (!nolog && !kill) {
+      if (!gstd_log_init (gstdlogfile, gstlogfile)) {
+        ret = EXIT_FAILURE;
+        goto out;
+      }
     }
 
     if (!gstd_daemon_init (argc, argv, pidfile)) {
@@ -158,7 +173,11 @@ main (gint argc, gchar * argv[])
     if (parent) {
       if (!quiet) {
         filename = gstd_log_get_current_gstd ();
-        g_print ("Log traces will be saved to %s.\n", filename);
+        if (nolog) {
+          g_print ("Log traces have been disabled.\n");
+        } else {
+          g_print ("Log traces will be saved to %s.\n", filename);
+        }
         g_print ("Detaching from parent process.\n");
         g_free (filename);
       }

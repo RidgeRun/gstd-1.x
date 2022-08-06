@@ -48,8 +48,8 @@ gstd_log_proxy (GstDebugCategory * category, GstDebugLevel level,
 
      static FILE *_gstdlog = NULL;
      static FILE *_gstlog = NULL;
-     static gchar *gstd_filename;
-     static gchar *gst_filename;
+     static gchar *gstd_filename = NULL;
+     static gchar *gst_filename = NULL;
 
 gboolean
 gstd_log_init (const gchar * gstdfilename, const gchar * gstfilename)
@@ -155,8 +155,9 @@ gstd_log_get_filename (const gchar * filename, const gchar * default_filename)
     return g_strdup (filename);
   } else {
     g_printerr
-        ("WARNING: The pid filename is not absolute since default filename\n");
-    return g_strdup (default_filename);;
+        ("WARNING: The pid filename is not absolute, falling back to: %s\n",
+        default_filename);
+    return g_strdup (default_filename);
   }
 }
 
