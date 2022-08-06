@@ -52,14 +52,9 @@ gstd_log_proxy (GstDebugCategory * category, GstDebugLevel level,
      static gchar *gst_filename = NULL;
 
 gboolean
-gstd_log_init (const gchar * gstdfilename, const gchar * gstfilename,
-    gboolean enabled)
+gstd_log_init (const gchar * gstdfilename, const gchar * gstfilename)
 {
   if (_gstdlog) {
-    return TRUE;
-  }
-
-  if (!enabled) {
     return TRUE;
   }
 

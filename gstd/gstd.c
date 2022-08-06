@@ -133,10 +133,20 @@ main (gint argc, gchar * argv[])
     goto out;
   }
 
+  /* If we need to daemonize or interact with the daemon (like killing
+   * it, for example) we need to initialize the daemon subsystem.
+   */
   if (daemon || kill) {
-    if (!gstd_log_init (gstdlogfile, gstlogfile, !nolog && !kill)) {
-      ret = EXIT_FAILURE;
-      goto out;
+
+    /* Initialize the file logging only if:
+     * - the user didn't explicitly request it by setting --no-log
+     * - the user didn't invoke gstd to kill the daemon
+     */
+    if (!nolog && !kill) {
+      if (!gstd_log_init (gstdlogfile, gstlogfile)) {
+        ret = EXIT_FAILURE;
+        goto out;
+      }
     }
 
     if (!gstd_daemon_init (argc, argv, pidfile)) {
