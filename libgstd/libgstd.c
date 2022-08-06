@@ -101,10 +101,9 @@ gstd_set_ipc (GstD * gstd)
   GstdIpc **ipc_array = NULL;
 
   g_return_if_fail (NULL != gstd);
-  g_return_if_fail (NULL != supported_ipcs);
 
   /* If there is ipcs, then initialize them */
-  if (NULL != supported_ipcs && num_ipcs > 0) {
+  if (num_ipcs > 0) {
     ipc_array = g_malloc0 (num_ipcs * sizeof (*ipc_array));
     for (gint ipc_idx = 0; ipc_idx < num_ipcs; ipc_idx++) {
       ipc_array[ipc_idx] =
