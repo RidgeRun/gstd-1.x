@@ -49,10 +49,22 @@ jobs:
         gstd-client list_pipelines
 
   meson:
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-18.04
+          - ubuntu-20.04
+        include:
+          - os: ubuntu-22.04
+            remove-unwind: fix-unwind
+
     runs-on: ${{ matrix.os }}
 
     steps:
     - uses: actions/checkout@v2
+    - if: ${{ matrix.remove-unwind }}
+      run: sudo apt remove libunwind-14-dev
     - name: Dependecies
       run: |
         sudo apt update
@@ -72,6 +84,5 @@ jobs:
       run: sudo ninja -C build install
     - name: List Pipelines Verification
       run: |
-        export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib/
         gstd -e
         gstd-client list_pipelines
