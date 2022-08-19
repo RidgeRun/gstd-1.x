@@ -222,7 +222,7 @@ static void
 init_readline (void)
 {
   /* Allow conditional parsing of the ~/.inputrc file */
-  rl_readline_name = "Gstd";
+  rl_readline_name = g_strdup ("Gstd");
 
   /* Custom command completion */
   rl_completion_entry_function = gstd_client_completer;

@@ -144,7 +144,8 @@ gstd_pipeline_bus_set_property (GObject * object,
   switch (property_id) {
     case PROP_TIMEOUT:
       self->timeout = g_value_get_int64 (value);
-      GST_INFO_OBJECT (self, "Timeout changed to: %li", self->timeout);
+      GST_INFO_OBJECT (self, "Timeout changed to: %" G_GUINT64_FORMAT,
+          self->timeout);
       break;
     case PROP_TYPES:
       self->types = g_value_get_flags (value);

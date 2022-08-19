@@ -18,7 +18,6 @@
  * Boston, MA 02110-1301, USA.
  */
 #include <gst/check/gstcheck.h>
-#include <pthread.h>
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
@@ -32,7 +31,7 @@
 /* Test Fixture */
 static gchar _request[3][512];
 static GstClient *_client;
-pthread_mutex_t lock;
+static GMutex lock;
 int socket_send_wait_time = 0;
 
 static void
@@ -131,7 +130,7 @@ callback (GstClient * _client, const gchar * pipeline_name,
     gpointer user_data)
 {
   /* Unlock the mutex */
-  pthread_mutex_unlock (&lock);
+  g_mutex_unlock (&lock);
   return GSTC_OK;
 }
 
@@ -146,20 +145,12 @@ GST_START_TEST (test_pipeline_bus_wait_async_success)
     "read /pipelines/pipe/bus/message"
   };
 
-  /* Mutex timeout 10ms */
-  struct timespec ts;
-  clock_gettime (CLOCK_REALTIME, &ts);
-  ts.tv_nsec += 10 * 1000000;
-
-  if (pthread_mutex_init (&lock, NULL) != 0) {
-    /* Exit if unable to create mutex lock */
-    ASSERT_CRITICAL ();
-  }
+  g_mutex_init (&lock);
 
   /*
    * Lock the mutex, this should be unlocked by the callback function
    */
-  pthread_mutex_lock (&lock);
+  g_mutex_lock (&lock);
 
   ret =
       gstc_pipeline_bus_wait_async (_client, pipeline_name, message_name,
@@ -170,9 +161,9 @@ GST_START_TEST (test_pipeline_bus_wait_async_success)
   assert_equals_string (expected[1], _request[1]);
 
   /* Wait for the callback function to finish or timeout passes */
-  pthread_mutex_timedlock (&lock, &ts);
+  g_mutex_lock (&lock);
   assert_equals_string (expected[2], _request[2]);
-  pthread_mutex_unlock (&lock);
+  g_mutex_unlock (&lock);
 }
 
 GST_END_TEST;
@@ -186,24 +177,16 @@ GST_START_TEST (test_pipeline_bus_wait_async_bus_didnt_respond)
   const gchar *expected[] = { "update /pipelines/pipe/bus/types eos",
     "update /pipelines/pipe/bus/timeout -1"
   };
-  struct timespec ts;
+
   /* Set the send command to wait for 1s before responding */
   socket_send_wait_time = 1;
 
-  /* Mutex timeout 10ms */
-  clock_gettime (CLOCK_REALTIME, &ts);
-  ts.tv_sec += 0;
-  ts.tv_nsec += 10 * 1000000;
-
-  if (pthread_mutex_init (&lock, NULL) != 0) {
-    /* Exit if unable to create mutex lock */
-    ASSERT_CRITICAL ();
-  }
+  g_mutex_init (&lock);
 
   /*
    * Lock the mutex, this should be unlocked by the callback function
    */
-  pthread_mutex_lock (&lock);
+  g_mutex_lock (&lock);
 
   ret =
       gstc_pipeline_bus_wait_async (_client, pipeline_name, message_name,
@@ -214,9 +197,9 @@ GST_START_TEST (test_pipeline_bus_wait_async_bus_didnt_respond)
   assert_equals_string (expected[1], _request[1]);
 
   /* Wait for the callback function to finish or timeout passes */
-  pthread_mutex_timedlock (&lock, &ts);
+  g_mutex_lock (&lock);
   assert_equals_string ("", _request[2]);
-  pthread_mutex_unlock (&lock);
+  g_mutex_unlock (&lock);
 
   /* Reset value */
   socket_send_wait_time = 0;
