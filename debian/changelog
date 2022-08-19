@@ -18,19 +18,19 @@ gstd (0.14.0-1) unstable; urgency=medium
   * CPP compilation fixes
   * Updates PyGstc to 0.2.2
 
- -- RidgeRun Engineering <support@ridgerun.com>  Thu, 03 Mar 12:00:00  -0600
+ -- RidgeRun Engineering <support@ridgerun.com>  Thu, 03 Mar 2022 12:00:00  -0600
 
 gstd (0.13.2-1) unstable; urgency=medium
 
   * Fix segfault when enabling HTTP IPC
 
- -- RidgeRun Engineering <support@ridgerun.com>  Wed, 05 Jan 10:00:00  -0600
+ -- RidgeRun Engineering <support@ridgerun.com>  Wed, 05 Jan 2022 10:00:00  -0600
 
 gstd (0.13.1-1) unstable; urgency=medium
 
   * Fix deadlock when a socket dies or closes incorrectly on PyGstc
 
- -- RidgeRun Engineering <support@ridgerun.com>  Wed, 08 Dec 08:30:00  -0600
+ -- RidgeRun Engineering <support@ridgerun.com>  Wed, 08 Dec 2021 08:30:00  -0600
 
 gstd (0.13.0-1) unstable; urgency=medium
 
@@ -40,7 +40,7 @@ gstd (0.13.0-1) unstable; urgency=medium
   * Remove compilation warnings
   * Fix tests to build inside gst-build
 
- -- RidgeRun Engineering <support@ridgerun.com>  Mon, 19 Jul 14:30:00  -0600
+ -- RidgeRun Engineering <support@ridgerun.com>  Mon, 19 Jul 2021 14:30:00  -0600
 
 gstd (0.12.0-1) unstable; urgency=medium
 
@@ -53,19 +53,17 @@ gstd (0.11.3-1) unstable; urgency=medium
 
   * Fix Javascript library for Gstd
   * Fix for pygstc where the poll call timed out immediately, rather
-than using the user's value.
+    than using the user's value.
   * Fix for gstd where the the IPC is stopped before unreffing it. Fixes
-an ugly assert failure given by the HTTP IPC
+    an ugly assert failure given by the HTTP IPC
 
  -- RidgeRun Engineering <support@ridgerun.com>  Tue, 5 Jan 2021 17:00:00 -0600
-
 
 gstd (0.11.0-1) unstable; urgency=medium
 
   * Gstd v0.11.0 release
 
  -- RidgeRun Engineering <support@ridgerun.com>  Mon, 24 Aug 2020 15:00:00 -0600
-
 
 gstd (0.9.0-1) unstable; urgency=medium
 
