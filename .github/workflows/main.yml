@@ -84,6 +84,8 @@ jobs:
       run: ninja -C build test
     - name: Install
       run: sudo ninja -C build install
+    - name: Check pygstc installation
+      run: python3 -c "import pygstc"
     - name: List Pipelines Verification
       run: |
         gstd -e
