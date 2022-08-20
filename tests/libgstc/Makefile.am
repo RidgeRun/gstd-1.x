@@ -1,3 +1,1 @@
-SUBDIRS=c
-
-SUBDIRS=python
+SUBDIRS=c python
