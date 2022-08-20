@@ -76,8 +76,12 @@ jobs:
         sudo apt install ninja-build python3-wheel
         sudo pip3 install meson
 
-    - name: Generate
-      run: meson --werror build
+    - name: Generate for Ubuntu 18.04
+      if: ${{ matrix.os == 'ubuntu-18.04' }}
+      run: meson --werror build -Dpython.purelibdir=/usr/lib/python3/dist-packages/
+    - name: Generate for Ubuntu 20.04 and above
+      if: ${{ matrix.os != 'ubuntu-18.04' }}
+      run: meson --werror build -Dpython.install_env=auto
     - name: Compile
       run: ninja -C build
     - name: Checks
