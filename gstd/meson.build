@@ -18,6 +18,7 @@ executable(exe_name,
   include_directories : [configinc, libgstd_inc_dir],
   dependencies : [gstd_deps, lib_gstd_dep],
   c_args: gst_c_args,
+  install_rpath: get_option('prefix') + '/' + get_option('libdir'),
 )
 lib_gstd_dir = meson.current_build_dir()
 
