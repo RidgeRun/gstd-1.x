@@ -168,45 +168,6 @@ GST_START_TEST (test_pipeline_bus_wait_async_success)
 
 GST_END_TEST;
 
-GST_START_TEST (test_pipeline_bus_wait_async_bus_didnt_respond)
-{
-  GstcStatus ret;
-  const gchar *pipeline_name = "pipe";
-  const gchar *message_name = "eos";
-  const gint64 timeout = -1;
-  const gchar *expected[] = { "update /pipelines/pipe/bus/types eos",
-    "update /pipelines/pipe/bus/timeout -1"
-  };
-
-  /* Set the send command to wait for 1s before responding */
-  socket_send_wait_time = 1;
-
-  g_mutex_init (&lock);
-
-  /*
-   * Lock the mutex, this should be unlocked by the callback function
-   */
-  g_mutex_lock (&lock);
-
-  ret =
-      gstc_pipeline_bus_wait_async (_client, pipeline_name, message_name,
-      timeout, callback, NULL);
-  assert_equals_int (GSTC_OK, ret);
-
-  assert_equals_string (expected[0], _request[0]);
-  assert_equals_string (expected[1], _request[1]);
-
-  /* Wait for the callback function to finish or timeout passes */
-  g_mutex_lock (&lock);
-  assert_equals_string ("", _request[2]);
-  g_mutex_unlock (&lock);
-
-  /* Reset value */
-  socket_send_wait_time = 0;
-}
-
-GST_END_TEST;
-
 static Suite *
 libgstc_pipeline_bus_wait_async_suite (void)
 {
@@ -217,7 +178,6 @@ libgstc_pipeline_bus_wait_async_suite (void)
 
   tcase_add_checked_fixture (tc, setup, teardown);
   tcase_add_test (tc, test_pipeline_bus_wait_async_success);
-  tcase_add_test (tc, test_pipeline_bus_wait_async_bus_didnt_respond);
 
   return suite;
 }
