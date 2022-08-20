@@ -167,7 +167,7 @@ GST_START_TEST (test_socket_success_keep_open)
   const gint keep_open = TRUE;
   const gchar *request = "ping";
   const gchar *expected = "pong";
-  gchar *response;
+  gchar *response = NULL;
 
   ret = gstc_socket_new (address, port, keep_open, &socket);
   assert_equals_int (GSTC_OK, ret);
@@ -195,7 +195,7 @@ GST_START_TEST (test_socket_timeout_sucess)
   const gint keep_open = TRUE;
   const gchar *request = "ping";
   const gchar *expected = "pong";
-  gchar *response;
+  gchar *response = NULL;
   socket_delay = 100;
 
   ret = gstc_socket_new (address, port, keep_open, &socket);
@@ -225,7 +225,7 @@ GST_START_TEST (test_socket_timeout_reached)
   const gint keep_open = TRUE;
   const gchar *request = "ping";
   const gchar *expected = "pong";
-  gchar *response;
+  gchar *response = NULL;
   socket_delay = 100;
 
   ret = gstc_socket_new (address, port, keep_open, &socket);
@@ -253,7 +253,7 @@ GST_START_TEST (test_socket_success_keep_closed)
   const gint keep_open = FALSE;
   const gchar *request = "ping";
   const gchar *expected = "pong";
-  gchar *response;
+  gchar *response = NULL;
   int socket_errno;
 
   ret = gstc_socket_new (address, port, keep_open, &gstc_socket);
@@ -298,7 +298,7 @@ GST_START_TEST (test_socket_persistent)
   const gint keep_open = TRUE;
   const gchar *request = "ping";
   const gchar *expected = "pong";
-  gchar *response;
+  gchar *response = NULL;
 
   ret = gstc_socket_new (address, port, keep_open, &socket);
   assert_equals_int (GSTC_OK, ret);
@@ -388,7 +388,7 @@ GST_START_TEST (test_socket_null_socket)
   GstcStatus ret;
   const gchar *request = "ping";
   const int timeout = -1;
-  gchar *response;
+  gchar *response = NULL;
 
   ret = gstc_socket_send (NULL, request, &response, timeout);
   assert_equals_int (GSTC_NULL_ARGUMENT, ret);
@@ -405,7 +405,7 @@ GST_START_TEST (test_socket_null_request)
   const int timeout = -1;
   const gint keep_open = TRUE;
   const gchar *request = NULL;
-  gchar *response;
+  gchar *response = NULL;
 
   ret = gstc_socket_new (address, port, keep_open, &socket);
   assert_equals_int (GSTC_OK, ret);
@@ -450,7 +450,7 @@ GST_START_TEST (test_socket_long_response)
   const gchar *request = "ping";
   gchar *expected;
   gint size = 1024 * 1024;
-  gchar *response;
+  gchar *response = NULL;
   int i = 0;
 
   ret = gstc_socket_new (address, port, keep_open, &gstc_socket);
