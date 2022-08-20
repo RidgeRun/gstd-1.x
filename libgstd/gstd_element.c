@@ -462,7 +462,7 @@ gstd_element_signals_to_string (GstdElement * self, GstdIFormatter * formatter)
 void
 gstd_element_actions_to_string (GstdElement * self, GstdIFormatter * formatter)
 {
-  GList *action_list;
+  GList *action_list = NULL;
 
   g_return_if_fail (GSTD_IS_OBJECT (self));
 
@@ -475,6 +475,7 @@ void
 gstd_element_internal_to_string (GstdElement * self, gchar ** outstring)
 {
   GstdIFormatter *formatter = NULL;
+
   g_return_if_fail (GSTD_IS_OBJECT (self));
 
   formatter = g_object_new (GSTD_TYPE_JSON_BUILDER, NULL);

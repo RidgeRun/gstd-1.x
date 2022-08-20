@@ -1035,8 +1035,6 @@ gstc_pipeline_bus_wait_callback (GstClient * _client, const char *pipeline_name,
   return GSTC_OK;
 }
 
-#pragma GCC diagnostic pop
-
 GstcStatus
 gstc_pipeline_bus_wait (GstClient * client,
     const char *pipeline_name, const char *message_name,
@@ -1097,9 +1095,9 @@ gstc_pipeline_emit_action (GstClient * client, const char *pipeline_name,
   GstcStatus ret;
   int asprintf_ret;
   char *where;
-  const char *where_fmt = "/pipelines/%s/elements/%s/actions/%s";
 
-  asprintf_ret = asprintf (&where, where_fmt, pipeline_name, element, action);
+  asprintf_ret = asprintf (&where, "/pipelines/%s/elements/%s/actions/%s",
+      pipeline_name, element, action);
   if (asprintf_ret == PRINTF_ERROR) {
     return GSTC_OOM;
   }

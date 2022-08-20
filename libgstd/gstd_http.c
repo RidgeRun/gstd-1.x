@@ -459,6 +459,7 @@ static gboolean
 gstd_http_init_get_option_group (GstdIpc * base, GOptionGroup ** group)
 {
   GstdHttp *self = GSTD_HTTP (base);
+
   GOptionEntry http_args[] = {
     {"enable-http-protocol", 't', 0, G_OPTION_ARG_NONE, &base->enabled,
         "Enable attach the server through given HTTP ports ", NULL}
@@ -495,6 +496,7 @@ gstd_http_stop (GstdIpc * base)
 {
   GstdHttp *self = NULL;
   GstdSession *session = NULL;
+
   g_return_val_if_fail (base, GSTD_NULL_ARGUMENT);
 
   self = GSTD_HTTP (base);
