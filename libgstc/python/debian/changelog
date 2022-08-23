@@ -1,3 +1,12 @@
+pygstc (0.5.0-1) unstable; urgency=low
+
+  * Improve meson integration
+  * Improve test drivers
+  * Integrate python tests to CI
+  * Support for Ubuntu 22.04
+
+ -- RidgeRun Engineering <support@ridgerun.com>  Mon, 22 Aug 2022 22:00:00 -0600
+
 pygstc (0.4.0-1) unstable; urgency=low
 
   * Add refcount commands support
