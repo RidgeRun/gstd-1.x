@@ -136,11 +136,7 @@ PKG_CHECK_MODULES(GJSON, [
 
 
 dnl check for gtk-doc
-m4_ifdef([GTK_DOC_CHECK], [
-GTK_DOC_CHECK([1.14],[--flavour no-tmpl --docdir docs])
-],[
-AM_CONDITIONAL([ENABLE_GTK_DOC], false)
-])
+GTK_DOC_CHECK([1.14])
 
 PKG_CHECK_MODULES(LIBEDIT, [
     libedit >= $LIBEDIT_REQUIRED
