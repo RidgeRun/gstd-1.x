@@ -30,24 +30,21 @@
 # OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import os
-import subprocess
 import unittest
 
+from gstd_runner import GstdTestRunner
 from pygstc.gstc import *
 from pygstc.logger import *
 
 
-class TestGstcInitMethods(unittest.TestCase):
-
-    def setUp(self):
-        subprocess.Popen(['gstd', '-p', '5000', '-n', '2'])
+class TestGstcInitMethods(GstdTestRunner):
 
     def test_init(self):
-        self.gstd_client = GstdClient()
+        self.gstd_client = GstdClient(port=self.port)
 
     def test_init_dummylogger(self):
         self.gstd_logger = DummyLogger()
-        self.gstd_client = GstdClient(logger=self.gstd_logger)
+        self.gstd_client = GstdClient(port=self.port, logger=self.gstd_logger)
 
     def test_init_logfile(self):
         f = open('dummy.log', 'w+')
@@ -57,7 +54,7 @@ class TestGstcInitMethods(unittest.TestCase):
         f.close()
         self.gstd_logger = CustomLogger('test_libgstc',
                                         logfile='dummy.log', loglevel='DEBUG')
-        self.gstd_client = GstdClient(logger=self.gstd_logger)
+        self.gstd_client = GstdClient(port=self.port, logger=self.gstd_logger)
         f = open('dummy.log')
         num_lines_final = sum(1 for line in f)
         f.close()

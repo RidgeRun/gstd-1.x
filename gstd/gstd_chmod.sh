@@ -3,4 +3,4 @@
 # $1 mode
 # $2 file
 
-chmod $1 $2
+chmod $1 ${DESTDIR}/$2

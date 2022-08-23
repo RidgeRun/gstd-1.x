@@ -31,16 +31,17 @@
 
 import unittest
 
+from gstd_runner import GstdTestRunner
 from pygstc.gstc import *
 from pygstc.logger import *
 
 
-class TestGstcListPipelinesMethods(unittest.TestCase):
+class TestGstcListPipelinesMethods(GstdTestRunner):
 
     def test_list_pipelines(self):
         pipeline = 'videotestsrc name=v0 ! fakesink'
         self.gstd_logger = CustomLogger('test_libgstc', loglevel='DEBUG')
-        self.gstd_client = GstdClient(logger=self.gstd_logger)
+        self.gstd_client = GstdClient(port=self.port, logger=self.gstd_logger)
         initial_n_pipes = len(self.gstd_client.list_pipelines())
         self.gstd_client.create('pipelines', 'p0', pipeline)
         final_n_pipes = len(self.gstd_client.list_pipelines())

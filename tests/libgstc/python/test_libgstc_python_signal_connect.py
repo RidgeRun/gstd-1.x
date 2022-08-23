@@ -31,17 +31,18 @@
 
 import unittest
 
+from gstd_runner import GstdTestRunner
 from pygstc.gstc import *
 from pygstc.logger import *
 
 
-class TestGstcSignalConnectMethods(unittest.TestCase):
+class TestGstcSignalConnectMethods(GstdTestRunner):
 
     def test_libgstc_python_signal_connect(self):
         pipeline = \
             'videotestsrc ! identity signal-handoffs=true name=identity ! fakesink'
         self.gstd_logger = CustomLogger('test_libgstc', loglevel='DEBUG')
-        self.gstd_client = GstdClient(logger=self.gstd_logger)
+        self.gstd_client = GstdClient(port=self.port, logger=self.gstd_logger)
         self.gstd_client.pipeline_create('p0', pipeline)
         self.gstd_client.pipeline_play('p0')
         ret = self.gstd_client.signal_connect('p0', 'identity',

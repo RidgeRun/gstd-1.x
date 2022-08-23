@@ -1,6 +1,10 @@
 project('gstd', 'c',
-  version : '0.14.0',
-  meson_version : '>= 0.50',)
+  version : '0.15.0',
+  meson_version : '>= 0.50',
+  default_options : [
+    'c_std=c11',
+  ]
+)
 
 gstd_version = meson.project_version()
 version_arr = gstd_version.split('.')
@@ -23,7 +27,8 @@ json_glib_dep = dependency('json-glib-1.0',      version : '>=0.16.2')
 libd_dep      = dependency('libdaemon',          version : '>=0.14')
 jansson_dep   = dependency('jansson',            version : '>=2.7')
 thread_dep    = dependency('threads')
-libsoup_dep = dependency('libsoup-2.4',		       version : '>=2.4')
+libsoup_dep   = dependency('libsoup-2.4',        version : '>=2.4')
+libedit_dep   = dependency('libedit',            version : '>=3.0')
 
 gst_check_required = get_option('enable-tests').enabled()
 gst_check_dep = dependency('gstreamer-check-1.0', required : gst_check_required, version : '>=1.0.5')
@@ -32,25 +37,6 @@ systemd_required = get_option('enable-systemd').enabled()
 systemd_dep = dependency('systemd', required : systemd_required, version : '>=232')
 
 cc = meson.get_compiler('c')
-readline = cc.find_library('readline', required: true)
-if readline.found()
-  add_project_arguments('-DHAVE_LIBREADLINE', language: 'c')
-  add_project_arguments('-DHAVE_READLINE_HISTORY', language: 'c')
-  # Add arguments to the compiler command line. 
-  if cc.has_header('readline/readline.h')
-    add_project_arguments('-DHAVE_READLINE_READLINE_H', language: 'c')
-  else
-    add_project_arguments('-DHAVE_READLINE_H', language: 'c')
-  endif
-  
-  if cc.has_header('readline/history.h')
-    add_project_arguments('-DHAVE_READLINE_HISTORY_H', language: 'c')
-  else
-    add_project_arguments('-DHAVE_HISTORY_H', language: 'c')
-  endif
-  
-  readline_dep = readline
-endif
 
 ## Dependencies
 # Define gst Daemon dependencies
@@ -78,7 +64,7 @@ libgstd_deps = [
 
 # Define gst client application dependencies
 gst_client_deps = [
-  readline_dep, 
+  libedit_dep,
   json_glib_dep, 
   gio_unix_dep
   ]
@@ -283,14 +269,16 @@ pkgconfig = import('pkgconfig')
 
 # Install git hooks
 run_command('rm', '-f', '.git/hooks/pre-commit',
-'.git/hooks/pre-commit')
-r = run_command('ln', '-s', '../../common/hooks/pre-commit.hook', '.git/hooks/pre-commit')
+'.git/hooks/pre-commit', check: false)
+r = run_command('ln', '-s', '../../common/hooks/pre-commit.hook', '.git/hooks/pre-commit', check: false)
 if r.returncode() != 0
   warning('Failed to create commit hook')
 endif
 
 # Meson will generate a header file all the entries in the configuration data object
 configure_file(output : 'config.h', configuration : cdata)
+
+add_project_arguments(['-D_GNU_SOURCE'], language: 'c')
 
 # Enter to each subdirectory and execute the meson.build
 subdir('libgstc')
@@ -300,3 +288,4 @@ subdir('gst_client')
 subdir('tests')
 subdir('examples')
 subdir('docs')
+subdir('init')

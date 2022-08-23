@@ -32,21 +32,22 @@
 import time
 import unittest
 
+from gstd_runner import GstdTestRunner
 from pygstc.gstc import *
 from pygstc.logger import *
 
 
-class TestGstcPipelinePlayMethods(unittest.TestCase):
+class TestGstcPipelinePlayMethods(GstdTestRunner):
 
     def test_libgstc_python_pipeline_play(self):
         pipeline = 'videotestsrc name=v0 ! fakesink'
         self.gstd_logger = CustomLogger('test_libgstc', loglevel='DEBUG')
-        self.gstd_client = GstdClient(logger=self.gstd_logger)
+        self.gstd_client = GstdClient(port=self.port, logger=self.gstd_logger)
         self.gstd_client.pipeline_create('p0', pipeline)
         self.gstd_client.pipeline_play('p0')
         time.sleep(0.1)
         self.assertIn(self.gstd_client.read('pipelines/p0/state')
-                      ['value'], ['PLAYING'])
+                      ['value'], ['PLAYING', 'playing'])
         self.gstd_client.pipeline_stop('p0')
         self.gstd_client.pipeline_delete('p0')
 

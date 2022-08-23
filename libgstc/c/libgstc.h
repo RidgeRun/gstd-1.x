@@ -1,8 +1,6 @@
 /*
- * GStreamer Daemon - gst-launch on steroids
- * C client library abstracting gstd interprocess communication
- *
- * Copyright (c) 2015-2021 RidgeRun, LLC (http://www.ridgerun.com)
+ * This file is part of GStreamer Daemon
+ * Copyright 2015-2022 Ridgerun, LLC (http://www.ridgerun.com)
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -11,23 +9,25 @@
  * 1. Redistributions of source code must retain the above copyright
  * notice, this list of conditions and the following disclaimer.
  *
- * 2. Redistributions in binary form must reproduce the above
- * copyright notice, this list of conditions and the following
- * disclaimer in the documentation and/or other materials provided
- * with the distribution.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
+ *
+ * 3. Neither the name of the copyright holder nor the names of its
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
- * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
- * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
- * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
- * OF THE POSSIBILITY OF SUCH DAMAGE.
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 /**
@@ -206,7 +206,22 @@ GstcStatus gstc_client_debug (GstClient *client, const char* threshold,
 GstcStatus
 gstc_pipeline_create (GstClient *client, const char *pipeline_name,
     const char *pipeline_desc);
-  
+
+/**
+ * gstc_pipeline_create_ref:
+ * @client: The client returned by gstc_client_new()
+ * @pipeline_name: Name to associate to the pipeline
+ * @pipeline_desc: The gst-launch style pipeline description to create
+ *
+ * Creates a new GStreamer pipeline using refcount.
+ *
+ * Returns: GstcStatus indicating success, daemon unreachable, daemon
+ * timeout, bad pipeline
+ */
+GstcStatus
+gstc_pipeline_create_ref (GstClient *client, const char *pipeline_name,
+    const char *pipeline_desc);
+
 /**
  * gstc_pipeline_list:
  * @client: The client returned by gstc_client_new()
@@ -239,6 +254,19 @@ GstcStatus
 gstc_pipeline_delete(GstClient *client, const char *pipeline_name);
 
 /**
+ * gstc_pipeline_delete_ref:
+ * @client: The client returned by gstc_client_new()
+ * @pipeline_name: Name associated with the pipeline
+ *
+ * Deletes a previously created GStreamer pipeline using refcount.
+ *
+ * Returns: GstcStatus indicating success, daemon unreachable, daemon
+ * timeout, bad pipeline name
+ */
+GstcStatus
+gstc_pipeline_delete_ref(GstClient *client, const char *pipeline_name);
+
+/**
  * gstc_pipeline_play:
  * @client: The client returned by gstc_client_new()
  * @pipeline_name: Name associated with the pipeline
@@ -250,6 +278,19 @@ gstc_pipeline_delete(GstClient *client, const char *pipeline_name);
  */
 GstcStatus
 gstc_pipeline_play(GstClient *client, const char *pipeline_name);
+
+/**
+ * gstc_pipeline_play_ref:
+ * @client: The client returned by gstc_client_new()
+ * @pipeline_name: Name associated with the pipeline
+ *
+ * Attempts to change the named pipeline to the play state using refcount.
+ *
+ * Returns: GstcStatus indicating success, daemon unreachable, daemon
+ * timeout, bad pipeline name, unable to change pipeline state
+ */
+GstcStatus
+gstc_pipeline_play_ref(GstClient *client, const char *pipeline_name);
 
 /**
  * gstc_pipeline_pause:
@@ -276,6 +317,19 @@ gstc_pipeline_pause(GstClient *client, const char *pipeline_name);
  */
 GstcStatus
 gstc_pipeline_stop(GstClient *client, const char *pipeline_name);
+
+/**
+ * gstc_pipeline_stop_ref:
+ * @client: The client returned by gstc_client_new()
+ * @pipeline_name: Name associated with the pipeline
+ *
+ * Attempts to change the named pipeline to the null state using refcount.
+ *
+ * Returns: GstcStatus indicating success, daemon unreachable, daemon
+ * timeout, bad pipeline name, unable to change pipeline state
+ */
+GstcStatus
+gstc_pipeline_stop_ref(GstClient *client, const char *pipeline_name);
 
 /**
  * gstc_pipeline_get_graph:

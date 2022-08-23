@@ -10,18 +10,29 @@ on:
       - develop
 
 jobs:
-  build:
-    runs-on: ubuntu-18.04
+  autotools:
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-18.04
+          - ubuntu-20.04
+        include:
+          - os: ubuntu-22.04
+            remove-unwind: fix-unwind
+
+    runs-on: ${{ matrix.os }}
 
     steps:
     - uses: actions/checkout@v2
+    - if: ${{ matrix.remove-unwind }}
+      run: sudo apt remove libunwind-14-dev
     - name: Dependecies
       run: |
         sudo apt update
         sudo apt install automake libtool pkg-config libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev
-        sudo apt install libglib2.0-dev libjson-glib-dev gtk-doc-tools libreadline-dev libncursesw5-dev
-        sudo apt install libdaemon-dev libjansson-dev python3-pip python3-setuptools libsoup2.4 
-
+        sudo apt install libglib2.0-dev libjson-glib-dev gtk-doc-tools libedit-dev libncursesw5-dev
+        sudo apt install libdaemon-dev libjansson-dev python3-pip python3-setuptools libsoup2.4-dev
     - name: Generate
       run: ./autogen.sh
     - name: Configure
@@ -32,6 +43,53 @@ jobs:
       run: make check
     - name: Install
       run: sudo make install
+    - name: Check pygstc installation
+      run: python3 -c "import pygstc"
+    - name: List Pipelines Verification
+      run: |
+        gstd -e
+        gstd-client list_pipelines
+
+  meson:
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-18.04
+          - ubuntu-20.04
+        include:
+          - os: ubuntu-22.04
+            remove-unwind: fix-unwind
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - uses: actions/checkout@v2
+    - if: ${{ matrix.remove-unwind }}
+      run: sudo apt remove libunwind-14-dev
+    - name: Dependecies
+      run: |
+        sudo apt update
+        sudo apt install automake libtool pkg-config libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev
+        sudo apt install libglib2.0-dev libjson-glib-dev gtk-doc-tools libedit-dev libncursesw5-dev
+        sudo apt install libdaemon-dev libjansson-dev python3-pip python3-setuptools libsoup2.4-dev
+        sudo apt install ninja-build python3-wheel
+        sudo pip3 install meson
+
+    - name: Generate for Ubuntu 18.04
+      if: ${{ matrix.os == 'ubuntu-18.04' }}
+      run: meson --werror build -Dpython.purelibdir=/usr/lib/python3/dist-packages/
+    - name: Generate for Ubuntu 20.04 and above
+      if: ${{ matrix.os != 'ubuntu-18.04' }}
+      run: meson --werror build -Dpython.install_env=auto
+    - name: Compile
+      run: ninja -C build
+    - name: Checks
+      run: ninja -C build test
+    - name: Install
+      run: sudo ninja -C build install
+    - name: Check pygstc installation
+      run: python3 -c "import pygstc"
     - name: List Pipelines Verification
       run: |
         gstd -e

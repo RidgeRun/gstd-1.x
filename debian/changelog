@@ -1,3 +1,16 @@
+gstd (0.15.0-1) unstable; urgency=medium
+
+  * Change project license to LGPL2+
+  * Support for refcounted pipe control commands
+  * Add option to disable daemon logs
+  * Fix support on Ubuntu 22.04
+  * Add meson to CI checks
+  * Improve support on older systems
+  * Enhancements on Python test driver and installer
+  * General improvements and fixes
+
+ -- RidgeRun Engineering <support@ridgerun.com>  Mon, 22 Aug 2022 22:00:00  -0600
+
 gstd (0.14.0-1) unstable; urgency=medium
 
   * Add actions

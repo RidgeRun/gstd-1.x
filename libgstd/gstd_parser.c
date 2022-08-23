@@ -1,20 +1,21 @@
 /*
- * GStreamer Daemon - Gst Launch under steroids
- * Copyright (c) 2015-2020 Ridgerun, LLC (http://www.ridgerun.com)
+ * This file is part of GStreamer Daemon
+ * Copyright 2015-2022 Ridgerun, LLC (http://www.ridgerun.com)
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful,
+ * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the
+ * Free Software Foundation, Inc., 51 Franklin St, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
  */
 
 #ifdef HAVE_CONFIG_H
@@ -22,8 +23,11 @@
 #endif
 
 #include "gstd_event_handler.h"
-#include "gstd_parser.h"
+#include "gstd_pipeline.h"
 #include "gstd_session.h"
+#include "gstd_state.h"
+
+#include "gstd_parser.h"
 
 #define check_argument(arg, code) \
     if (NULL == (arg)) return (code)
@@ -97,6 +101,14 @@ static GstdReturnCode gstd_parser_debug_color (GstdSession *, gchar *, gchar *,
     gchar **);
 static GstdReturnCode gstd_parser_debug_reset (GstdSession *, gchar *, gchar *,
     gchar **);
+static GstdReturnCode gstd_parser_pipeline_create_ref (GstdSession *, gchar *,
+    gchar *, gchar **);
+static GstdReturnCode gstd_parser_pipeline_delete_ref (GstdSession *, gchar *,
+    gchar *, gchar **);
+static GstdReturnCode gstd_parser_pipeline_play_ref (GstdSession *, gchar *,
+    gchar *, gchar **);
+static GstdReturnCode gstd_parser_pipeline_stop_ref (GstdSession *, gchar *,
+    gchar *, gchar **);
 
 typedef GstdReturnCode GstdFunc (GstdSession *, gchar *, gchar *, gchar **);
 typedef struct _GstdCmd
@@ -147,6 +159,11 @@ static GstdCmd cmds[] = {
   {"debug_color", gstd_parser_debug_color},
   {"debug_reset", gstd_parser_debug_reset},
 
+  {"pipeline_create_ref", gstd_parser_pipeline_create_ref},
+  {"pipeline_delete_ref", gstd_parser_pipeline_delete_ref},
+  {"pipeline_play_ref", gstd_parser_pipeline_play_ref},
+  {"pipeline_stop_ref", gstd_parser_pipeline_stop_ref},
+
   {NULL}
 };
 
@@ -154,7 +171,7 @@ static GstdReturnCode
 gstd_parser_parse_raw_cmd (GstdSession * session, gchar * action, gchar * args,
     gchar ** response)
 {
-  gchar **tokens;
+  gchar **tokens = NULL;
   gchar *uri, *rest;
   GstdObject *node;
   GstdReturnCode ret;
@@ -204,7 +221,7 @@ GstdReturnCode
 gstd_parser_parse_cmd (GstdSession * session, const gchar * cmd,
     gchar ** response)
 {
-  gchar **tokens;
+  gchar **tokens = NULL;
   gchar *action, *args;
   GstdCmd *cb;
   GstdReturnCode ret = GSTD_BAD_COMMAND;
@@ -271,7 +288,6 @@ gstd_parser_create (GstdSession * session, GstdObject * obj, gchar * args,
     goto out;
 
   gstd_object_read (obj, name, &new);
-
   if (NULL != new) {
     gstd_object_to_string (new, response);
     g_object_unref (new);
@@ -352,9 +368,7 @@ gstd_parser_pipeline_create (GstdSession * session, gchar * action,
   g_return_val_if_fail (GSTD_IS_SESSION (session), GSTD_NULL_ARGUMENT);
 
   uri = g_strdup_printf ("/pipelines %s", args ? args : "");
-
   ret = gstd_parser_parse_raw_cmd (session, (gchar *) "create", uri, response);
-
   g_free (uri);
 
   return ret;
@@ -453,7 +467,7 @@ gstd_parser_pipeline_verbose (GstdSession * session, gchar * action,
 
 #if GST_VERSION_MINOR >= 10
   gchar *uri;
-  gchar **tokens;
+  gchar **tokens = NULL;
 
   g_return_val_if_fail (GSTD_IS_SESSION (session), GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (args, GSTD_NULL_ARGUMENT);
@@ -485,7 +499,7 @@ gstd_parser_element_set (GstdSession * session, gchar * action, gchar * args,
 {
   GstdReturnCode ret;
   gchar *uri;
-  gchar **tokens;
+  gchar **tokens = NULL;
 
   g_return_val_if_fail (GSTD_IS_SESSION (session), GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (args, GSTD_NULL_ARGUMENT);
@@ -512,7 +526,7 @@ gstd_parser_element_get (GstdSession * session, gchar * action, gchar * args,
 {
   GstdReturnCode ret;
   gchar *uri;
-  gchar **tokens;
+  gchar **tokens = NULL;
 
   g_return_val_if_fail (GSTD_IS_SESSION (session), GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (args, GSTD_NULL_ARGUMENT);
@@ -571,7 +585,7 @@ gstd_parser_list_properties (GstdSession * session, gchar * action,
 {
   GstdReturnCode ret;
   gchar *uri;
-  gchar **tokens;
+  gchar **tokens = NULL;
 
   g_return_val_if_fail (GSTD_IS_SESSION (session), GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (args, GSTD_NULL_ARGUMENT);
@@ -597,7 +611,7 @@ gstd_parser_list_signals (GstdSession * session, gchar * action, gchar * args,
 {
   GstdReturnCode ret;
   gchar *uri;
-  gchar **tokens;
+  gchar **tokens = NULL;
 
   g_return_val_if_fail (GSTD_IS_SESSION (session), GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (args, GSTD_NULL_ARGUMENT);
@@ -642,7 +656,7 @@ gstd_parser_bus_filter (GstdSession * session, gchar * action,
 {
   GstdReturnCode ret;
   gchar *uri;
-  gchar **tokens;
+  gchar **tokens = NULL;
 
   g_return_val_if_fail (GSTD_IS_SESSION (session), GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (args, GSTD_NULL_ARGUMENT);
@@ -667,7 +681,7 @@ gstd_parser_bus_timeout (GstdSession * session, gchar * action, gchar * args,
 {
   GstdReturnCode ret;
   gchar *uri;
-  gchar **tokens;
+  gchar **tokens = NULL;
 
   g_return_val_if_fail (GSTD_IS_SESSION (session), GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (args, GSTD_NULL_ARGUMENT);
@@ -711,7 +725,7 @@ gstd_parser_event_seek (GstdSession * session, gchar * action, gchar * args,
 {
   GstdReturnCode ret;
   gchar *uri;
-  gchar **tokens;
+  gchar **tokens = NULL;
 
   g_return_val_if_fail (GSTD_IS_SESSION (session), GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (args, GSTD_NULL_ARGUMENT);
@@ -755,7 +769,7 @@ gstd_parser_event_flush_stop (GstdSession * session, gchar * action,
 {
   GstdReturnCode ret;
   gchar *uri;
-  gchar **tokens;
+  gchar **tokens = NULL;
 
   g_return_val_if_fail (GSTD_IS_SESSION (session), GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (args, GSTD_NULL_ARGUMENT);
@@ -864,7 +878,7 @@ gstd_parser_signal_connect (GstdSession * session, gchar * action,
 {
   GstdReturnCode ret;
   gchar *uri;
-  gchar **tokens;
+  gchar **tokens = NULL;
 
   g_return_val_if_fail (GSTD_IS_SESSION (session), GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (args, GSTD_NULL_ARGUMENT);
@@ -892,7 +906,7 @@ gstd_parser_signal_disconnect (GstdSession * session, gchar * action,
 {
   GstdReturnCode ret;
   gchar *uri;
-  gchar **tokens;
+  gchar **tokens = NULL;
 
   g_return_val_if_fail (GSTD_IS_SESSION (session), GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (args, GSTD_NULL_ARGUMENT);
@@ -919,7 +933,7 @@ gstd_parser_action_emit (GstdSession * session, gchar * action,
 {
   GstdReturnCode ret;
   gchar *uri;
-  gchar **tokens;
+  gchar **tokens = NULL;
 
   g_return_val_if_fail (GSTD_IS_SESSION (session), GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (args, GSTD_NULL_ARGUMENT);
@@ -946,7 +960,7 @@ gstd_parser_signal_timeout (GstdSession * session, gchar * action, gchar * args,
 {
   GstdReturnCode ret;
   gchar *uri;
-  gchar **tokens;
+  gchar **tokens = NULL;
 
   g_return_val_if_fail (GSTD_IS_SESSION (session), GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (args, GSTD_NULL_ARGUMENT);
@@ -965,5 +979,211 @@ gstd_parser_signal_timeout (GstdSession * session, gchar * action, gchar * args,
   g_free (uri);
   g_strfreev (tokens);
 
+  return ret;
+}
+
+static GstdReturnCode
+gstd_parser_pipeline_create_ref (GstdSession * session, gchar * action,
+    gchar * args, gchar ** response)
+{
+  gchar **tokens = NULL;
+  gchar *description = NULL;
+  GstdObject *pipeline_list_node = NULL;
+  GstdObject *pipeline_node = NULL;
+  GstdReturnCode ret = GSTD_EOK;
+
+  g_return_val_if_fail (GSTD_IS_SESSION (session), GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (action, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (args, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (response, GSTD_NULL_ARGUMENT);
+
+  tokens = g_strsplit (args, " ", 2);
+
+  /* Get the pipeline list node */
+  ret = gstd_get_by_uri (session, "/pipelines", &pipeline_list_node);
+  if (ret) {
+    goto pipeline_list_node_error;
+  }
+
+  GST_OBJECT_LOCK (session);
+
+  /* Look for the pipeline node */
+  pipeline_node =
+      gstd_list_find_child (GSTD_LIST (pipeline_list_node), tokens[0]);
+
+  /* Pipeline doesn't exist */
+  if (!pipeline_node) {
+    ret = gstd_parser_pipeline_create (session, action, args, response);
+    if (ret) {
+      goto create_error;
+    }
+    pipeline_node =
+        gstd_list_find_child (GSTD_LIST (pipeline_list_node), tokens[0]);
+  } else {
+    g_object_get (pipeline_node, "description", &description, NULL);
+    /* Return error code if the descriptions don't match */
+    if (0 != g_strcmp0 (description, tokens[1])) {
+      ret = GSTD_EXISTING_NAME;
+      g_free (description);
+      goto create_error;
+    }
+    g_free (description);
+  }
+  ret = gstd_pipeline_increment_refcount (GSTD_PIPELINE (pipeline_node));
+
+create_error:
+  GST_OBJECT_UNLOCK (session);
+  gst_object_unref (pipeline_list_node);
+pipeline_list_node_error:
+  g_strfreev (tokens);
+  return ret;
+}
+
+static GstdReturnCode
+gstd_parser_pipeline_delete_ref (GstdSession * session, gchar * action,
+    gchar * args, gchar ** response)
+{
+  GstdObject *pipeline_list_node = NULL;
+  GstdObject *pipeline_node = NULL;
+  GstdReturnCode ret = GSTD_EOK;
+  guint refcount = 0;
+
+  g_return_val_if_fail (GSTD_IS_SESSION (session), GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (action, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (args, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (response, GSTD_NULL_ARGUMENT);
+
+  /* Get the pipeline list node */
+  ret = gstd_get_by_uri (session, "/pipelines", &pipeline_list_node);
+  if (ret) {
+    goto pipeline_list_node_error;
+  }
+
+  GST_OBJECT_LOCK (session);
+
+  /* Look for the pipeline node */
+  pipeline_node = gstd_list_find_child (GSTD_LIST (pipeline_list_node), args);
+  if (!pipeline_node) {
+    ret = GSTD_NO_PIPELINE;
+    goto pipeline_node_error;
+  }
+
+  g_object_get (pipeline_node, "refcount", &refcount, NULL);
+  if (1 == refcount) {
+    ret = gstd_parser_pipeline_delete (session, action, args, response);
+  } else {
+    ret = gstd_pipeline_decrement_refcount (GSTD_PIPELINE (pipeline_node));
+  }
+
+pipeline_node_error:
+  GST_OBJECT_UNLOCK (session);
+  gst_object_unref (pipeline_list_node);
+pipeline_list_node_error:
+  return ret;
+}
+
+static GstdReturnCode
+gstd_parser_pipeline_play_ref (GstdSession * session, gchar * action,
+    gchar * args, gchar ** response)
+{
+  gchar *uri = NULL;
+  GstdObject *pipeline_node = NULL;
+  GstdObject *state_node = NULL;
+  GstdReturnCode ret = GSTD_EOK;
+  guint refcount = 0;
+
+  g_return_val_if_fail (GSTD_IS_SESSION (session), GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (action, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (args, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (response, GSTD_NULL_ARGUMENT);
+
+  /* Get the pipeline node */
+  uri = g_strdup_printf ("/pipelines/%s", args);
+  ret = gstd_get_by_uri (session, uri, &pipeline_node);
+  g_free (uri);
+  if (ret) {
+    goto pipeline_node_error;
+  }
+
+  /* Get the state node */
+  uri = g_strdup_printf ("/pipelines/%s/state", args);
+  ret = gstd_get_by_uri (session, uri, &state_node);
+  g_free (uri);
+  if (ret) {
+    goto state_node_error;
+  }
+
+  GST_OBJECT_LOCK (pipeline_node);
+
+  g_object_get (state_node, "refcount", &refcount, NULL);
+  if (0 == refcount) {
+    ret = gstd_parser_pipeline_play (session, action, args, response);
+    if (ret) {
+      goto play_error;
+    }
+  } else {
+    gstd_object_to_string (state_node, response);
+  }
+  ret = gstd_state_increment_refcount (GSTD_STATE (state_node));
+
+play_error:
+  GST_OBJECT_UNLOCK (pipeline_node);
+  gst_object_unref (state_node);
+state_node_error:
+  gst_object_unref (pipeline_node);
+pipeline_node_error:
+  return ret;
+}
+
+static GstdReturnCode
+gstd_parser_pipeline_stop_ref (GstdSession * session, gchar * action,
+    gchar * args, gchar ** response)
+{
+  gchar *uri = NULL;
+  GstdObject *pipeline_node = NULL;
+  GstdObject *state_node = NULL;
+  GstdReturnCode ret = GSTD_EOK;
+  guint refcount = 0;
+
+  g_return_val_if_fail (GSTD_IS_SESSION (session), GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (action, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (args, GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (response, GSTD_NULL_ARGUMENT);
+
+  /* Get the pipeline node */
+  uri = g_strdup_printf ("/pipelines/%s", args);
+  ret = gstd_get_by_uri (session, uri, &pipeline_node);
+  g_free (uri);
+  if (ret) {
+    goto pipeline_node_error;
+  }
+
+  /* Get the state node */
+  uri = g_strdup_printf ("/pipelines/%s/state", args);
+  ret = gstd_get_by_uri (session, uri, &state_node);
+  g_free (uri);
+  if (ret) {
+    goto state_node_error;
+  }
+
+  GST_OBJECT_LOCK (pipeline_node);
+
+  g_object_get (state_node, "refcount", &refcount, NULL);
+  if (1 == refcount) {
+    ret = gstd_parser_pipeline_stop (session, action, args, response);
+    if (ret) {
+      goto stop_error;
+    }
+  } else {
+    gstd_object_to_string (state_node, response);
+  }
+  ret = gstd_state_decrement_refcount (GSTD_STATE (state_node));
+
+stop_error:
+  GST_OBJECT_UNLOCK (pipeline_node);
+  gst_object_unref (state_node);
+state_node_error:
+  gst_object_unref (pipeline_node);
+pipeline_node_error:
   return ret;
 }

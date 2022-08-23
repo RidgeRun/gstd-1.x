@@ -1,26 +1,28 @@
 /*
- * GStreamer Daemon - Gst Launch under steroids
- * Copyright (c) 2015-2020 Ridgerun, LLC (http://www.ridgerun.com)
- * 
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- * 
- * This program is distributed in the hope that it will be useful,
+ * This file is part of GStreamer Daemon
+ * Copyright 2015-2022 Ridgerun, LLC (http://www.ridgerun.com)
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the
+ * Free Software Foundation, Inc., 51 Franklin St, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 
 #include <errno.h>
+#include <editline/readline.h>
 #include <gio/gio.h>
 #include <gio/gunixsocketaddress.h>
 #include <glib/gstdio.h>
@@ -30,33 +32,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-#ifdef HAVE_LIBREADLINE
-#  if defined(HAVE_READLINE_READLINE_H)
-#    include <readline/readline.h>
-#  elif defined(HAVE_READLINE_H)
-#    include <readline.h>
-#  else /* !defined(HAVE_READLINE_H) */
-extern gchar *readline ();
-#  endif /* !defined(HAVE_READLINE_H) */
-gchar *cmdline = NULL;
-#else /* !defined(HAVE_READLINE_READLINE_H) */
-
-#endif /* HAVE_LIBREADLINE */
-
-#ifdef HAVE_READLINE_HISTORY
-#  if defined(HAVE_READLINE_HISTORY_H)
-#    include <readline/history.h>
-#  elif defined(HAVE_HISTORY_H)
-#    include <history.h>
-#  else /* !defined(HAVE_HISTORY_H) */
-extern void add_history ();
-extern gint write_history ();
-extern gint read_history ();
-#  endif /* defined(HAVE_READLINE_HISTORY_H) */
-#else
-
-#endif /* HAVE_READLINE_HISTORY */
 
 /* cmdline defaults */
 #define GSTD_CLIENT_DEFAULT_TCP_INET_ADDRESS "localhost"
@@ -126,7 +101,7 @@ static GstdClientCmd cmds[] = {
       "update <URI> [property value ...]"},
   {"delete", gstd_client_cmd_socket,
         "Deletes the resource held at the given URI with the given name",
-      "read <URI> <name>"},
+      "delete <URI> <name>"},
   {"sh", gstd_client_cmd_sh, "Executes a shell command", "sh <command>"},
   {"source", gstd_client_cmd_source, "Sources a file with commands",
       "source <file>"},
@@ -135,15 +110,27 @@ static GstdClientCmd cmds[] = {
   {"pipeline_create", gstd_client_cmd_socket,
         "Creates a new pipeline based on the name and description",
       "pipeline_create <name> <description>"},
+  {"pipeline_create_ref", gstd_client_cmd_socket,
+        "Creates a new pipeline based on the name and description using refcount",
+      "pipeline_create_ref <name> <description>"},
   {"pipeline_delete", gstd_client_cmd_socket,
         "Deletes the pipeline with the given name",
       "pipeline_delete <name>"},
+  {"pipeline_delete_ref", gstd_client_cmd_socket,
+        "Deletes the pipeline with the given name using refcount",
+      "pipeline_delete_ref <name>"},
   {"pipeline_play", gstd_client_cmd_socket, "Sets the pipeline to playing",
       "pipeline_play <name>"},
+  {"pipeline_play_ref", gstd_client_cmd_socket,
+        "Sets the pipeline to playing using refcount",
+      "pipeline_play_ref <name>"},
   {"pipeline_pause", gstd_client_cmd_socket, "Sets the pipeline to paused",
       "pipeline_pause <name>"},
   {"pipeline_stop", gstd_client_cmd_socket, "Sets the pipeline to null",
       "pipeline_stop <name>"},
+  {"pipeline_stop_ref", gstd_client_cmd_socket,
+        "Sets the pipeline to null using refcount",
+      "pipeline_stop_ref <name>"},
   {"pipeline_get_graph", gstd_client_cmd_socket, "Gets pipeline graph",
       "pipeline_get_graph <name>"},
   {"pipeline_verbose", gstd_client_cmd_socket, "Updates pipeline verbose",
@@ -163,17 +150,17 @@ static GstdClientCmd cmds[] = {
       "list_elements <pipe>"},
   {"list_properties", gstd_client_cmd_socket,
         "List the properties of an element in a given pipeline",
-      "list_properties <pipe> <elemement>"},
+      "list_properties <pipe> <element>"},
   {"list_signals", gstd_client_cmd_socket,
         "List the signals of an element in a given pipeline",
-      "list_signals <pipe> <elemement>"},
+      "list_signals <pipe> <element>"},
 
-  {"bus_read", gstd_client_cmd_socket, "List the existing pipelines",
+  {"bus_read", gstd_client_cmd_socket, "Read from the bus",
       "bus_read <pipe>"},
   {"bus_filter", gstd_client_cmd_socket,
         "Select the types of message to be read from the bus. Separate with "
         "a '+', i.e.: eos+warning+error",
-      "bus_read <pipe> <filter>"},
+      "bus_filter <pipe> <filter>"},
   {"bus_timeout", gstd_client_cmd_socket,
         "Apply a timeout for the bus polling. -1: forever, 0: return immediately, "
         "n: wait n nanoseconds",
@@ -235,7 +222,7 @@ static void
 init_readline (void)
 {
   /* Allow conditional parsing of the ~/.inputrc file */
-  rl_readline_name = "Gstd";
+  rl_readline_name = g_strdup ("Gstd");
 
   /* Custom command completion */
   rl_completion_entry_function = gstd_client_completer;
@@ -429,11 +416,6 @@ main (gint argc, gchar * argv[])
   if (!inter)
     return EXIT_SUCCESS;
 
-#ifndef HAVE_LIBREADLINE
-  // No readline, no interaction
-  quit = TRUE;
-#endif
-
   gstd_client_header (quiet);
 
   /* New interrupt checkpoint */
@@ -504,7 +486,7 @@ static void
 gstd_client_header (gboolean quiet)
 {
   const gchar *header =
-      "GStreamer Daemon  Copyright (C) 2015-2017 Ridgerun, LLC (http://www.ridgerun.com)\n"
+      "GStreamer Daemon  Copyright (C) 2015-2022 Ridgerun, LLC (http://www.ridgerun.com)\n"
       "This program comes with ABSOLUTELY NO WARRANTY; for details type `warranty'.\n"
       "This is free software, and you are welcome to redistribute it\n"
       "under certain conditions; read the license for more details.\n";
@@ -516,22 +498,24 @@ gstd_client_header (gboolean quiet)
 static gint
 gstd_client_cmd_warranty (gchar * name, gchar * arg, GstdClientData * data)
 {
-  const gchar *warranty = "GStreamer Daemon - Gst Launch under steroids\n"
-      "Copyright (c) 2015-2017 Ridgerun, LLC (http://www.ridgerun.com)\n"
+  const gchar *warranty = ""
+      "Copyright 2015-2022 Ridgerun, LLC (http://www.ridgerun.com)\n"
       "\n"
-      "This program is free software: you can redistribute it and/or\n"
-      "modify it under the terms of the GNU General Public License\n"
-      " as published by the Free Software Foundation, either version 2\n"
-      " of the License, or (at your option) any later version.\n"
+      "This library is free software; you can redistribute it and/or\n"
+      "modify it under the terms of the GNU Library General Public\n"
+      "License as published by the Free Software Foundation; either\n"
+      "version 2 of the License, or (at your option) any later version.\n"
       "\n"
-      "This program is distributed in the hope that it will be useful,\n"
+      "This library is distributed in the hope that it will be useful,\n"
       "but WITHOUT ANY WARRANTY; without even the implied warranty of\n"
-      "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n"
-      "GNU General Public License for more details.\n"
+      "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU\n"
+      "Library General Public License for more details.\n"
       "\n"
-      "You should have received a copy of the GNU General Public License\n"
-      "along with this program; if not, write to the Free Software\n"
-      "Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA\n";
+      "You should have received a copy of the GNU Library General Public\n"
+      "License along with this library; if not, write to the\n"
+      "Free Software Foundation, Inc., 51 Franklin St, Fifth Floor,\n"
+      "Boston, MA 02110-1301, USA.\n";
+
   g_print ("%s", warranty);
   return 0;
 }

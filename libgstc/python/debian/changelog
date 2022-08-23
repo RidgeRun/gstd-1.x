@@ -1,0 +1,48 @@
+pygstc (0.5.0-1) unstable; urgency=low
+
+  * Improve meson integration
+  * Improve test drivers
+  * Integrate python tests to CI
+  * Support for Ubuntu 22.04
+
+ -- RidgeRun Engineering <support@ridgerun.com>  Mon, 22 Aug 2022 22:00:00 -0600
+
+pygstc (0.4.0-1) unstable; urgency=low
+
+  * Add refcount commands support
+
+ -- RidgeRun Engineering <support@ridgerun.com>  Mon, 30 Mar 2022 17:00:00 -0600
+
+pygstc (0.3.0-1) unstable; urgency=low
+
+  * Add debian package
+
+ -- RidgeRun Engineering <support@ridgerun.com>  Mon, 28 Mar 2022 16:00:00 -0600
+
+pygstc (0.2.2-1) unstable; urgency=low
+
+  * Add action support
+
+ -- RidgeRun Engineering <support@ridgerun.com>  Thu, 03 Mar 2022 15:00:00 -0600
+
+pygstc (0.2.1-1) unstable; urgency=low
+
+  * Fix socket being wrongly configure to non-blocking
+  * Fix TCP reported timeout error code
+  * Make sure all bytes are sent by TCP
+  * Add buffer lenght check to verify emptiness
+
+ -- RidgeRun Engineering <support@ridgerun.com>  Wed, 08 Dec 2021 15:00:00 -0600
+
+pygstc (0.2.0-1) unstable; urgency=low
+
+  * Add graph support
+  * Add verbose instruction
+
+ -- RidgeRun Engineering <support@ridgerun.com>  Thu, 30 Apr 2020 15:00:00 -0600
+
+pygstc (0.1.0-1) unstable; urgency=low
+
+  * Initial pygstd version
+
+ -- RidgeRun Engineering <support@ridgerun.com>  Mon, 16 Mar 2020 15:00:00 -0600

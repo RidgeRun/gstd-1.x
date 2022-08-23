@@ -1,20 +1,21 @@
 /*
- * GStreamer Daemon - Gst Launch under steroids
- * Copyright (c) 2015-2021 Ridgerun, LLC (http://www.ridgerun.com)
- * 
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- * 
- * This program is distributed in the hope that it will be useful,
+ * This file is part of GStreamer Daemon
+ * Copyright 2015-2022 Ridgerun, LLC (http://www.ridgerun.com)
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the
+ * Free Software Foundation, Inc., 51 Franklin St, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
  */
 
 #ifdef HAVE_CONFIG_H
@@ -74,6 +75,7 @@ main (gint argc, gchar * argv[])
   gint ret = EXIT_SUCCESS;
   gchar *current_filename = NULL;
   gchar *filename = NULL;
+  gboolean nolog = FALSE;
   gboolean parent = FALSE;
 
   GstD *gstd = NULL;
@@ -99,6 +101,10 @@ main (gint argc, gchar * argv[])
     ,
     {"gst-log-filename", 'd', 0, G_OPTION_ARG_FILENAME, &gstlogfile,
         "Create gst.log file to path", NULL}
+    ,
+    {"no-log", 'L', 0, G_OPTION_ARG_NONE, &nolog,
+          "Disable file logging when gstd is running in daemon mode. Takes precedence over -l and -d.",
+        NULL}
     ,
     {NULL}
   };
@@ -127,10 +133,20 @@ main (gint argc, gchar * argv[])
     goto out;
   }
 
+  /* If we need to daemonize or interact with the daemon (like killing
+   * it, for example) we need to initialize the daemon subsystem.
+   */
   if (daemon || kill) {
-    if (!gstd_log_init (gstdlogfile, gstlogfile)) {
-      ret = EXIT_FAILURE;
-      goto out;
+
+    /* Initialize the file logging only if:
+     * - the user didn't explicitly request it by setting --no-log
+     * - the user didn't invoke gstd to kill the daemon
+     */
+    if (!nolog && !kill) {
+      if (!gstd_log_init (gstdlogfile, gstlogfile)) {
+        ret = EXIT_FAILURE;
+        goto out;
+      }
     }
 
     if (!gstd_daemon_init (argc, argv, pidfile)) {
@@ -157,7 +173,11 @@ main (gint argc, gchar * argv[])
     if (parent) {
       if (!quiet) {
         filename = gstd_log_get_current_gstd ();
-        g_print ("Log traces will be saved to %s.\n", filename);
+        if (nolog) {
+          g_print ("Log traces have been disabled.\n");
+        } else {
+          g_print ("Log traces will be saved to %s.\n", filename);
+        }
         g_print ("Detaching from parent process.\n");
         g_free (filename);
       }

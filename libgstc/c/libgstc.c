@@ -1,36 +1,39 @@
 /*
- * GStreamer Daemon - gst-launch on steroids
- * C client library abstracting gstd interprocess communication
- *
- * Copyright (c) 2015-2021 RidgeRun, LLC (http://www.ridgerun.com)
+ * This file is part of GStreamer Daemon
+ * Copyright 2015-2022 Ridgerun, LLC (http://www.ridgerun.com)
  *
  * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ * modification, are permitted provided that the following conditions are
+ * met:
  *
  * 1. Redistributions of source code must retain the above copyright
  * notice, this list of conditions and the following disclaimer.
  *
- * 2. Redistributions in binary form must reproduce the above
- * copyright notice, this list of conditions and the following
- * disclaimer in the documentation and/or other materials provided
- * with the distribution.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
+ *
+ * 3. Neither the name of the copyright holder nor the names of its
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
- * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
- * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
- * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
- * OF THE POSSIBILITY OF SUCH DAMAGE.
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#define _GNU_SOURCE
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <pthread.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -50,6 +53,12 @@
 #define READ_FORMAT   "read %s"
 #define UPDATE_FORMAT "update %s %s"
 #define DELETE_FORMAT "delete %s %s"
+
+/* Gst client high level command formats */
+#define PIPELINE_CREATE_REF_FORMAT "pipeline_crete_ref %s %s"
+#define PIPELINE_DELETE_REF_FORMAT "pipeline_delete_ref %s"
+#define PIPELINE_PLAY_REF_FORMAT "pipeline_play_ref %s"
+#define PIPELINE_STOP_REF_FORMAT "pipeline_stop_ref %s"
 
 #define PIPELINE_CREATE_FORMAT               "%s %s"
 #define PIPELINE_STATE_FORMAT                "/pipelines/%s/state"
@@ -329,6 +338,32 @@ gstc_pipeline_create (GstClient * client, const char *pipeline_name,
 }
 
 GstcStatus
+gstc_pipeline_create_ref (GstClient * client, const char *pipeline_name,
+    const char *pipeline_desc)
+{
+  GstcStatus ret;
+  int asprintf_ret;
+  char *request;
+
+  gstc_assert_and_ret_val (NULL != client, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != pipeline_name, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != pipeline_desc, GSTC_NULL_ARGUMENT);
+
+  asprintf_ret =
+      asprintf (&request, PIPELINE_CREATE_REF_FORMAT, pipeline_name,
+      pipeline_desc);
+  if (PRINTF_ERROR == asprintf_ret) {
+    return GSTC_OOM;
+  }
+
+  ret = gstc_cmd_send (client, request);
+
+  free (request);
+
+  return ret;
+}
+
+GstcStatus
 gstc_pipeline_delete (GstClient * client, const char *pipeline_name)
 {
   GstcStatus ret;
@@ -338,6 +373,28 @@ gstc_pipeline_delete (GstClient * client, const char *pipeline_name)
   gstc_assert_and_ret_val (NULL != pipeline_name, GSTC_NULL_ARGUMENT);
 
   ret = gstc_cmd_delete (client, resource, pipeline_name);
+
+  return ret;
+}
+
+GstcStatus
+gstc_pipeline_delete_ref (GstClient * client, const char *pipeline_name)
+{
+  GstcStatus ret;
+  int asprintf_ret;
+  char *request;
+
+  gstc_assert_and_ret_val (NULL != client, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != pipeline_name, GSTC_NULL_ARGUMENT);
+
+  asprintf_ret = asprintf (&request, PIPELINE_DELETE_REF_FORMAT, pipeline_name);
+  if (PRINTF_ERROR == asprintf_ret) {
+    return GSTC_OOM;
+  }
+
+  ret = gstc_cmd_send (client, request);
+
+  free (request);
 
   return ret;
 }
@@ -377,6 +434,28 @@ gstc_pipeline_play (GstClient * client, const char *pipeline_name)
 }
 
 GstcStatus
+gstc_pipeline_play_ref (GstClient * client, const char *pipeline_name)
+{
+  GstcStatus ret;
+  int asprintf_ret;
+  char *request;
+
+  gstc_assert_and_ret_val (NULL != client, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != pipeline_name, GSTC_NULL_ARGUMENT);
+
+  asprintf_ret = asprintf (&request, PIPELINE_PLAY_REF_FORMAT, pipeline_name);
+  if (PRINTF_ERROR == asprintf_ret) {
+    return GSTC_OOM;
+  }
+
+  ret = gstc_cmd_send (client, request);
+
+  free (request);
+
+  return ret;
+}
+
+GstcStatus
 gstc_pipeline_pause (GstClient * client, const char *pipeline_name)
 {
   const char *state = "paused";
@@ -396,6 +475,28 @@ gstc_pipeline_stop (GstClient * client, const char *pipeline_name)
   gstc_assert_and_ret_val (NULL != pipeline_name, GSTC_NULL_ARGUMENT);
 
   return gstc_cmd_change_state (client, pipeline_name, state);
+}
+
+GstcStatus
+gstc_pipeline_stop_ref (GstClient * client, const char *pipeline_name)
+{
+  GstcStatus ret;
+  int asprintf_ret;
+  char *request;
+
+  gstc_assert_and_ret_val (NULL != client, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != pipeline_name, GSTC_NULL_ARGUMENT);
+
+  asprintf_ret = asprintf (&request, PIPELINE_STOP_REF_FORMAT, pipeline_name);
+  if (PRINTF_ERROR == asprintf_ret) {
+    return GSTC_OOM;
+  }
+
+  ret = gstc_cmd_send (client, request);
+
+  free (request);
+
+  return ret;
 }
 
 GstcStatus
@@ -934,8 +1035,6 @@ gstc_pipeline_bus_wait_callback (GstClient * _client, const char *pipeline_name,
   return GSTC_OK;
 }
 
-#pragma GCC diagnostic pop
-
 GstcStatus
 gstc_pipeline_bus_wait (GstClient * client,
     const char *pipeline_name, const char *message_name,
@@ -996,9 +1095,9 @@ gstc_pipeline_emit_action (GstClient * client, const char *pipeline_name,
   GstcStatus ret;
   int asprintf_ret;
   char *where;
-  const char *where_fmt = "/pipelines/%s/elements/%s/actions/%s";
 
-  asprintf_ret = asprintf (&where, where_fmt, pipeline_name, element, action);
+  asprintf_ret = asprintf (&where, "/pipelines/%s/elements/%s/actions/%s",
+      pipeline_name, element, action);
   if (asprintf_ret == PRINTF_ERROR) {
     return GSTC_OOM;
   }

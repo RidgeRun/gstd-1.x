@@ -1,2 +1,4 @@
 subdir('c')
-subdir('python')
+if not get_option('enable-python').disabled()
+  subdir('python')
+endif

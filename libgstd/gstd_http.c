@@ -1,20 +1,21 @@
 /*
- * GStreamer Daemon - Gst Launch under steroids
- * Copyright (c) 2015-2020 Ridgerun, LLC (http://www.ridgerun.com)
+ * This file is part of GStreamer Daemon
+ * Copyright 2015-2022 Ridgerun, LLC (http://www.ridgerun.com)
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful,
+ * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the
+ * Free Software Foundation, Inc., 51 Franklin St, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
  */
 
 #ifdef HAVE_CONFIG_H
@@ -27,6 +28,7 @@
 #include <libsoup/soup.h>
 
 #include "gstd_http.h"
+#include "gstd_parser.h"
 
 /* Gstd HTTP debugging category */
 GST_DEBUG_CATEGORY_STATIC (gstd_http_debug);
@@ -457,6 +459,7 @@ static gboolean
 gstd_http_init_get_option_group (GstdIpc * base, GOptionGroup ** group)
 {
   GstdHttp *self = GSTD_HTTP (base);
+
   GOptionEntry http_args[] = {
     {"enable-http-protocol", 't', 0, G_OPTION_ARG_NONE, &base->enabled,
         "Enable attach the server through given HTTP ports ", NULL}
@@ -493,6 +496,7 @@ gstd_http_stop (GstdIpc * base)
 {
   GstdHttp *self = NULL;
   GstdSession *session = NULL;
+
   g_return_val_if_fail (base, GSTD_NULL_ARGUMENT);
 
   self = GSTD_HTTP (base);

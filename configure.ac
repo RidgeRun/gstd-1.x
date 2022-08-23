@@ -2,7 +2,7 @@ dnl required version of autoconf
 AC_PREREQ([2.53])
 
 dnl Gstreamer's daemon package name and version
-AC_INIT([gstd],[0.14.0])
+AC_INIT([gstd],[0.15.0])
 
 dnl required version of gstreamer and gst-plugins-base
 GST_REQUIRED=1.0.0
@@ -22,6 +22,9 @@ LIBD_REQUIRED=0.14
 dnl required version of jansson
 JANSSON_REQUIRED=2.7
 
+dnl required version of libedit
+LIBEDIT_REQUIRED=3.0
+
 dnl required version of systemd
 SYSTEMD_REQUIRED=232
 
@@ -34,6 +37,13 @@ AM_INIT_AUTOMAKE([1.10 subdir-objects])
 
 dnl enable mainainer mode by default
 AM_MAINTAINER_MODE([enable])
+
+AC_WARNING([!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!])
+AC_WARNING([Autotools will be deprecated in the next Gstd release! Please migrate to Meson])
+AC_WARNING([!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!])
+AC_MSG_WARN([!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!])
+AC_MSG_WARN([Autotools will be deprecated in the next Gstd release! Please migrate to Meson])
+AC_MSG_WARN([!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!])
 
 dnl check for tools (compiler etc.)
 AM_PROG_CC_C_O
@@ -133,27 +143,23 @@ PKG_CHECK_MODULES(GJSON, [
 
 
 dnl check for gtk-doc
-m4_ifdef([GTK_DOC_CHECK], [
-GTK_DOC_CHECK([1.14],[--flavour no-tmpl --docdir docs])
-],[
-AM_CONDITIONAL([ENABLE_GTK_DOC], false)
-])
+GTK_DOC_CHECK([1.14])
 
-AX_LIB_READLINE
-if test "x$ax_cv_lib_readline" = "xno"; then
+PKG_CHECK_MODULES(LIBEDIT, [
+    libedit >= $LIBEDIT_REQUIRED
+  ], [
+    AC_SUBST(LIBEDIT_CFLAGS)
+    AC_SUBST(LIBEDIT_LIBS)
+  ], [
   AC_MSG_ERROR([
-       Please install readline development packages. In Debian based
-       systems you may run:
-         - readline : "sudo apt-get install libreadline-dev"
+    Can't find libedit development packages:
 
-       Additionally, install one of the following:
-        - ncurses  : "sudo apt-get install libncurses5-dev"
-        - ncurserw : "sudo apt-get install libncursesw5-dev"
+      libedit-dev >= $LIBEDIT_REQUIRED
+
+    Please make sure you have the necessary libdedit-dev
+    development files installed.
   ])
-else
-  AC_SUBST(READLINE_CFLAGS, )
-  AC_SUBST(READLINE_LIBS, $ax_cv_lib_readline)
-fi
+])
 
 PKG_CHECK_MODULES(LIBD, [
     libdaemon >= $LIBD_REQUIRED
@@ -284,6 +290,10 @@ AC_COMPILE_IFELSE([AC_LANG_PROGRAM([ ], [ ])], [
 ], [
   AC_MSG_RESULT([no])
 ])
+
+dnl extra flags passed to all modules
+AC_SUBST([GSTD_CFLAGS], ["-std=c11 -D_GNU_SOURCE"])
+AC_SUBST([GSTD_LIBS], [])
 
 dnl =======================================================================
 dnl Finally, create Makefiles in all directories

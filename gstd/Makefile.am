@@ -3,15 +3,18 @@ bin_PROGRAMS = gstd
 
 gstd_SOURCES =  gstd.c gstd_daemon.c
 
-gstd_CFLAGS =                                                 \
-             $(GST_CFLAGS)                                    \
-	      -I$(top_srcdir)/libgstd/                          \
-	      $(LIBD_CFLAGS)                                    \
-	      -DGSTD_LOG_STATE_DIR=\"$(GSTD_LOG_STATE_DIR)\"    \
-	      -DGSTD_RUN_STATE_DIR=\"$(GSTD_RUN_STATE_DIR)\"
+gstd_CFLAGS =                                                   \
+              $(GSTD_CFLAGS)                                    \
+              $(GST_CFLAGS)                                     \
+              -I$(top_srcdir)/libgstd/                          \
+              $(LIBD_CFLAGS)                                    \
+              -DGSTD_LOG_STATE_DIR=\"$(GSTD_LOG_STATE_DIR)\"    \
+              -DGSTD_RUN_STATE_DIR=\"$(GSTD_RUN_STATE_DIR)\"
 
-gstd_LDFLAGS = $(GST_LIBS)                    \
-	       $(LIBD_LIBS)                     \
+gstd_LDFLAGS =                                  \
+               $(GSTD_LIBS)                     \
+               $(GST_LIBS)                      \
+               $(LIBD_LIBS)                     \
 	       -Wl,-rpath -Wl,$(libdir)
 
 gstd_LDADD = $(top_builddir)/libgstd/libgstd-1.0.la

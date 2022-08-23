@@ -63,6 +63,7 @@ libgstd_@GSTD_API_VERSION@_la_SOURCES =             \
              libgstd.c
 
 libgstd_@GSTD_API_VERSION@_la_CFLAGS =                         \
+             $(GSTD_CFLAGS)                                    \
              $(GST_CFLAGS)                                     \
              -I$(top_srcdir)/gstd/                             \
              $(GIO_CFLAGS)                                     \
@@ -73,7 +74,14 @@ libgstd_@GSTD_API_VERSION@_la_CFLAGS =                         \
              -DGSTD_RUN_STATE_DIR=\"$(GSTD_RUN_STATE_DIR)\"    \
              $(JANSSON_CFLAGS) -pthread
 
-libgstd_@GSTD_API_VERSION@_la_LDFLAGS = $(GST_LIBS) $(GIO_LIBS) $(GJSON_LIBS) $(LIBSOUP_LIBS) $(JANSSON_LIBS) -pthread
+libgstd_@GSTD_API_VERSION@_la_LDFLAGS =                        \
+             $(GSTD_LIBS)                                      \
+             $(GST_LIBS)                                       \
+             $(GIO_LIBS)                                       \
+             $(GJSON_LIBS)                                     \
+             $(LIBSOUP_LIBS)                                   \
+             $(JANSSON_LIBS)                                   \
+             -pthread
 
 noinst_HEADERS =                                   \
              gstd_action.h                         \
