@@ -2,7 +2,7 @@ dnl required version of autoconf
 AC_PREREQ([2.53])
 
 dnl Gstreamer's daemon package name and version
-AC_INIT([gstd],[0.14.0])
+AC_INIT([gstd],[0.15.0])
 
 dnl required version of gstreamer and gst-plugins-base
 GST_REQUIRED=1.0.0
@@ -37,6 +37,13 @@ AM_INIT_AUTOMAKE([1.10 subdir-objects])
 
 dnl enable mainainer mode by default
 AM_MAINTAINER_MODE([enable])
+
+AC_WARNING([!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!])
+AC_WARNING([Autotools will be deprecated in the next Gstd release! Please migrate to Meson])
+AC_WARNING([!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!])
+AC_MSG_WARN([!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!])
+AC_MSG_WARN([Autotools will be deprecated in the next Gstd release! Please migrate to Meson])
+AC_MSG_WARN([!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!])
 
 dnl check for tools (compiler etc.)
 AM_PROG_CC_C_O
@@ -136,11 +143,7 @@ PKG_CHECK_MODULES(GJSON, [
 
 
 dnl check for gtk-doc
-m4_ifdef([GTK_DOC_CHECK], [
-GTK_DOC_CHECK([1.14],[--flavour no-tmpl --docdir docs])
-],[
-AM_CONDITIONAL([ENABLE_GTK_DOC], false)
-])
+GTK_DOC_CHECK([1.14])
 
 PKG_CHECK_MODULES(LIBEDIT, [
     libedit >= $LIBEDIT_REQUIRED
