@@ -38,6 +38,13 @@ AM_INIT_AUTOMAKE([1.10 subdir-objects])
 dnl enable mainainer mode by default
 AM_MAINTAINER_MODE([enable])
 
+AC_WARNING([!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!])
+AC_WARNING([Autotools will be deprecated in the next Gstd release! Please migrate to Meson])
+AC_WARNING([!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!])
+AC_MSG_WARN([!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!])
+AC_MSG_WARN([Autotools will be deprecated in the next Gstd release! Please migrate to Meson])
+AC_MSG_WARN([!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!])
+
 dnl check for tools (compiler etc.)
 AM_PROG_CC_C_O
 
