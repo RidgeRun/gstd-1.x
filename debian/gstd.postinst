@@ -1,4 +1,7 @@
-#!/bin/sh
+#!/bin/bash
+
+# set the error flag
+set -e
 
 # Create gstd group for permissions
 groupadd -f gstd &>/dev/null
@@ -13,11 +16,11 @@ if [ "$1" = "configure" ] || [ "$1" = "abort-upgrade" ] || [ "$1" = "abort-decon
 		if [ ! -e "$dir" ]; then
 			if mkdir "$dir" 2>/dev/null; then
 				chown "$user":"$group" "$dir"
-				chmod -R "$mode" "$dir"
+				chmod "$mode" "$dir"
 			fi
 		else
                         chown "$user":"$group" "$dir"
-                        chmod -R "$mode" "$dir"		
+                        chmod "$mode" "$dir"
 		fi
 	done
 ) << DATA

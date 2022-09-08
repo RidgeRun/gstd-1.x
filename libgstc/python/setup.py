@@ -42,8 +42,6 @@ setup(
     name='pygstc',
     version=version,
     description='Python GStreamer Daemon Client',
-    long_description='Python GStreamer Daemon Client',
-    long_description_content_type='text/markdown',
     url='https://github.com/RidgeRun/gstd-1.x',
     author='RidgeRun',
     author_email='support@ridgerun.com',
