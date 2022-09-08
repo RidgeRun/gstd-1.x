@@ -7,8 +7,8 @@ option('enable-initd', type : 'feature', value : 'disabled', description : 'Enab
 option('enable-python', type : 'feature', value : 'auto', description : 'Install the pygstc library')
 
 # String options
-option('with-gstd-runstatedir', type : 'string', value : '${prefix}/var/run/gstd', description : 'Specify the location of the gstd\'s PID file')
-option('with-gstd-logstatedir', type : 'string', value : '${prefix}/var/log/gstd', description : 'Specify the location of gstd\'s log files')
+option('with-gstd-runstatedir', type : 'string', value : '/var/run/gstd', description : 'Specify the location of the gstd\'s PID file')
+option('with-gstd-logstatedir', type : 'string', value : '/var/log/gstd', description : 'Specify the location of gstd\'s log files')
 option('with-gstd-systemddir', type : 'string', value : 'Systemd default systemduserunitdir', description : 'Specify the location of gstd.service file')
 option('with-gstd-initddir', type : 'string', value : '${sysconfdir}/init.d', description : 'Specify the location of gstd init script')
 option('with-statedir-owner', type : 'string', value : 'root', description : 'Specify the owner of gstd\'s run and log dirs created by the initd script')

@@ -1,7 +1,7 @@
 Source: gstd
 Priority: optional
 Maintainer: RidgeRun Engineering <support@ridgerun.com>
-Build-Depends: debhelper (>= 10), 
+Build-Depends: debhelper (>= 11), 
           automake,
           libtool,
           pkg-config,
@@ -14,7 +14,10 @@ Build-Depends: debhelper (>= 10),
           libncursesw5-dev,
           libdaemon-dev,
           libjansson-dev,
-          python3-pip
+          python3-pip,
+          dh-python,
+          python3-setuptools,
+          python3
 Standards-Version: 4.1.2
 Section: libs
 Homepage: https://developer.ridgerun.com/wiki/index.php?title=GStreamer_Daemon_-_GStreamer_Daemon_Basics
@@ -24,13 +27,20 @@ Architecture: any
 Multi-arch: same
 Depends: ${shlibs:Depends},
          ${misc:Depends}
-Description: GStreamer Daemon
- GStreamer Daemon, also called gstd, is a GStreamer
- framework for controlling audio and video streaming
- using TCP connection messages. Qt applications, web
- interfaces, and GStreamer element test suites show
- different ways the framework can be utilized.
- GStreamer Daemon is gst-launch on steroids where you
- can create a GStreamer pipeline, play, pause, change
- speed, skip around, and even change element parameter
- settings all while the pipeline is active.
+Description: GStreamer Daemon 
+  GStreamer Daemon, also called gstd, is a GStreamer 
+  framework for controlling audio and video streaming 
+  using TCP connection messages. Qt applications, web 
+  interfaces, and GStreamer element test suites show 
+  different ways the framework can be utilized. 
+  GStreamer Daemon is gst-launch on steroids where you 
+  can create a GStreamer pipeline, play, pause, change 
+  speed, skip around, and even change element parameter 
+  settings all while the pipeline is active.
+
+Package: pygstc
+Architecture: all
+Depends: ${misc:Depends},
+         ${python3:Depends}
+Description: Python GStreamer Daemon Client.
+ Standalone Python Client for RidgeRun's GStreamer Daemon

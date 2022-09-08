@@ -122,8 +122,8 @@ endif
 gstd_run_state_dir = '-DGSTD_RUN_STATE_DIR="@0@"'.format(runstatedir)
 
 logstatedir = get_option('with-gstd-logstatedir') + '/'
-if logstatedir == '${prefix}/var/log/gstd/'
-   logstatedir = prefix + '/var/log/gstd/'
+if logstatedir == '/var/log/gstd/'
+   logstatedir = '/var/log/gstd/'
 endif
 gstd_log_state_dir = '-DGSTD_LOG_STATE_DIR="@0@"'.format(logstatedir)
 gst_c_args = ['-DHAVE_CONFIG_H',gstd_log_state_dir,gstd_run_state_dir]
