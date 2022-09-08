@@ -57,6 +57,7 @@ debian/tmp
 build/
 .pybuild/
 *egg-info/
+libgstc/python/dist/
 
 # Init
 init/gstd
