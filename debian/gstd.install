@@ -1,5 +1,7 @@
-debian/tmp/usr/bin/*
-debian/tmp/usr/include/*
-debian/tmp/usr/lib/systemd/*
-debian/tmp/usr/lib/x86_64-linux-gnu/*
+debian/tmp/usr/bin
+debian/tmp/usr/include
+debian/tmp/usr/lib/*/libgstc*
+debian/tmp/usr/lib/*/libgstd*
+debian/tmp/usr/lib/*/pkgconfig
+debian/tmp/usr/lib/systemd/user
 debian/tmp/var/*
