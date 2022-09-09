@@ -43,6 +43,6 @@ Package: pygstc
 Architecture: all
 Depends: ${misc:Depends},
          ${python3:Depends},
-         python3
+         python3 (>= 3.5.0)
 Description: Python GStreamer Daemon Client.
  Standalone Python Client for RidgeRun's GStreamer Daemon
