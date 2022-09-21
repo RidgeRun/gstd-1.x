@@ -1,7 +1,6 @@
 #!/usr/bin/make -f
 
 export DEB_BUILD_OPTIONS := nocheck
-export DEB_DH_AUTORECONF_ARGS += --as-needed
 export DEB_BUILD_MAINT_OPTIONS = hardening=+all
 
 %:
