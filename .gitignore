@@ -28,6 +28,7 @@ test-driver
 stamp-h1
 docs/gtk-doc.make
 gtk-doc.m4
+gtk-doc.make
 libtool.orig
 gst_client/gst-client-1.0
 .clang_complete
@@ -50,11 +51,13 @@ debian/*.prerm.debhelper
 debian/*.substvars
 debian/gstd/
 debian/pygstc/
+debian/tmp
 
 # python build
 build/
 .pybuild/
 *egg-info/
+libgstc/python/dist/
 
 # Init
 init/gstd
