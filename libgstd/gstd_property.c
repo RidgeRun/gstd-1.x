@@ -215,6 +215,9 @@ gstd_property_to_string (GstdObject * obj, gchar ** outstring)
     klass->add_value (self, formatter, &value);
 
     g_value_unset (&value);
+  } else {
+    gstd_iformatter_set_member_name (formatter, "value");
+    gstd_iformatter_set_null_value (formatter);
   }
 
   gstd_iformatter_set_member_name (formatter, "param");

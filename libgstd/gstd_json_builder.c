@@ -151,6 +151,17 @@ gstd_json_set_string_value (GstdIFormatter * iface, const gchar * value)
 }
 
 static void
+gstd_json_set_null_value (GstdIFormatter * iface)
+{
+  GstdJsonBuilder *self;
+
+  g_return_if_fail (GSTD_IS_JSON_BUILDER (iface));
+
+  self = GSTD_JSON_BUILDER (iface);
+  json_builder_add_null_value (self->json_builder);
+}
+
+static void
 gstd_json_set_value (GstdIFormatter * iface, const GValue * value)
 {
   GstdJsonBuilder *self;
@@ -266,6 +277,7 @@ gstd_iformatter_interface_init (GstdIFormatterInterface * iface)
   iface->end_array = gstd_json_builder_end_array;
   iface->set_member_name = gstd_json_set_member_name;
   iface->set_string_value = gstd_json_set_string_value;
+  iface->set_null_value = gstd_json_set_null_value;
   iface->set_value = gstd_json_set_value;
   iface->generate = gstd_json_builder_generate;
 }
