@@ -205,15 +205,20 @@ gstd_property_to_string (GstdObject * obj, gchar ** outstring)
   gstd_iformatter_set_member_name (formatter, "name");
   gstd_iformatter_set_string_value (formatter, property->name);
 
-  gstd_iformatter_set_member_name (formatter, "value");
+  if (property->flags & G_PARAM_READABLE) {
+    gstd_iformatter_set_member_name (formatter, "value");
 
-  g_value_init (&value, property->value_type);
-  g_object_get_property (G_OBJECT (self->target), property->name, &value);
+    g_value_init (&value, property->value_type);
+    g_object_get_property (G_OBJECT (self->target), property->name, &value);
 
-  g_assert (klass->add_value);
-  klass->add_value (self, formatter, &value);
+    g_assert (klass->add_value);
+    klass->add_value (self, formatter, &value);
 
-  g_value_unset (&value);
+    g_value_unset (&value);
+  } else {
+    gstd_iformatter_set_member_name (formatter, "value");
+    gstd_iformatter_set_null_value (formatter);
+  }
 
   gstd_iformatter_set_member_name (formatter, "param");
   /* Describe the parameter specs using a structure */
