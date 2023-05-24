@@ -2,7 +2,7 @@ gstd (0.15.1-1) unstable; urgency=medium
 
   * Add includes to the declaration of the dependency
 
- -- RidgeRun Engineering <support@ridgerun.com>  Wed, 24 May 2022 20:28:00  +0200
+ -- RidgeRun Engineering <support@ridgerun.com>  Wed, 24 May 2023 20:28:00 +0200
 
 gstd (0.15.0-1) unstable; urgency=medium
 
