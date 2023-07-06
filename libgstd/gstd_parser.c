@@ -101,6 +101,10 @@ static GstdReturnCode gstd_parser_debug_color (GstdSession *, gchar *, gchar *,
     gchar **);
 static GstdReturnCode gstd_parser_debug_reset (GstdSession *, gchar *, gchar *,
     gchar **);
+static GstdReturnCode gstd_parser_stats_enable (GstdSession *, gchar *,
+    gchar *, gchar **);
+static GstdReturnCode gstd_parser_stats_get (GstdSession *, gchar *,
+    gchar *, gchar **);
 static GstdReturnCode gstd_parser_pipeline_create_ref (GstdSession *, gchar *,
     gchar *, gchar **);
 static GstdReturnCode gstd_parser_pipeline_delete_ref (GstdSession *, gchar *,
@@ -158,6 +162,9 @@ static GstdCmd cmds[] = {
   {"debug_threshold", gstd_parser_debug_threshold},
   {"debug_color", gstd_parser_debug_color},
   {"debug_reset", gstd_parser_debug_reset},
+
+  {"stats_enable", gstd_parser_stats_enable},
+  {"stats_get", gstd_parser_stats_get},
 
   {"pipeline_create_ref", gstd_parser_pipeline_create_ref},
   {"pipeline_delete_ref", gstd_parser_pipeline_delete_ref},
@@ -871,6 +878,42 @@ gstd_parser_debug_reset (GstdSession * session, gchar * action, gchar * reset,
   return ret;
 }
 
+static GstdReturnCode
+gstd_parser_stats_enable (GstdSession * session, gchar * action,
+    gchar * enabled, gchar ** response)
+{
+  GstdReturnCode ret;
+  gchar *uri;
+
+  g_return_val_if_fail (GSTD_IS_SESSION (session), GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (response, GSTD_NULL_ARGUMENT);
+
+  check_argument (enabled, GSTD_BAD_COMMAND);
+
+  uri = g_strdup_printf ("/stats/enable %s", enabled);
+  ret = gstd_parser_parse_raw_cmd (session, (gchar *) "update", uri, response);
+
+  g_free (uri);
+
+  return ret;
+}
+
+static GstdReturnCode
+gstd_parser_stats_get (GstdSession * session, gchar * action, gchar * args,
+    gchar ** response)
+{
+  GstdReturnCode ret;
+  gchar *uri;
+
+  g_return_val_if_fail (GSTD_IS_SESSION (session), GSTD_NULL_ARGUMENT);
+  g_return_val_if_fail (args, GSTD_NULL_ARGUMENT);
+
+  uri = g_strdup_printf ("/stats/stats");
+  ret = gstd_parser_parse_raw_cmd (session, (gchar *) "read", uri, response);
+  g_free (uri);
+
+  return ret;
+}
 
 static GstdReturnCode
 gstd_parser_signal_connect (GstdSession * session, gchar * action,

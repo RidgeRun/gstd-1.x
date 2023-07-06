@@ -203,6 +203,14 @@ static GstdClientCmd cmds[] = {
         "Enable/Disable debug threshold reset",
       "debug_reset <reset>"},
 
+  {"stats_enable", gstd_client_cmd_socket,
+        "Enables/Disables stats collection",
+      "stats_enable <enable>"},
+
+  {"stats_get", gstd_client_cmd_socket,
+        "Gets stats collected",
+      "stats_get"},
+
   {NULL}
 };
 
