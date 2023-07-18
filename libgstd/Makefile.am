@@ -58,6 +58,7 @@ libgstd_@GSTD_API_VERSION@_la_SOURCES =             \
              gstd_signal_reader.c                   \
              gstd_socket.c                          \
              gstd_state.c                           \
+             gstd_stats.c                           \
              gstd_tcp.c                             \
              gstd_unix.c                            \
              libgstd.c
@@ -134,5 +135,6 @@ noinst_HEADERS =                                   \
              gstd_signal_reader.h                  \
              gstd_socket.h                         \
              gstd_state.h                          \
+             gstd_stats.h                          \
              gstd_tcp.h                            \
              gstd_unix.h
