@@ -906,7 +906,6 @@ gstd_parser_stats_get (GstdSession * session, gchar * action, gchar * args,
   gchar *uri;
 
   g_return_val_if_fail (GSTD_IS_SESSION (session), GSTD_NULL_ARGUMENT);
-  g_return_val_if_fail (args, GSTD_NULL_ARGUMENT);
 
   uri = g_strdup_printf ("/stats/stats");
   ret = gstd_parser_parse_raw_cmd (session, (gchar *) "read", uri, response);
