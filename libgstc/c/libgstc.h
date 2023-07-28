@@ -666,6 +666,31 @@ GstcStatus gstc_pipeline_emit_action (GstClient *client,
    const char *pipeline_name, const char *element,
    const char *action);
 
+/**
+ * gstc_enable_stats:
+ * @client: The client returned by gstc_client_new()
+ * @enable: If nonzero, then stats are enabled, if zero stats are disabled
+ * 
+ * Enables or disables stats collection in the daemon
+ * 
+ * Returns: GstcStatus indicating success, daemon unreachable, daemon
+ * timeout
+ */
+GstcStatus gstc_enable_stats (GstClient *client, const int enable);
+
+/**
+ * gstc_get_stats:
+ * @client: The client returned by gstc_client_new()
+ * @response: Pointer to output string memory representing a stats value,
+ * this memory should be freed by the user.
+ * 
+ * Attempts to get a stats value from gstd
+ * 
+ * Returns: GstcStatus indicating success, daemon unreachable, daemon
+ * timeout
+ */
+GstcStatus gstc_get_stats (GstClient *client, char **response);
+
 #ifdef __cplusplus
 }
 #endif
