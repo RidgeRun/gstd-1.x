@@ -181,7 +181,7 @@ GstcStatus gstc_client_ping(GstClient *client);
  * @threshold: the debug level takes a keyword and the debug level in the argument
  * recieving 0 as a level is equivalent to disabling debug
  * @colors: if non-zero ANSI color control escape sequences will be included in the debug output
- * @reset: if non-zero the debug threshold will be cleared each time, otherwise threshold 
+ * @reset: if non-zero the debug threshold will be cleared each time, otherwise threshold
  * is appended to previous threshold.
  *
  * Controls amount of GStreamer Daemon debug logging.  Typically the GStreamer Daemon debug log output is directed to the system log file.
@@ -398,7 +398,7 @@ GstcStatus gstc_element_get (GstClient *client, const char *pname,
  */
 GstcStatus gstc_element_set(GstClient *client, const char *pname,
     const char *element, const char *parameter, const char *format, ...);
-    
+
 /**
  * gstc_element_properties_list:
  * @client: The client returned by gstc_client_new()
@@ -530,7 +530,7 @@ GstcStatus gstc_pipeline_list_elements(GstClient *client, const char *pipeline_n
  * @timeout: The amount of nanoseconds to wait for the event, or -1
  * for unlimited
  * @user_data: (allow none): A placeholder for custom data
- * 
+ *
  * The callback signature of the function to be registered in
  * gst_pipeline_bus_wait_async().
  *
@@ -551,7 +551,7 @@ typedef GstcStatus
  * @callback: The function to be called when the message (or timeout)
  * is received on the bus.
  * @user_data: (allow none): A placeholder for custom data
- * 
+ *
  * Register a callback function to be called when a specific message
  * is received on the bus or a timeout ocurred.
  *
@@ -570,7 +570,7 @@ gstc_pipeline_bus_wait_async (GstClient *client,
  * @message_name: The type of message to receive
  * @timeout: The amount of nanoseconds to wait for the event, or -1
  * for unlimited
- * 
+ *
  * Block until a message of type @message_name is received in the bus
  * or a timeout occurs.
  *
@@ -670,9 +670,9 @@ GstcStatus gstc_pipeline_emit_action (GstClient *client,
  * gstc_enable_stats:
  * @client: The client returned by gstc_client_new()
  * @enable: If nonzero, then stats are enabled, if zero stats are disabled
- * 
+ *
  * Enables or disables stats collection in the daemon
- * 
+ *
  * Returns: GstcStatus indicating success, daemon unreachable, daemon
  * timeout
  */
@@ -683,13 +683,24 @@ GstcStatus gstc_enable_stats (GstClient *client, const int enable);
  * @client: The client returned by gstc_client_new()
  * @response: Pointer to output string memory representing a stats value,
  * this memory should be freed by the user.
- * 
+ *
  * Attempts to get a stats value from gstd
- * 
+ *
  * Returns: GstcStatus indicating success, daemon unreachable, daemon
  * timeout
  */
 GstcStatus gstc_get_stats (GstClient *client, char **response);
+
+/**
+ * gstc_reset_stats:
+ * @client: The client returned by gstc_client_new()
+ *
+ * Resets the stats state of the current gstd session
+ *
+ * Returns: GstcStatus indicating success, daemon unreachable, daemon
+ * timeout
+ */
+GstcStatus gstc_reset_stats (GstClient *client);
 
 #ifdef __cplusplus
 }

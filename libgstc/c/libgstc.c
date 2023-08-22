@@ -76,7 +76,8 @@
 #define PIPELINE_SIGNAL_DISCONNECT_FORMAT    "/pipelines/%s/elements/%s/signals/%s/disconnect"
 
 #define STATS_ENABLE_FORMAT "stats_enable %s"
-#define STATS_GET_FORMAT "stats_get"
+#define STATS_GET_FORMAT    "stats_get"
+#define STATS_RESET_FORMAT    "stats_reset"
 #define SEEK_FORMAT        "seek %f %d %d %d %lld %d %lld"
 #define FLUSH_STOP_FORMAT  "flush_stop %s"
 #define TIMEOUT_FORMAT  "%lli"
@@ -1268,6 +1269,18 @@ gstc_get_stats (GstClient * client, char **response)
   ret =
       gstc_cmd_send_get_response (client, STATS_GET_FORMAT, response,
       client->timeout);
+
+  return ret;
+}
+
+GstcStatus
+gstc_reset_stats (GstClient * client)
+{
+  GstcStatus ret;
+
+  gstc_assert_and_ret_val (NULL != client, GSTC_NULL_ARGUMENT);
+
+  ret = gstc_cmd_send (client, STATS_RESET_FORMAT);
 
   return ret;
 }
