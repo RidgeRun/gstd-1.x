@@ -105,6 +105,8 @@ static GstdReturnCode gstd_parser_stats_enable (GstdSession *, gchar *,
     gchar *, gchar **);
 static GstdReturnCode gstd_parser_stats_get (GstdSession *, gchar *,
     gchar *, gchar **);
+static GstdReturnCode gstd_parser_stats_reset (GstdSession *, gchar *,
+    gchar *, gchar **);
 static GstdReturnCode gstd_parser_pipeline_create_ref (GstdSession *, gchar *,
     gchar *, gchar **);
 static GstdReturnCode gstd_parser_pipeline_delete_ref (GstdSession *, gchar *,
@@ -165,6 +167,7 @@ static GstdCmd cmds[] = {
 
   {"stats_enable", gstd_parser_stats_enable},
   {"stats_get", gstd_parser_stats_get},
+  {"stats_reset", gstd_parser_stats_reset},
 
   {"pipeline_create_ref", gstd_parser_pipeline_create_ref},
   {"pipeline_delete_ref", gstd_parser_pipeline_delete_ref},
@@ -908,6 +911,22 @@ gstd_parser_stats_get (GstdSession * session, gchar * action, gchar * args,
   g_return_val_if_fail (GSTD_IS_SESSION (session), GSTD_NULL_ARGUMENT);
 
   uri = g_strdup_printf ("/stats/stats");
+  ret = gstd_parser_parse_raw_cmd (session, (gchar *) "read", uri, response);
+  g_free (uri);
+
+  return ret;
+}
+
+static GstdReturnCode
+gstd_parser_stats_reset (GstdSession * session, gchar * action, gchar * args,
+    gchar ** response)
+{
+  GstdReturnCode ret;
+  gchar *uri;
+
+  g_return_val_if_fail (GSTD_IS_SESSION (session), GSTD_NULL_ARGUMENT);
+
+  uri = g_strdup_printf ("/stats/reset");
   ret = gstd_parser_parse_raw_cmd (session, (gchar *) "read", uri, response);
   g_free (uri);
 

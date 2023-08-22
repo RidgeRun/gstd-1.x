@@ -1,7 +1,7 @@
 /*
  * This file is part of GStreamer Daemon
  * Based on GStreamer gst-stats application
- * 
+ *
  * Copyright 2015-2023 RidgeRun, LLC (http://www.ridgerun.com)
  *
  * This library is free software; you can redistribute it and/or
@@ -38,11 +38,13 @@ enum
 {
   PROP_ENABLE = 1,
   PROP_STATS,
+  PROP_RESET,
   N_PROPERTIES
 };
 
 #define PROP_ENABLE_DEFAULT FALSE
 #define PROP_STATS_DEFAULT NULL
+#define PROP_RESET_DEFAULT NULL
 
 struct _GstdStats
 {
@@ -177,6 +179,7 @@ static gchar *gstd_stats_get_json (GstdStats * self);
 static void gstd_stats_log_monitor (GstDebugCategory * category,
     GstDebugLevel level, const gchar * file, const gchar * function, gint line,
     GObject * object, GstDebugMessage * message, gpointer user_data);
+static void gstd_stats_reset (GstdStats * self);
 
 static void free_element_stats (gpointer data);
 static void free_pad_stats (gpointer data);
@@ -206,6 +209,12 @@ gstd_stats_class_init (GstdStatsClass * klass)
       "Stats",
       "Current stats collected",
       PROP_STATS_DEFAULT, G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
+
+  properties[PROP_RESET] =
+      g_param_spec_string ("reset",
+      "Reset",
+      "Reset inner state",
+      PROP_RESET_DEFAULT, G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
   g_object_class_install_properties (oclass, N_PROPERTIES, properties);
 
@@ -306,6 +315,10 @@ gstd_stats_get_property (GObject * object,
       self->stats = gstd_stats_get_json (self);
       GST_DEBUG_OBJECT (self, "Returning current stats %s", self->stats);
       g_value_set_string (value, self->stats);
+      break;
+    case PROP_RESET:
+      GST_DEBUG_OBJECT (self, "Reseting stats");
+      gstd_stats_reset (self);
       break;
     default:
       /* We don't have any other property... */
@@ -1161,6 +1174,69 @@ gstd_stats_log_monitor (GstDebugCategory * category, GstDebugLevel level,
       gstd_stats_collect_stats (self, message);
     }
   }
+}
+
+static void
+gstd_stats_reset (GstdStats * self)
+{
+  g_return_if_fail (self);
+
+  if (self->stats) {
+    g_free (self->stats);
+  }
+
+  self->stats = PROP_STATS_DEFAULT;
+
+  if (self->pads)
+    g_ptr_array_free (self->pads, TRUE);
+  if (self->elements)
+    g_ptr_array_free (self->elements, TRUE);
+  if (self->threads) {
+    g_hash_table_destroy (self->threads);
+  }
+
+  self->threads = g_hash_table_new_full (NULL, NULL, NULL, free_thread_stats);
+  self->elements = g_ptr_array_new_with_free_func (free_element_stats);
+  self->pads = g_ptr_array_new_with_free_func (free_pad_stats);
+
+  if (self->latencies) {
+    g_hash_table_remove_all (self->latencies);
+    g_hash_table_destroy (self->latencies);
+    self->latencies = NULL;
+  }
+  if (self->element_latencies) {
+    g_hash_table_remove_all (self->element_latencies);
+    g_hash_table_destroy (self->element_latencies);
+    self->element_latencies = NULL;
+  }
+  if (self->element_reported_latencies) {
+    g_queue_free_full (self->element_reported_latencies, free_reported_latency);
+    self->element_reported_latencies = NULL;
+  }
+
+  self->latencies =
+      g_hash_table_new_full (g_str_hash, g_str_equal, g_free,
+      free_latency_stats);
+  self->element_latencies =
+      g_hash_table_new_full (g_str_hash, g_str_equal, g_free,
+      free_latency_stats);
+  self->element_reported_latencies = g_queue_new ();
+
+  self->num_buffers = 0;
+  self->num_events = 0;
+  self->num_messages = 0;
+  self->num_queries = 0;
+  self->num_elements = 0;
+  self->num_bins = 0;
+  self->num_pads = 0;
+  self->num_ghostpads = 0;
+  self->last_ts = G_GUINT64_CONSTANT (0);
+  self->total_cpuload = 0;
+  self->have_cpuload = FALSE;
+
+  self->have_latency = FALSE;
+  self->have_element_latency = FALSE;
+  self->have_element_reported_latency = FALSE;
 }
 
 /* Free methods */

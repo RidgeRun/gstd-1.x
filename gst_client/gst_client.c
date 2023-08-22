@@ -211,6 +211,10 @@ static GstdClientCmd cmds[] = {
         "Gets stats collected",
       "stats_get"},
 
+  {"stats_reset", gstd_client_cmd_socket,
+        "Resets stats inner state",
+      "stats_reset"},
+
   {NULL}
 };
 
