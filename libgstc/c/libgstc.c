@@ -75,6 +75,9 @@
 #define PIPELINE_SIGNAL_TIMEOUT_FORMAT       "/pipelines/%s/elements/%s/signals/%s/timeout"
 #define PIPELINE_SIGNAL_DISCONNECT_FORMAT    "/pipelines/%s/elements/%s/signals/%s/disconnect"
 
+#define STATS_ENABLE_FORMAT "stats_enable %s"
+#define STATS_GET_FORMAT    "stats_get"
+#define STATS_RESET_FORMAT    "stats_reset"
 #define SEEK_FORMAT        "seek %f %d %d %d %lld %d %lld"
 #define FLUSH_STOP_FORMAT  "flush_stop %s"
 #define TIMEOUT_FORMAT  "%lli"
@@ -1231,4 +1234,53 @@ gstc_pipeline_signal_disconnect (GstClient * client, const char *pipeline_name,
 
   return ret;
 
+}
+
+GstcStatus
+gstc_enable_stats (GstClient * client, const int enable)
+{
+  GstcStatus ret;
+  char *request;
+  int asprintf_ret;
+  const char *enable_bool;
+
+  gstc_assert_and_ret_val (NULL != client, GSTC_NULL_ARGUMENT);
+
+  enable_bool = enable == 0 ? "false" : "true";
+  asprintf_ret = asprintf (&request, STATS_ENABLE_FORMAT, enable_bool);
+  if (PRINTF_ERROR == asprintf_ret) {
+    return GSTC_OOM;
+  }
+  ret = gstc_cmd_send (client, request);
+
+  free (request);
+
+  return ret;
+}
+
+GstcStatus
+gstc_get_stats (GstClient * client, char **response)
+{
+  GstcStatus ret;
+
+  gstc_assert_and_ret_val (NULL != client, GSTC_NULL_ARGUMENT);
+  gstc_assert_and_ret_val (NULL != response, GSTC_NULL_ARGUMENT);
+
+  ret =
+      gstc_cmd_send_get_response (client, STATS_GET_FORMAT, response,
+      client->timeout);
+
+  return ret;
+}
+
+GstcStatus
+gstc_reset_stats (GstClient * client)
+{
+  GstcStatus ret;
+
+  gstc_assert_and_ret_val (NULL != client, GSTC_NULL_ARGUMENT);
+
+  ret = gstc_cmd_send (client, STATS_RESET_FORMAT);
+
+  return ret;
 }

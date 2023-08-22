@@ -43,6 +43,7 @@ enum
   PROP_PIPELINES = 1,
   PROP_PID,
   PROP_DEBUG,
+  PROP_STATS,
   N_PROPERTIES                  // NOT A PROPERTY
 };
 
@@ -120,6 +121,12 @@ gstd_session_class_init (GstdSessionClass * klass)
       "The debug object containing debug information",
       GSTD_TYPE_DEBUG, G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
+  properties[PROP_STATS] =
+      g_param_spec_object ("stats",
+      "Stats",
+      "The stats object containing tracers information",
+      GSTD_TYPE_STATS, G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
   g_object_class_install_properties (object_class, N_PROPERTIES, properties);
 
   /* Initialize debug category with nice colors */
@@ -154,6 +161,9 @@ gstd_session_init (GstdSession * self)
   self->debug =
       GSTD_DEBUG (g_object_new (GSTD_TYPE_DEBUG, "name", "Debug", NULL));
 
+  self->stats =
+      GSTD_STATS (g_object_new (GSTD_TYPE_STATS, "name", "Stats", NULL));
+
   self->pid = (GPid) getpid ();
 }
 
@@ -176,7 +186,10 @@ gstd_session_get_property (GObject * object,
       GST_DEBUG_OBJECT (self, "Returning debug object %p", self->debug);
       g_value_set_object (value, self->debug);
       break;
-
+    case PROP_STATS:
+      GST_DEBUG_OBJECT (self, "Returning stats object %p", self->stats);
+      g_value_set_object (value, self->stats);
+      break;
     default:
       /* We don't have any other property... */
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -199,7 +212,10 @@ gstd_session_set_property (GObject * object,
       self->debug = g_value_dup_object (value);
       GST_DEBUG_OBJECT (self, "Changing debug object to %p", self->debug);
       break;
-
+    case PROP_STATS:
+      self->stats = g_value_dup_object (value);
+      GST_DEBUG_OBJECT (self, "Changing stats object to %p", self->stats);
+      break;
     default:
       /* We don't have any other property... */
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -222,6 +238,11 @@ gstd_session_dispose (GObject * object)
   if (self->debug) {
     g_object_unref (self->debug);
     self->debug = NULL;
+  }
+
+  if (self->stats) {
+    g_object_unref (self->stats);
+    self->stats = NULL;
   }
 
   G_OBJECT_CLASS (gstd_session_parent_class)->dispose (object);
