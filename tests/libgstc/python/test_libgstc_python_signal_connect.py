@@ -38,18 +38,18 @@ from pygstc.logger import *
 
 class TestGstcSignalConnectMethods(GstdTestRunner):
 
-    def test_libgstc_python_signal_connect(self):
+    async def test_libgstc_python_signal_connect(self):
         pipeline = \
             'videotestsrc ! identity signal-handoffs=true name=identity ! fakesink'
         self.gstd_logger = CustomLogger('test_libgstc', loglevel='DEBUG')
         self.gstd_client = GstdClient(port=self.port, logger=self.gstd_logger)
-        self.gstd_client.pipeline_create('p0', pipeline)
-        self.gstd_client.pipeline_play('p0')
-        ret = self.gstd_client.signal_connect('p0', 'identity',
+        await self.gstd_client.pipeline_create('p0', pipeline)
+        await self.gstd_client.pipeline_play('p0')
+        ret = await self.gstd_client.signal_connect('p0', 'identity',
                                               'handoff')
         self.assertEqual(ret['name'], 'handoff')
-        self.gstd_client.pipeline_stop('p0')
-        self.gstd_client.pipeline_delete('p0')
+        await self.gstd_client.pipeline_stop('p0')
+        await self.gstd_client.pipeline_delete('p0')
 
 
 if __name__ == '__main__':

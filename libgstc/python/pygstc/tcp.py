@@ -28,9 +28,9 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
 # OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import json
-import select
+import asyncio
 import socket
+from contextlib import asynccontextmanager
 
 """
 GstClient - Ipc Class
@@ -54,7 +54,7 @@ class Ipc:
         ip,
         port,
         maxsize=None,
-        terminator='\x00'.encode('utf-8'),
+        terminator=b'\x00',
     ):
         """
         Initialize new Ipc
@@ -81,7 +81,23 @@ class Ipc:
         self._maxsize = maxsize
         self._terminator = terminator
 
-    def send(self, line, timeout=None):
+    @asynccontextmanager
+    async def gstd_conn(self):
+        kwargs = {
+            'host': self._ip,
+            'port': self._port
+        }
+        if self._maxsize is not None:
+            kwargs['limit'] = self._maxsize
+        reader, writer = await asyncio.open_connection(**kwargs)
+        try:
+            yield reader, writer
+        finally:
+            if not writer.is_closing():
+                writer.close()
+            await writer.wait_closed()
+
+    async def send(self, line, timeout=None):
         """
         Create a socket and sends a message through it
 
@@ -103,87 +119,29 @@ class Ipc:
         data : string
             Decoded JSON string with the response
         """
-        data = None
         self._logger.debug('GSTD socket sending line: {}'.format(line))
         try:
-            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-            s.connect((self._ip, self._port))
-            s.sendall(' '.join(line).encode('utf-8'))
-            data = self._recvall(s, timeout)
-            if not data:
-                raise socket.error("Socket read error happened")
-            data = data.decode('utf-8')
-            s.close()
-            return data
-
+            async with self.gstd_conn() as (reader, writer):
+                writer.write(' '.join(line).encode('utf-8'))
+                await writer.drain()
+                fut = reader.readuntil(separator=self._terminator)
+                data = await asyncio.wait_for(fut, timeout=timeout)
+                if not data:
+                    raise socket.error("Socket read error happened")
+                data = data[:-1].decode('utf-8')
+                return data
         except BufferError as e:
-            s.close()
             error_msg = 'Server response too long'
             self._logger.error(error_msg)
             raise BufferError(error_msg)\
                 from e
         except TimeoutError as e:
-            s.close()
             error_msg = 'Server took too long to respond'
             self._logger.error(error_msg)
             raise TimeoutError(error_msg)\
                 from e
         except socket.error as e:
-            s.close()
             error_msg = 'Server did not respond. Is it up?'
             self._logger.error(error_msg)
             raise ConnectionRefusedError(error_msg)\
                 from e
-
-    def _recvall(self, sock, timeout):
-        """
-        Wait for a response message from the socket
-
-        Parameters
-        ----------
-        sock : string
-            The socket to poll
-        timeout : float
-            Timeout in seconds to wait for a response. 0: non-blocking, None: blocking
-
-        Raises
-        ------
-        socket.error
-            Error is triggered when Gstd IPC fails
-        BufferError
-            When the incoming buffer is too big.
-
-        Returns
-        -------
-        buf : string
-            Raw socket response
-        """
-        buf = b''
-        newbuf = ''
-        try:
-            sock.settimeout(timeout)
-        except socket.error as e:
-            raise TimeoutError from e
-
-        while True:
-            if (self._maxsize and self._maxsize > len(newbuf)):
-                raise BufferError
-
-            try:
-                newbuf = sock.recv(self._socket_read_size)
-                # Raise an exception timeout
-            except socket.error as e:
-                raise TimeoutError from e
-
-            # When a connection dies, the socket does not close properly and it
-            # returns immediately with an empty string. So, check that first.
-            if len(newbuf) == 0:
-                break
-
-            if self._terminator in newbuf:
-                buf += newbuf[:newbuf.find(self._terminator)]
-                break
-            else:
-                buf += newbuf
-        return buf
