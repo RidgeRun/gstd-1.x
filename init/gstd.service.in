@@ -6,7 +6,7 @@ StartLimitIntervalSec=30
 [Service]
 Restart=on-failure
 RestartSec=5s
-ExecStartPre=@GSTD_SYSTEMD_DIR@/gstd-check-user-xenv.sh
+ExecStartPre=-@GSTD_SYSTEMD_DIR@/gstd-check-user-xenv.sh
 ExecStart=@prefix@/bin/gstd
 
 [Install]
