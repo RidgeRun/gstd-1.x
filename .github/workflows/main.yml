@@ -32,7 +32,7 @@ jobs:
         sudo apt update
         sudo apt install automake libtool pkg-config libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev
         sudo apt install libglib2.0-dev libjson-glib-dev gtk-doc-tools libedit-dev libncursesw5-dev
-        sudo apt install libdaemon-dev libjansson-dev python3-pip python3-setuptools libsoup2.4-dev
+        sudo apt install libdaemon-dev libjansson-dev python3-pip python3-setuptools libsoup-3.0-dev
     - name: Generate
       run: ./autogen.sh
     - name: Configure
@@ -72,7 +72,7 @@ jobs:
         sudo apt update
         sudo apt install automake libtool pkg-config libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev
         sudo apt install libglib2.0-dev libjson-glib-dev gtk-doc-tools libedit-dev libncursesw5-dev
-        sudo apt install libdaemon-dev libjansson-dev python3-pip python3-setuptools libsoup2.4-dev
+        sudo apt install libdaemon-dev libjansson-dev python3-pip python3-setuptools libsoup-3.0-dev
         sudo apt install ninja-build python3-wheel
         sudo pip3 install meson
 
