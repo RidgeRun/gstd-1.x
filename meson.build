@@ -27,7 +27,7 @@ json_glib_dep = dependency('json-glib-1.0',      version : '>=0.16.2')
 libd_dep      = dependency('libdaemon',          version : '>=0.14')
 jansson_dep   = dependency('jansson',            version : '>=2.7')
 thread_dep    = dependency('threads')
-libsoup_dep   = dependency('libsoup-2.4',        version : '>=2.4')
+libsoup_dep   = dependency('libsoup-3.0',        version : '>=2.99')
 libedit_dep   = dependency('libedit',            version : '>=3.0')
 
 gst_check_required = get_option('enable-tests').enabled()
