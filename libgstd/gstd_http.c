@@ -26,6 +26,7 @@
 #include <string.h>
 #include <gst/gst.h>
 #include <libsoup/soup.h>
+#include <json-glib/json-glib.h>
 
 #include "gstd_http.h"
 #include "gstd_parser.h"
@@ -83,6 +84,7 @@ static GstdReturnCode do_put (SoupServer * server, SoupMessage * msg,
 static GstdReturnCode do_delete (SoupServer * server, SoupMessage * msg,
     char *name, char **output, const char *path, GstdSession * session);
 static void do_request (gpointer data_request, gpointer eval);
+static void parse_json_body (SoupMessage *msg, gchar **out_name, gchar **out_desc);
 static void server_callback (SoupServer * server, SoupMessage * msg,
     const char *path, GHashTable * query, SoupClientContext * context,
     gpointer data);
@@ -311,9 +313,13 @@ do_request (gpointer data_request, gpointer eval)
   path = data_request_local->path;
   query = data_request_local->query;
 
-  if (query != NULL) {
-    name = g_hash_table_lookup (query, "name");
-    description_pipe = g_hash_table_lookup (query, "description");
+  parse_json_body (msg, &name, &description_pipe);
+
+  if (!name && query) {
+    name = g_strdup (g_hash_table_lookup (query, "name"));
+  }
+  if (!description_pipe && query) {
+    description_pipe = g_strdup (g_hash_table_lookup (query, "description"));
   }
 
   if (msg->method == SOUP_METHOD_GET) {
@@ -327,6 +333,10 @@ do_request (gpointer data_request, gpointer eval)
   } else if (msg->method == SOUP_METHOD_OPTIONS) {
     ret = GSTD_EOK;
   }
+  g_free (name);
+  g_free (description_pipe);
+  name = NULL;
+  description_pipe = NULL;
 
   description = gstd_return_code_to_string (ret);
   response =
@@ -354,6 +364,56 @@ do_request (gpointer data_request, gpointer eval)
   data_request = NULL;
 
   return;
+}
+
+static void
+parse_json_body (SoupMessage *msg, gchar **out_name, gchar **out_desc)
+{
+  const char *content_type = NULL;
+  JsonParser *parser = NULL;
+  JsonNode *root = NULL;
+  GError *err = NULL;
+
+  g_return_if_fail (msg);
+  g_return_if_fail (out_name);
+  g_return_if_fail (out_desc);
+
+  *out_name = NULL;
+  *out_desc = NULL;
+
+  soup_message_body_flatten (msg->request_body);
+  if (!msg->request_body || msg->request_body->length == 0) {
+    return;
+  }
+
+  content_type = soup_message_headers_get_content_type (msg->request_headers, NULL);
+  if (!content_type || !g_str_has_prefix (content_type, "application/json")) {
+    return;
+  }
+
+  parser = json_parser_new ();
+  if (!json_parser_load_from_data (parser,
+                                   msg->request_body->data,
+                                   msg->request_body->length,
+                                   &err)) {
+    g_clear_error (&err);
+    g_object_unref (parser);
+    return;
+  }
+
+  root = json_parser_get_root (parser);
+  if (JSON_NODE_HOLDS_OBJECT (root)) {
+    JsonObject *obj = json_node_get_object (root);
+    if (json_object_has_member (obj, "name")) {
+      const char *value = json_object_get_string_member (obj, "name");
+      if (value) *out_name = g_strdup (value);
+    }
+    if (json_object_has_member (obj, "description")) {
+      const char *value = json_object_get_string_member (obj, "description");
+      if (value) *out_desc = g_strdup (value);
+    }
+  }
+  g_object_unref (parser);
 }
 
 static void

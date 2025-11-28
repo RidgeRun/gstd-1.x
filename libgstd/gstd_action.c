@@ -208,7 +208,9 @@ gstd_action_create_default (GstdObject * object, const gchar * name,
   GstdAction *action = NULL;
   GSignalQuery query;
   guint action_id;
-  gint ret_sig = 0;
+  GValue ret_sig = G_VALUE_INIT;
+  GValue *args = NULL;
+  gchar **arg_list = NULL;
 
   GST_INFO_OBJECT (action, "Action create");
 
@@ -222,19 +224,62 @@ gstd_action_create_default (GstdObject * object, const gchar * name,
       G_OBJECT_TYPE (action->target));
   g_signal_query (action_id, &query);
 
-  if (query.n_params > 0) {
-    GST_ERROR_OBJECT (action, "Only actions with no parameters are supported");
-    ret = GSTD_BAD_VALUE;
-    goto out;
+  if (query.n_params > 0 && (!description || g_strcmp0(description, "(null)") == 0 || g_strcmp0(description, "") == 0)) {
+    return GSTD_NULL_ARGUMENT;
+  } else if (description) {
+    arg_list = g_strsplit (description, " ", query.n_params);
   }
 
-  GST_INFO_OBJECT (action, "Emit to %s", GST_OBJECT_NAME (action->target));
-  g_signal_emit_by_name (action->target, name, &ret_sig);
+  if (g_strv_length (arg_list) != query.n_params) {
+    return GSTD_NULL_ARGUMENT;
+  }
 
-  if (ret_sig != 0) {
-    ret = GSTD_BAD_VALUE;
+  /* One additional value to store the instance as first value */
+  args = g_new0 (GValue, query.n_params + 1);
+
+  g_value_init (&args[0], G_TYPE_OBJECT);
+  g_value_set_object (&args[0], action->target);
+
+  for (guint i = 0; i < query.n_params; i++) {
+    g_value_init (&args[i + 1], query.param_types[i]);
+
+    if (query.param_types[i] == G_TYPE_STRING) {
+      g_value_set_string (&args[i + 1], arg_list[i]);
+    } else if (query.param_types[i] == G_TYPE_INT) {
+      g_value_set_int (&args[i + 1], g_ascii_strtoll (arg_list[i], NULL, 10));
+    } else if (query.param_types[i] == G_TYPE_UINT) {
+      g_value_set_uint (&args[i + 1], (guint) g_ascii_strtoull (arg_list[i], NULL, 10));
+    } else if (query.param_types[i] == G_TYPE_UINT64) {
+      g_value_set_uint64 (&args[i + 1], (guint64) g_ascii_strtoull (arg_list[i],
+              NULL, 10));
+    } else if (query.param_types[i] == G_TYPE_BOOLEAN) {
+      g_value_set_boolean (&args[i + 1], g_ascii_strcasecmp (arg_list[i], "true") == 0);
+    } else if (query.param_types[i] == G_TYPE_FLOAT) {
+      g_value_set_float (&args[i + 1], g_ascii_strtod (arg_list[i], NULL));
+    } else if (query.param_types[i] == G_TYPE_DOUBLE) {
+      g_value_set_double (&args[i + 1], g_ascii_strtod (arg_list[i], NULL));
+    } else {
+      ret = GSTD_BAD_COMMAND;
+      goto out;
+    }
+  }
+
+  if (query.return_type != G_TYPE_NONE) {
+    g_value_init(&ret_sig, query.return_type);
+    g_signal_emitv (args, action_id, 0, &ret_sig);
+
+    /* The return value is not required */
+
+    g_value_unset(&ret_sig);
+  } else {
+    g_signal_emitv (args, action_id, 0, NULL);
   }
 
 out:
+  for (guint i = 0; i <= query.n_params; i++)
+    g_value_unset (&args[i]);
+  g_free (args);
+  g_strfreev (arg_list);
+
   return ret;
 }
