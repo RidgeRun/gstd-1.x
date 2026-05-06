@@ -36,10 +36,16 @@ GST_DEBUG_CATEGORY_STATIC (gstd_http_debug);
 
 #define GSTD_DEBUG_DEFAULT_LEVEL GST_LEVEL_INFO
 
+#if SOUP_CHECK_VERSION(3,0,0)
+typedef SoupServerMessage SoupMsg;
+#else
+typedef SoupMessage SoupMsg;
+#endif
+
 typedef struct _GstdHttpRequest
 {
   SoupServer *server;
-  SoupMessage *msg;
+  SoupMsg *msg;
   GstdSession *session;
   const char *path;
   GHashTable *query;
@@ -73,19 +79,27 @@ static GstdReturnCode gstd_http_stop (GstdIpc * base);
 static gboolean gstd_http_init_get_option_group (GstdIpc * base,
     GOptionGroup ** group);
 static SoupStatus get_status_code (GstdReturnCode ret);
-static GstdReturnCode do_get (SoupServer * server, SoupMessage * msg,
+static GstdReturnCode do_get (SoupServer * server, SoupMsg * msg,
     char **output, const char *path, GstdSession * session);
-static GstdReturnCode do_post (SoupServer * server, SoupMessage * msg,
+static GstdReturnCode do_post (SoupServer * server, SoupMsg * msg,
     char *name, char *description, char **output, const char *path,
     GstdSession * session);
-static GstdReturnCode do_put (SoupServer * server, SoupMessage * msg,
+static GstdReturnCode do_put (SoupServer * server, SoupMsg * msg,
     char *name, char **output, const char *path, GstdSession * session);
-static GstdReturnCode do_delete (SoupServer * server, SoupMessage * msg,
+static GstdReturnCode do_delete (SoupServer * server, SoupMsg * msg,
     char *name, char **output, const char *path, GstdSession * session);
 static void do_request (gpointer data_request, gpointer eval);
-static void server_callback (SoupServer * server, SoupMessage * msg,
+
+#if SOUP_CHECK_VERSION(3,0,0)
+/* libsoup3: no context argument for server_callback */
+static void server_callback (SoupServer * server, SoupMsg * msg,
+    const char *path, GHashTable * query, gpointer data);
+#else
+/* libsoup2.4: include context argument for server_callback */
+static void server_callback (SoupServer * server, SoupMsg * msg,
     const char *path, GHashTable * query, SoupClientContext * context,
     gpointer data);
+#endif
 
 static void
 gstd_http_class_init (GstdHttpClass * klass)
@@ -168,7 +182,7 @@ get_status_code (GstdReturnCode ret)
 }
 
 static GstdReturnCode
-do_get (SoupServer * server, SoupMessage * msg, char **output, const char *path,
+do_get (SoupServer * server, SoupMsg * msg, char **output, const char *path,
     GstdSession * session)
 {
   gchar *message = NULL;
@@ -189,7 +203,7 @@ do_get (SoupServer * server, SoupMessage * msg, char **output, const char *path,
 }
 
 static GstdReturnCode
-do_post (SoupServer * server, SoupMessage * msg, char *name,
+do_post (SoupServer * server, SoupMsg * msg, char *name,
     char *description, char **output, const char *path, GstdSession * session)
 {
   gchar *message = NULL;
@@ -224,7 +238,7 @@ out:
 }
 
 static GstdReturnCode
-do_put (SoupServer * server, SoupMessage * msg, char *name, char **output,
+do_put (SoupServer * server, SoupMsg * msg, char *name, char **output,
     const char *path, GstdSession * session)
 {
   gchar *message = NULL;
@@ -254,7 +268,7 @@ out:
 }
 
 static GstdReturnCode
-do_delete (SoupServer * server, SoupMessage * msg, char *name,
+do_delete (SoupServer * server, SoupMsg * msg, char *name,
     char **output, const char *path, GstdSession * session)
 {
   gchar *message = NULL;
@@ -294,11 +308,12 @@ do_request (gpointer data_request, gpointer eval)
   const gchar *description = NULL;
   SoupStatus status = SOUP_STATUS_OK;
   SoupServer *server = NULL;
-  SoupMessage *msg = NULL;
+  SoupMsg *msg = NULL;
   GstdSession *session = NULL;
   const char *path = NULL;
   GHashTable *query = NULL;
   GstdHttpRequest *data_request_local = NULL;
+  const char *method;
 
   g_return_if_fail (data_request);
 
@@ -315,16 +330,20 @@ do_request (gpointer data_request, gpointer eval)
     name = g_hash_table_lookup (query, "name");
     description_pipe = g_hash_table_lookup (query, "description");
   }
-
-  if (msg->method == SOUP_METHOD_GET) {
+#if SOUP_CHECK_VERSION(3,0,0)
+  method = soup_server_message_get_method (msg);
+#else
+  method = msg->method;
+#endif
+  if (method == SOUP_METHOD_GET) {
     ret = do_get (server, msg, &output, path, session);
-  } else if (msg->method == SOUP_METHOD_POST) {
+  } else if (method == SOUP_METHOD_POST) {
     ret = do_post (server, msg, name, description_pipe, &output, path, session);
-  } else if (msg->method == SOUP_METHOD_PUT) {
+  } else if (method == SOUP_METHOD_PUT) {
     ret = do_put (server, msg, name, &output, path, session);
-  } else if (msg->method == SOUP_METHOD_DELETE) {
+  } else if (method == SOUP_METHOD_DELETE) {
     ret = do_delete (server, msg, name, &output, path, session);
-  } else if (msg->method == SOUP_METHOD_OPTIONS) {
+  } else if (method == SOUP_METHOD_OPTIONS) {
     ret = GSTD_EOK;
   }
 
@@ -336,15 +355,31 @@ do_request (gpointer data_request, gpointer eval)
   g_free (output);
   output = NULL;
 
+#if SOUP_CHECK_VERSION(3,0,0)
+  soup_server_message_set_response (msg, "application/json", SOUP_MEMORY_COPY,
+      response, strlen (response));
+#else
   soup_message_set_response (msg, "application/json", SOUP_MEMORY_COPY,
       response, strlen (response));
+#endif
   g_free (response);
   response = NULL;
 
   status = get_status_code (ret);
+
+#if SOUP_CHECK_VERSION(3,0,0)
+  soup_server_message_set_status (msg, status, NULL);
+#else
   soup_message_set_status (msg, status);
+#endif
+
   g_mutex_lock (data_request_local->mutex);
+
+#if SOUP_CHECK_VERSION(3,2,0)
+  soup_server_message_unpause (msg);
+#else
   soup_server_unpause_message (server, msg);
+#endif
   g_mutex_unlock (data_request_local->mutex);
 
   if (query != NULL) {
@@ -356,14 +391,23 @@ do_request (gpointer data_request, gpointer eval)
   return;
 }
 
+#if SOUP_CHECK_VERSION(3,0,0)
+/* libsoup3: no context argument for server_callback */
 static void
-server_callback (SoupServer * server, SoupMessage * msg,
-    const char *path, GHashTable * query,
-    SoupClientContext * context, gpointer data)
+server_callback (SoupServer * server, SoupMsg * msg,
+    const char *path, GHashTable * query, gpointer data)
+#else
+/* libsoup2.4: include context argument for server_callback */
+static void
+server_callback (SoupServer * server, SoupMsg * msg,
+    const char *path, GHashTable * query, SoupClientContext * context,
+    gpointer data)
+#endif
 {
   GstdSession *session = NULL;
   GstdHttp *self = NULL;
   GstdHttpRequest *data_request = NULL;
+  SoupMessageHeaders *response_headers = NULL;
 
   g_return_if_fail (server);
   g_return_if_fail (msg);
@@ -385,14 +429,26 @@ server_callback (SoupServer * server, SoupMessage * msg,
   }
   data_request->mutex = &self->mutex;
 
-  soup_message_headers_append (msg->response_headers,
+
+#if SOUP_CHECK_VERSION(3,0,0)
+/* libsoup3: no context argument for server_callback */
+  response_headers = soup_server_message_get_request_headers (msg);
+#else
+/* libsoup2.4: include context argument for server_callback */
+  response_headers = msg->response_headers;
+#endif
+  soup_message_headers_append (response_headers,
       "Access-Control-Allow-Origin", "*");
-  soup_message_headers_append (msg->response_headers,
+  soup_message_headers_append (response_headers,
       "Access-Control-Allow-Headers", "origin,range,content-type");
-  soup_message_headers_append (msg->response_headers,
+  soup_message_headers_append (response_headers,
       "Access-Control-Allow-Methods", "PUT, GET, POST, DELETE");
   g_mutex_lock (&self->mutex);
+#if SOUP_CHECK_VERSION(3,2,0)
+  soup_server_message_pause (msg);
+#else
   soup_server_pause_message (server, msg);
+#endif
   g_mutex_unlock (&self->mutex);
   if (!g_thread_pool_push (self->pool, (gpointer) data_request, NULL)) {
     GST_ERROR_OBJECT (self->pool, "Thread pool push failed");
@@ -420,7 +476,7 @@ gstd_http_start (GstdIpc * base, GstdSession * session)
   gstd_http_stop (base);
 
   GST_DEBUG_OBJECT (self, "Initializing HTTP server");
-  self->server = soup_server_new (SOUP_SERVER_SERVER_HEADER, "Gstd-1.0", NULL);
+  self->server = soup_server_new ("server-header", "Gstd-1.0", NULL);
   if (!self->server) {
     goto noconnection;
   }

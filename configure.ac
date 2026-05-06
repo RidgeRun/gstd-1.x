@@ -2,10 +2,14 @@ dnl required version of autoconf
 AC_PREREQ([2.53])
 
 dnl Gstreamer's daemon package name and version
-AC_INIT([gstd],[0.15.0])
+AC_INIT([gstd],[0.15.2])
 
 dnl required version of gstreamer and gst-plugins-base
 GST_REQUIRED=1.0.0
+
+dnl required version of libsoup
+LIBSOUP3_REQUIRED=3.0
+LIBSOUP2_REQUIRED=2.4
 
 dnl required version of gio
 GIO_REQUIRED=2.44.1
@@ -85,7 +89,27 @@ PKG_CHECK_MODULES(GST, [
   ])
 ])
 
-PKG_CHECK_MODULES(LIBSOUP, [libsoup-2.4 >= 2.32])
+PKG_CHECK_MODULES([LIBSOUP], [libsoup-3.0 >= 3.0], [
+  AC_DEFINE([HAVE_LIBSOUP3], [1], [Define if libsoup3 exists.])
+  ], [
+  PKG_CHECK_MODULES([LIBSOUP], [libsoup-2.4 >= 2.4], [
+    AC_MSG_WARN(libsoup-2.4 detected: this library will be deprecated in upcoming releases.
+      Consider migrating to libsoup-3.0.)
+    ], [
+      AC_DEFINE([HAVE_LIBSOUP2], [1], [Define if libsoup2 exists.])
+      ], [
+      AC_MSG_ERROR([
+        Can't find any of the following LIBSOUP development packages:
+
+        libsoup-3.0              >= $LIBSOUP3_REQUIRED
+        libsoup-2.4              >= $LIBSOUP2_REQUIRED (to be deprecated in incoming releases)
+
+      Please make sure you have the necessary LIBSOUP3 or LIBSOUP2
+      development headers installed.
+      ])
+  ])
+])
+
 AC_SUBST(LIBSOUP_CFLAGS)
 AC_SUBST(LIBSOUP_LIBS)
 

@@ -1,5 +1,5 @@
 project('gstd', 'c',
-  version : '0.15.0',
+  version : '0.15.2',
   meson_version : '>= 0.50',
   default_options : [
     'c_std=c11',
@@ -27,8 +27,13 @@ json_glib_dep = dependency('json-glib-1.0',      version : '>=0.16.2')
 libd_dep      = dependency('libdaemon',          version : '>=0.14')
 jansson_dep   = dependency('jansson',            version : '>=2.7')
 thread_dep    = dependency('threads')
-libsoup_dep   = dependency('libsoup-2.4',        version : '>=2.4')
 libedit_dep   = dependency('libedit',            version : '>=3.0')
+
+libsoup_dep   = dependency('libsoup-3.0', version : '>=3.0', required: false)
+if not libsoup_dep.found()
+  libsoup_dep   = dependency('libsoup-2.4',        version : '>=2.4')
+  warning('libsoup-2.4 detected; this will be deprecated in upcoming releases. Please migrate to libsoup-3.0.')
+endif
 
 gst_check_required = get_option('enable-tests').enabled()
 gst_check_dep = dependency('gstreamer-check-1.0', required : gst_check_required, version : '>=1.0.5')
@@ -46,55 +51,55 @@ gstd_deps = [
 
 # Define gst client library dependencies
 libgstc_deps = [
-  gst_base_dep, 
-  json_glib_dep, 
-  jansson_dep, 
+  gst_base_dep,
+  json_glib_dep,
+  jansson_dep,
   thread_dep
   ]
 
 # Define gst core library dependencies
 libgstd_deps = [
-  gst_base_dep, 
-  gio_unix_dep, 
-  json_glib_dep, 
-  jansson_dep, 
-  thread_dep, 
+  gst_base_dep,
+  gio_unix_dep,
+  json_glib_dep,
+  jansson_dep,
+  thread_dep,
   libsoup_dep
   ]
 
 # Define gst client application dependencies
 gst_client_deps = [
   libedit_dep,
-  json_glib_dep, 
+  json_glib_dep,
   gio_unix_dep
   ]
 
 # Define test dependencies
 test_libgstc_deps=[
-  gst_base_dep, 
-  json_glib_dep, 
-  jansson_dep, 
-  thread_dep, 
+  gst_base_dep,
+  json_glib_dep,
+  jansson_dep,
+  thread_dep,
   gst_check_dep
   ]
 
 test_gstd_deps=[
-  gst_base_dep, 
-  gio_unix_dep, 
-  json_glib_dep, 
-  libd_dep, 
-  jansson_dep, 
+  gst_base_dep,
+  gio_unix_dep,
+  json_glib_dep,
+  libd_dep,
+  jansson_dep,
   gst_check_dep
   ]
 
 test_libgstd_deps=[
-  gst_base_dep, 
-  gio_unix_dep, 
-  json_glib_dep, 
-  libd_dep, 
-  jansson_dep, 
-  thread_dep, 
-  libsoup_dep, 
+  gst_base_dep,
+  gio_unix_dep,
+  json_glib_dep,
+  libd_dep,
+  jansson_dep,
+  thread_dep,
+  libsoup_dep,
   gst_check_dep
   ]
 

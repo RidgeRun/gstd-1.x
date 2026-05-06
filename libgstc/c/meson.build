@@ -33,7 +33,11 @@ install_headers('libgstc.h')
 pkgconfig.generate(gstc_lib, description : 'GStreamer Client library to control Gstd')
 
 # Define the library as an internal dependency to the current build
-lib_gstc_dep = declare_dependency(link_with: gstc_lib,
-  dependencies : [libgstc_deps])
+lib_gstc_inc = include_directories('.')
+lib_gstc_dep = declare_dependency(
+  link_with: gstc_lib,
+  dependencies : [libgstc_deps],
+  include_directories : [lib_gstc_inc]
+)
 
 lib_gstc_dir = meson.current_source_dir()

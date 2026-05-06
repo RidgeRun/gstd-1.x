@@ -1,96 +1,101 @@
-name: gstd CI
+  name: gstd CI
 
-on:
-  push:
-    branches:
-      - master
-      - develop
-  pull_request:
-    branches:
-      - develop
+  on:
+    push:
+      branches:
+        - master
+        - develop
+    pull_request:
+      branches:
+        - develop
 
-jobs:
-  autotools:
-    strategy:
-      fail-fast: false
-      matrix:
-        os:
-          - ubuntu-18.04
-          - ubuntu-20.04
-        include:
-          - os: ubuntu-22.04
-            remove-unwind: fix-unwind
+  jobs:
+    autotools:
+      strategy:
+        fail-fast: false
+        matrix:
+          ubuntu_version: [ "20.04", "22.04", "24.04" ]
+          include:
+            - ubuntu_version: "20.04"
+              libsoup2: "libsoup2.4-dev"
 
-    runs-on: ${{ matrix.os }}
+      runs-on: ubuntu-24.04
+      container:
+        image: ubuntu:${{ matrix.ubuntu_version }}
 
-    steps:
-    - uses: actions/checkout@v2
-    - if: ${{ matrix.remove-unwind }}
-      run: sudo apt remove libunwind-14-dev
-    - name: Dependecies
-      run: |
-        sudo apt update
-        sudo apt install automake libtool pkg-config libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev
-        sudo apt install libglib2.0-dev libjson-glib-dev gtk-doc-tools libedit-dev libncursesw5-dev
-        sudo apt install libdaemon-dev libjansson-dev python3-pip python3-setuptools libsoup2.4-dev
-    - name: Generate
-      run: ./autogen.sh
-    - name: Configure
-      run: ./configure CFLAGS=-Werror
-    - name: Compile
-      run: make
-    - name: Checks
-      run: make check
-    - name: Install
-      run: sudo make install
-    - name: Check pygstc installation
-      run: python3 -c "import pygstc"
-    - name: List Pipelines Verification
-      run: |
-        gstd -e
-        gstd-client list_pipelines
+      steps:
+      - uses: actions/checkout@v2
+      - name: Dependecies
+        run: |
+          export DEBIAN_FRONTEND=noninteractive
+          apt update
+          apt install -y automake libtool pkg-config libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev
+          apt install -y libglib2.0-dev libjson-glib-dev gtk-doc-tools libedit-dev libncursesw5-dev
+          apt install -y libdaemon-dev libjansson-dev python3-pip python3-setuptools
+          if [ "${{ matrix.libsoup2 }}" ]; then
+            apt install -y libsoup2.4-dev
+          else
+            apt install -y libsoup-3.0-dev
+          fi
+      - name: Generate
+        run: ./autogen.sh
+      - name: Configure
+        run: ./configure CFLAGS=-Werror
+      - name: Compile
+        run: make
+      - name: Checks
+        run: make check
+      - name: Install
+        run: make install
+      - name: Check pygstc installation
+        run: python3 -c "import pygstc"
+      - name: List Pipelines Verification
+        run: |
+          gstd -e
+          gstd-client list_pipelines
 
-  meson:
-    strategy:
-      fail-fast: false
-      matrix:
-        os:
-          - ubuntu-18.04
-          - ubuntu-20.04
-        include:
-          - os: ubuntu-22.04
-            remove-unwind: fix-unwind
+    meson:
+      strategy:
+        fail-fast: false
+        matrix:
+          ubuntu_version: [ "20.04", "22.04", "24.04" ]
+          include:
+            - ubuntu_version: "24.04"
+              meson_opts: "-Dpython.install_env=auto"
+            - ubuntu_version: "20.04"
+              libsoup2: "libsoup2.4-dev"
 
-    runs-on: ${{ matrix.os }}
+      runs-on: ubuntu-24.04
+      container:
+        image: ubuntu:${{ matrix.ubuntu_version }}
 
-    steps:
-    - uses: actions/checkout@v2
-    - if: ${{ matrix.remove-unwind }}
-      run: sudo apt remove libunwind-14-dev
-    - name: Dependecies
-      run: |
-        sudo apt update
-        sudo apt install automake libtool pkg-config libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev
-        sudo apt install libglib2.0-dev libjson-glib-dev gtk-doc-tools libedit-dev libncursesw5-dev
-        sudo apt install libdaemon-dev libjansson-dev python3-pip python3-setuptools libsoup2.4-dev
-        sudo apt install ninja-build python3-wheel
-        sudo pip3 install meson
+      steps:
+      - uses: actions/checkout@v2
+      - name: Dependecies
+        run: |
+          export DEBIAN_FRONTEND=noninteractive
+          apt update
+          apt install -y automake libtool pkg-config libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev
+          apt install -y libglib2.0-dev libjson-glib-dev gtk-doc-tools libedit-dev libncursesw5-dev
+          apt install -y libdaemon-dev libjansson-dev python3-pip python3-setuptools
+          if [ "${{ matrix.libsoup2 }}" ]; then
+            apt install -y libsoup2.4-dev
+          else
+            apt install -y libsoup-3.0-dev
+          fi
+          apt install -y ninja-build meson
 
-    - name: Generate for Ubuntu 18.04
-      if: ${{ matrix.os == 'ubuntu-18.04' }}
-      run: meson --werror build -Dpython.purelibdir=/usr/lib/python3/dist-packages/
-    - name: Generate for Ubuntu 20.04 and above
-      if: ${{ matrix.os != 'ubuntu-18.04' }}
-      run: meson --werror build -Dpython.install_env=auto
-    - name: Compile
-      run: ninja -C build
-    - name: Checks
-      run: ninja -C build test
-    - name: Install
-      run: sudo ninja -C build install
-    - name: Check pygstc installation
-      run: python3 -c "import pygstc"
-    - name: List Pipelines Verification
-      run: |
-        gstd -e
-        gstd-client list_pipelines
+      - name: Generate for Ubuntu 20.04 and above
+        run: meson --werror build ${{ matrix.meson_opts }}
+      - name: Compile
+        run: ninja -C build
+      - name: Checks
+        run: ninja -C build test
+      - name: Install
+        run: ninja -C build install
+      - name: Check pygstc installation
+        run: python3 -c "import pygstc"
+      - name: List Pipelines Verification
+        run: |
+          gstd -e
+          gstd-client list_pipelines

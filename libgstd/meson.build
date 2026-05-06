@@ -81,5 +81,9 @@ install_headers(gstd_headers)
 pkgconfig.generate(gstd_lib_manager, description : 'GStreamer Manager library to control Gstd')
 
 # Define the library as an internal dependency to the current build
-lib_gstd_dep = declare_dependency(link_with: gstd_lib_manager,
-  dependencies : [libgstd_deps])
+lib_gstd_inc = include_directories('.')
+lib_gstd_dep = declare_dependency(
+  link_with: gstd_lib_manager,
+  dependencies : [libgstd_deps],
+  include_directories : [lib_gstd_inc]
+)

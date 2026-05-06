@@ -25,13 +25,11 @@
 #include "gstd_object.h"
 
 G_BEGIN_DECLS
-
 #define GSTD_TYPE_IFORMATTER                (gstd_iformatter_get_type ())
 #define GSTD_IFORMATTER(obj)                (G_TYPE_CHECK_INSTANCE_CAST ((obj), GSTD_TYPE_IFORMATTER, GstdIFormatter))
 #define GSTD_IS_IFORMATTER(obj)             (G_TYPE_CHECK_INSTANCE_TYPE ((obj), GSTD_TYPE_IFORMATTER))
 #define GSTD_IFORMATTER_GET_INTERFACE(inst) (G_TYPE_INSTANCE_GET_INTERFACE ((inst), GSTD_TYPE_IFORMATTER, GstdIFormatterInterface))
-
-GType gstd_iformatter_get_type (void);
+    GType gstd_iformatter_get_type (void);
 
 typedef struct _GstdIFormatter GstdIFormatter;
 typedef struct _GstdIFormatterInterface GstdIFormatterInterface;
@@ -52,6 +50,8 @@ struct _GstdIFormatterInterface
 
   void (*set_string_value) (GstdIFormatter * self, const gchar * value);
 
+  void (*set_null_value) (GstdIFormatter * self);
+
   void (*set_value) (GstdIFormatter * self, const GValue * value);
 
   void (*generate) (GstdIFormatter * self, gchar ** outstring);
@@ -71,10 +71,11 @@ void gstd_iformatter_set_member_name (GstdIFormatter * self,
 void gstd_iformatter_set_string_value (GstdIFormatter * self,
     const gchar * value);
 
+void gstd_iformatter_set_null_value (GstdIFormatter * self);
+
 void gstd_iformatter_set_value (GstdIFormatter * self, const GValue * value);
 
 void gstd_iformatter_generate (GstdIFormatter * self, gchar ** outstring);
 
 G_END_DECLS
-
 #endif /* __GSTD_IFORMATTER_H__ */

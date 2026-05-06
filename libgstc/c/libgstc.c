@@ -1083,6 +1083,8 @@ gstc_pipeline_list (GstClient * client, char **pipelines[], int *list_lenght)
   ret = gstc_json_get_child_char_array (response, "response", "nodes",
       "name", pipelines, list_lenght);
 
+  free (response);
+
 out:
   return ret;
 
