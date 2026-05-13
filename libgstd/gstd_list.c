@@ -37,7 +37,6 @@ enum
   N_PROPERTIES                  // NOT A PROPERTY
 };
 
-#define GSTD_LIST_DEFAULT_COUNT 0
 #define GSTD_LIST_DEFAULT_NODE_TYPE G_TYPE_NONE
 #define GSTD_LIST_DEFAULT_FLAGS GSTD_PARAM_READ | GSTD_PARAM_CREATE | GSTD_PARAM_DELETE
 
@@ -80,7 +79,7 @@ gstd_list_class_init (GstdListClass * klass)
       g_param_spec_uint ("count",
       "Count",
       "The amount of nodes in the list",
-      0, G_MAXINT, GSTD_LIST_DEFAULT_COUNT, G_PARAM_READABLE | GSTD_PARAM_READ);
+      0, G_MAXINT, 0, G_PARAM_READABLE | GSTD_PARAM_READ);
 
   properties[PROP_NODE_TYPE] =
       g_param_spec_gtype ("node-type",
@@ -114,7 +113,6 @@ gstd_list_init (GstdList * self)
 {
   GST_INFO_OBJECT (self, "Initializing list");
   self->list = NULL;
-  self->count = GSTD_LIST_DEFAULT_COUNT;
   self->node_type = GSTD_LIST_DEFAULT_NODE_TYPE;
 }
 
@@ -143,9 +141,15 @@ gstd_list_get_property (GObject * object,
 
   switch (property_id) {
     case PROP_COUNT:
-      GST_DEBUG_OBJECT (self, "Returning count of %u", self->count);
-      g_value_set_uint (value, self->count);
+    {
+      guint count;
+      GST_OBJECT_LOCK (self);
+      count = g_list_length (self->list);
+      GST_OBJECT_UNLOCK (self);
+      GST_DEBUG_OBJECT (self, "Returning count of %u", count);
+      g_value_set_uint (value, count);
       break;
+    }
     case PROP_NODE_TYPE:
       GST_DEBUG_OBJECT (self, "Returning type %s",
           g_type_name (self->node_type));
@@ -218,8 +222,6 @@ gstd_list_create (GstdObject * object, const gchar * name,
     goto error;
   }
 
-  self->count++;
-
   if (!gstd_list_append_child (self, out)) {
     g_object_unref (out);
     ret = GSTD_EXISTING_RESOURCE;
@@ -273,8 +275,6 @@ gstd_list_delete (GstdObject * object, const gchar * node)
     GST_OBJECT_UNLOCK (self);
     return ret;
   }
-
-  self->count--;
 
   self->list = g_list_delete_link (self->list, found);
   GST_OBJECT_UNLOCK (self);
@@ -369,7 +369,6 @@ gstd_list_append_child (GstdList * self, GstdObject * child)
   }
 
   self->list = g_list_append (self->list, child);
-  self->count = g_list_length (self->list);
   GST_OBJECT_UNLOCK (self);
   GST_INFO_OBJECT (self, "Appended %s to %s list", GSTD_OBJECT_NAME (child),
       GSTD_OBJECT_NAME (self));
