@@ -165,16 +165,21 @@ gstd_session_get_property (GObject * object,
 
   switch (property_id) {
     case PROP_PIPELINES:
+      /* g_value_set_object refs the result; safe after unlock. */
+      GST_OBJECT_LOCK (self);
       GST_DEBUG_OBJECT (self, "Returning pipeline list %p", self->pipelines);
       g_value_set_object (value, self->pipelines);
+      GST_OBJECT_UNLOCK (self);
       break;
     case PROP_PID:
       GST_DEBUG_OBJECT (self, "Returning pid %d", self->pid);
       g_value_set_int (value, self->pid);
       break;
     case PROP_DEBUG:
+      GST_OBJECT_LOCK (self);
       GST_DEBUG_OBJECT (self, "Returning debug object %p", self->debug);
       g_value_set_object (value, self->debug);
+      GST_OBJECT_UNLOCK (self);
       break;
 
     default:
@@ -192,13 +197,33 @@ gstd_session_set_property (GObject * object,
 
   switch (property_id) {
     case PROP_PIPELINES:
-      self->pipelines = g_value_dup_object (value);
-      GST_INFO_OBJECT (self, "Changed pipeline list to %p", self->pipelines);
+    {
+      /* Swap under lock; unref the old outside the lock so its finalizer
+       * never runs under our object lock. */
+      GstdList *old;
+      GstdList *new_list = g_value_dup_object (value);
+      GST_OBJECT_LOCK (self);
+      old = self->pipelines;
+      self->pipelines = new_list;
+      GST_OBJECT_UNLOCK (self);
+      if (old)
+        g_object_unref (old);
+      GST_INFO_OBJECT (self, "Changed pipeline list to %p", new_list);
       break;
+    }
     case PROP_DEBUG:
-      self->debug = g_value_dup_object (value);
-      GST_DEBUG_OBJECT (self, "Changing debug object to %p", self->debug);
+    {
+      GstdDebug *old;
+      GstdDebug *new_debug = g_value_dup_object (value);
+      GST_OBJECT_LOCK (self);
+      old = self->debug;
+      self->debug = new_debug;
+      GST_OBJECT_UNLOCK (self);
+      if (old)
+        g_object_unref (old);
+      GST_DEBUG_OBJECT (self, "Changing debug object to %p", new_debug);
       break;
+    }
 
     default:
       /* We don't have any other property... */
