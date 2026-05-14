@@ -302,14 +302,19 @@ gstd_list_to_string (GstdObject * object, gchar ** outstring)
   g_return_val_if_fail (GSTD_IS_OBJECT (object), GSTD_NULL_ARGUMENT);
   g_warn_if_fail (!*outstring);
 
-  /* Lets leverage the parent's class implementation */
+  /* Parent to_string must run unlocked: it re-enters PROP_COUNT which
+   * takes GST_OBJECT_LOCK (non-recursive). */
   GSTD_OBJECT_CLASS (gstd_list_parent_class)->to_string (GSTD_OBJECT (object),
       &props);
   // A little hack to remove the last bracket
   props[strlen (props) - 2] = '\0';
 
-  list = self->list;
   acc = g_strdup ("");
+
+  /* Lock the walk so concurrent gstd_list_delete cannot free a link or unref
+   * a child mid-iteration. */
+  GST_OBJECT_LOCK (self);
+  list = self->list;
   while (list) {
     separator = list->next ? "," : "";
     node =
@@ -319,6 +324,7 @@ gstd_list_to_string (GstdObject * object, gchar ** outstring)
     acc = node;
     list = list->next;
   }
+  GST_OBJECT_UNLOCK (self);
 
   *outstring = g_strdup_printf ("%s,\n  \"nodes\" : [%s]\n}", props, acc);
   g_free (props);
