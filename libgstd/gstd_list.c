@@ -333,23 +333,20 @@ gstd_list_to_string (GstdObject * object, gchar ** outstring)
   return GSTD_EOK;
 }
 
+/* Returns a new reference; caller must g_object_unref when done. */
 GstdObject *
 gstd_list_find_child (GstdList * self, const gchar * name)
 {
   GList *result;
-  GstdObject *child;
+  GstdObject *child = NULL;
 
   g_return_val_if_fail (self, NULL);
   g_return_val_if_fail (name, NULL);
 
   GST_OBJECT_LOCK (self);
   result = g_list_find_custom (self->list, name, gstd_list_find_node);
-
-
   if (result) {
-    child = GSTD_OBJECT (result->data);
-  } else {
-    child = NULL;
+    child = GSTD_OBJECT (g_object_ref (result->data));
   }
   GST_OBJECT_UNLOCK (self);
 

@@ -66,6 +66,7 @@ struct _GstdListClass
 
 GType gstd_list_get_type (void);
 
+/* Returns a new reference; caller must g_object_unref when done. */
 GstdObject *gstd_list_find_child (GstdList * self, const gchar * name);
 gboolean gstd_list_append_child (GstdList *, GstdObject * child);
 
