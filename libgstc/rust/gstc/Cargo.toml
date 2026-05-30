@@ -1,0 +1,33 @@
+[package]
+name = "gstc"
+version = "0.1.0"
+edition = "2021"
+description = "Rust client for RidgeRun GStreamer Daemon (GstD)"
+license = "BSD-3-Clause"
+
+[dependencies]
+serde_json = "1"
+
+[[example]]
+name = "pipeline_lifecycle"
+path = "../../../examples/libgstc/rust/pipeline_lifecycle_rust.rs"
+
+[[example]]
+name = "wait_on_bus"
+path = "../../../examples/libgstc/rust/wait_on_bus_rust.rs"
+
+[[example]]
+name = "simple_pipeline"
+path = "../../../examples/libgstc/rust/simple_pipeline_rust.rs"
+
+[[example]]
+name = "dynamic_property_change"
+path = "../../../examples/libgstc/rust/dynamic_property_change_rust.rs"
+
+[[example]]
+name = "gapless_playback"
+path = "../../../examples/libgstc/rust/gapless_playback_rust.rs"
+
+[[example]]
+name = "mp4_recording"
+path = "../../../examples/libgstc/rust/mp4_recording_rust.rs"

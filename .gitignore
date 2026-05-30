@@ -38,6 +38,7 @@ autoregen.sh
 # debian files
 *.deb
 *.build
+!**/meson.build
 *.buildinfo
 *.changes
 debian/.debhelper/

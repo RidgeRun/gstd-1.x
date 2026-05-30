@@ -1,5 +1,5 @@
 project('gstd', 'c',
-  version : '0.15.2',
+  version : '0.16.0',
   meson_version : '>= 0.50',
   default_options : [
     'c_std=c11',
