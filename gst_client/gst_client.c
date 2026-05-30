@@ -653,11 +653,12 @@ read_error:
   g_string_free (response, TRUE);
 
 write_error:
-  g_io_stream_close (G_IO_STREAM (data->con), NULL, NULL);
-  g_object_unref (data->con);
-  data->con = NULL;
-
 out:
+  if (data->con) {
+    g_io_stream_close (G_IO_STREAM (data->con), NULL, NULL);
+    g_object_unref (data->con);
+    data->con = NULL;
+  }
   return ret;
 }
 
