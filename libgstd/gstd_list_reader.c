@@ -155,9 +155,10 @@ gstd_list_reader_read_child (GstdIReader * iface,
   g_return_val_if_fail (name, GSTD_NULL_ARGUMENT);
   g_return_val_if_fail (out, GSTD_NULL_ARGUMENT);
 
+  /* gstd_list_find_child returns an owned ref; transfer it to *out. */
   found = gstd_list_find_child (GSTD_LIST (object), name);
   if (found) {
-    *out = GSTD_OBJECT (g_object_ref (found));
+    *out = GSTD_OBJECT (found);
     ret = GSTD_EOK;
   } else {
     *out = NULL;

@@ -346,9 +346,13 @@ gstd_pipeline_get_property (GObject * object,
 
   switch (property_id) {
     case PROP_DESCRIPTION:
+      /* g_value_set_string deep-copies under the lock; once we unlock the
+       * caller owns its own copy. */
+      GST_OBJECT_LOCK (self);
       GST_DEBUG_OBJECT (self, "Returning description of \"%s\"",
           self->description);
       g_value_set_string (value, self->description);
+      GST_OBJECT_UNLOCK (self);
       break;
     case PROP_ELEMENTS:
       GST_DEBUG_OBJECT (self, "Returning element list %p", self->elements);
@@ -359,8 +363,12 @@ gstd_pipeline_get_property (GObject * object,
       g_value_set_object (value, self->pipeline_bus);
       break;
     case PROP_STATE:
+      /* Lock the read; g_value_set_object refs the result so caller is safe
+       * after we unlock. Pairs with locked swap in set_property. */
+      GST_OBJECT_LOCK (self);
       GST_DEBUG_OBJECT (self, "Returning pipeline state %p", self->state);
       g_value_set_object (value, self->state);
+      GST_OBJECT_UNLOCK (self);
       break;
     case PROP_EVENT:
       GST_DEBUG_OBJECT (self, "Returning event handler %p",
@@ -376,10 +384,15 @@ gstd_pipeline_get_property (GObject * object,
       break;
 
     case PROP_VERBOSE:
-      GST_DEBUG_OBJECT (self, "Returning verbose handler %lu",
-          self->deep_notify_id);
-      g_value_set_boolean (value, 0 != self->deep_notify_id);
+    {
+      gulong id;
+      GST_OBJECT_LOCK (self);
+      id = self->deep_notify_id;
+      GST_OBJECT_UNLOCK (self);
+      GST_DEBUG_OBJECT (self, "Returning verbose handler %lu", id);
+      g_value_set_boolean (value, 0 != id);
       break;
+    }
 
     case PROP_REFCOUNT:
       GST_OBJECT_LOCK (self);
@@ -389,27 +402,25 @@ gstd_pipeline_get_property (GObject * object,
       break;
 
     case PROP_POSITION:
-      if (!gst_element_query_position (self->pipeline, GST_FORMAT_TIME,
-              &self->position)) {
-        /* if the query could not be performed. return 0 */
-        self->position = G_GINT64_CONSTANT (0);
-      }
-
+    {
+      /* Use a stack-local; do not write back into self->position to avoid
+       * torn writes between concurrent readers. */
+      gint64 pos = G_GINT64_CONSTANT (0);
+      gst_element_query_position (self->pipeline, GST_FORMAT_TIME, &pos);
       GST_DEBUG_OBJECT (self, "Returning pipeline position %" GST_TIME_FORMAT,
-          GST_TIME_ARGS (self->position));
-      g_value_set_int64 (value, self->position);
+          GST_TIME_ARGS (pos));
+      g_value_set_int64 (value, pos);
       break;
+    }
     case PROP_DURATION:
-      if (!gst_element_query_duration (self->pipeline, GST_FORMAT_TIME,
-              &self->duration)) {
-        /* if the query could not be performed. return 0 */
-        self->duration = G_GINT64_CONSTANT (0);
-      }
-
+    {
+      gint64 dur = G_GINT64_CONSTANT (0);
+      gst_element_query_duration (self->pipeline, GST_FORMAT_TIME, &dur);
       GST_DEBUG_OBJECT (self, "Returning pipeline duration %" GST_TIME_FORMAT,
-          GST_TIME_ARGS (self->duration));
-      g_value_set_int64 (value, self->duration);
+          GST_TIME_ARGS (dur));
+      g_value_set_int64 (value, dur);
       break;
+    }
     default:
       /* We don't have any other property... */
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -428,24 +439,42 @@ gstd_pipeline_set_property (GObject * object,
 
   switch (property_id) {
     case PROP_DESCRIPTION:
-      if (self->description)
-        g_free (self->description);
-      self->description = g_value_dup_string (value);
-      GST_INFO_OBJECT (self, "Changed description to \"%s\"",
-          self->description);
+    {
+      /* Same pattern as PROP_STATE: swap under lock, free old outside. */
+      gchar *old;
+      gchar *new_desc = g_value_dup_string (value);
+      GST_OBJECT_LOCK (self);
+      old = self->description;
+      self->description = new_desc;
+      GST_OBJECT_UNLOCK (self);
+      g_free (old);
+      GST_INFO_OBJECT (self, "Changed description to \"%s\"", new_desc);
       break;
+    }
 
     case PROP_STATE:
-      if (self->state) {
-        g_object_unref (self->state);
-      }
-      self->state = g_value_get_object (value);
+    {
+      /* Swap under lock; use dup_object (takes a ref) — get_object would
+       * borrow and leave self->state dangling once the GValue is unset.
+       * Unref the old state outside the lock so its finalizer never runs
+       * under our object lock. */
+      GstdState *old;
+      GST_OBJECT_LOCK (self);
+      old = self->state;
+      self->state = g_value_dup_object (value);
+      GST_OBJECT_UNLOCK (self);
+      if (old)
+        g_object_unref (old);
       break;
+    }
 
 #if GST_VERSION_MINOR >= 10
     case PROP_VERBOSE:
       verbose = g_value_get_boolean (value);
 
+      /* Lock the read-modify-write of deep_notify_id against concurrent
+       * setters and the verbose getter. */
+      GST_OBJECT_LOCK (self);
       if (verbose == FALSE && self->deep_notify_id != 0) {
         g_signal_handler_disconnect (self->pipeline, self->deep_notify_id);
         self->deep_notify_id = 0;
@@ -455,6 +484,7 @@ gstd_pipeline_set_property (GObject * object,
             gst_element_add_property_deep_notify_watch (self->pipeline, NULL,
             TRUE);
       }
+      GST_OBJECT_UNLOCK (self);
       break;
 #endif
 

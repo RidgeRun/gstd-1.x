@@ -1007,7 +1007,7 @@ gstd_parser_pipeline_create_ref (GstdSession * session, gchar * action,
 
   GST_OBJECT_LOCK (session);
 
-  /* Look for the pipeline node */
+  /* Look for the pipeline node (owned ref, must unref) */
   pipeline_node =
       gstd_list_find_child (GSTD_LIST (pipeline_list_node), tokens[0]);
 
@@ -1032,6 +1032,8 @@ gstd_parser_pipeline_create_ref (GstdSession * session, gchar * action,
   ret = gstd_pipeline_increment_refcount (GSTD_PIPELINE (pipeline_node));
 
 create_error:
+  if (pipeline_node)
+    g_object_unref (pipeline_node);
   GST_OBJECT_UNLOCK (session);
   gst_object_unref (pipeline_list_node);
 pipeline_list_node_error:
@@ -1061,7 +1063,7 @@ gstd_parser_pipeline_delete_ref (GstdSession * session, gchar * action,
 
   GST_OBJECT_LOCK (session);
 
-  /* Look for the pipeline node */
+  /* Look for the pipeline node (owned ref, must unref) */
   pipeline_node = gstd_list_find_child (GSTD_LIST (pipeline_list_node), args);
   if (!pipeline_node) {
     ret = GSTD_NO_PIPELINE;
@@ -1076,6 +1078,8 @@ gstd_parser_pipeline_delete_ref (GstdSession * session, gchar * action,
   }
 
 pipeline_node_error:
+  if (pipeline_node)
+    g_object_unref (pipeline_node);
   GST_OBJECT_UNLOCK (session);
   gst_object_unref (pipeline_list_node);
 pipeline_list_node_error:

@@ -37,7 +37,6 @@ enum
   N_PROPERTIES                  // NOT A PROPERTY
 };
 
-#define GSTD_LIST_DEFAULT_COUNT 0
 #define GSTD_LIST_DEFAULT_NODE_TYPE G_TYPE_NONE
 #define GSTD_LIST_DEFAULT_FLAGS GSTD_PARAM_READ | GSTD_PARAM_CREATE | GSTD_PARAM_DELETE
 
@@ -80,7 +79,7 @@ gstd_list_class_init (GstdListClass * klass)
       g_param_spec_uint ("count",
       "Count",
       "The amount of nodes in the list",
-      0, G_MAXINT, GSTD_LIST_DEFAULT_COUNT, G_PARAM_READABLE | GSTD_PARAM_READ);
+      0, G_MAXINT, 0, G_PARAM_READABLE | GSTD_PARAM_READ);
 
   properties[PROP_NODE_TYPE] =
       g_param_spec_gtype ("node-type",
@@ -114,7 +113,6 @@ gstd_list_init (GstdList * self)
 {
   GST_INFO_OBJECT (self, "Initializing list");
   self->list = NULL;
-  self->count = GSTD_LIST_DEFAULT_COUNT;
   self->node_type = GSTD_LIST_DEFAULT_NODE_TYPE;
 }
 
@@ -143,9 +141,15 @@ gstd_list_get_property (GObject * object,
 
   switch (property_id) {
     case PROP_COUNT:
-      GST_DEBUG_OBJECT (self, "Returning count of %u", self->count);
-      g_value_set_uint (value, self->count);
+    {
+      guint count;
+      GST_OBJECT_LOCK (self);
+      count = g_list_length (self->list);
+      GST_OBJECT_UNLOCK (self);
+      GST_DEBUG_OBJECT (self, "Returning count of %u", count);
+      g_value_set_uint (value, count);
       break;
+    }
     case PROP_NODE_TYPE:
       GST_DEBUG_OBJECT (self, "Returning type %s",
           g_type_name (self->node_type));
@@ -218,8 +222,6 @@ gstd_list_create (GstdObject * object, const gchar * name,
     goto error;
   }
 
-  self->count++;
-
   if (!gstd_list_append_child (self, out)) {
     g_object_unref (out);
     ret = GSTD_EXISTING_RESOURCE;
@@ -274,8 +276,6 @@ gstd_list_delete (GstdObject * object, const gchar * node)
     return ret;
   }
 
-  self->count--;
-
   self->list = g_list_delete_link (self->list, found);
   GST_OBJECT_UNLOCK (self);
 
@@ -302,14 +302,19 @@ gstd_list_to_string (GstdObject * object, gchar ** outstring)
   g_return_val_if_fail (GSTD_IS_OBJECT (object), GSTD_NULL_ARGUMENT);
   g_warn_if_fail (!*outstring);
 
-  /* Lets leverage the parent's class implementation */
+  /* Parent to_string must run unlocked: it re-enters PROP_COUNT which
+   * takes GST_OBJECT_LOCK (non-recursive). */
   GSTD_OBJECT_CLASS (gstd_list_parent_class)->to_string (GSTD_OBJECT (object),
       &props);
   // A little hack to remove the last bracket
   props[strlen (props) - 2] = '\0';
 
-  list = self->list;
   acc = g_strdup ("");
+
+  /* Lock the walk so concurrent gstd_list_delete cannot free a link or unref
+   * a child mid-iteration. */
+  GST_OBJECT_LOCK (self);
+  list = self->list;
   while (list) {
     separator = list->next ? "," : "";
     node =
@@ -319,6 +324,7 @@ gstd_list_to_string (GstdObject * object, gchar ** outstring)
     acc = node;
     list = list->next;
   }
+  GST_OBJECT_UNLOCK (self);
 
   *outstring = g_strdup_printf ("%s,\n  \"nodes\" : [%s]\n}", props, acc);
   g_free (props);
@@ -327,23 +333,20 @@ gstd_list_to_string (GstdObject * object, gchar ** outstring)
   return GSTD_EOK;
 }
 
+/* Returns a new reference; caller must g_object_unref when done. */
 GstdObject *
 gstd_list_find_child (GstdList * self, const gchar * name)
 {
   GList *result;
-  GstdObject *child;
+  GstdObject *child = NULL;
 
   g_return_val_if_fail (self, NULL);
   g_return_val_if_fail (name, NULL);
 
   GST_OBJECT_LOCK (self);
   result = g_list_find_custom (self->list, name, gstd_list_find_node);
-
-
   if (result) {
-    child = GSTD_OBJECT (result->data);
-  } else {
-    child = NULL;
+    child = GSTD_OBJECT (g_object_ref (result->data));
   }
   GST_OBJECT_UNLOCK (self);
 
@@ -369,7 +372,6 @@ gstd_list_append_child (GstdList * self, GstdObject * child)
   }
 
   self->list = g_list_append (self->list, child);
-  self->count = g_list_length (self->list);
   GST_OBJECT_UNLOCK (self);
   GST_INFO_OBJECT (self, "Appended %s to %s list", GSTD_OBJECT_NAME (child),
       GSTD_OBJECT_NAME (self));
