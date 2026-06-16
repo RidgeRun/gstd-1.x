@@ -176,6 +176,7 @@
 #include "gstd_pipeline.h"
 #include "gstd_list.h"
 #include "gstd_debug.h"
+#include "gstd_stats.h"
 
 G_BEGIN_DECLS
 #define GSTD_TYPE_SESSION \
@@ -211,6 +212,11 @@ struct _GstdSession
    * Object containing debug options
    */
   GstdDebug *debug;
+
+  /*
+   * Object containing stats options
+   */
+  GstdStats *stats;
 };
 
 struct _GstdSessionClass

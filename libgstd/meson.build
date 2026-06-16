@@ -47,6 +47,7 @@ gstd_src = [
   'gstd_msg_type.c',
   'gstd_bus_msg_qos.c',
   'gstd_state.c',
+  'gstd_stats.c',
   'gstd_parser.c',
   'gstd_bus_msg_stream_status.c',
   'gstd_bus_msg_element.c',

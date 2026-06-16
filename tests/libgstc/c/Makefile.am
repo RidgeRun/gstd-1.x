@@ -25,7 +25,8 @@ TESTS = 				\
 	libgstc_pipeline_get_state      \
 	libgstc_pipeline_list_signals   \
 	libgstc_pipeline_signal_connect \
-	libgstc_pipeline_signal_disconnect
+	libgstc_pipeline_signal_disconnect \
+	libgstc_enable_stats
 
 check_PROGRAMS = $(TESTS)
 
@@ -175,3 +176,7 @@ libgstc_pipeline_list_signals_SOURCES =         \
         @top_srcdir@/libgstc/c/libgstc.c        \
         $(COMMON_SOURCES)
 
+libgstc_stats_SOURCES =         \
+        test_libgstc_stats.c    \
+        @top_srcdir@/libgstc/c/libgstc.c        \
+        $(COMMON_SOURCES)
