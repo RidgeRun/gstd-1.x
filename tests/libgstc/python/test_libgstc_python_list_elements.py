@@ -38,14 +38,14 @@ from pygstc.logger import *
 
 class TestGstcListElementsMethods(GstdTestRunner):
 
-    def test_list_elements(self):
+    async def test_list_elements(self):
         pipeline = 'videotestsrc name=v0 ! fakesink name=x0'
         self.gstd_logger = CustomLogger('test_libgstc', loglevel='DEBUG')
         self.gstd_client = GstdClient(port=self.port, logger=self.gstd_logger)
-        self.gstd_client.pipeline_create('p0', pipeline)
-        self.assertEqual(self.gstd_client.list_elements('p0'),
-                         [{'name': 'x0'}, {'name': 'v0'}])
-        self.gstd_client.pipeline_delete('p0')
+        await self.gstd_client.pipeline_create('p0', pipeline)
+        ret = await self.gstd_client.list_elements('p0')
+        self.assertEqual(ret, [{'name': 'x0'}, {'name': 'v0'}])
+        await self.gstd_client.pipeline_delete('p0')
 
 
 if __name__ == '__main__':

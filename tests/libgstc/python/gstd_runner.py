@@ -29,15 +29,15 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
 # OF THE POSSIBILITY OF SUCH DAMAGE.
 
+import asyncio
 import pathlib
 import socket
-import subprocess
 import unittest
 
 
 DEFAULT_TEAR_DOWN_TIMEOUT = 1
 
-class GstdTestRunner(unittest.TestCase):
+class GstdTestRunner(unittest.IsolatedAsyncioTestCase):
 
     def get_open_port(self):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -48,24 +48,30 @@ class GstdTestRunner(unittest.TestCase):
         s.close()
         return port
 
-    def setUp(self):
+    async def asyncSetUp(self):
         self.port = self.get_open_port()
         self.gstd_path = (pathlib.Path(__file__).parent.parent.parent.parent
             .joinpath('gstd').joinpath('gstd').resolve())
-        self.gstd = subprocess.Popen([self.gstd_path, '-p', str(self.port)])
-        connected = -1
-        while connected != 0:
-            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            connected = sock.connect_ex(("", self.port))
-            sock.close()
+        self.gstd = await asyncio.create_subprocess_exec(self.gstd_path, '-p', str(self.port))
+        asyncio.get_event_loop().call_later(5, self.gstd.kill)
+        connected = False
+        while not connected:
+            try:
+                reader, writer = await asyncio.open_connection(port=self.port)
+                writer.close()
+                await writer.wait_closed()
+                connected = True
+            except OSError:
+                pass
 
-    def tearDown(self):
-        self.gstd.terminate()
-        try:
-            self.gstd.wait(DEFAULT_TEAR_DOWN_TIMEOUT)
-        except subprocess.TimeoutExpired:
-            self.gstd.kill()
-            self.gstd.wait()
+    async def asyncTearDown(self):
+        if self.gstd.returncode is None:
+            self.gstd.terminate()
+            try:
+                await asyncio.wait_for(self.gstd.wait(), timeout=DEFAULT_TEAR_DOWN_TIMEOUT)
+            except asyncio.TimeoutError:
+                self.gstd.kill()
+                await self.gstd.wait()
 
 
 if __name__ == '__main__':

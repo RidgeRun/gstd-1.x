@@ -38,16 +38,16 @@ from pygstc.logger import *
 
 class TestGstcEventFlushStartMethods(GstdTestRunner):
 
-    def test_event_flush_start(self):
+    async def test_event_flush_start(self):
         pipeline = 'videotestsrc name=v0 ! fakesink'
         self.gstd_logger = CustomLogger('test_libgstc', loglevel='DEBUG')
         self.gstd_client = GstdClient(port=self.port, logger=self.gstd_logger)
-        self.gstd_client.pipeline_create('p0', pipeline)
-        self.gstd_client.pipeline_play('p0')
-        self.gstd_client.event_flush_start('p0')
-        self.gstd_client.event_flush_stop('p0')
-        self.gstd_client.pipeline_stop('p0')
-        self.gstd_client.pipeline_delete('p0')
+        await self.gstd_client.pipeline_create('p0', pipeline)
+        await self.gstd_client.pipeline_play('p0')
+        await self.gstd_client.event_flush_start('p0')
+        await self.gstd_client.event_flush_stop('p0')
+        await self.gstd_client.pipeline_stop('p0')
+        await self.gstd_client.pipeline_delete('p0')
 
 
 if __name__ == '__main__':

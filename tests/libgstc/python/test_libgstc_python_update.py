@@ -38,18 +38,18 @@ from pygstc.logger import *
 
 class TestGstcUpdateMethods(GstdTestRunner):
 
-    def test_libgstc_python_update(self):
+    async def test_libgstc_python_update(self):
         pipeline = 'videotestsrc name=v0 pattern=snow ! fakesink'
         self.gstd_logger = CustomLogger('test_libgstc', loglevel='DEBUG')
         self.gstd_client = GstdClient(port=self.port, logger=self.gstd_logger)
-        self.gstd_client.pipeline_create('p0', pipeline)
-        self.gstd_client.update(
+        await self.gstd_client.pipeline_create('p0', pipeline)
+        await self.gstd_client.update(
             'pipelines/p0/elements/v0/properties/pattern', 'ball')
-        ret = self.gstd_client.read(
+        ret = await self.gstd_client.read(
             'pipelines/p0/elements/v0/properties/pattern')
         self.assertIn(ret['value'], ['Moving ball', 'ball'])
-        self.gstd_client.pipeline_stop('p0')
-        self.gstd_client.pipeline_delete('p0')
+        await self.gstd_client.pipeline_stop('p0')
+        await self.gstd_client.pipeline_delete('p0')
 
 
 if __name__ == '__main__':

@@ -38,15 +38,15 @@ from pygstc.logger import *
 
 class TestGstcDebugEnableMethods(GstdTestRunner):
 
-    def test_debug_enable_true(self):
+    async def test_debug_enable_true(self):
         self.gstd_logger = CustomLogger('test_libgstc', loglevel='DEBUG')
         self.gstd_client = GstdClient(port=self.port, logger=self.gstd_logger)
-        self.gstd_client.debug_enable(True)
+        await self.gstd_client.debug_enable(True)
 
-    def test_debug_enable_false(self):
+    async def test_debug_enable_false(self):
         self.gstd_logger = CustomLogger('test_libgstc', loglevel='DEBUG')
         self.gstd_client = GstdClient(port=self.port, logger=self.gstd_logger)
-        self.gstd_client.debug_enable(False)
+        await self.gstd_client.debug_enable(False)
 
 
 if __name__ == '__main__':

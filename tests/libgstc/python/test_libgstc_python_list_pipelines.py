@@ -38,15 +38,15 @@ from pygstc.logger import *
 
 class TestGstcListPipelinesMethods(GstdTestRunner):
 
-    def test_list_pipelines(self):
+    async def test_list_pipelines(self):
         pipeline = 'videotestsrc name=v0 ! fakesink'
         self.gstd_logger = CustomLogger('test_libgstc', loglevel='DEBUG')
         self.gstd_client = GstdClient(port=self.port, logger=self.gstd_logger)
-        initial_n_pipes = len(self.gstd_client.list_pipelines())
-        self.gstd_client.create('pipelines', 'p0', pipeline)
-        final_n_pipes = len(self.gstd_client.list_pipelines())
+        initial_n_pipes = len(await self.gstd_client.list_pipelines())
+        await self.gstd_client.create('pipelines', 'p0', pipeline)
+        final_n_pipes = len(await self.gstd_client.list_pipelines())
         self.assertEqual(final_n_pipes, initial_n_pipes + 1)
-        self.gstd_client.pipeline_delete('p0')
+        await self.gstd_client.pipeline_delete('p0')
 
 
 if __name__ == '__main__':

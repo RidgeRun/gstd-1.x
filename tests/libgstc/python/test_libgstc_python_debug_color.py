@@ -38,15 +38,15 @@ from pygstc.logger import *
 
 class TestGstcDebugColorMethods(GstdTestRunner):
 
-    def test_debug_color_true(self):
+    async def test_debug_color_true(self):
         self.gstd_logger = CustomLogger('test_libgstc', loglevel='DEBUG')
         self.gstd_client = GstdClient(port=self.port, logger=self.gstd_logger)
-        self.gstd_client.debug_color(True)
+        await self.gstd_client.debug_color(True)
 
-    def test_debug_color_false(self):
+    async def test_debug_color_false(self):
         self.gstd_logger = CustomLogger('test_libgstc', loglevel='DEBUG')
         self.gstd_client = GstdClient(port=self.port, logger=self.gstd_logger)
-        self.gstd_client.debug_color(False)
+        await self.gstd_client.debug_color(False)
 
 
 if __name__ == '__main__':

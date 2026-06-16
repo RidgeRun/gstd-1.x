@@ -29,41 +29,34 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
 # OF THE POSSIBILITY OF SUCH DAMAGE.
 
+import asyncio
 import unittest
-import threading
 
 from gstd_runner import GstdTestRunner
 from pygstc.gstc import *
 from pygstc.logger import *
-import time
-import os
-
-ret_val = ''
 
 
-def signal_connect_test(port):
-    global ret_val
+async def signal_connect_test(port):
     gstd_logger = CustomLogger('test_libgstc', loglevel='DEBUG')
     gstd_client = GstdClient(port=port, logger=gstd_logger)
-    ret_val = gstd_client.signal_connect('p0', 'identity', 'handoff')
+    return await gstd_client.signal_connect('p0', 'identity', 'handoff')
 
 
 class TestGstcSignalDisconnectMethods(GstdTestRunner):
 
-    def test_libgstc_python_signal_disconnect(self):
-        global ret_val
+    async def test_libgstc_python_signal_disconnect(self):
         pipeline = 'videotestsrc ! identity name=identity ! fakesink'
         self.gstd_logger = CustomLogger('test_libgstc', loglevel='DEBUG')
         self.gstd_client = GstdClient(port=self.port, logger=self.gstd_logger)
-        self.gstd_client.pipeline_create('p0', pipeline)
-        ret_thr = threading.Thread(target=signal_connect_test, args=(self.port,))
-        ret_thr.start()
-        time.sleep(0.1)
-        self.gstd_client.signal_disconnect('p0', 'identity', 'handoff')
-        time.sleep(0.1)
+        await self.gstd_client.pipeline_create('p0', pipeline)
+        connect_task = asyncio.create_task(signal_connect_test(self.port))
+        await asyncio.sleep(0.1)
+        await self.gstd_client.signal_disconnect('p0', 'identity', 'handoff')
+        ret_val = await connect_task
         self.assertEqual(ret_val, None)
-        self.gstd_client.pipeline_stop('p0')
-        self.gstd_client.pipeline_delete('p0')
+        await self.gstd_client.pipeline_stop('p0')
+        await self.gstd_client.pipeline_delete('p0')
 
 
 if __name__ == '__main__':

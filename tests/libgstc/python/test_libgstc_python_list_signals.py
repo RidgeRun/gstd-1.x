@@ -38,15 +38,15 @@ from pygstc.logger import *
 
 class TestGstcListSignalsMethods(GstdTestRunner):
 
-    def test_list_signals(self):
+    async def test_list_signals(self):
         pipeline = \
             'videotestsrc name=v0 ! identity name=i0 ! fakesink name=x0'
         self.gstd_logger = CustomLogger('test_libgstc', loglevel='DEBUG')
         self.gstd_client = GstdClient(port=self.port, logger=self.gstd_logger)
-        self.gstd_client.pipeline_create('p0', pipeline)
-        self.assertTrue({'name': 'handoff'} in
-                        self.gstd_client.list_signals('p0', 'i0'))
-        self.gstd_client.pipeline_delete('p0')
+        await self.gstd_client.pipeline_create('p0', pipeline)
+        ret = await self.gstd_client.list_signals('p0', 'i0')
+        self.assertTrue({'name': 'handoff'} in ret)
+        await self.gstd_client.pipeline_delete('p0')
 
 
 if __name__ == '__main__':

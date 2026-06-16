@@ -29,7 +29,7 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
 # OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import time
+import asyncio
 import unittest
 
 from gstd_runner import GstdTestRunner
@@ -42,22 +42,22 @@ RUN_STATES = ['RUNNING', 'running,', 'READY', 'ready']
 
 class TestGstcPipelinePauseMethods(GstdTestRunner):
 
-    def test_libgstc_python_pipeline_pause(self):
+    async def test_libgstc_python_pipeline_pause(self):
         pipeline = 'videotestsrc name=v0 ! fakesink'
         self.gstd_logger = CustomLogger('test_libgstc', loglevel='DEBUG')
         self.gstd_client = GstdClient(port=self.port, logger=self.gstd_logger)
-        self.gstd_client.pipeline_create('p0', pipeline)
-        self.gstd_client.pipeline_play('p0')
-        self.gstd_client.pipeline_pause('p0')
-        state = self.gstd_client.read('pipelines/p0/state')['value']
+        await self.gstd_client.pipeline_create('p0', pipeline)
+        await self.gstd_client.pipeline_play('p0')
+        await self.gstd_client.pipeline_pause('p0')
+        state = await self.gstd_client.read('pipelines/p0/state')
         retry = DEFAULT_STATE_READ_RETRIES
-        while (retry and state in RUN_STATES):
-            time.sleep(DEFAULT_TIME_BETWEEN_RETRIES)
-            state = self.gstd_client.read('pipelines/p0/state')['value']
+        while (retry and state['value'] in RUN_STATES):
+            asyncio.sleep(DEFAULT_TIME_BETWEEN_RETRIES)
+            state = await self.gstd_client.read('pipelines/p0/state')
             retry -= 1
-        self.assertIn(self.gstd_client.read(
-            'pipelines/p0/state')['value'], ['PAUSED', 'paused'])
-        self.gstd_client.pipeline_delete('p0')
+        state = await self.gstd_client.read('pipelines/p0/state')
+        self.assertIn(state['value'], ['PAUSED', 'paused'])
+        await self.gstd_client.pipeline_delete('p0')
 
 
 if __name__ == '__main__':

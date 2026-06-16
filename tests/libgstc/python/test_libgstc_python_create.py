@@ -38,24 +38,24 @@ from pygstc.logger import *
 
 class TestGstcCreateMethods(GstdTestRunner):
 
-    def test_create_pipeline(self):
+    async def test_create_pipeline(self):
         pipeline = 'videotestsrc name=v0 ! fakesink'
         self.gstd_logger = CustomLogger('test_libgstc', loglevel='DEBUG')
         self.gstd_client = GstdClient(port=self.port, logger=self.gstd_logger)
-        ret = self.gstd_client.read('pipelines')
+        ret = await self.gstd_client.read('pipelines')
         initial_n_pipes = len(ret['nodes'])
-        self.gstd_client.create('pipelines', 'p0', pipeline)
-        ret = self.gstd_client.read('pipelines')
+        await self.gstd_client.create('pipelines', 'p0', pipeline)
+        ret = await self.gstd_client.read('pipelines')
         final_n_pipes = len(ret['nodes'])
         self.assertEqual(final_n_pipes, initial_n_pipes + 1)
-        self.gstd_client.pipeline_delete('p0')
+        await self.gstd_client.pipeline_delete('p0')
 
-    def test_create_bad_pipeline(self):
+    async def test_create_bad_pipeline(self):
         pipeline = 'source sink'
         self.gstd_logger = CustomLogger('test_libgstc', loglevel='DEBUG')
         self.gstd_client = GstdClient(port=self.port, logger=self.gstd_logger)
         with self.assertRaises(GstdError):
-            self.gstd_client.create('pipelines', 'p0', pipeline)
+            await self.gstd_client.create('pipelines', 'p0', pipeline)
 
 
 if __name__ == '__main__':
